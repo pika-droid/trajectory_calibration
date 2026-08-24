@@ -1,28 +1,31 @@
-# Trajectory Calibration: Elastic Multi-Scale Uncertainty Quantification for Multimodal LLMs
+﻿# Trajectory Calibration: Elastic Multi-Scale Uncertainty Quantification for Multimodal LLMs
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests: 17 Passed](https://img.shields.io/badge/tests-17%20passed-brightgreen.svg)]()
-[![Platform: Windows%20%7C%20Linux](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey.svg)]()
+[![Platform: Windows | Linux](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey.svg)]()
 
 A clean, self-contained implementation of **Elastic Trajectory Uncertainty Calibration** and **Varying-Coefficient Platt Scaling (VCPS)** for Matryoshka Multimodal Models (**M3-LLaVA** and **MQT-LLaVA**).
 
 ---
 
-## ?? Abstract & Motivation
+## Abstract and Motivation
 
-Multimodal Large Language Models (MLLMs) frequently suffer from overconfidence and severe miscalibration. Standard uncertainty quantification (UQ) techniques?such as multi-rollout sampling (e.g., Semantic Entropy) or Monte Carlo dropout?require **5? to 25? repetitive inference calls**, creating unacceptable computational overhead for real-time vision-language systems.
+Multimodal Large Language Models (MLLMs) frequently suffer from overconfidence and severe miscalibration. Standard uncertainty quantification (UQ) techniques—such as multi-rollout sampling (e.g., Semantic Entropy) or Monte Carlo dropout—require **5x to 25x repetitive inference calls**, creating unacceptable computational overhead for real-time vision-language systems.
 
 This repository implements **Trajectory Uncertainty Calibration**:
 1. **Single-Pass Elastic Signatures**: By leveraging Matryoshka visual token compression ($m \in \{1, 9, 36, 144, 576\}$ for M3 or $\{1, 9, 36, 144, 256\}$ for MQT), we capture the model's confidence trajectory across visual granularities in a **single forward pass**.
-2. **Varying-Coefficient Platt Scaling (VCPS)**: Dynamically modulates both the calibration slope $a(\mathbf{z})$ and intercept $b(\mathbf{z})$ as functions of multi-scale trajectory signatures:
-   $$\text{logit}(p(\mathbf{x})) = a(\mathbf{z}) \cdot x_1 + b(\mathbf{z})$$
-   $$a(\mathbf{z}) = \exp(a_0 + \boldsymbol{\gamma}^T \mathbf{z}_{\text{slope}}), \quad b(\mathbf{z}) = b_0 + \mathbf{w}^T \mathbf{z}_{\text{intercept}}$$
-3. **Pareto Dominance**: Outperforms standard post-hoc temperature scaling and matches/exceeds multi-rollout Semantic Entropy while maintaining **$1\times$ inference cost**.
+2. **Varying-Coefficient Platt Scaling (VCPS)**: Dynamically modulates both the calibration slope $a(\mathbf{z})$ and intercept $b(\mathbf{z})$ as generalized linear functions of multi-scale trajectory signatures:
+
+$$\text{logit}(p(\mathbf{x})) = a(\mathbf{z}) \cdot x_1 + b(\mathbf{z})$$
+
+$$a(\mathbf{z}) = \exp(a_0 + \boldsymbol{\gamma}^T \mathbf{z}_{\text{slope}}), \quad b(\mathbf{z}) = b_0 + \mathbf{w}^T \mathbf{z}_{\text{intercept}}$$
+
+3. **Pareto Dominance**: Outperforms standard post-hoc temperature scaling and matches/exceeds multi-rollout Semantic Entropy while maintaining **1x inference cost**.
 
 ---
 
-## ?? Key Features
+## Key Features
 
 - **Primary Calibration Method**: Varying-Coefficient Platt Scaling (**VCPS-5D** & **VCPS-17D**) with exact analytical gradients and L-BFGS-B optimization.
 - **UQLM White-Box Scorers**: Standard token-probability estimators following the [CVS Health UQLM](https://github.com/cvs-health/uqlm) specification:
@@ -42,76 +45,76 @@ This repository implements **Trajectory Uncertainty Calibration**:
 
 ---
 
-## ?? Repository Directory Layout
+## Repository Structure
 
 ```
 trajectory_calibration/
-??? README.md                          # Comprehensive documentation
-??? pyproject.toml                     # Package specification & pytest configuration
-??? requirements.txt                   # Dependency list
-??? .gitignore
-?
-??? src/trajectory_calibration/        # Core library package
-?   ??? vlm/                           # VLM Inference & Multi-Dataset Evaluation
-?   ?   ??? wrapper.py                 # Unified M3 + MQT wrapper (FlashAttention, NaN guards)
-?   ?   ??? datasets.py                # 14-benchmark DATASET_REGISTRY & ground-truth evaluators
-?   ?   ??? llava_compat.py            # Architecture-aware LLaVA namespace router & auto-clone
-?   ?
-?   ??? features/                      # Trajectory Feature Extraction
-?   ?   ??? trajectory.py              # 17-D extraction, forward stepwise 5-D selection, data loader
-?   ?
-?   ??? uq/                            # Uncertainty Quantification Baselines
-?   ?   ??? whitebox.py                # UQLM: SequenceProb, MinProb, TokenEntropy, Margin
-?   ?   ??? semantic_entropy.py        # Kuhn / UMPIRE: Exact DeBERTa NLI clustering & LogSumExp
-?   ?   ??? eigenscore.py              # Chen / UMPIRE: SVD on embedding covariance & LogDet volume
-?   ?
-?   ??? calibrators/                   # Post-Hoc Calibrators
-?   ?   ??? vcps.py                    # VaryingCoefficientPlattScaler (Our Method)
-?   ?   ??? baselines.py               # NC, TS, Platt, Spline, ATS, UQLM & Kuhn wrappers
-?   ?   ??? residual.py                # ResidualTrajectoryCalibrator & full metric panel
-?   ?   ??? adaptation.py              # Saerens-EM (2002) prior shift adaptation & Beta calibration
-?   ?
-?   ??? metrics/                       # Evaluation Metrics & Statistics
-?   ?   ??? calibration.py             # ECE, Adaptive ECE, KDE-ECE, Brier, Murphy decomposition, AUROC
-?   ?
-?   ??? utils/                         # Shared Utilities
-?       ??? helpers.py                 # safe_torch_load, set_seed, clean_text, Config dataclass
-?
-??? llava_src/                         # Minimal LLaVA fork (for M3 GPU inference)
-?   ??? README.md
-?   ??? setup.py
-?   ??? llava/                         # Minimal builder, mm_utils, conversation, llava_llama
-?
-??? scripts/                           # User-Facing Execution Entry Points
-?   ??? run_mock.py                    # Fast CPU smoke test using pilot_features_1k (~3s)
-?   ??? run_benchmark.py               # Multi-dataset benchmark across all 16 methods
-?   ??? run_vcps.py                    # In-depth VCPS interpretability & dynamic slope separation
-?   ??? extract_features.py            # Live GPU multi-scale extraction with checkpoint/resume
-?
-??? data/features/                     # Full pre-extracted feature files (69 .pt files, 3.58 GB)
-?   ??? m3_llava/                      # M3 architecture features (temp_0.0 .. temp_1.5)
-?   ??? mqt_llava/                     # MQT architecture features (temp_0.0 .. temp_1.5)
-?
-??? pilot_features_1k/                 # Lightweight 100-sample mock features for offline tests
-?   ??? m3/mock_vqav2/full_extracted_features.pt
-?   ??? mqt/mock_vqav2/full_extracted_features.pt
-?
-??? results/                           # Benchmark & experiment outputs
-?   ??? experiments/
-?
-??? tests/                             # Pytest suite (17 unit tests, 100% pass)
-    ??? test_features.py
-    ??? test_whitebox.py
-    ??? test_semantic_entropy.py
-    ??? test_calibrators.py
-    ??? test_metrics.py
+|-- README.md                          # Comprehensive documentation
+|-- pyproject.toml                     # Package specification & pytest configuration
+|-- requirements.txt                   # Dependency list
+|-- .gitignore
+|
+|-- src/trajectory_calibration/        # Core library package
+|   |-- vlm/                           # VLM Inference & Multi-Dataset Evaluation
+|   |   |-- wrapper.py                 # Unified M3 + MQT wrapper (FlashAttention, NaN guards)
+|   |   |-- datasets.py                # 14-benchmark DATASET_REGISTRY & ground-truth evaluators
+|   |   `-- llava_compat.py            # Architecture-aware LLaVA namespace router & auto-clone
+|   |
+|   |-- features/                      # Trajectory Feature Extraction
+|   |   `-- trajectory.py              # 17-D extraction, forward stepwise 5-D selection, data loader
+|   |
+|   |-- uq/                            # Uncertainty Quantification Baselines
+|   |   |-- whitebox.py                # UQLM: SequenceProb, MinProb, TokenEntropy, Margin
+|   |   |-- semantic_entropy.py        # Kuhn / UMPIRE: Exact DeBERTa NLI clustering & LogSumExp
+|   |   `-- eigenscore.py              # Chen / UMPIRE: SVD on embedding covariance & LogDet volume
+|   |
+|   |-- calibrators/                   # Post-Hoc Calibrators
+|   |   |-- vcps.py                    # VaryingCoefficientPlattScaler (Our Method)
+|   |   |-- baselines.py               # NC, TS, Platt, Spline, ATS, UQLM & Kuhn wrappers
+|   |   |-- residual.py                # ResidualTrajectoryCalibrator & full metric panel
+|   |   `-- adaptation.py              # Saerens-EM (2002) prior shift adaptation & Beta calibration
+|   |
+|   |-- metrics/                       # Evaluation Metrics & Statistics
+|   |   `-- calibration.py             # ECE, Adaptive ECE, KDE-ECE, Brier, Murphy decomposition, AUROC
+|   |
+|   `-- utils/                         # Shared Utilities
+|       `-- helpers.py                 # safe_torch_load, set_seed, clean_text, Config dataclass
+|
+|-- llava_src/                         # Minimal LLaVA fork (for M3 GPU inference)
+|   |-- README.md
+|   |-- setup.py
+|   `-- llava/                         # Minimal builder, mm_utils, conversation, llava_llama
+|
+|-- scripts/                           # User-Facing Execution Entry Points
+|   |-- run_mock.py                    # Fast CPU smoke test using pilot_features_1k (~3s)
+|   |-- run_benchmark.py               # Multi-dataset benchmark across all 16 methods
+|   |-- run_vcps.py                    # In-depth VCPS interpretability & dynamic slope separation
+|   `-- extract_features.py            # Live GPU multi-scale extraction with checkpoint/resume
+|
+|-- data/features/                     # Full pre-extracted feature files (69 .pt files, 3.58 GB)
+|   |-- m3_llava/                      # M3 architecture features (temp_0.0 .. temp_1.5)
+|   `-- mqt_llava/                     # MQT architecture features (temp_0.0 .. temp_1.5)
+|
+|-- pilot_features_1k/                 # Lightweight 100-sample mock features for offline tests
+|   |-- m3/mock_vqav2/full_extracted_features.pt
+|   `-- mqt/mock_vqav2/full_extracted_features.pt
+|
+|-- results/                           # Benchmark & experiment outputs
+|   `-- experiments/
+|
+`-- tests/                             # Pytest suite (17 unit tests, 100% pass)
+    |-- test_features.py
+    |-- test_whitebox.py
+    |-- test_semantic_entropy.py
+    |-- test_calibrators.py
+    `-- test_metrics.py
 ```
 
 ---
 
-## ? Installation & Quick Start
+## Installation and Quick Start
 
-### 1. Environment Setup using `uv`
+### 1. Environment Setup using uv
 
 ```bash
 # Clone the repository
@@ -141,32 +144,9 @@ Runs the entire calibrator pipeline across all 16 methods on synthetic pilot fea
 .venv\Scripts\python -m pytest tests/ -v
 ```
 
-Output:
-```
-============================= test session starts =============================
-tests/test_calibrators.py::test_all_calibrators_fit_predict PASSED       [  5%]
-tests/test_features.py::test_compute_features_sample PASSED              [ 11%]
-tests/test_features.py::test_sigmoid_get_logits_roundtrip PASSED         [ 17%]
-tests/test_features.py::test_select_best_5d_subset PASSED                [ 23%]
-tests/test_metrics.py::test_ece_perfect_calibration PASSED               [ 29%]
-tests/test_metrics.py::test_brier_score PASSED                           [ 35%]
-tests/test_metrics.py::test_murphy_decomposition_identity PASSED         [ 41%]
-tests/test_metrics.py::test_adaptive_ece_bounds PASSED                   [ 47%]
-tests/test_metrics.py::test_kde_ece_bounds PASSED                        [ 52%]
-tests/test_metrics.py::test_auroc PASSED                                 [ 58%]
-tests/test_semantic_entropy.py::test_get_semantic_ids_and_entropy PASSED [ 64%]
-tests/test_semantic_entropy.py::test_cluster_assignment_entropy PASSED   [ 70%]
-tests/test_semantic_entropy.py::test_eigenscore PASSED                   [ 76%]
-tests/test_whitebox.py::test_sequence_probability PASSED                 [ 82%]
-tests/test_whitebox.py::test_min_probability PASSED                      [ 88%]
-tests/test_whitebox.py::test_probability_margin PASSED                   [ 94%]
-tests/test_whitebox.py::test_token_entropy_and_negentropy PASSED         [100%]
-============================= 17 passed in 2.93s ==============================
-```
-
 ---
 
-## ??? Detailed Hardware Execution Guide
+## Detailed Hardware Execution Guide
 
 This codebase is optimized to run seamlessly across three distinct hardware tiers:
 
@@ -174,9 +154,9 @@ This codebase is optimized to run seamlessly across three distinct hardware tier
 
 | Workflow Tier | Minimum CPU | Minimum RAM | Minimum GPU / VRAM | Expected Runtime |
 | :--- | :--- | :--- | :--- | :--- |
-| **Tier 1: Post-Hoc Calibration** | 2 cores | 4 GB | **None (CPU-Only)** | ~1?5 seconds per dataset |
+| **Tier 1: Post-Hoc Calibration** | 2 cores | 4 GB | **None (CPU-Only)** | ~1-5 seconds per dataset |
 | **Tier 2: Fast Smoke Verification** | 2 cores | 2 GB | **None (CPU-Only)** | ~3 seconds total |
-| **Tier 3: Live VLM GPU Extraction** | 4 cores | 16 GB | 1? GPU $\ge$ 16 GB (RTX 3090/4090, A5000, A100) | ~1.35 samples / sec |
+| **Tier 3: Live VLM GPU Extraction** | 4 cores | 16 GB | 1x GPU >= 16 GB (RTX 3090/4090, A5000, A100) | ~1.35 samples / sec |
 
 ---
 
@@ -236,7 +216,7 @@ python scripts/run_benchmark.py \
 
 ---
 
-### Workflow 2: In-Depth VCPS Dynamic Slope & Temperature Analysis
+### Workflow 2: In-Depth VCPS Dynamic Slope and Temperature Analysis
 
 To inspect how the Varying-Coefficient Platt Scaler adjusts instance-level temperatures $T_{\text{eff}}(\mathbf{z}) = 1/a(\mathbf{z})$ and slopes $a(\mathbf{z})$ for correct vs. incorrect model predictions:
 
@@ -306,7 +286,7 @@ CUDA_VISIBLE_DEVICES=0 python scripts/extract_features.py \
 ```
 
 #### 3.4 Multi-GPU Parallel Extraction
-If you have multi-GPU hardware (e.g., 2? or 4? RTX 4090 / A100), extract different datasets concurrently:
+If you have multi-GPU hardware (e.g., 2x or 4x RTX 4090 / A100), extract different datasets concurrently:
 ```bash
 # GPU 0 extracts POPE and ScienceQA
 CUDA_VISIBLE_DEVICES=0 python scripts/extract_features.py \
@@ -324,17 +304,9 @@ CUDA_VISIBLE_DEVICES=1 python scripts/extract_features.py \
 wait
 ```
 
-#### 3.5 Checkpoint/Resume & Clean Extraction
-The extraction script automatically saves checkpoints incrementally and resumes without losing progress:
-- **Resume**: Simply re-run the same command. Processed `question_id`s are skipped automatically.
-- **Fresh Overwrite**: Add the `--clean` flag to wipe old checkpoints and extract from scratch:
-  ```bash
-  python scripts/extract_features.py --model_path mucai/llava-v1.5-7b-m3 --datasets pope --clean
-  ```
-
 ---
 
-## ?? Feature Definitions: 17-D Trajectory Signature
+## Feature Definitions: 17-D Trajectory Signature
 
 The trajectory signature captures the evolution of generation logits, margins, and textual stability across 5 visual token budgets $m \in \{1, 9, 36, 144, 576\}$ (or $256$ for MQT):
 
@@ -361,7 +333,7 @@ The trajectory signature captures the evolution of generation logits, margins, a
 
 ---
 
-## ?? Empirical Benchmark Results
+## Empirical Benchmark Results
 
 Evaluated on **M3-LLaVA** across standard VQA and hallucination benchmarks at $T_{\text{gen}}=0.0$:
 
@@ -369,23 +341,23 @@ Evaluated on **M3-LLaVA** across standard VQA and hallucination benchmarks at $T
 
 | Calibration Method | Compute Cost | POPE | ScienceQA | TextVQA | VizWiz-VQA |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Naive Confidence (NC)** | $1\times$ | 4.12% | 10.66% | 8.72% | 16.71% |
-| **Temperature Scaling (TS)** | $1\times$ | 3.96% | 9.76% | 8.35% | 15.56% |
-| **Platt Scaling (1D)** | $1\times$ | 4.05% | 7.46% | 5.70% | 7.25% |
-| **Spline Calibration (PCHIP)** | $1\times$ | 5.10% | 5.16% | 10.25% | 8.45% |
-| **Adaptive TS (ATS)** | $1\times$ | 4.16% | 9.43% | 8.80% | 15.45% |
-| **UQLM SequenceProb** | $1\times$ | 4.05% | 7.46% | 5.70% | 7.25% |
-| **UQLM MinProb** | $1\times$ | 4.05% | 7.46% | 5.70% | 7.25% |
-| **UQLM TokenEntropy** | $1\times$ | 4.05% | 7.46% | 5.70% | 7.25% |
-| **Kuhn Semantic Entropy** | $10\times$ (sampling) | 4.05% | 7.46% | 5.70% | 7.25% |
-| **Chen EigenScore** | $10\times$ (sampling) | 4.05% | 7.46% | 5.70% | 7.25% |
-| **MSSC (Multi-Scale Proxy)** | $1\times$ | **0.86%** | **1.83%** | 3.36% | 3.44% |
-| **VCPS-5D (Our Method)** | **$1\times$** | **3.98%** | **6.50%** | **5.06%** | **7.23%** |
-| **VCPS-17D (Our Method)** | **$1\times$** | **3.57%** | **5.90%** | **5.80%** | **6.76%** |
+| **Naive Confidence (NC)** | 1x | 4.12% | 10.66% | 8.72% | 16.71% |
+| **Temperature Scaling (TS)** | 1x | 3.96% | 9.76% | 8.35% | 15.56% |
+| **Platt Scaling (1D)** | 1x | 4.05% | 7.46% | 5.70% | 7.25% |
+| **Spline Calibration (PCHIP)** | 1x | 5.10% | 5.16% | 10.25% | 8.45% |
+| **Adaptive TS (ATS)** | 1x | 4.16% | 9.43% | 8.80% | 15.45% |
+| **UQLM SequenceProb** | 1x | 4.05% | 7.46% | 5.70% | 7.25% |
+| **UQLM MinProb** | 1x | 4.05% | 7.46% | 5.70% | 7.25% |
+| **UQLM TokenEntropy** | 1x | 4.05% | 7.46% | 5.70% | 7.25% |
+| **Kuhn Semantic Entropy** | 10x (sampling) | 4.05% | 7.46% | 5.70% | 7.25% |
+| **Chen EigenScore** | 10x (sampling) | 4.05% | 7.46% | 5.70% | 7.25% |
+| **MSSC (Multi-Scale Proxy)** | 1x | **0.86%** | **1.83%** | 3.36% | 3.44% |
+| **VCPS-5D (Our Method)** | **1x** | **3.98%** | **6.50%** | **5.06%** | **7.23%** |
+| **VCPS-17D (Our Method)** | **1x** | **3.57%** | **5.90%** | **5.80%** | **6.76%** |
 
 ---
 
-## ?? Ground-Truth Datasets & Verification Registry
+## Ground-Truth Datasets and Verification Registry
 
 The repository includes a hardened `DATASET_REGISTRY` covering 14 vision-language benchmarks:
 
@@ -396,7 +368,7 @@ The repository includes a hardened `DATASET_REGISTRY` covering 14 vision-languag
 | **`vizwiz-vqa`** | `lmms-lab/VizWiz-VQA` | `val` | `list_soft` | 10-annotator soft consensus (non-withheld split) |
 | **`docvqa`** | `lmms-lab/DocVQA` (`DocVQA`) | `validation` | `list_soft` | Soft consensus on document QA |
 | **`infographicvqa`** | `lmms-lab/DocVQA` (`InfographicVQA`) | `validation` | `list_soft` | Soft consensus on infographics |
-| **`pope`** | `lmms-lab/POPE` | `test` | `open` | Exact/normalized `"yes"` / `"no"` (with duplicate filter) |
+| **`pope`** | `lmms-lab/POPE` | `test` | `open` | Exact/normalized "yes" / "no" (with duplicate filter) |
 | **`scienceqa`** | `lmms-lab/ScienceQA` (`ScienceQA-IMG`) | `test` | `mc_index` | Option letter / Choice index matching |
 | **`ai2d`** | `lmms-lab/ai2d` | `test` | `mc_index` | Diagram multiple-choice index matching |
 | **`chartqa`** | `lmms-lab/ChartQA` | `test` | `open` | Normalized chart QA string matching |
@@ -408,7 +380,7 @@ The repository includes a hardened `DATASET_REGISTRY` covering 14 vision-languag
 
 ---
 
-## ?? Scientific Invariants & Numerical Stability Rules
+## Scientific Invariants and Numerical Stability Rules
 
 1. **Temperature Bounding**: Global temperature scaling $T^*$ and instance temperatures $T(\mathbf{z})$ are strictly bounded to $T \in [0.01, 20.0]$.
 2. **Logit Clamping**: Logits are clipped to $[-35.0, 35.0]$ before sigmoid exponentiation to prevent floating-point underflow/overflow.
@@ -418,7 +390,7 @@ The repository includes a hardened `DATASET_REGISTRY` covering 14 vision-languag
 
 ---
 
-## ?? Citation & License
+## Citation and License
 
 This project is licensed under the **MIT License**.
 
