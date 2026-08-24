@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.env
+.venv
+venv/
+env/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# Experiment & data directories (ignore heavy weights)
+results/features/*
+!results/features/.gitkeep
+results/experiments/*
+!results/experiments/.gitkeep
+data/features/*
+!data/features/.gitkeep
+checkpoints/
+*.pt
+*.pth
+*.bin
+!pilot_features_1k/**/*.pt
+
+# Pytest / logs
+.pytest_cache/
+*.log
