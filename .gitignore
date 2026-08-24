@@ -27,6 +27,7 @@ checkpoints/
 *.pt
 *.pth
 *.bin
+*.zip
 !pilot_features_1k/**/*.pt
 
 # Pytest / logs
