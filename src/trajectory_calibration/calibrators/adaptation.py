@@ -11,16 +11,11 @@ import numpy as np
 from scipy.optimize import minimize_scalar
 from sklearn.linear_model import LogisticRegression
 
-from trajectory_calibration.features.trajectory import get_logits, sigmoid
-
-
-def safe_clip_probs(p: np.ndarray, eps: float = 1e-7) -> np.ndarray:
-    """Clips probabilities to [eps, 1 - eps] for numerical stability."""
-    return np.clip(p, eps, 1.0 - eps)
+from trajectory_calibration.utils.math import get_logits, safe_clip_probs, sigmoid
 
 
 def run_saerens_em_binary(
-    p_source: np.ndarray, pi_source: float, max_iter: int = 100, tol: float = 1e-6
+    p_source: np.ndarray | list[float], pi_source: float, max_iter: int = 100, tol: float = 1e-6
 ) -> tuple[np.ndarray, float]:
     """
     Saerens et al. (2002) Expectation-Maximization for unsupervised target prior shift adaptation.
@@ -53,7 +48,7 @@ def run_saerens_em_binary(
 
 
 def fit_target_intercept_adaptation(
-    preds_source: np.ndarray, target_unlabeled_guess: float | np.ndarray
+    preds_source: np.ndarray | list[float], target_unlabeled_guess: float | np.ndarray
 ) -> np.ndarray:
     """
     Shifts the calibrated logit intercept to align mean probability with the target base rate.
@@ -72,7 +67,7 @@ def fit_target_intercept_adaptation(
 
 
 def fit_beta_calibration(
-    confs_train: np.ndarray, y_train: np.ndarray
+    confs_train: np.ndarray | list[float], y_train: np.ndarray | list[int | float]
 ) -> tuple[float, float, float]:
     """
     Fits Beta Calibration (Kull et al., 2017): logit(p) = a * ln(c) - b * ln(1 - c) + c_param.
@@ -81,7 +76,7 @@ def fit_beta_calibration(
     y = np.asarray(y_train, dtype=np.int64)
 
     X_beta = np.column_stack([np.log(c), -np.log(1.0 - c)])
-    lr = LogisticRegression(C=1000.0, solver="lbfgs", max_iter=200)
+    lr = LogisticRegression(C=1000.0, solver="lbfgs", max_iter=1000)
     lr.fit(X_beta, y)
 
     a = float(lr.coef_[0][0])
@@ -91,7 +86,7 @@ def fit_beta_calibration(
 
 
 def apply_beta_calibration(
-    confs: np.ndarray, a: float, b: float, c_param: float
+    confs: np.ndarray | list[float], a: float, b: float, c_param: float
 ) -> np.ndarray:
     """Applies Beta calibration parameters to input confidences."""
     c = safe_clip_probs(np.asarray(confs, dtype=np.float64))

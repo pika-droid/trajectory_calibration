@@ -11,39 +11,50 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 
-from trajectory_calibration.features.trajectory import evaluate_model_diagnostics, get_logits, sigmoid
-from trajectory_calibration.metrics.calibration import (
+try:
+    from scipy.integrate import trapezoid as _trapezoid
+except ImportError:
+    _trapezoid = getattr(np, "trapezoid", getattr(np, "trapz", None))
+
+from trajectory_calibration.features.diagnostics import evaluate_model_diagnostics
+from trajectory_calibration.metrics.ece import (
     compute_adaptive_ece,
-    compute_auroc,
-    compute_brier,
     compute_ece,
     compute_kde_ece,
     compute_mce,
-    compute_murphy_brier_decomposition,
+)
+from trajectory_calibration.metrics.murphy import compute_murphy_brier_decomposition
+from trajectory_calibration.metrics.scoring import (
+    compute_auroc,
+    compute_brier,
     compute_nll,
     compute_prediction_std,
 )
+from trajectory_calibration.utils.math import get_logits, sigmoid
 
 logger = logging.getLogger("trajectory_calibration.calibrators.residual")
 
 
-def compute_aurc(probs: np.ndarray, y: np.ndarray) -> float:
+def compute_aurc(probs: np.ndarray | list[float], y: np.ndarray | list[float]) -> float:
     """Area Under the Risk-Coverage Curve (AURC)."""
-    probs = np.asarray(probs, dtype=np.float64)
-    y = np.asarray(y, dtype=np.float64)
-    n = len(probs)
+    p = np.asarray(probs, dtype=np.float64)
+    labels = np.asarray(y, dtype=np.float64)
+    n = len(p)
     if n == 0:
         return 0.0
 
-    order = np.argsort(-probs)
-    y_sorted = y[order]
+    order = np.argsort(-p)
+    y_sorted = labels[order]
 
     cum_correct = np.cumsum(y_sorted)
     coverage = np.arange(1, n + 1) / n
     precision = cum_correct / np.arange(1, n + 1)
     risk = 1.0 - precision
 
-    aurc = float(np.trapz(risk, coverage))
+    if _trapezoid is not None:
+        aurc = float(_trapezoid(risk, coverage))
+    else:
+        aurc = float(np.sum((risk[:-1] + risk[1:]) / 2.0 * np.diff(coverage)))
     return aurc
 
 
@@ -58,8 +69,8 @@ class ResidualTrajectoryCalibrator:
         self.C = C
         self.random_state = random_state
         self.scaler = StandardScaler()
-        self.stage1_lr = LogisticRegression(C=1000.0, solver="lbfgs")
-        self.stage2_lr = LogisticRegression(C=self.C, solver="lbfgs", random_state=self.random_state)
+        self.stage1_lr = LogisticRegression(C=1000.0, solver="lbfgs", max_iter=1000)
+        self.stage2_lr = LogisticRegression(C=self.C, solver="lbfgs", max_iter=1000, random_state=self.random_state)
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray) -> ResidualTrajectoryCalibrator:
         X = np.asarray(X_train, dtype=np.float64)
@@ -68,8 +79,6 @@ class ResidualTrajectoryCalibrator:
 
         # Stage 1: Platt on x1
         self.stage1_lr.fit(x1, y)
-        p1 = self.stage1_lr.predict_proba(x1)[:, 1]
-        l1 = get_logits(p1).reshape(-1, 1)
 
         # Stage 2: Fit residual on Z
         Z = X[:, 1:] if X.shape[1] > 1 else X
@@ -93,26 +102,21 @@ def evaluate_full_metric_panel(
     probs: np.ndarray, y: np.ndarray, c_576: np.ndarray, y_train: np.ndarray | None = None
 ) -> dict[str, Any]:
     """
-    Evaluates the complete scientific metric panel across 10 distinct metrics:
-    - ECE, ECE Percent
-    - Adaptive ECE, Adaptive ECE Percent
-    - KDE ECE
-    - Brier Score & Murphy Decomposition (Uncertainty, Resolution, Reliability)
-    - AUROC, NLL, AURC, Prediction Std, Spearman Rho, Diagnostic Status
+    Evaluates the complete scientific metric panel across 10 distinct metrics.
     """
-    probs = np.asarray(probs, dtype=np.float64)
-    y = np.asarray(y, dtype=np.float64)
-    c_576 = np.asarray(c_576, dtype=np.float64)
+    p = np.asarray(probs, dtype=np.float64)
+    labels = np.asarray(y, dtype=np.float64)
+    c = np.asarray(c_576, dtype=np.float64)
 
-    ece = compute_ece(probs, y)
-    ada_ece = compute_adaptive_ece(probs, y)
-    kde_ece = compute_kde_ece(probs, y)
-    brier = compute_brier(probs, y)
-    nll = compute_nll(probs, y)
-    auroc = compute_auroc(probs, y)
-    aurc = compute_aurc(probs, y)
-    murphy = compute_murphy_brier_decomposition(probs, y)
-    diag = evaluate_model_diagnostics(probs, y, c_576, y_train=y_train)
+    ece = compute_ece(p, labels)
+    ada_ece = compute_adaptive_ece(p, labels)
+    kde_ece = compute_kde_ece(p, labels)
+    brier = compute_brier(p, labels)
+    nll = compute_nll(p, labels)
+    auroc = compute_auroc(p, labels)
+    aurc = compute_aurc(p, labels)
+    murphy = compute_murphy_brier_decomposition(p, labels)
+    diag = evaluate_model_diagnostics(p, labels, c, y_train=y_train)
 
     return {
         "ece": ece,

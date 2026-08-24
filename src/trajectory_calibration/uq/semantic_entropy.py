@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import logging
 from typing import Any
-
 import numpy as np
 
 from trajectory_calibration.utils.helpers import clean_text
@@ -19,30 +18,18 @@ logger = logging.getLogger("trajectory_calibration.uq.semantic_entropy")
 
 
 class FastStringEntailment:
-    """
-    High-throughput string equivalence & substring containment entailment matcher.
+    """High-throughput string equivalence & substring containment entailment matcher."""
 
-    Used for zero-dependency CPU execution and single-word/short-phrase VQA evaluation.
-    """
-
-    def check_implication(self, text1: str, text2: str, *args, **kwargs) -> int:
-        """
-        Returns:
-        - 2: Entailment (equivalent / bidirectional match)
-        - 1: Neutral
-        - 0: Contradiction
-        """
+    def check_implication(self, text1: str, text2: str, *args: Any, **kwargs: Any) -> int:
+        """Returns 2 (Entailment), 1 (Neutral), or 0 (Contradiction)."""
         t1 = clean_text(text1)
         t2 = clean_text(text2)
 
         if not t1 or not t2:
             return 1
-        if t1 == t2:
-            return 2
-        if t1 in t2 or t2 in t1:
+        if t1 == t2 or t1 in t2 or t2 in t1:
             return 2
 
-        # Check binary antonyms
         binary_opposites = {
             ("yes", "no"),
             ("true", "false"),
@@ -57,9 +44,7 @@ class FastStringEntailment:
 
 
 class EntailmentDeberta:
-    """
-    DeBERTa-v2-xlarge-mnli bidirectional NLI entailment classifier.
-    """
+    """DeBERTa-v2-xlarge-mnli bidirectional NLI entailment classifier."""
 
     def __init__(self, model_name: str = "microsoft/deberta-v2-xlarge-mnli", device: str | None = None) -> None:
         import torch
@@ -70,16 +55,14 @@ class EntailmentDeberta:
         self.model = AutoModelForSequenceClassification.from_pretrained(model_name).to(self.device)
         self.model.eval()
 
-    def check_implication(self, text1: str, text2: str, *args, **kwargs) -> int:
+    def check_implication(self, text1: str, text2: str, *args: Any, **kwargs: Any) -> int:
         import torch
         import torch.nn.functional as F
 
         inputs = self.tokenizer(text1, text2, return_tensors="pt").to(self.device)
         with torch.no_grad():
             outputs = self.model(**inputs)
-            logits = outputs.logits
-            # DeBERTa-MNLI classes: 0 -> contradiction, 1 -> neutral, 2 -> entailment
-            pred_idx = torch.argmax(F.softmax(logits, dim=-1)).cpu().item()
+            pred_idx = torch.argmax(F.softmax(outputs.logits, dim=-1)).cpu().item()
         return int(pred_idx)
 
 
@@ -89,29 +72,16 @@ def get_semantic_ids(
     strict_entailment: bool = False,
     example: dict[str, Any] | None = None,
 ) -> list[int]:
-    """
-    Groups a list of generated answer strings into semantic equivalence clusters.
-
-    Args:
-        strings_list: List of generation outputs across rollouts or scales.
-        model: Entailment model instance (EntailmentDeberta or FastStringEntailment).
-        strict_entailment: If True, requires both t1->t2 and t2->t1 to be entailment (2).
-                           If False, requires neither to be contradiction (0) and not both neutral (1,1).
-
-    Returns:
-        List of integer cluster IDs matching the length of strings_list.
-    """
+    """Groups a list of generated answer strings into semantic equivalence clusters."""
     if model is None:
         model = FastStringEntailment()
 
     def are_equivalent(text1: str, text2: str) -> bool:
         imp1 = model.check_implication(text1, text2, example=example)
         imp2 = model.check_implication(text2, text1, example=example)
-
         if strict_entailment:
             return (imp1 == 2) and (imp2 == 2)
-        else:
-            return (0 not in [imp1, imp2]) and ([1, 1] != [imp1, imp2])
+        return (0 not in [imp1, imp2]) and ([1, 1] != [imp1, imp2])
 
     semantic_set_ids = [-1] * len(strings_list)
     next_id = 0
@@ -128,27 +98,25 @@ def get_semantic_ids(
 
 
 def logsumexp_by_id(
-    semantic_ids: list[int], log_likelihoods: list[float] | np.ndarray
+    semantic_ids: list[int], log_likelihoods: list[float] | np.ndarray, agg: str = "sum_normalized"
 ) -> list[float]:
-    """
-    Aggregates log-likelihoods for identical semantic cluster IDs via LogSumExp.
-    """
-    log_likelihoods = np.asarray(log_likelihoods, dtype=np.float64)
+    """Aggregates log-likelihoods for identical semantic cluster IDs via LogSumExp."""
+    lps = np.asarray(log_likelihoods, dtype=np.float64)
+    if len(lps) == 0:
+        return []
+
     unique_ids = sorted(list(set(semantic_ids)))
     cluster_log_probs = []
 
-    # Total normalizer
-    max_lp = np.max(log_likelihoods)
-    total_logsumexp = max_lp + np.log(np.sum(np.exp(log_likelihoods - max_lp)))
+    max_lp = float(np.max(lps))
+    total_logsumexp = max_lp + np.log(np.sum(np.exp(lps - max_lp)))
 
     for uid in unique_ids:
         id_indices = [pos for pos, x in enumerate(semantic_ids) if x == uid]
-        id_lps = log_likelihoods[id_indices]
+        id_lps = lps[id_indices]
 
-        max_c = np.max(id_lps)
+        max_c = float(np.max(id_lps))
         cluster_lse = max_c + np.log(np.sum(np.exp(id_lps - max_c)))
-
-        # Normalized cluster probability in log space
         norm_cluster_lp = cluster_lse - total_logsumexp
         cluster_log_probs.append(float(norm_cluster_lp))
 
@@ -158,27 +126,24 @@ def logsumexp_by_id(
 def compute_semantic_entropy(
     semantic_ids: list[int], log_likelihoods: list[float] | np.ndarray
 ) -> float:
-    """
-    Computes exact Kuhn et al. Semantic Entropy: -sum_k P(C_k) * ln P(C_k).
-    """
+    """Computes exact Kuhn et al. Semantic Entropy: -sum_k P(C_k) * ln P(C_k)."""
     if len(semantic_ids) == 0:
         return 0.0
 
     cluster_log_probs = logsumexp_by_id(semantic_ids, log_likelihoods)
+    if not cluster_log_probs:
+        return 0.0
     probs = np.exp(cluster_log_probs)
-    probs = probs / np.sum(probs)  # Numerical safety normalization
+    probs = probs / np.sum(probs)
 
     se = -np.sum(probs * np.log(np.clip(probs, 1e-12, 1.0)))
     return float(max(0.0, se))
 
 
-def compute_cluster_assignment_entropy(semantic_ids: list[int]) -> float:
-    """
-    Computes cluster assignment entropy from frequency of assigned clusters: -sum_k p_k * ln p_k.
-    """
+def cluster_assignment_entropy(semantic_ids: list[int]) -> float:
+    """Computes cluster assignment entropy: -sum_k p_k * ln p_k."""
     if len(semantic_ids) == 0:
         return 0.0
-
     counts = np.bincount(semantic_ids)
     probs = counts / len(semantic_ids)
     probs = probs[probs > 0]
@@ -186,11 +151,15 @@ def compute_cluster_assignment_entropy(semantic_ids: list[int]) -> float:
     return float(max(0.0, entropy))
 
 
-def compute_predictive_entropy(log_likelihoods: list[float] | np.ndarray) -> float:
-    """
-    Computes average sequence negative log-likelihood: - (1/N) * sum_i log P(s_i).
-    """
-    arr = np.asarray(log_likelihoods, dtype=np.float64)
+compute_cluster_assignment_entropy = cluster_assignment_entropy
+
+
+def predictive_entropy(log_probs: list[float] | np.ndarray) -> float:
+    """Computes average sequence negative log-likelihood: - (1/N) * sum_i log P(s_i)."""
+    arr = np.asarray(log_probs, dtype=np.float64)
     if len(arr) == 0:
         return 0.0
     return float(-np.mean(arr))
+
+
+compute_predictive_entropy = predictive_entropy

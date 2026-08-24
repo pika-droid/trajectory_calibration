@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import logging
 import os
-import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -45,50 +44,27 @@ def load_llava_modules(
             sys.path.remove(p_str)
 
     # 3. Determine search paths for the target architecture
-    if arch == "mqt":
-        mqt_dir = Path("/workspace/MQT-LLaVA")
-        if not mqt_dir.exists():
-            mqt_dir = project_root / "MQT-LLaVA"
-
-        # Auto-clone if missing
-        if not mqt_dir.exists():
-            logger.info(f"Cloning official MQT-LLaVA repository to {mqt_dir}...")
-            try:
-                subprocess.run(
-                    [
-                        "git",
-                        "clone",
-                        "--depth",
-                        "1",
-                        "https://github.com/gordonhu608/MQT-LLaVA.git",
-                        str(mqt_dir),
-                    ],
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
-                logger.info(f"Successfully cloned MQT-LLaVA to {mqt_dir}")
-            except Exception as e:
-                logger.warning(f"Could not clone MQT-LLaVA automatically: {e}")
-
-        search_paths = [
-            Path("/workspace/MQT-LLaVA"),
-            project_root / "MQT-LLaVA",
-            Path("/workspace/mqt-llava"),
-            Path("/workspace/matryoshka-mm"),
-            Path("/workspace/LLaVA"),
-            project_root / "llava_src",
-        ]
-    else:
-        search_paths = [
-            project_root / "llava_src",
-            Path("/workspace/matryoshka-mm"),
-            Path("/workspace/LLaVA"),
-            Path("/workspace/MajorProject2/src"),
-        ]
-
+    search_paths: list[Path] = []
     if custom_search_paths:
-        search_paths = custom_search_paths + search_paths
+        search_paths.extend(custom_search_paths)
+
+    if arch == "mqt":
+        mqt_env = os.environ.get("MQT_LLAVA_PATH")
+        if mqt_env:
+            search_paths.append(Path(mqt_env))
+        search_paths.extend([
+            project_root / "MQT-LLaVA",
+            project_root / "mqt-llava",
+            project_root / "llava_src",
+        ])
+    else:
+        m3_env = os.environ.get("M3_LLAVA_PATH")
+        if m3_env:
+            search_paths.append(Path(m3_env))
+        search_paths.extend([
+            project_root / "llava_src",
+            project_root / "src",
+        ])
 
     resolved_path = None
     for p in reversed(search_paths):
@@ -136,9 +112,8 @@ def load_llava_modules(
             "resolved_path": resolved_path,
             "loaded_file": loaded_from,
         }
-    except ModuleNotFoundError as e:
-        logger.warning(f"LLaVA modules not found for {arch}: {e}")
-        # Fallback constants for CPU execution
+    except (ModuleNotFoundError, ImportError) as e:
+        logger.debug(f"LLaVA modules not found for {arch}: {e}. Returning safe fallback.")
         return {
             "load_pretrained_model": None,
             "disable_torch_init": lambda: None,

@@ -1,9 +1,8 @@
 """
 Varying-Coefficient Platt Scaling (VCPS).
 
-Our primary proposed method (Method 29). Dynamically modulates both the
-slope a(z) and intercept b(z) as generalized linear functions of multi-scale
-trajectory signatures z:
+Dynamically modulates both the slope a(z) and intercept b(z) as generalized
+linear functions of multi-scale trajectory signatures z:
 
     logit(p(x)) = a(z) * x1 + b(z)
     a(z) = exp(a0 + gamma^T z_slope)  (strictly positive dynamic slope)
@@ -22,16 +21,14 @@ from scipy.optimize import minimize
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 
-from trajectory_calibration.features.trajectory import get_logits, sigmoid
-from trajectory_calibration.metrics.calibration import compute_nll
+from trajectory_calibration.metrics.scoring import compute_nll
+from trajectory_calibration.utils.math import get_logits, sigmoid
 
 logger = logging.getLogger("trajectory_calibration.calibrators.vcps")
 
 
 class VaryingCoefficientPlattScaler:
-    """
-    Varying-Coefficient Platt Scaler (VCPS).
-    """
+    """Varying-Coefficient Platt Scaler (VCPS)."""
 
     def __init__(
         self,
@@ -69,10 +66,8 @@ class VaryingCoefficientPlattScaler:
         self.feature_names = feature_names or [f"x{i}" for i in range(1, d + 1)]
         x1 = X[:, 0]
 
-        # Standardize features
         X_norm = self.scaler.fit_transform(X)
 
-        # Map feature subsets
         slope_idx = [self.feature_names.index(f) for f in self.slope_features if f in self.feature_names]
         int_idx = [self.feature_names.index(f) for f in self.intercept_features if f in self.feature_names]
 
@@ -83,61 +78,43 @@ class VaryingCoefficientPlattScaler:
 
         self._slope_idx = slope_idx
         self._int_idx = int_idx
-
         k_slope = len(slope_idx)
         k_int = len(int_idx)
 
-        # Initialize via 1D Platt
-        lr = LogisticRegression(C=1000.0, solver="lbfgs", max_iter=200)
+        lr = LogisticRegression(C=1000.0, solver="lbfgs", max_iter=1000)
         lr.fit(x1.reshape(-1, 1), y)
         init_a0 = float(lr.coef_[0][0])
         init_b0 = float(lr.intercept_[0])
 
-        # Objective function with exact analytical gradients
         def objective(params: np.ndarray) -> tuple[float, np.ndarray]:
             if self.mode == "1d_platt":
-                a0 = params[0]
-                gamma = np.zeros(k_slope)
-                b0 = params[1]
-                w = np.zeros(k_int)
+                a0, b0 = params[0], params[1]
+                gamma, w = np.zeros(k_slope), np.zeros(k_int)
             elif self.mode == "slope_only":
-                a0 = params[0]
-                gamma = params[1 : 1 + k_slope]
-                b0 = params[1 + k_slope]
+                a0, gamma, b0 = params[0], params[1 : 1 + k_slope], params[1 + k_slope]
                 w = np.zeros(k_int)
             elif self.mode == "intercept_only":
-                a0 = params[0]
-                gamma = np.zeros(k_slope)
-                b0 = params[1]
-                w = params[2:]
+                a0, gamma, b0, w = params[0], np.zeros(k_slope), params[1], params[2:]
             else:  # full
-                a0 = params[0]
-                gamma = params[1 : 1 + k_slope]
-                b0 = params[1 + k_slope]
-                w = params[2 + k_slope :]
+                a0, gamma = params[0], params[1 : 1 + k_slope]
+                b0, w = params[1 + k_slope], params[2 + k_slope :]
 
-            # Slope and intercept
             if self.mode in ["full", "slope_only"]:
                 slope_log = np.clip(np.log(max(init_a0, 0.1)) + np.dot(X_norm[:, slope_idx], gamma), -3.0, 3.0)
                 a_x = np.exp(slope_log)
             else:
                 a_x = np.full(n, max(init_a0, 0.1))
 
-            if self.mode in ["full", "intercept_only"]:
-                b_x = b0 + np.dot(X_norm[:, int_idx], w)
-            else:
-                b_x = np.full(n, b0)
+            b_x = b0 + np.dot(X_norm[:, int_idx], w) if self.mode in ["full", "intercept_only"] else np.full(n, b0)
 
             logits = a_x * x1 + b_x
             p = sigmoid(logits)
 
-            # Loss: NLL + L2 penalty
             nll = compute_nll(p, y)
             reg_gamma = (0.5 / self.C_slope) * np.sum(gamma ** 2) if self.mode in ["full", "slope_only"] else 0.0
             reg_w = (0.5 / self.C_intercept) * np.sum(w ** 2) if self.mode in ["full", "intercept_only"] else 0.0
             total_loss = nll + reg_gamma + reg_w
 
-            # Gradients
             r = (p - y) / n
             grad_a0 = np.sum(r * x1 * a_x)
             grad_gamma = np.dot(X_norm[:, slope_idx].T, r * x1 * a_x) + (gamma / self.C_slope)
@@ -155,7 +132,6 @@ class VaryingCoefficientPlattScaler:
 
             return float(total_loss), grad
 
-        # Pack initial parameter vector
         if self.mode == "1d_platt":
             x0 = np.array([init_a0, init_b0])
         elif self.mode == "slope_only":
@@ -166,26 +142,16 @@ class VaryingCoefficientPlattScaler:
             x0 = np.concatenate([[init_a0], np.zeros(k_slope), [init_b0], np.zeros(k_int)])
 
         res = minimize(objective, x0=x0, jac=True, method="L-BFGS-B")
-
-        # Unpack solution
         p_opt = res.x
         self.a0 = float(p_opt[0])
         if self.mode == "full":
-            self.gamma = p_opt[1 : 1 + k_slope]
-            self.b0 = float(p_opt[1 + k_slope])
-            self.w = p_opt[2 + k_slope :]
+            self.gamma, self.b0, self.w = p_opt[1 : 1 + k_slope], float(p_opt[1 + k_slope]), p_opt[2 + k_slope :]
         elif self.mode == "slope_only":
-            self.gamma = p_opt[1 : 1 + k_slope]
-            self.b0 = float(p_opt[1 + k_slope])
-            self.w = np.zeros(k_int)
+            self.gamma, self.b0, self.w = p_opt[1 : 1 + k_slope], float(p_opt[1 + k_slope]), np.zeros(k_int)
         elif self.mode == "intercept_only":
-            self.gamma = np.zeros(k_slope)
-            self.b0 = float(p_opt[1])
-            self.w = p_opt[2:]
+            self.gamma, self.b0, self.w = np.zeros(k_slope), float(p_opt[1]), p_opt[2:]
         else:
-            self.gamma = np.zeros(k_slope)
-            self.b0 = float(p_opt[1])
-            self.w = np.zeros(k_int)
+            self.gamma, self.b0, self.w = np.zeros(k_slope), float(p_opt[1]), np.zeros(k_int)
 
         return self
 

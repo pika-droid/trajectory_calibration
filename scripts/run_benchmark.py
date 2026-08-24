@@ -2,8 +2,7 @@
 """
 Comprehensive Multi-Dataset Calibration Benchmark Runner.
 
-Fits and evaluates all 16 post-hoc calibrators, UQLM white-box estimators,
-Kuhn Semantic Entropy, Chen EigenScore, and VCPS across target datasets,
+Fits and evaluates post-hoc calibrators across target datasets,
 saving publication-ready markdown and CSV summary tables.
 """
 
@@ -19,18 +18,13 @@ import numpy as np
 import pandas as pd
 from trajectory_calibration.calibrators.baselines import (
     AdaptiveTemperatureScaling,
-    EigenScoreEstimator,
-    MinProbabilityEstimator,
     MultiScaleEigenVariance,
     MultiScaleSemanticConsistency,
     NaiveConfidenceEstimator,
     PlattScalingEstimator,
     ProbabilityMarginEstimator,
-    SemanticEntropyEstimator,
-    SequenceProbabilityEstimator,
     SplineCalibrator,
     TemperatureScalingEstimator,
-    TokenEntropyEstimator,
 )
 from trajectory_calibration.calibrators.residual import (
     ResidualTrajectoryCalibrator,
@@ -97,12 +91,7 @@ def main() -> None:
             "Platt Scaling (1D)": (PlattScalingEstimator(), X_train_17d, X_test_17d),
             "Spline Calibration": (SplineCalibrator(), X_train_17d, X_test_17d),
             "Adaptive TS (ATS)": (AdaptiveTemperatureScaling(), X_train_5d, X_test_5d),
-            "UQLM SequenceProb": (SequenceProbabilityEstimator(), X_train_17d, X_test_17d),
-            "UQLM MinProb": (MinProbabilityEstimator(), X_train_17d, X_test_17d),
-            "UQLM TokenEntropy": (TokenEntropyEstimator(), X_train_17d, X_test_17d),
-            "UQLM Margin": (ProbabilityMarginEstimator(), X_train_17d, X_test_17d),
-            "Kuhn Semantic Entropy": (SemanticEntropyEstimator(), X_train_17d, X_test_17d),
-            "Chen EigenScore": (EigenScoreEstimator(), X_train_17d, X_test_17d),
+            "Probability Margin (1D)": (ProbabilityMarginEstimator(), X_train_17d, X_test_17d),
             "MSSC (Multi-Scale Proxy)": (MultiScaleSemanticConsistency(), X_train_17d, X_test_17d),
             "MSE-EIGEN (Multi-Scale)": (MultiScaleEigenVariance(), X_train_17d, X_test_17d),
             "Residual Calibrator": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
@@ -131,7 +120,7 @@ def main() -> None:
     print("\n" + "=" * 75)
     print(f" BENCHMARK SUMMARY: Adaptive ECE (%) [{args.arch.upper()} T_gen={args.gen_temperature}]")
     print("=" * 75)
-    print(pivot_ece.to_string())
+    print(pivot_ece.round(2).to_string())
     print("=" * 75)
 
 

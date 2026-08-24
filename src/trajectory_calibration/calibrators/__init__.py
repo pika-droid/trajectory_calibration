@@ -1,4 +1,6 @@
-"""Calibration methods, baselines, and varying-coefficient models."""
+"""
+Trajectory Calibration Estimators Module.
+"""
 
 from trajectory_calibration.calibrators.adaptation import (
     apply_beta_calibration,
@@ -9,18 +11,25 @@ from trajectory_calibration.calibrators.adaptation import (
 )
 from trajectory_calibration.calibrators.baselines import (
     AdaptiveTemperatureScaling,
-    EigenScoreEstimator,
-    MinProbabilityEstimator,
     MultiScaleEigenVariance,
     MultiScaleSemanticConsistency,
     NaiveConfidenceEstimator,
     PlattScalingEstimator,
     ProbabilityMarginEstimator,
-    SemanticEntropyEstimator,
-    SequenceProbabilityEstimator,
     SplineCalibrator,
     TemperatureScalingEstimator,
-    TokenEntropyEstimator,
+)
+from trajectory_calibration.calibrators.classic import (
+    AdaptiveTemperatureScaling,
+    NaiveConfidenceEstimator,
+    PlattScalingEstimator,
+    SplineCalibrator,
+    TemperatureScalingEstimator,
+)
+from trajectory_calibration.calibrators.proxies import (
+    MultiScaleEigenVariance,
+    MultiScaleSemanticConsistency,
+    ProbabilityMarginEstimator,
 )
 from trajectory_calibration.calibrators.residual import (
     ResidualTrajectoryCalibrator,
@@ -30,26 +39,21 @@ from trajectory_calibration.calibrators.residual import (
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
 
 __all__ = [
-    "AdaptiveTemperatureScaling",
-    "EigenScoreEstimator",
-    "MinProbabilityEstimator",
-    "MultiScaleEigenVariance",
-    "MultiScaleSemanticConsistency",
     "NaiveConfidenceEstimator",
-    "PlattScalingEstimator",
-    "ProbabilityMarginEstimator",
-    "ResidualTrajectoryCalibrator",
-    "SemanticEntropyEstimator",
-    "SequenceProbabilityEstimator",
-    "SplineCalibrator",
     "TemperatureScalingEstimator",
-    "TokenEntropyEstimator",
+    "PlattScalingEstimator",
+    "SplineCalibrator",
+    "AdaptiveTemperatureScaling",
+    "ProbabilityMarginEstimator",
+    "MultiScaleSemanticConsistency",
+    "MultiScaleEigenVariance",
     "VaryingCoefficientPlattScaler",
-    "apply_beta_calibration",
+    "ResidualTrajectoryCalibrator",
     "compute_aurc",
     "evaluate_full_metric_panel",
-    "fit_beta_calibration",
-    "fit_target_intercept_adaptation",
     "run_saerens_em_binary",
+    "fit_target_intercept_adaptation",
+    "fit_beta_calibration",
+    "apply_beta_calibration",
     "safe_clip_probs",
 ]

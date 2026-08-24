@@ -2,7 +2,7 @@
 Core helper utilities for trajectory calibration.
 
 Provides safe checkpoint loading, reproducibility seed management,
-text normalization, and configuration dataclasses.
+and text normalization.
 """
 
 from __future__ import annotations
@@ -10,38 +10,13 @@ from __future__ import annotations
 import os
 import random
 import re
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import torch
 
-
-@dataclass
-class Config:
-    """Centralized configuration for feature extraction and calibration benchmarks."""
-
-    model_path: str = "mucai/llava-v1.5-7b-m3"
-    arch: str = "m3"  # "m3" or "mqt", auto-resolved in __post_init__
-    precision: str = "fp16"
-    features_dir: Path = Path("results/features")
-    output_dir: Path = Path("results/experiments")
-    seed: int = 42
-    max_new_tokens: int = 16
-    subset_size: int | None = None
-    token_scales: list[int] = field(default_factory=lambda: [1, 9, 36, 144, 576])
-
-    def __post_init__(self) -> None:
-        if "mqt" in self.model_path.lower() or self.arch.lower() == "mqt":
-            self.arch = "mqt"
-            self.token_scales = [1, 9, 36, 144, 256]
-        else:
-            self.arch = "m3"
-            self.token_scales = [1, 9, 36, 144, 576]
-        self.fine_scale = self.token_scales[-1]
-        self.features_dir = Path(self.features_dir)
-        self.output_dir = Path(self.output_dir)
+from trajectory_calibration.utils.config import ARCH_SCALES, Config
 
 
 def safe_torch_load(path: str | Path, map_location: str = "cpu") -> Any:
@@ -90,3 +65,6 @@ def clean_text(text: Any) -> str:
     text = re.sub(r"[^\w\s]", "", text)
     text = re.sub(r"\b(a|an|the)\b", "", text)
     return " ".join(text.split())
+
+
+__all__ = ["Config", "ARCH_SCALES", "safe_torch_load", "set_seed", "clean_text"]

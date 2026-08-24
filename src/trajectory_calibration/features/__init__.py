@@ -1,27 +1,35 @@
-"""Feature extraction, dataset ingestion, and 5-D selection algorithms."""
+"""
+Trajectory Calibration Features Module.
+"""
 
-from trajectory_calibration.features.trajectory import (
-    FEATURE_KEYS,
-    FEATURE_NAMES,
-    compute_features_from_sample,
-    evaluate_model_diagnostics,
-    generate_mock_df,
-    get_logits,
+from trajectory_calibration.features.definitions import FEATURE_KEYS, FEATURE_NAMES
+from trajectory_calibration.features.diagnostics import evaluate_model_diagnostics
+from trajectory_calibration.features.extractor import compute_features_from_sample
+from trajectory_calibration.features.loader import (
+    find_feature_file,
     get_stratified_split,
     load_dataset_features,
-    select_best_5d_subset,
-    sigmoid,
 )
+from trajectory_calibration.features.selection import (
+    calculate_vif,
+    select_best_5d_subset,
+    variance_inflation_factor,
+)
+from trajectory_calibration.features.synthetic import generate_mock_df
+from trajectory_calibration.features.trajectory import get_logits, sigmoid
 
 __all__ = [
-    "FEATURE_KEYS",
     "FEATURE_NAMES",
+    "FEATURE_KEYS",
+    "get_logits",
+    "sigmoid",
     "compute_features_from_sample",
+    "find_feature_file",
+    "load_dataset_features",
+    "get_stratified_split",
+    "select_best_5d_subset",
+    "variance_inflation_factor",
+    "calculate_vif",
     "evaluate_model_diagnostics",
     "generate_mock_df",
-    "get_logits",
-    "get_stratified_split",
-    "load_dataset_features",
-    "select_best_5d_subset",
-    "sigmoid",
 ]

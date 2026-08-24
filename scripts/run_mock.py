@@ -2,52 +2,46 @@
 """
 Quick CPU smoke test for Trajectory Calibration.
 
-Runs end-to-end fitting and evaluation across all calibrators
-using pilot_features_1k in ~5 seconds with zero GPU requirements.
+Runs end-to-end fitting and evaluation across distinct single-pass calibrators
+using pilot_features_1k in ~3 seconds with zero GPU requirements.
 """
 
 import sys
 from pathlib import Path
 
-# Add src to path
 SRC_PATH = Path(__file__).resolve().parent.parent / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 import numpy as np
-from trajectory_calibration.features.trajectory import (
-    FEATURE_KEYS,
-    get_stratified_split,
-    load_dataset_features,
-    select_best_5d_subset,
-)
 from trajectory_calibration.calibrators.baselines import (
     AdaptiveTemperatureScaling,
-    EigenScoreEstimator,
-    MinProbabilityEstimator,
     MultiScaleEigenVariance,
     MultiScaleSemanticConsistency,
     NaiveConfidenceEstimator,
     PlattScalingEstimator,
     ProbabilityMarginEstimator,
-    SemanticEntropyEstimator,
-    SequenceProbabilityEstimator,
     SplineCalibrator,
     TemperatureScalingEstimator,
-    TokenEntropyEstimator,
 )
 from trajectory_calibration.calibrators.residual import (
     ResidualTrajectoryCalibrator,
     evaluate_full_metric_panel,
 )
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
+from trajectory_calibration.features.trajectory import (
+    FEATURE_KEYS,
+    get_stratified_split,
+    load_dataset_features,
+    select_best_5d_subset,
+)
 from trajectory_calibration.utils.helpers import set_seed
 
 
 def main() -> None:
     set_seed(42)
     print("=" * 70)
-    print(" TRAJECTORY CALIBRATION ? CPU SMOKE TEST (pilot_features_1k)")
+    print(" TRAJECTORY CALIBRATION — CPU SMOKE TEST (pilot_features_1k)")
     print("=" * 70)
 
     pilot_dir = Path(__file__).resolve().parent.parent / "pilot_features_1k" / "m3" / "mock_vqav2"
@@ -83,12 +77,7 @@ def main() -> None:
         "Platt Scaling (1D)": (PlattScalingEstimator(), X_train_17d, X_test_17d),
         "Spline Calibration": (SplineCalibrator(), X_train_17d, X_test_17d),
         "Adaptive TS (ATS)": (AdaptiveTemperatureScaling(), X_train_5d, X_test_5d),
-        "UQLM SequenceProb": (SequenceProbabilityEstimator(), X_train_17d, X_test_17d),
-        "UQLM MinProb": (MinProbabilityEstimator(), X_train_17d, X_test_17d),
-        "UQLM TokenEntropy": (TokenEntropyEstimator(), X_train_17d, X_test_17d),
-        "UQLM Margin": (ProbabilityMarginEstimator(), X_train_17d, X_test_17d),
-        "Kuhn Semantic Entropy": (SemanticEntropyEstimator(), X_train_17d, X_test_17d),
-        "Chen EigenScore": (EigenScoreEstimator(), X_train_17d, X_test_17d),
+        "Probability Margin (1D)": (ProbabilityMarginEstimator(), X_train_17d, X_test_17d),
         "MSSC (Multi-Scale Proxy)": (MultiScaleSemanticConsistency(), X_train_17d, X_test_17d),
         "MSE-EIGEN (Multi-Scale)": (MultiScaleEigenVariance(), X_train_17d, X_test_17d),
         "Residual Calibrator": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
@@ -107,7 +96,7 @@ def main() -> None:
         print(f"{name:<28} | {panel['ece_percent']:<8.2f} | {panel['adaptive_ece_percent']:<11.2f} | {panel['auroc']:<7.3f} | {panel['brier']:<7.4f} | {panel['status']:<9}")
 
     print("-" * 85)
-    print(" SMOKE TEST PASSED! All 16 methods fit and evaluated successfully.")
+    print(" SMOKE TEST PASSED! All distinct single-pass methods fit and evaluated successfully.")
     print("=" * 70)
 
 

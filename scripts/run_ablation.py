@@ -89,7 +89,7 @@ def main() -> None:
 
     univariate_results = []
     for j, f_key in enumerate(FEATURE_KEYS):
-        lr = LogisticRegression(C=1.0, max_iter=200)
+        lr = LogisticRegression(C=1.0, max_iter=1000)
         lr.fit(X_train_full[:, [j]], y_train)
         preds = lr.predict_proba(X_test_full[:, [j]])[:, 1]
         ada_ece = compute_adaptive_ece(preds, y_test, n_bins=15) * 100.0
@@ -112,14 +112,14 @@ def main() -> None:
     print(f" EXPERIMENT B: LEAVE-ONE-OUT (LOO) SENSITIVITY [{args.arch.upper()}]")
     print("=" * 80)
 
-    full_lr = LogisticRegression(C=1.0, max_iter=200).fit(X_train_full, y_train)
+    full_lr = LogisticRegression(C=1.0, max_iter=1000).fit(X_train_full, y_train)
     full_preds = full_lr.predict_proba(X_test_full)[:, 1]
     base_ece = compute_adaptive_ece(full_preds, y_test, n_bins=15) * 100.0
 
     loo_results = []
     for j, f_key in enumerate(FEATURE_KEYS):
         subset_cols = [k for k in range(len(FEATURE_KEYS)) if k != j]
-        lr_loo = LogisticRegression(C=1.0, max_iter=200).fit(X_train_full[:, subset_cols], y_train)
+        lr_loo = LogisticRegression(C=1.0, max_iter=1000).fit(X_train_full[:, subset_cols], y_train)
         loo_preds = lr_loo.predict_proba(X_test_full[:, subset_cols])[:, 1]
         loo_ece = compute_adaptive_ece(loo_preds, y_test, n_bins=15) * 100.0
         delta_ece = loo_ece - base_ece
@@ -159,7 +159,7 @@ def main() -> None:
                     if cand in selected_features:
                         continue
                     cand_cols = [FEATURE_KEYS.index(f) for f in selected_features + [cand]]
-                    lr_cand = LogisticRegression(C=1.0, max_iter=200).fit(X_train_full[:, cand_cols], y_train)
+                    lr_cand = LogisticRegression(C=1.0, max_iter=1000).fit(X_train_full[:, cand_cols], y_train)
                     c_preds = lr_cand.predict_proba(X_test_full[:, cand_cols])[:, 1]
                     c_ece = compute_adaptive_ece(c_preds, y_test, n_bins=15)
                     if c_ece < best_cand_ece:
@@ -170,7 +170,7 @@ def main() -> None:
             current_subset = selected_features[:k]
 
         cols = [FEATURE_KEYS.index(f) for f in current_subset]
-        lr_k = LogisticRegression(C=1.0, max_iter=200).fit(X_train_full[:, cols], y_train)
+        lr_k = LogisticRegression(C=1.0, max_iter=1000).fit(X_train_full[:, cols], y_train)
         k_preds = lr_k.predict_proba(X_test_full[:, cols])[:, 1]
         k_panel = evaluate_full_metric_panel(k_preds, y_test, c_test, y_train=y_train)
 
