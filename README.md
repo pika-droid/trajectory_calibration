@@ -58,7 +58,7 @@ trajectory_calibration/
 |   |   `-- llava_compat.py            # Architecture-aware LLaVA namespace router & auto-clone
 |   |
 |   |-- features/                      # Trajectory Feature Extraction
-|   |   `-- trajectory.py              # 17-D extraction, forward stepwise 5-D selection, data loader
+|   |   `-- trajectory.py              # 17-D extraction, forward stepwise 5-D selection, VIF, data loader
 |   |
 |   |-- uq/                            # Uncertainty Quantification Baselines
 |   |   |-- whitebox.py                # UQLM: SequenceProb, MinProb, TokenEntropy, Margin
@@ -67,7 +67,7 @@ trajectory_calibration/
 |   |
 |   |-- calibrators/                   # Post-Hoc Calibrators
 |   |   |-- vcps.py                    # VaryingCoefficientPlattScaler (Our Method)
-|   |   |-- baselines.py               # NC, TS, Platt, Spline, ATS, UQLM wrappers
+|   |   |-- baselines.py               # NC, TS, Platt, Spline, ATS, MSSC wrappers
 |   |   |-- residual.py                # ResidualTrajectoryCalibrator & full metric panel
 |   |   `-- adaptation.py              # Saerens-EM (2002) prior shift adaptation & Beta calibration
 |   |
@@ -84,8 +84,11 @@ trajectory_calibration/
 |
 |-- scripts/                           # User-Facing Execution Entry Points
 |   |-- run_mock.py                    # Fast CPU smoke test using pilot_features_1k (~3s)
-|   |-- run_benchmark.py               # Multi-dataset benchmark across all 16 methods
+|   |-- run_benchmark.py               # Multi-dataset in-domain benchmark
 |   |-- run_vcps.py                    # In-depth VCPS interpretability & dynamic slope separation
+|   |-- run_lodo.py                    # Leave-One-Dataset-Out (LODO) cross-domain transfer (Exp 29b)
+|   |-- run_temperature_study.py       # Decoding temperature robustness & slope tracking (Exp 30)
+|   |-- run_ablation.py                # Univariate, Leave-One-Out (LOO), & Pareto subset ablation
 |   `-- extract_features.py            # Live GPU multi-scale extraction with checkpoint/resume
 |
 |-- data/features/                     # Full pre-extracted feature files (69 .pt files, 3.58 GB)
@@ -225,25 +228,33 @@ python scripts/run_benchmark.py \
     --output_dir results/experiments/benchmark_m3_all
 ```
 
-#### 1.3 Run MQT-LLaVA Benchmark (Query Transformer Architecture)
+#### 1.3 Run Leave-One-Dataset-Out (LODO) Zero-Shot Cross-Domain Transfer (Exp 29b)
 ```bash
-python scripts/run_benchmark.py \
-    --features_dir data/features \
-    --arch mqt \
-    --gen_temperature 0.0 \
-    --datasets pope scienceqa textvqa vizwiz-vqa \
-    --output_dir results/experiments/benchmark_mqt
-```
-
-#### 1.4 Run Benchmark Across Non-Zero Sampling Temperatures ($T_{\text{gen}} \in \{0.3, 0.6, 0.9, 1.0, 1.5\}$)
-```bash
-# Evaluate calibration robustness under stochastic decoding (T=0.6)
-python scripts/run_benchmark.py \
+python scripts/run_lodo.py \
     --features_dir data/features \
     --arch m3 \
-    --gen_temperature 0.6 \
+    --gen_temperature 0.0 \
+    --output_dir results/experiments/lodo
+```
+
+#### 1.4 Run Multi-Temperature Decoding Robustness Study (Exp 30)
+```bash
+python scripts/run_temperature_study.py \
+    --features_dir data/features \
+    --arch m3 \
+    --temperatures 0.0 0.3 0.6 0.9 1.0 1.5 \
     --datasets pope scienceqa textvqa vizwiz-vqa \
-    --output_dir results/experiments/benchmark_m3_temp0.6
+    --output_dir results/experiments/temperature_study
+```
+
+#### 1.5 Run Feature Sensitivity & Ablation Study (Exp A, B, C)
+```bash
+python scripts/run_ablation.py \
+    --features_dir data/features \
+    --arch m3 \
+    --gen_temperature 0.0 \
+    --datasets pope scienceqa textvqa vizwiz-vqa \
+    --output_dir results/experiments/ablation
 ```
 
 ---

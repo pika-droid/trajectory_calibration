@@ -415,3 +415,14 @@ def evaluate_model_diagnostics(
         "spearman_rho": rho,
         "status": status,
     }
+
+
+def calculate_vif(X: np.ndarray) -> float:
+    """Calculates maximum Variance Inflation Factor across feature columns."""
+    if X.shape[1] <= 1:
+        return 1.0
+    try:
+        vifs = [variance_inflation_factor(X, i) for i in range(X.shape[1])]
+        return float(np.max(vifs))
+    except Exception:
+        return 1.0
