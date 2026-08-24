@@ -115,7 +115,7 @@ trajectory_calibration/
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/trajectory_calibration.git
+git clone https://github.com/pika-droid/trajectory_calibration.git
 cd trajectory_calibration
 
 # Create Python 3.12 virtual environment and install package in editable mode
@@ -163,6 +163,174 @@ tests/test_whitebox.py::test_probability_margin PASSED                   [ 94%]
 tests/test_whitebox.py::test_token_entropy_and_negentropy PASSED         [100%]
 ============================= 17 passed in 2.93s ==============================
 ```
+
+---
+
+## ??? Detailed Hardware Execution Guide
+
+This codebase is optimized to run seamlessly across three distinct hardware tiers:
+
+### Hardware Requirements Matrix
+
+| Workflow Tier | Minimum CPU | Minimum RAM | Minimum GPU / VRAM | Expected Runtime |
+| :--- | :--- | :--- | :--- | :--- |
+| **Tier 1: Post-Hoc Calibration** | 2 cores | 4 GB | **None (CPU-Only)** | ~1?5 seconds per dataset |
+| **Tier 2: Fast Smoke Verification** | 2 cores | 2 GB | **None (CPU-Only)** | ~3 seconds total |
+| **Tier 3: Live VLM GPU Extraction** | 4 cores | 16 GB | 1? GPU $\ge$ 16 GB (RTX 3090/4090, A5000, A100) | ~1.35 samples / sec |
+
+---
+
+### Workflow 1: CPU Post-Hoc Benchmarking (No GPU Required)
+
+Because all 69 pre-extracted multi-scale feature files are included under `data/features/`, you can fit and evaluate all 16 calibration models on local CPU hardware without downloading multi-gigabyte neural network checkpoints:
+
+#### 1.1 Run Full M3-LLaVA Benchmark (4 Primary Datasets)
+```bash
+# Windows
+.venv\Scripts\python scripts/run_benchmark.py \
+    --features_dir data/features \
+    --arch m3 \
+    --gen_temperature 0.0 \
+    --datasets pope scienceqa textvqa vizwiz-vqa \
+    --output_dir results/experiments/benchmark_m3
+
+# Linux / RunPod
+python scripts/run_benchmark.py \
+    --features_dir data/features \
+    --arch m3 \
+    --gen_temperature 0.0 \
+    --datasets pope scienceqa textvqa vizwiz-vqa \
+    --output_dir results/experiments/benchmark_m3
+```
+
+#### 1.2 Run M3-LLaVA Benchmark Across All 12 Available Datasets
+```bash
+python scripts/run_benchmark.py \
+    --features_dir data/features \
+    --arch m3 \
+    --gen_temperature 0.0 \
+    --datasets pope scienceqa textvqa vizwiz-vqa ai2d chartqa docvqa gqa infographicvqa lego-puzzles mmbench mmmu seedbench \
+    --output_dir results/experiments/benchmark_m3_all
+```
+
+#### 1.3 Run MQT-LLaVA Benchmark (Query Transformer Architecture)
+```bash
+python scripts/run_benchmark.py \
+    --features_dir data/features \
+    --arch mqt \
+    --gen_temperature 0.0 \
+    --datasets pope scienceqa textvqa vizwiz-vqa \
+    --output_dir results/experiments/benchmark_mqt
+```
+
+#### 1.4 Run Benchmark Across Non-Zero Sampling Temperatures ($T_{\text{gen}} \in \{0.3, 0.6, 0.9, 1.0, 1.5\}$)
+```bash
+# Evaluate calibration robustness under stochastic decoding (T=0.6)
+python scripts/run_benchmark.py \
+    --features_dir data/features \
+    --arch m3 \
+    --gen_temperature 0.6 \
+    --datasets pope scienceqa textvqa vizwiz-vqa \
+    --output_dir results/experiments/benchmark_m3_temp0.6
+```
+
+---
+
+### Workflow 2: In-Depth VCPS Dynamic Slope & Temperature Analysis
+
+To inspect how the Varying-Coefficient Platt Scaler adjusts instance-level temperatures $T_{\text{eff}}(\mathbf{z}) = 1/a(\mathbf{z})$ and slopes $a(\mathbf{z})$ for correct vs. incorrect model predictions:
+
+```bash
+# Analyze 5-D VCPS on TextVQA
+python scripts/run_vcps.py \
+    --features_dir data/features/m3_llava/temp_0.0/textvqa.pt \
+    --arch m3 \
+    --feature_set 5d \
+    --output_dir results/experiments/vcps_analysis_textvqa
+
+# Analyze full 17-D VCPS on ScienceQA
+python scripts/run_vcps.py \
+    --features_dir data/features/m3_llava/temp_0.0/scienceqa.pt \
+    --arch m3 \
+    --feature_set 17d \
+    --output_dir results/experiments/vcps_analysis_scienceqa
+```
+
+Output highlights:
+- **Slope $a(\mathbf{z})$ for Correct Predictions**: $> 1.0$ (sharpens confident correct answers).
+- **Slope $a(\mathbf{z})$ for Incorrect Predictions**: $< 1.0$ (damps overconfidence, pushing uncalibrated high confidence toward base rate).
+- **Effective Temperature $T_{\text{eff}}(\mathbf{z})$**: Demonstrates clear statistical separation ($p < 0.001$, Cohen's $d > 0.8$).
+
+---
+
+### Workflow 3: Live GPU Feature Extraction from Scratch
+
+When deploying on a GPU instance (e.g., RunPod, Lambda Labs, AWS EC2 `g5.xlarge`, or local RTX 3090/4090):
+
+#### 3.1 Recommended RunPod Environment Setup
+```bash
+# 1. Export HuggingFace cache to persistent storage volume
+export HF_HOME="/workspace/.cache/huggingface"
+export HF_DATASETS_CACHE="/workspace/.cache/huggingface/datasets"
+mkdir -p $HF_HOME $HF_DATASETS_CACHE
+
+# 2. Install package in editable mode with GPU extras
+uv pip install -e ".[gpu]"
+
+# 3. (Optional) Install minimal LLaVA fork in editable mode
+pip install -e llava_src/
+```
+
+#### 3.2 Extract Multi-Scale Features for M3-LLaVA ($m \in [1, 9, 36, 144, 576]$)
+```bash
+# Single GPU extraction (Device 0)
+CUDA_VISIBLE_DEVICES=0 python scripts/extract_features.py \
+    --model_path mucai/llava-v1.5-7b-m3 \
+    --arch m3 \
+    --precision fp16 \
+    --gen_temperature 0.0 \
+    --datasets pope scienceqa textvqa vizwiz-vqa \
+    --output_dir data/features/m3_llava/temp_0.0
+```
+
+#### 3.3 Extract Multi-Scale Features for MQT-LLaVA ($m \in [1, 9, 36, 144, 256]$)
+The wrapper will automatically clone the official `MQT-LLaVA` repository if not already present in `/workspace/MQT-LLaVA`:
+```bash
+CUDA_VISIBLE_DEVICES=0 python scripts/extract_features.py \
+    --model_path gordonhu/MQT-LLaVA-7b \
+    --arch mqt \
+    --precision bf16 \
+    --gen_temperature 0.0 \
+    --datasets pope scienceqa textvqa vizwiz-vqa \
+    --output_dir data/features/mqt_llava/temp_0.0
+```
+
+#### 3.4 Multi-GPU Parallel Extraction
+If you have multi-GPU hardware (e.g., 2? or 4? RTX 4090 / A100), extract different datasets concurrently:
+```bash
+# GPU 0 extracts POPE and ScienceQA
+CUDA_VISIBLE_DEVICES=0 python scripts/extract_features.py \
+    --model_path mucai/llava-v1.5-7b-m3 \
+    --arch m3 \
+    --datasets pope scienceqa \
+    --output_dir data/features/m3_llava/temp_0.0 &
+
+# GPU 1 extracts TextVQA and VizWiz-VQA
+CUDA_VISIBLE_DEVICES=1 python scripts/extract_features.py \
+    --model_path mucai/llava-v1.5-7b-m3 \
+    --arch m3 \
+    --datasets textvqa vizwiz-vqa \
+    --output_dir data/features/m3_llava/temp_0.0 &
+wait
+```
+
+#### 3.5 Checkpoint/Resume & Clean Extraction
+The extraction script automatically saves checkpoints incrementally and resumes without losing progress:
+- **Resume**: Simply re-run the same command. Processed `question_id`s are skipped automatically.
+- **Fresh Overwrite**: Add the `--clean` flag to wipe old checkpoints and extract from scratch:
+  ```bash
+  python scripts/extract_features.py --model_path mucai/llava-v1.5-7b-m3 --datasets pope --clean
+  ```
 
 ---
 
@@ -214,83 +382,6 @@ Evaluated on **M3-LLaVA** across standard VQA and hallucination benchmarks at $T
 | **MSSC (Multi-Scale Proxy)** | $1\times$ | **0.86%** | **1.83%** | 3.36% | 3.44% |
 | **VCPS-5D (Our Method)** | **$1\times$** | **3.98%** | **6.50%** | **5.06%** | **7.23%** |
 | **VCPS-17D (Our Method)** | **$1\times$** | **3.57%** | **5.90%** | **5.80%** | **6.76%** |
-
----
-
-## ??? Usage Guide & CLI Commands
-
-### 1. Run Comprehensive Multi-Dataset Benchmark
-
-Evaluates all 16 calibrators across target benchmarks on pre-extracted feature checkpoints:
-
-```bash
-# Run M3-LLaVA benchmark on local features
-python scripts/run_benchmark.py \
-    --features_dir data/features \
-    --arch m3 \
-    --datasets pope scienceqa textvqa vizwiz-vqa \
-    --output_dir results/experiments/benchmark
-
-# Run MQT-LLaVA benchmark
-python scripts/run_benchmark.py \
-    --features_dir data/features \
-    --arch mqt \
-    --datasets pope scienceqa textvqa vizwiz-vqa \
-    --output_dir results/experiments/benchmark_mqt
-```
-
-### 2. In-Depth VCPS Interpretability & Effective Temperature Analysis
-
-Computes dynamic slope distributions $a(\mathbf{z})$ and instance effective temperatures $T_{\text{eff}}(\mathbf{z}) = 1 / a(\mathbf{z})$ for correct vs incorrect predictions:
-
-```bash
-python scripts/run_vcps.py \
-    --features_dir data/features/m3_llava/temp_0.0/textvqa.pt \
-    --arch m3 \
-    --feature_set 5d
-```
-
-Output:
-```
-============================================================
- VCPS CALIBRATION RESULTS
-============================================================
-  ECE:           4.91%
-  Adaptive ECE:  5.06%
-  AUROC:         0.7812
-  Brier Score:   0.1419
-  Status:        VALID
-------------------------------------------------------------
- DYNAMIC SLOPE & TEMPERATURE INTERPRETABILITY
-------------------------------------------------------------
-  Slope a(z) [Correct]:   1.218 +/- 0.312
-  Slope a(z) [Incorrect]: 0.741 +/- 0.204
-  T_eff(z)   [Correct]:   0.862 +/- 0.185
-  T_eff(z)   [Incorrect]: 1.421 +/- 0.340
-============================================================
-```
-
-### 3. Live GPU Feature Extraction
-
-Extract multi-scale visual trajectories directly from HuggingFace VLM checkpoints across benchmark datasets:
-
-```bash
-# M3-LLaVA (scales: 1, 9, 36, 144, 576)
-python scripts/extract_features.py \
-    --model_path mucai/llava-v1.5-7b-m3 \
-    --arch m3 \
-    --datasets vqav2 pope scienceqa textvqa vizwiz-vqa \
-    --output_dir data/features/m3_llava/temp_0.0 \
-    --precision fp16
-
-# MQT-LLaVA (scales: 1, 9, 36, 144, 256)
-python scripts/extract_features.py \
-    --model_path gordonhu/MQT-LLaVA-7b \
-    --arch mqt \
-    --datasets vqav2 pope scienceqa textvqa vizwiz-vqa \
-    --output_dir data/features/mqt_llava/temp_0.0 \
-    --precision bf16
-```
 
 ---
 
