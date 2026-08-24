@@ -161,6 +161,12 @@ Best results are **bolded**, second-best are *italicized*.
 | **VCPS-5D (Our Method)** | *6.71%* | 3.06% | 2.45% | *7.71%* | 1.23% | 11.36% | 6.12% | 3.47% | 3.98% | 6.50% | 7.23% | **5.06%** | *7.23%* | **7.39%** |
 | **VCPS-17D (Our Method)** | **6.28%** | **2.14%** | **2.36%** | 7.82% | 1.29% | 10.47% | 5.10% | 3.47% | **3.57%** | *5.90%* | 4.99% | 5.80% | **6.76%** | 9.02% |
 
+**M3-LLaVA Summary**:
+- **Beats All Baselines (Rank 1 / Best)**: **7 out of 14 datasets** (`ai2d`, `chartqa`, `docvqa`, `pope`, `textvqa`, `vizwiz-vqa`, `vqav2`).
+- **Top-2 Performance (Rank 1 or Rank 2)**: **9 out of 14 datasets** (including `scienceqa` and tied `gqa`).
+- **Versus Standard Temperature Scaling (TS)**: VCPS outperforms TS on **14 out of 14 datasets** (100% win rate).
+- **Versus 1D Platt Scaling**: VCPS outperforms or matches 1D Platt on **11 out of 14 datasets**.
+
 ---
 
 ### MQT-LLaVA: Adaptive ECE (%) [Lower is Better]
@@ -175,6 +181,12 @@ Best results are **bolded**, second-best are *italicized*.
 | **Residual Calibrator** | 14.32% | 9.82% | 3.98% | 13.48% | **0.50%** | 15.37% | 13.37% | **1.17%** | 9.53% | 8.80% | 15.45% | 10.13% | 11.18% | *12.76%* |
 | **VCPS-5D (Our Method)** | 13.46% | **6.71%** | 4.20% | 10.26% | 1.09% | *10.56%* | 8.80% | *2.15%* | 5.83% | 6.89% | 8.99% | *8.53%* | *6.69%* | 15.00% |
 | **VCPS-17D (Our Method)** | 11.55% | 9.74% | *3.73%* | *9.36%* | 1.10% | 11.16% | **8.11%** | 2.16% | *5.69%* | **6.41%** | 9.28% | 11.61% | 7.00% | 12.86% |
+
+**MQT-LLaVA Summary**:
+- **Beats All Baselines (Rank 1 / Best)**: **3 out of 14 datasets** (`chartqa`, `mmbench`, `scienceqa`).
+- **Top-2 Performance (Rank 1 or Rank 2)**: **9 out of 14 datasets** (`chartqa`, `mmbench`, `scienceqa`, `docvqa`, `gqa`, `lego-puzzles`, `mmmu`, `pope`, `textvqa`, `vizwiz-vqa`).
+- **Versus Standard Temperature Scaling (TS)**: VCPS outperforms TS on **14 out of 14 datasets** (100% win rate).
+- **Versus 1D Platt Scaling**: VCPS outperforms or matches 1D Platt on **9 out of 14 datasets**.
 
 ---
 
