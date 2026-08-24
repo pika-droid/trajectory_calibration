@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-Trajectory Feature Sensitivity & Ablation Study Suite (Week 16/17 Experiments).
+Trajectory Feature Sensitivity & Ablation Study Suite.
 
 Implements:
-- Experiment A: Univariate Feature Ranking (evaluates calibration power of each of the 17 features in isolation)
-- Experiment B: Leave-One-Out (LOO) Feature Degradation Sensitivity (measures Delta ECE when dropping feature j)
-- Experiment C: Pareto-Optimal Subset Progression (K in {1, 2, 3, 5, 7, 10, 17} with VIF collinearity tracking)
+- Univariate Feature Ranking (evaluates calibration power of each trajectory feature in isolation)
+- Leave-One-Out (LOO) Feature Degradation Sensitivity (measures Delta ECE when dropping feature j)
+- Pareto-Optimal Subset Progression (K in {1, 2, 3, 5, 7, 10, 18} with VIF collinearity tracking)
 """
 
 import argparse
@@ -81,10 +81,10 @@ def main() -> None:
     c_test = test_df["c_576"].values
 
     # =========================================================================
-    # EXPERIMENT A: UNIVARIATE FEATURE RANKING
+    # UNIVARIATE FEATURE RANKING
     # =========================================================================
     print("\n" + "=" * 80)
-    print(f" EXPERIMENT A: UNIVARIATE FEATURE RANKING [{args.arch.upper()}]")
+    print(f" UNIVARIATE FEATURE RANKING [{args.arch.upper()}]")
     print("=" * 80)
 
     univariate_results = []
@@ -102,14 +102,14 @@ def main() -> None:
         })
 
     df_uni = pd.DataFrame(univariate_results).sort_values("adaptive_ece_percent")
-    df_uni.to_csv(out_dir / f"exp_a_{args.arch}_univariate_ranking.csv", index=False)
+    df_uni.to_csv(out_dir / f"ablation_{args.arch}_univariate_ranking.csv", index=False)
     print(df_uni.round(3).to_string(index=False))
 
     # =========================================================================
-    # EXPERIMENT B: LEAVE-ONE-OUT (LOO) SENSITIVITY
+    # LEAVE-ONE-OUT (LOO) SENSITIVITY
     # =========================================================================
     print("\n" + "=" * 80)
-    print(f" EXPERIMENT B: LEAVE-ONE-OUT (LOO) SENSITIVITY [{args.arch.upper()}]")
+    print(f" LEAVE-ONE-OUT (LOO) SENSITIVITY [{args.arch.upper()}]")
     print("=" * 80)
 
     full_lr = LogisticRegression(C=1.0, max_iter=1000).fit(X_train_full, y_train)
@@ -131,24 +131,24 @@ def main() -> None:
         })
 
     df_loo = pd.DataFrame(loo_results).sort_values("delta_ece", ascending=False)
-    df_loo.to_csv(out_dir / f"exp_b_{args.arch}_loo_sensitivity.csv", index=False)
+    df_loo.to_csv(out_dir / f"ablation_{args.arch}_loo_sensitivity.csv", index=False)
     print(df_loo.round(3).to_string(index=False))
 
     # =========================================================================
-    # EXPERIMENT C: PARETO SUBSET PROGRESSION (K in {1, 2, 3, 5, 7, 10, 17})
+    # PARETO SUBSET PROGRESSION (K in {1, 2, 3, 5, 7, 10, 18})
     # =========================================================================
     print("\n" + "=" * 80)
-    print(f" EXPERIMENT C: PARETO SUBSET PROGRESSION [{args.arch.upper()}]")
+    print(f" PARETO SUBSET PROGRESSION [{args.arch.upper()}]")
     print("=" * 80)
 
-    k_progression = [1, 2, 3, 5, 7, 10, 17]
+    k_progression = [1, 2, 3, 5, 7, 10, len(FEATURE_KEYS)]
     pareto_results = []
     selected_features = ["x1"]  # always root anchor
 
     for k in k_progression:
         if k == 1:
             current_subset = ["x1"]
-        elif k == 17:
+        elif k == len(FEATURE_KEYS):
             current_subset = FEATURE_KEYS
         else:
             # Stepwise greedy addition
@@ -185,7 +185,7 @@ def main() -> None:
         })
 
     df_pareto = pd.DataFrame(pareto_results)
-    df_pareto.to_csv(out_dir / f"exp_c_{args.arch}_pareto_progression.csv", index=False)
+    df_pareto.to_csv(out_dir / f"ablation_{args.arch}_pareto_progression.csv", index=False)
     print(df_pareto.round(3).to_string(index=False))
     print("=" * 80)
 

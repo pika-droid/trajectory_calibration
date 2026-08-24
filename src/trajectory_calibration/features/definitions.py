@@ -1,5 +1,8 @@
 """
 Trajectory feature dictionary definitions and constant keys.
+
+Defines the 18 trajectory signature keys (x1, x3..x22) computed from multi-scale
+visual token sweeps (5 scales: 1, 9, 36, 144, 576/256).
 """
 
 from __future__ import annotations

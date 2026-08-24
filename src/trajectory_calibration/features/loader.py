@@ -109,7 +109,10 @@ def get_stratified_split(
     else:
         strat_key = df["is_correct"].values
 
+    counts = pd.Series(strat_key).value_counts()
+    stratify_param = strat_key if (counts >= 2).all() and len(counts) > 1 else None
+
     train_idx, test_idx = train_test_split(
-        indices, test_size=test_size, random_state=random_state, stratify=strat_key
+        indices, test_size=test_size, random_state=random_state, stratify=stratify_param
     )
     return train_idx, test_idx

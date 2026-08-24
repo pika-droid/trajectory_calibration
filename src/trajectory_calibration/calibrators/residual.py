@@ -8,6 +8,7 @@ import logging
 from typing import Any
 
 import numpy as np
+from scipy.optimize import minimize
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 
@@ -62,28 +63,45 @@ class ResidualTrajectoryCalibrator:
     """
     Two-stage residual trajectory calibrator.
     - Stage 1: Fits 1D Platt scaling on x1 -> l1.
-    - Stage 2: Fits L2 logistic regression on trajectory features with l1 as fixed offset.
+    - Stage 2: Fits L2 logistic regression on trajectory features Z with l1 as fixed GLM offset.
     """
 
     def __init__(self, C: float = 1.0, random_state: int = 42) -> None:
-        self.C = C
+        self.C = float(C)
         self.random_state = random_state
         self.scaler = StandardScaler()
         self.stage1_lr = LogisticRegression(C=1000.0, solver="lbfgs", max_iter=1000)
-        self.stage2_lr = LogisticRegression(C=self.C, solver="lbfgs", max_iter=1000, random_state=self.random_state)
+        self.weights: np.ndarray | None = None
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray) -> ResidualTrajectoryCalibrator:
         X = np.asarray(X_train, dtype=np.float64)
-        y = np.asarray(y_train, dtype=np.int64)
+        y = np.asarray(y_train, dtype=np.float64)
+        n, d = X.shape
         x1 = X[:, [0]]
 
         # Stage 1: Platt on x1
         self.stage1_lr.fit(x1, y)
+        p1 = self.stage1_lr.predict_proba(x1)[:, 1]
+        l1 = get_logits(p1)
 
-        # Stage 2: Fit residual on Z
-        Z = X[:, 1:] if X.shape[1] > 1 else X
+        # Stage 2: Fit residual weights on Z with l1 as fixed GLM offset
+        Z = X[:, 1:] if d > 1 else X
         Z_norm = self.scaler.fit_transform(Z)
-        self.stage2_lr.fit(Z_norm, y)
+        k = Z_norm.shape[1]
+
+        def loss_and_grad(w: np.ndarray) -> tuple[float, np.ndarray]:
+            logits = l1 + np.dot(Z_norm, w)
+            p = sigmoid(logits)
+            nll = compute_nll(p, y)
+            reg = (0.5 / self.C) * np.sum(w ** 2)
+            total_loss = nll + reg
+
+            r = (p - y) / n
+            grad_w = np.dot(Z_norm.T, r) + (w / self.C)
+            return float(total_loss), grad_w
+
+        res = minimize(loss_and_grad, x0=np.zeros(k), jac=True, method="L-BFGS-B")
+        self.weights = res.x
         return self
 
     def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
@@ -94,7 +112,7 @@ class ResidualTrajectoryCalibrator:
 
         Z = X[:, 1:] if X.shape[1] > 1 else X
         Z_norm = self.scaler.transform(Z)
-        res_logits = self.stage2_lr.decision_function(Z_norm)
+        res_logits = np.dot(Z_norm, self.weights) if self.weights is not None else 0.0
         return sigmoid(l1 + res_logits)
 
 

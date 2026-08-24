@@ -48,7 +48,7 @@ def select_best_5d_subset(
     """
     Forward stepwise selection algorithm to pick the top 5 features minimizing NLL.
 
-    Strictly anchors to 'x1' (Final Logit) to prevent ADR-012 prediction collapse.
+    Strictly anchors to 'x1' (Final Logit) to prevent prediction collapse.
     """
     selected = ["x1"] if "x1" in feature_keys else [feature_keys[0]]
     remaining = [k for k in feature_keys if k not in selected]

@@ -46,3 +46,27 @@ def test_select_best_5d_subset():
     subset = select_best_5d_subset(X, y, FEATURE_KEYS)
     assert len(subset) == 5
     assert subset[0] == "x1"  # x1 is always root anchor
+
+
+def test_stratified_split_fallback_small_sample():
+    from trajectory_calibration.features.loader import get_stratified_split
+    import pandas as pd
+
+    # Single-class dataset should not crash train_test_split
+    df_single = pd.DataFrame({
+        "x1": [1.0, 2.0, 3.0, 4.0, 5.0],
+        "is_correct": [1, 1, 1, 1, 1],
+        "answer_type": ["open"] * 5,
+    })
+    tr_idx, te_idx = get_stratified_split(df_single, test_size=0.2, random_state=42)
+    assert len(tr_idx) + len(te_idx) == 5
+
+    # Dataset with minority class count = 1 should fall back gracefully
+    df_rare = pd.DataFrame({
+        "x1": [1.0, 2.0, 3.0, 4.0, 5.0],
+        "is_correct": [1, 1, 1, 1, 0],
+        "answer_type": ["open"] * 5,
+    })
+    tr_idx, te_idx = get_stratified_split(df_rare, test_size=0.2, random_state=42)
+    assert len(tr_idx) + len(te_idx) == 5
+

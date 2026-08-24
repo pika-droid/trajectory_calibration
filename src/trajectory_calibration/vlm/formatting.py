@@ -5,6 +5,7 @@ Question prompt formatting and image extraction helpers.
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
 from PIL import Image
 
@@ -79,9 +80,23 @@ def load_image_from_sample(sample: dict[str, Any]) -> Image.Image | None:
 
     if isinstance(img_raw, Image.Image):
         return img_raw.convert("RGB")
+    elif isinstance(img_raw, (str, Path)):
+        p = Path(img_raw)
+        if p.exists() and p.is_file():
+            try:
+                return Image.open(p).convert("RGB")
+            except Exception:
+                return None
     elif isinstance(img_raw, (list, tuple)) and len(img_raw) > 0:
         first = img_raw[0]
         if isinstance(first, Image.Image):
             return first.convert("RGB")
+        elif isinstance(first, (str, Path)):
+            p = Path(first)
+            if p.exists() and p.is_file():
+                try:
+                    return Image.open(p).convert("RGB")
+                except Exception:
+                    return None
 
     return None

@@ -42,7 +42,7 @@ def compute_prediction_std(probs: np.ndarray | list[float]) -> float:
     """
     Standard deviation of predicted probabilities.
 
-    Used as an ADR-012 collapse diagnostic: sigma_p < 0.02 indicates prediction collapse.
+    Used as a collapse diagnostic: sigma_p < 0.02 indicates prediction collapse.
     """
     p = np.asarray(probs, dtype=np.float64)
     if len(p) == 0:

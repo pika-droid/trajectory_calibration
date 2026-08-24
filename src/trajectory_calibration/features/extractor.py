@@ -12,7 +12,8 @@ from trajectory_calibration.utils.helpers import clean_text
 
 def compute_features_from_sample(item: dict[str, Any], fine_scale: int = 576) -> dict[str, float | int | str]:
     """
-    Extracts the 17-D trajectory feature vector from a multi-scale inference sample.
+    Extracts the 18-D trajectory feature vector (1 base anchor x1 + 17 multi-scale trajectory signatures)
+    from a multi-scale inference sample.
     """
     feats = item.get("features", {})
     scales = [1, 9, 36, 144, fine_scale]

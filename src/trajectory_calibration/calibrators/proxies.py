@@ -17,12 +17,25 @@ def _resolve_feature_col(
     X: np.ndarray, feature_key: str, feature_names: list[str] | None, fallback_idx: int
 ) -> np.ndarray:
     """Helper to safely extract the target feature column by name or index."""
-    if feature_names is not None and feature_key in feature_names:
-        col_idx = feature_names.index(feature_key)
-        return X[:, [col_idx]]
+    if feature_names is not None:
+        if feature_key in feature_names:
+            col_idx = feature_names.index(feature_key)
+            return X[:, [col_idx]]
+        raise ValueError(
+            f"Feature '{feature_key}' not found in provided feature_names: {feature_names}"
+        )
+
+    if X.ndim == 1 or (X.ndim == 2 and X.shape[1] == 1):
+        return X.reshape(-1, 1)
+
     if X.ndim == 2 and X.shape[1] > fallback_idx:
         return X[:, [fallback_idx]]
-    return X[:, [0]] if X.ndim == 2 else X.reshape(-1, 1)
+
+    raise ValueError(
+        f"Cannot resolve feature '{feature_key}' from input shape {X.shape} "
+        f"(fallback index {fallback_idx} exceeds column count {X.shape[1] if X.ndim == 2 else 1}). "
+        f"Provide explicit feature_names."
+    )
 
 
 class MultiScaleSemanticConsistency:

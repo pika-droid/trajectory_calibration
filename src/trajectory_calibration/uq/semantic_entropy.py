@@ -9,6 +9,7 @@ and cluster assignment entropy.
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any
 import numpy as np
 
@@ -18,7 +19,7 @@ logger = logging.getLogger("trajectory_calibration.uq.semantic_entropy")
 
 
 class FastStringEntailment:
-    """High-throughput string equivalence & substring containment entailment matcher."""
+    """High-throughput string equivalence & word-boundary entailment matcher."""
 
     def check_implication(self, text1: str, text2: str, *args: Any, **kwargs: Any) -> int:
         """Returns 2 (Entailment), 1 (Neutral), or 0 (Contradiction)."""
@@ -27,7 +28,7 @@ class FastStringEntailment:
 
         if not t1 or not t2:
             return 1
-        if t1 == t2 or t1 in t2 or t2 in t1:
+        if t1 == t2:
             return 2
 
         binary_opposites = {
@@ -39,6 +40,11 @@ class FastStringEntailment:
         for op1, op2 in binary_opposites:
             if (t1 == op1 and t2 == op2) or (t1 == op2 and t2 == op1):
                 return 0
+
+        # Word boundary matching for phrase containment
+        if len(t1.split()) > 1 or len(t2.split()) > 1:
+            if bool(re.search(r"\b" + re.escape(t1) + r"\b", t2)) or bool(re.search(r"\b" + re.escape(t2) + r"\b", t1)):
+                return 2
 
         return 1
 

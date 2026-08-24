@@ -19,11 +19,8 @@ env/
 .idea/
 *.swp
 
-# Experiment & data directories (ignore heavy weights)
-results/features/*
-!results/features/.gitkeep
-results/experiments/*
-!results/experiments/.gitkeep
+# Experiment & data directories (ignore heavy weights, track CSV summary results)
+results/features/
 data/features/*
 !data/features/.gitkeep
 checkpoints/

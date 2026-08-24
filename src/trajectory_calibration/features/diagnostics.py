@@ -1,5 +1,5 @@
 """
-Model health and diagnostic status evaluators (ADR-012).
+Model health and diagnostic status evaluators.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ def evaluate_model_diagnostics(
 ) -> dict[str, Any]:
     """
     Evaluates ECE, MCE, Brier, Brier Gain, Prediction Std, Spearman Rank Correlation,
-    and assigns ADR-012 Diagnostic Status (VALID, COLLAPSED, SCRAMBLED).
+    and assigns Diagnostic Status (VALID, COLLAPSED, SCRAMBLED).
     """
     probs_arr = np.asarray(probs_test, dtype=np.float64)
     y_arr = np.asarray(y_test, dtype=np.float64)

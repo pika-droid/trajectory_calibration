@@ -5,10 +5,21 @@ Multi-benchmark ground-truth evaluation and scoring engine.
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 from trajectory_calibration.utils.helpers import clean_text
 from trajectory_calibration.vlm.registry import DATASET_REGISTRY
+
+
+def _is_word_match(candidate: str, target: str) -> bool:
+    """Checks if candidate matches target either exactly or as a whole word boundary."""
+    if not candidate or not target:
+        return False
+    if candidate == target:
+        return True
+    pattern = r"\b" + re.escape(candidate) + r"\b"
+    return bool(re.search(pattern, target))
 
 
 def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str) -> float:
@@ -27,7 +38,7 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
         gt_clean = clean_text(gt_ans)
         if pred_norm == gt_clean or pred_clean == gt_ans.lower():
             return 1.0
-        if len(pred_norm) >= 3 and (pred_norm in gt_clean or gt_clean in pred_norm):
+        if len(pred_norm) >= 3 and (_is_word_match(pred_norm, gt_clean) or _is_word_match(gt_clean, pred_norm)):
             return 1.0
         return 0.0
 
@@ -44,7 +55,7 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
             if (
                 gt_clean == pred_norm
                 or pred_clean == str(gt_text).strip().lower()
-                or (len(pred_norm) >= 3 and (pred_norm in gt_clean or gt_clean in pred_norm))
+                or (len(pred_norm) >= 3 and (_is_word_match(pred_norm, gt_clean) or _is_word_match(gt_clean, pred_norm)))
             ):
                 match_count += 1
         return min(1.0, match_count / 3.0) if match_count > 0 else 0.0
