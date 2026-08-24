@@ -65,7 +65,11 @@ class EntailmentDeberta:
         import torch
         import torch.nn.functional as F
 
-        inputs = self.tokenizer(text1, text2, return_tensors="pt").to(self.device)
+        inputs = self.tokenizer(text1, text2, return_tensors="pt")
+        if hasattr(inputs, "to"):
+            inputs = inputs.to(self.device)
+        else:
+            inputs = {k: v.to(self.device) if hasattr(v, "to") else v for k, v in inputs.items()}
         with torch.no_grad():
             outputs = self.model(**inputs)
             pred_idx = torch.argmax(F.softmax(outputs.logits, dim=-1)).cpu().item()

@@ -17,12 +17,17 @@ if str(SRC_PATH) not in sys.path:
 
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
 from trajectory_calibration.uq.eigenscore import compute_eigenscore
-from trajectory_calibration.uq.semantic_entropy import FastStringEntailment, compute_semantic_entropy, get_semantic_ids
+from trajectory_calibration.uq.semantic_entropy import (
+    EntailmentDeberta,
+    FastStringEntailment,
+    compute_semantic_entropy,
+    get_semantic_ids,
+)
 from trajectory_calibration.uq.whitebox import WhiteBoxScorers
 from trajectory_calibration.utils.helpers import safe_torch_load
 
 
-def verify_feature_file(pt_path: Path, expected_rollouts: int = 5) -> dict[str, any]:
+def verify_feature_file(pt_path: Path, expected_rollouts: int = 5, entailment_model_type: str = "fast") -> dict[str, any]:
     if not pt_path.exists():
         return {"status": "FAIL", "reason": f"File not found: {pt_path}"}
 
@@ -41,7 +46,7 @@ def verify_feature_file(pt_path: Path, expected_rollouts: int = 5) -> dict[str, 
     ]
 
     confs, accs, ses, ess, X_rows, y_rows = [], [], [], [], [], []
-    entail_model = FastStringEntailment()
+    entail_model = EntailmentDeberta() if entailment_model_type == "deberta" else FastStringEntailment()
 
     for idx, sample in enumerate(data):
         for k in req_keys:
@@ -107,6 +112,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Verify extracted multi-pass features.")
     parser.add_argument("--features_dir", type=str, default="data/features_multipass/m3_llava/temp_0.5")
     parser.add_argument("--expected_rollouts", type=int, default=5)
+    parser.add_argument(
+        "--entailment_model",
+        type=str,
+        choices=["deberta", "fast"],
+        default="fast",
+        help="NLI entailment model: 'deberta' (microsoft/deberta-v2-xlarge-mnli) or 'fast' (string matching).",
+    )
     args = parser.parse_args()
 
     dir_path = Path(args.features_dir)
@@ -125,7 +137,7 @@ def main() -> None:
     all_passed = True
     for pt in pt_files:
         ds_name = pt.stem
-        res = verify_feature_file(pt, expected_rollouts=args.expected_rollouts)
+        res = verify_feature_file(pt, expected_rollouts=args.expected_rollouts, entailment_model_type=args.entailment_model)
         if res["status"] == "PASS":
             print(f"{ds_name:<16} | {res['num_samples']:<7} | {res['mean_conf']:<8.3f} | {res['mean_acc']:<8.3f} | {res['mean_se']:<8.3f} | {res['mean_eigenscore']:<10.3f} | [PASS]")
         else:
