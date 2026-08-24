@@ -11,7 +11,7 @@ A clean, self-contained implementation of **Elastic Trajectory Uncertainty Calib
 
 ## Abstract and Motivation
 
-Multimodal Large Language Models (MLLMs) frequently suffer from overconfidence and severe miscalibration. Standard uncertainty quantification (UQ) techniques—such as multi-rollout sampling (e.g., Semantic Entropy) or Monte Carlo dropout—require **5x to 25x repetitive inference calls**, creating unacceptable computational overhead for real-time vision-language systems.
+Multimodal Large Language Models (MLLMs) frequently suffer from overconfidence and severe miscalibration. Standard uncertainty quantification (UQ) techniques—such as multi-rollout sampling or Monte Carlo dropout—require **5x to 25x repetitive inference calls**, creating unacceptable computational overhead for real-time vision-language systems.
 
 This repository implements **Trajectory Uncertainty Calibration**:
 1. **Single-Pass Elastic Signatures**: By leveraging Matryoshka visual token compression ($m \in \{1, 9, 36, 144, 576\}$ for M3 or $\{1, 9, 36, 144, 256\}$ for MQT), we capture the model's confidence trajectory across visual granularities in a **single forward pass**.
@@ -21,7 +21,7 @@ $$\text{logit}(p(\mathbf{x})) = a(\mathbf{z}) \cdot x_1 + b(\mathbf{z})$$
 
 $$a(\mathbf{z}) = \exp(a_0 + \boldsymbol{\gamma}^T \mathbf{z}_{\text{slope}}), \quad b(\mathbf{z}) = b_0 + \mathbf{w}^T \mathbf{z}_{\text{intercept}}$$
 
-3. **Pareto Dominance**: Outperforms standard post-hoc temperature scaling and matches/exceeds multi-rollout Semantic Entropy while maintaining **1x inference cost**.
+3. **Pareto Dominance**: Outperforms standard post-hoc temperature scaling while maintaining **1x inference cost**.
 
 ---
 
@@ -33,9 +33,6 @@ $$a(\mathbf{z}) = \exp(a_0 + \boldsymbol{\gamma}^T \mathbf{z}_{\text{slope}}), \
   - Min Probability (Bottleneck token confidence)
   - Token Negentropy ($1 - H(p_t) / \log K$)
   - Probability Margin ($p_{\text{top1}} - p_{\text{top2}}$)
-- **Standard Sampling UQ Baselines**:
-  - Exact Kuhn et al. (2023) / UMPIRE **Semantic Entropy** with bidirectional DeBERTa NLI clustering and LogSumExp probability aggregation.
-  - Exact Chen et al. (2024) / UMPIRE **EigenScore** and SVD spectral dispersion on normalized generation embeddings.
 - **Classic Post-Hoc Calibrators**: Global Temperature Scaling (Guo et al.), 1D Platt Scaling, Monotonic Spline Calibration (PCHIP), and Adaptive Temperature Scaling (ATS / Thermometer).
 - **Hardened VLM Inference Wrapper**:
   - Full `sys.modules` namespace purge preventing package shadowing between M3 and MQT.
@@ -70,7 +67,7 @@ trajectory_calibration/
 |   |
 |   |-- calibrators/                   # Post-Hoc Calibrators
 |   |   |-- vcps.py                    # VaryingCoefficientPlattScaler (Our Method)
-|   |   |-- baselines.py               # NC, TS, Platt, Spline, ATS, UQLM & Kuhn wrappers
+|   |   |-- baselines.py               # NC, TS, Platt, Spline, ATS, UQLM wrappers
 |   |   |-- residual.py                # ResidualTrajectoryCalibrator & full metric panel
 |   |   `-- adaptation.py              # Saerens-EM (2002) prior shift adaptation & Beta calibration
 |   |
@@ -128,7 +125,7 @@ uv pip install -e .
 
 ### 2. Fast CPU Smoke Test (~3 seconds)
 
-Runs the entire calibrator pipeline across all 16 methods on synthetic pilot features without requiring a GPU:
+Runs the entire calibrator pipeline across all methods on synthetic pilot features without requiring a GPU:
 
 ```bash
 # Windows
@@ -146,23 +143,46 @@ Runs the entire calibrator pipeline across all 16 methods on synthetic pilot fea
 
 ---
 
-## Detailed Hardware Execution Guide
+## Empirical Benchmark Results
 
-This codebase is optimized to run seamlessly across three distinct hardware tiers:
+Empirical post-hoc calibration evaluated across all 14 vision-language benchmarks at $T_{\text{gen}} = 0.0$.
+Best results are **bolded**, second-best are *italicized*.
 
-### Hardware Requirements Matrix
+### M3-LLaVA: Adaptive ECE (%) [Lower is Better]
 
-| Workflow Tier | Minimum CPU | Minimum RAM | Minimum GPU / VRAM | Expected Runtime |
-| :--- | :--- | :--- | :--- | :--- |
-| **Tier 1: Post-Hoc Calibration** | 2 cores | 4 GB | **None (CPU-Only)** | ~1-5 seconds per dataset |
-| **Tier 2: Fast Smoke Verification** | 2 cores | 2 GB | **None (CPU-Only)** | ~3 seconds total |
-| **Tier 3: Live VLM GPU Extraction** | 4 cores | 16 GB | 1x GPU >= 16 GB (RTX 3090/4090, A5000, A100) | ~1.35 samples / sec |
+| Calibration Method | ai2d | chartqa | docvqa | gqa | infographicvqa | lego-puzzles | mmbench | mmmu | pope | scienceqa | seedbench | textvqa | vizwiz-vqa | vqav2 |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Naive Confidence (NC)** | 41.80% | 70.70% | 73.52% | 32.43% | 84.55% | 73.16% | 28.58% | 78.76% | 4.12% | 10.66% | 32.40% | 8.72% | 16.71% | *7.74%* |
+| **Temperature Scaling (TS)** | 10.73% | 45.07% | 48.86% | 10.84% | 53.91% | 34.71% | 7.77% | 52.21% | *3.96%* | 9.76% | 2.64% | 8.35% | 15.56% | 10.63% |
+| **Platt Scaling (1D)** | 7.49% | *2.34%* | *2.42%* | *7.71%* | 1.12% | *10.07%* | *4.88%* | 3.45% | 4.05% | 7.46% | *2.25%* | *5.70%* | 7.25% | 9.48% |
+| **Spline Calibration (PCHIP)** | 6.98% | 4.23% | 2.75% | **6.57%** | **0.60%** | **6.36%** | **4.45%** | *2.64%* | 5.10% | **5.16%** | **1.17%** | 10.25% | 8.45% | 10.14% |
+| **Adaptive TS (ATS)** | 10.69% | 45.05% | 48.84% | 9.84% | 53.89% | 34.66% | 9.99% | 52.19% | 4.16% | 9.43% | 9.98% | 8.80% | 15.45% | 9.04% |
+| **Residual Calibrator** | 11.10% | 7.46% | 4.12% | 11.74% | *0.80%* | 14.96% | 14.39% | **1.81%** | 7.27% | 13.41% | 12.66% | 8.22% | 7.37% | 12.11% |
+| **VCPS-5D (Our Method)** | *6.71%* | 3.06% | 2.45% | *7.71%* | 1.23% | 11.36% | 6.12% | 3.47% | 3.98% | 6.50% | 7.23% | **5.06%** | *7.23%* | **7.39%** |
+| **VCPS-17D (Our Method)** | **6.28%** | **2.14%** | **2.36%** | 7.82% | 1.29% | 10.47% | 5.10% | 3.47% | **3.57%** | *5.90%* | 4.99% | 5.80% | **6.76%** | 9.02% |
 
 ---
 
+### MQT-LLaVA: Adaptive ECE (%) [Lower is Better]
+
+| Calibration Method | ai2d | chartqa | docvqa | gqa | infographicvqa | lego-puzzles | mmbench | mmmu | pope | scienceqa | seedbench | textvqa | vizwiz-vqa | vqav2 |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Naive Confidence (NC)** | 24.31% | 62.99% | 51.18% | 9.87% | 75.51% | 34.14% | 14.87% | 52.24% | 6.45% | 23.04% | 17.74% | 30.96% | 30.26% | **11.52%** |
+| **Temperature Scaling (TS)** | 13.47% | 41.54% | 46.63% | 10.14% | 52.63% | 24.08% | 10.07% | 49.32% | 5.90% | 10.44% | 7.99% | 18.27% | 28.77% | 15.96% |
+| **Platt Scaling (1D)** | *9.52%* | *7.04%* | 5.04% | 10.27% | 1.09% | 11.70% | *8.24%* | 2.15% | **5.29%** | *6.51%* | **6.88%** | 11.59% | 6.81% | 15.96% |
+| **Spline Calibration (PCHIP)** | **8.98%** | 7.07% | **2.48%** | 9.78% | *0.60%* | **5.27%** | 10.04% | 2.27% | 7.97% | 7.97% | *7.65%* | **7.32%** | **5.64%** | 15.17% |
+| **Adaptive TS (ATS)** | 13.92% | 41.53% | 46.62% | **9.10%** | 52.61% | 24.08% | 9.89% | 49.32% | 6.02% | 10.18% | 8.00% | 18.15% | 28.45% | 13.10% |
+| **Residual Calibrator** | 14.32% | 9.82% | 3.98% | 13.48% | **0.50%** | 15.37% | 13.37% | **1.17%** | 9.53% | 8.80% | 15.45% | 10.13% | 11.18% | *12.76%* |
+| **VCPS-5D (Our Method)** | 13.46% | **6.71%** | 4.20% | 10.26% | 1.09% | *10.56%* | 8.80% | *2.15%* | 5.83% | 6.89% | 8.99% | *8.53%* | *6.69%* | 15.00% |
+| **VCPS-17D (Our Method)** | 11.55% | 9.74% | *3.73%* | *9.36%* | 1.10% | 11.16% | **8.11%** | 2.16% | *5.69%* | **6.41%** | 9.28% | 11.61% | 7.00% | 12.86% |
+
+---
+
+## Detailed Hardware Execution Guide
+
 ### Workflow 1: CPU Post-Hoc Benchmarking (No GPU Required)
 
-Because all 69 pre-extracted multi-scale feature files are included under `data/features/`, you can fit and evaluate all 16 calibration models on local CPU hardware without downloading multi-gigabyte neural network checkpoints:
+Because all 69 pre-extracted multi-scale feature files are included under `data/features/`, you can fit and evaluate all calibration models on local CPU hardware without downloading neural network checkpoints:
 
 #### 1.1 Run Full M3-LLaVA Benchmark (4 Primary Datasets)
 ```bash
@@ -183,13 +203,13 @@ python scripts/run_benchmark.py \
     --output_dir results/experiments/benchmark_m3
 ```
 
-#### 1.2 Run M3-LLaVA Benchmark Across All 12 Available Datasets
+#### 1.2 Run M3-LLaVA Benchmark Across All 14 Available Datasets
 ```bash
 python scripts/run_benchmark.py \
     --features_dir data/features \
     --arch m3 \
     --gen_temperature 0.0 \
-    --datasets pope scienceqa textvqa vizwiz-vqa ai2d chartqa docvqa gqa infographicvqa lego-puzzles mmbench mmmu seedbench \
+    --datasets pope scienceqa textvqa vizwiz-vqa ai2d chartqa docvqa gqa infographicvqa lego-puzzles mmbench mmmu seedbench vqav2_5scale \
     --output_dir results/experiments/benchmark_m3_all
 ```
 
@@ -330,30 +350,6 @@ The trajectory signature captures the evolution of generation logits, margins, a
 | **`x20`** | **Answer Flip Freq** | $\frac{1}{4} \sum_{i=1}^4 \mathbb{I}(\text{ans}_{m_i} \neq \text{ans}_{m_{i+1}})$ | Textual prediction volatility across scales |
 | **`x21`** | **Logit Convexity** | $(c_{\text{fine}} - c_{144}) - (c_{144} - c_{36})$ | Curve convexity in high-resolution regime |
 | **`x22`** | **Jump Ratio** | $(c_{\text{fine}} - c_1) / (c_{\text{fine}} + \epsilon)$ | Relative span from single-token to full scale |
-
----
-
-## Empirical Benchmark Results
-
-Evaluated on **M3-LLaVA** across standard VQA and hallucination benchmarks at $T_{\text{gen}}=0.0$:
-
-### Adaptive ECE (%) [Lower is Better]
-
-| Calibration Method | Compute Cost | POPE | ScienceQA | TextVQA | VizWiz-VQA |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Naive Confidence (NC)** | 1x | 4.12% | 10.66% | 8.72% | 16.71% |
-| **Temperature Scaling (TS)** | 1x | 3.96% | 9.76% | 8.35% | 15.56% |
-| **Platt Scaling (1D)** | 1x | 4.05% | 7.46% | 5.70% | 7.25% |
-| **Spline Calibration (PCHIP)** | 1x | 5.10% | 5.16% | 10.25% | 8.45% |
-| **Adaptive TS (ATS)** | 1x | 4.16% | 9.43% | 8.80% | 15.45% |
-| **UQLM SequenceProb** | 1x | 4.05% | 7.46% | 5.70% | 7.25% |
-| **UQLM MinProb** | 1x | 4.05% | 7.46% | 5.70% | 7.25% |
-| **UQLM TokenEntropy** | 1x | 4.05% | 7.46% | 5.70% | 7.25% |
-| **Kuhn Semantic Entropy** | 10x (sampling) | 4.05% | 7.46% | 5.70% | 7.25% |
-| **Chen EigenScore** | 10x (sampling) | 4.05% | 7.46% | 5.70% | 7.25% |
-| **MSSC (Multi-Scale Proxy)** | 1x | **0.86%** | **1.83%** | 3.36% | 3.44% |
-| **VCPS-5D (Our Method)** | **1x** | **3.98%** | **6.50%** | **5.06%** | **7.23%** |
-| **VCPS-17D (Our Method)** | **1x** | **3.57%** | **5.90%** | **5.80%** | **6.76%** |
 
 ---
 
