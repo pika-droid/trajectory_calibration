@@ -364,7 +364,7 @@ The trajectory signature captures the evolution of generation logits, margins, a
 | **`x10`** | **Logprob Gain** | $\ln c_{\text{fine}} - \ln c_9$ | Probability magnitude shift in log-space |
 | **`x11`** | **Logprob Variance** | $\text{Var}([\ln c_1, \dots, \ln c_{\text{fine}}])$ | Log-likelihood stability across scales |
 | **`x12`** | **Logprob Acceleration** | $(\ln c_{\text{fine}} - \ln c_{144}) - (\ln c_{144} - \ln c_{36})$ | Discrete second derivative of log-confidence |
-| **`x13`** | **Discrete Answer Stability** | $1 / |\text{UniqueAnswers}|$ across 5 scales | Single-pass semantic consistency proxy |
+| **`x13`** | **Discrete Answer Stability** | $1 / \vert\text{UniqueAnswers}\vert$ across 5 scales | Single-pass semantic consistency proxy |
 | **`x14`** | **Relative Gain Ratio** | $c_{\text{fine}} / (c_9 + \epsilon)$ | Multiplicative confidence enhancement ratio |
 | **`x15`** | **Mid-Fine Contrast** | $(c_{\text{fine}} - c_{144}) - (c_{144} - c_9)$ | Convexity of mid-to-fine scale transition |
 | **`x17`** | **End-Scale Spike** | $c_{\text{fine}} - \frac{1}{4}\sum_{i=1}^4 c_{m_i}$ | Sudden fine-scale confidence jump |
@@ -408,16 +408,3 @@ The repository includes a hardened `DATASET_REGISTRY` covering 14 vision-languag
 5. **Deduplication**: Automatic `drop_duplicates(subset=["question_id"])` filters redundant padding samples from benchmark datasets.
 
 ---
-
-## Citation and License
-
-This project is licensed under the **MIT License**.
-
-```bibtex
-@article{trajectory_calibration2026,
-  title={Trajectory Calibration: Single-Pass Elastic Uncertainty Quantification for Multimodal LLMs},
-  author={Ashmin et al.},
-  journal={arXiv preprint},
-  year={2026}
-}
-```
