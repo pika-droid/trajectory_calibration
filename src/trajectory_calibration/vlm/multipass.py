@@ -77,6 +77,108 @@ def generate_mock_multipass_sample(
 
 
 @torch.inference_mode()
+def _extract_single_rollout(
+    wrapper: Any,
+    sequences: torch.Tensor,
+    scores: list[torch.Tensor] | None,
+    hidden_states: list[tuple[torch.Tensor, ...]] | None,
+    input_len: int,
+    k_idx: int = 0,
+) -> tuple[str, list[float], float, np.ndarray]:
+    """Extracts text, token logprobs, sequence logprob, and embedding for a single sequence index."""
+    n_sc = len(scores) if scores is not None else 0
+    n_hs = len(hidden_states) if hidden_states is not None else 0
+    eos_id = getattr(wrapper.tokenizer, "eos_token_id", None)
+    h_dim = getattr(wrapper.model.config, "hidden_size", 4096)
+
+    full_seq = sequences[k_idx]
+    gen_tokens = full_seq[-n_sc:].tolist() if n_sc > 0 else (full_seq[input_len:].tolist() if len(full_seq) > input_len else full_seq.tolist())
+    act_len = (gen_tokens.index(eos_id) + 1) if (eos_id is not None and eos_id in gen_tokens) else len(gen_tokens)
+    tok_ids = gen_tokens[:act_len]
+    text = wrapper.tokenizer.decode(tok_ids, skip_special_tokens=True).strip()
+
+    t_lps = []
+    for t in range(min(act_len, n_sc)):
+        logits_t = scores[t][k_idx].detach().float()
+        if tok_ids[t] < logits_t.shape[-1]:
+            t_lps.append(float(torch.log_softmax(logits_t, dim=-1)[tok_ids[t]].item()))
+    t_lps = t_lps if t_lps else [0.0]
+    seq_lp = float(sum(t_lps))
+
+    t_vecs = []
+    for t in range(min(act_len, n_hs)):
+        t_vecs.append(hidden_states[t][-1][k_idx, -1, :].detach().float().cpu().numpy())
+    emb = np.mean(t_vecs, axis=0).astype(np.float32) if t_vecs else np.zeros(h_dim, dtype=np.float32)
+
+    return text, t_lps, seq_lp, emb
+
+
+def _generate_rollouts_with_oom_defense(
+    wrapper: Any,
+    s_kwargs: dict[str, Any],
+    num_rollouts: int,
+    input_len: int,
+) -> tuple[list[str], list[list[float]], list[float], list[np.ndarray]]:
+    """Generates rollouts in parallel, with automatic sequential fallback if CUDA OOM occurs."""
+    try:
+        batched_kwargs = dict(s_kwargs)
+        batched_kwargs["num_return_sequences"] = int(num_rollouts)
+        s_out = wrapper.model.generate(**batched_kwargs)
+
+        roll_texts, roll_tok_lps, roll_seq_lps, roll_embs = [], [], [], []
+        for k in range(num_rollouts):
+            text, t_lps, seq_lp, emb = _extract_single_rollout(
+                wrapper=wrapper,
+                sequences=s_out.sequences,
+                scores=s_out.scores,
+                hidden_states=s_out.hidden_states,
+                input_len=input_len,
+                k_idx=k,
+            )
+            roll_texts.append(text)
+            roll_tok_lps.append(t_lps)
+            roll_seq_lps.append(seq_lp)
+            roll_embs.append(emb)
+
+        del s_out
+        return roll_texts, roll_tok_lps, roll_seq_lps, roll_embs
+
+    except (torch.cuda.OutOfMemoryError, RuntimeError) as e:
+        err_msg = str(e).lower()
+        if "out of memory" in err_msg or isinstance(e, torch.cuda.OutOfMemoryError):
+            logger.warning("CUDA OOM encountered during parallel rollouts. Falling back to sequential execution...")
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
+            seq_kwargs = dict(s_kwargs)
+            seq_kwargs["num_return_sequences"] = 1
+
+            roll_texts, roll_tok_lps, roll_seq_lps, roll_embs = [], [], [], []
+            for _ in range(num_rollouts):
+                s_out_single = wrapper.model.generate(**seq_kwargs)
+                text, t_lps, seq_lp, emb = _extract_single_rollout(
+                    wrapper=wrapper,
+                    sequences=s_out_single.sequences,
+                    scores=s_out_single.scores,
+                    hidden_states=s_out_single.hidden_states,
+                    input_len=input_len,
+                    k_idx=0,
+                )
+                roll_texts.append(text)
+                roll_tok_lps.append(t_lps)
+                roll_seq_lps.append(seq_lp)
+                roll_embs.append(emb)
+                del s_out_single
+
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
+            return roll_texts, roll_tok_lps, roll_seq_lps, roll_embs
+
+        raise e
+
+
+@torch.inference_mode()
 def extract_multipass_record(
     wrapper: Any,
     sample: dict[str, Any],
@@ -86,7 +188,9 @@ def extract_multipass_record(
     top_p: float = 0.9,
     max_new_tokens: int = 32,
 ) -> dict[str, Any] | None:
-    """Performs greedy + multi-rollout inference and packages payload for UQ."""
+    """
+    Executes 1 greedy pass and M sampling rollouts, returning full UQ trajectory payload.
+    """
     image = load_image_from_sample(sample)
     if image is None:
         return None
@@ -148,11 +252,11 @@ def extract_multipass_record(
             conf_softmax = 0.5
         vqa_acc = float(evaluate_accuracy(greedy_ans, sample, dataset_key))
 
-        # 2. Multi-Rollout Sampling Pass (Parallel Batched Generation: ~1.2s/sample)
+        # 2. Multi-Rollout Sampling Pass (Parallel Batched Generation with Sequential OOM Fallback)
         s_kwargs: dict[str, Any] = {
             "inputs": input_ids, "images": image_tensor, "image_sizes": image_sizes,
             "do_sample": True, "temperature": float(gen_temperature), "top_p": float(top_p),
-            "renormalize_logits": True, "num_return_sequences": int(num_rollouts),
+            "renormalize_logits": True,
             "max_new_tokens": max_new_tokens, "use_cache": True,
             "output_attentions": False, "output_hidden_states": True,
             "output_scores": True, "return_dict_in_generate": True,
@@ -160,34 +264,12 @@ def extract_multipass_record(
         if vt is not None:
             s_kwargs["matryoshka_vis_token_scale"] = vt
 
-        s_out = wrapper.model.generate(**s_kwargs)
-
-        n_sc = len(s_out.scores) if s_out.scores is not None else 0
-        n_hs = len(s_out.hidden_states) if s_out.hidden_states is not None else 0
-        eos_id = getattr(wrapper.tokenizer, "eos_token_id", None)
-        roll_texts, roll_tok_lps, roll_seq_lps, roll_embs = [], [], [], []
-
-        for k in range(num_rollouts):
-            full_seq = s_out.sequences[k]
-            gen_tokens = full_seq[-n_sc:].tolist() if n_sc > 0 else (full_seq[input_len:].tolist() if len(full_seq) > input_len else full_seq.tolist())
-            act_len = (gen_tokens.index(eos_id) + 1) if (eos_id is not None and eos_id in gen_tokens) else len(gen_tokens)
-            tok_ids = gen_tokens[:act_len]
-            roll_texts.append(wrapper.tokenizer.decode(tok_ids, skip_special_tokens=True).strip())
-
-            t_lps = []
-            for t in range(min(act_len, n_sc)):
-                logits_t = s_out.scores[t][k].detach().float()
-                if tok_ids[t] < logits_t.shape[-1]:
-                    t_lps.append(float(torch.log_softmax(logits_t, dim=-1)[tok_ids[t]].item()))
-            t_lps = t_lps if t_lps else [0.0]
-            roll_tok_lps.append(t_lps)
-            roll_seq_lps.append(float(sum(t_lps)))
-
-            t_vecs = []
-            for t in range(min(act_len, n_hs)):
-                t_vecs.append(s_out.hidden_states[t][-1][k, -1, :].detach().float().cpu().numpy())
-            h_dim = getattr(wrapper.model.config, "hidden_size", 4096)
-            roll_embs.append(np.mean(t_vecs, axis=0).astype(np.float32) if t_vecs else np.zeros(h_dim, dtype=np.float32))
+        roll_texts, roll_tok_lps, roll_seq_lps, roll_embs = _generate_rollouts_with_oom_defense(
+            wrapper=wrapper,
+            s_kwargs=s_kwargs,
+            num_rollouts=num_rollouts,
+            input_len=input_len,
+        )
 
         return {
             "question_id": qid, "dataset": dataset_key, "question": question,

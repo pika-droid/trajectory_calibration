@@ -14,6 +14,11 @@ import os
 import shutil
 import sys
 from pathlib import Path
+
+# Configure PyTorch CUDA memory allocator to eliminate fragmentation
+if "PYTORCH_CUDA_ALLOC_CONF" not in os.environ:
+    os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
 from tqdm import tqdm
 
 SRC_PATH = Path(__file__).resolve().parent.parent / "src"
@@ -99,6 +104,9 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
 
         extracted.append(record)
         processed_qids.add(q_id)
+
+        if len(extracted) % 50 == 0 and torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
         if len(extracted) % 100 == 0:
             torch.save(extracted, tmp_path)
