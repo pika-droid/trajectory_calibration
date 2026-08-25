@@ -89,6 +89,7 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
             dataset_key=dataset_key,
             num_rollouts=args.num_rollouts,
             gen_temperature=args.gen_temperature,
+            top_p=args.top_p,
             max_new_tokens=32,
         )
         if record is None:
@@ -115,6 +116,7 @@ def main() -> None:
     parser.add_argument("--datasets", nargs="+", default=["pope"], help="Datasets to extract (or 'all').")
     parser.add_argument("--num_rollouts", type=int, default=5, help="Number of sampling rollouts.")
     parser.add_argument("--gen_temperature", type=float, default=0.5, help="Sampling temperature.")
+    parser.add_argument("--top_p", type=float, default=0.9, help="Top-p nucleus sampling threshold.")
     parser.add_argument("--output_dir", type=str, default="data/features_multipass", help="Output directory.")
     parser.add_argument("--limit", type=int, default=None, help="Sample cap for smoke testing.")
     parser.add_argument("--subset_size", type=int, default=None, help="Alias for --limit.")
