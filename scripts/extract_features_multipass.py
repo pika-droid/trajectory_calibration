@@ -117,6 +117,8 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
     # Automatically purge uncompressed Arrow cache files (preserves downloaded model weights & parquets)
     for cache_path in [
         os.path.expanduser("~/.cache/huggingface/datasets"),
+        "/workspace/.cache/huggingface/datasets",
+        "/workspace/.cache/huggingface/downloads/extracted",
         os.path.join(os.environ.get("HF_HOME", ""), "datasets") if os.environ.get("HF_HOME") else None,
         "/tmp/huggingface",
     ]:
