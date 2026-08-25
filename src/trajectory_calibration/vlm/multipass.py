@@ -145,26 +145,28 @@ def extract_multipass_record(
 
         s_out = wrapper.model.generate(**s_kwargs)
 
+        n_sc = len(s_out.scores) if s_out.scores is not None else 0
+        n_hs = len(s_out.hidden_states) if s_out.hidden_states is not None else 0
         eos_id = getattr(wrapper.tokenizer, "eos_token_id", None)
         roll_texts, roll_tok_lps, roll_seq_lps, roll_embs = [], [], [], []
 
         for k in range(num_rollouts):
-            g_ids = s_out.sequences[k, input_len:].tolist()
-            act_len = (g_ids.index(eos_id) + 1) if (eos_id is not None and eos_id in g_ids) else len(g_ids)
-            tok_ids = g_ids[:act_len]
+            full_seq = s_out.sequences[k]
+            gen_tokens = full_seq[-n_sc:].tolist() if n_sc > 0 else (full_seq[input_len:].tolist() if len(full_seq) > input_len else full_seq.tolist())
+            act_len = (gen_tokens.index(eos_id) + 1) if (eos_id is not None and eos_id in gen_tokens) else len(gen_tokens)
+            tok_ids = gen_tokens[:act_len]
             roll_texts.append(wrapper.tokenizer.decode(tok_ids, skip_special_tokens=True).strip())
 
             t_lps = []
-            n_sc = len(s_out.scores) if s_out.scores is not None else 0
             for t in range(min(act_len, n_sc)):
                 logits_t = s_out.scores[t][k].detach().float()
-                t_lps.append(float(torch.log_softmax(logits_t, dim=-1)[tok_ids[t]].item()))
+                if tok_ids[t] < logits_t.shape[-1]:
+                    t_lps.append(float(torch.log_softmax(logits_t, dim=-1)[tok_ids[t]].item()))
             t_lps = t_lps if t_lps else [0.0]
             roll_tok_lps.append(t_lps)
             roll_seq_lps.append(float(sum(t_lps)))
 
             t_vecs = []
-            n_hs = len(s_out.hidden_states) if s_out.hidden_states is not None else 0
             for t in range(min(act_len, n_hs)):
                 t_vecs.append(s_out.hidden_states[t][-1][k, -1, :].detach().float().cpu().numpy())
             h_dim = getattr(wrapper.model.config, "hidden_size", 4096)
