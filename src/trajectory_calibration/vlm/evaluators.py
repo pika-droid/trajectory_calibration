@@ -9,6 +9,7 @@ import re
 from typing import Any
 
 from trajectory_calibration.utils.helpers import clean_text
+from trajectory_calibration.vlm.formatting import _parse_options_list
 from trajectory_calibration.vlm.registry import DATASET_REGISTRY
 
 
@@ -62,7 +63,7 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
 
     elif ans_type == "mc_index":
         correct_idx = sample.get("answer", sample.get("label", sample.get("correct_choice")))
-        options = sample.get("choices", sample.get("options", []))
+        options = _parse_options_list(sample.get("choices", sample.get("options", [])))
         if correct_idx is not None and str(correct_idx).isdigit():
             idx_int = int(correct_idx)
             if 0 <= idx_int < len(options):
@@ -80,15 +81,9 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
         if pred_clean == gt_ans.lower() or pred_clean.startswith(gt_ans.lower()):
             return 1.0
 
-        options = sample.get("options", sample.get("choices", []))
-        if isinstance(options, str):
-            try:
-                options = json.loads(options)
-            except Exception:
-                options = []
-
-        if isinstance(options, list) and len(options) > 0:
-            target_idx = ord(gt_ans[0]) - ord("A")
+        options = _parse_options_list(sample.get("options", sample.get("choices", [])))
+        if options and len(gt_ans) == 1 and "A" <= gt_ans <= "Z":
+            target_idx = ord(gt_ans) - ord("A")
             if 0 <= target_idx < len(options):
                 target_option = clean_text(str(options[target_idx]))
                 if pred_norm == target_option:

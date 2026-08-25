@@ -4,10 +4,34 @@ Question prompt formatting and image extraction helpers.
 
 from __future__ import annotations
 
+import ast
 import json
 from pathlib import Path
 from typing import Any
 from PIL import Image
+
+
+def _parse_options_list(options_raw: Any) -> list[str]:
+    """Safely parse multiple-choice options from lists, Python strings, or JSON."""
+    if isinstance(options_raw, list):
+        return [str(opt) for opt in options_raw]
+    if isinstance(options_raw, str):
+        options_raw = options_raw.strip()
+        if not options_raw:
+            return []
+        try:
+            parsed = ast.literal_eval(options_raw)
+            if isinstance(parsed, list):
+                return [str(opt) for opt in parsed]
+        except Exception:
+            pass
+        try:
+            parsed = json.loads(options_raw)
+            if isinstance(parsed, list):
+                return [str(opt) for opt in parsed]
+        except Exception:
+            pass
+    return []
 
 
 def format_question(sample: dict[str, Any], dataset_key: str) -> str:
@@ -24,8 +48,8 @@ def format_question(sample: dict[str, Any], dataset_key: str) -> str:
     question = str(question).strip()
 
     if dataset_key == "ai2d":
-        options = sample.get("options", [])
-        if options and isinstance(options, list):
+        options = _parse_options_list(sample.get("options", []))
+        if options:
             opts_str = "\n".join([f"({chr(65 + i)}) {opt}" for i, opt in enumerate(options)])
             question = f"{question}\n{opts_str}\nAnswer with the option letter."
 
@@ -39,19 +63,14 @@ def format_question(sample: dict[str, Any], dataset_key: str) -> str:
             question = f"{question}\n" + "\n".join(opts) + "\nAnswer with the option letter."
 
     elif dataset_key == "mmmu":
-        options = sample.get("options", [])
-        if isinstance(options, str):
-            try:
-                options = json.loads(options)
-            except Exception:
-                options = []
-        if isinstance(options, list) and len(options) > 0:
+        options = _parse_options_list(sample.get("options", []))
+        if options:
             opts_str = "\n".join([f"({chr(65 + i)}) {opt}" for i, opt in enumerate(options)])
             question = f"{question}\n{opts_str}\nAnswer with the option letter."
 
     elif dataset_key == "scienceqa":
-        choices = sample.get("choices", sample.get("options", []))
-        if choices and isinstance(choices, list):
+        choices = _parse_options_list(sample.get("choices", sample.get("options", [])))
+        if choices:
             opts_str = "\n".join([f"({chr(65 + i)}) {opt}" for i, opt in enumerate(choices)])
             question = f"{question}\n{opts_str}\nAnswer with the option letter."
 
