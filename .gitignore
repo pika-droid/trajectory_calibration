@@ -36,3 +36,7 @@ checkpoints/
 
 # Local baseline repos
 baseline_repo/
+
+# Wiki documentation
+wiki/
+
