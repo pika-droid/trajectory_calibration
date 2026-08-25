@@ -8,8 +8,10 @@ Chen EigenScore / UMPIRE, and UQLM White-Box baselines.
 """
 
 import argparse
+import gc
 import logging
 import os
+import shutil
 import sys
 from pathlib import Path
 from tqdm import tqdm
@@ -105,8 +107,21 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
     tmp_path.replace(pt_path)
     logger.info(f"Completed '{dataset_key}'. Total saved: {len(extracted)} -> {pt_path}")
 
+    # Free memory and purge temporary unpacked Arrow cache to prevent disk buildup
+    del ds
+    del extracted
+    gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
+
+    # Automatically purge uncompressed Arrow cache files (preserves downloaded model weights & parquets)
+    for cache_path in [
+        os.path.expanduser("~/.cache/huggingface/datasets"),
+        os.path.join(os.environ.get("HF_HOME", ""), "datasets") if os.environ.get("HF_HOME") else None,
+        "/tmp/huggingface",
+    ]:
+        if cache_path and os.path.exists(cache_path):
+            shutil.rmtree(cache_path, ignore_errors=True)
 
 
 def main() -> None:
