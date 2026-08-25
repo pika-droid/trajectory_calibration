@@ -23,9 +23,14 @@ logger = logging.getLogger("trajectory_calibration.vlm.wrapper")
 class UnifiedVLMWrapper:
     """Unified inference wrapper supporting both M3-LLaVA and MQT-LLaVA architectures."""
 
-    def __init__(self, model_path: str = "mucai/llava-v1.5-7b-m3", precision: str = "fp16") -> None:
+    def __init__(
+        self,
+        model_path: str = "mucai/llava-v1.5-7b-m3",
+        precision: str = "fp16",
+        arch: str | None = None,
+    ) -> None:
+        self.arch = arch.lower() if arch else ("mqt" if "mqt" in model_path.lower() else "m3")
         self.model_path = model_path
-        self.arch = "mqt" if "mqt" in model_path.lower() else "m3"
         self.scales = ARCH_SCALES[self.arch]
         self.fine_scale = self.scales[-1]
 

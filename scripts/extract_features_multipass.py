@@ -128,7 +128,7 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Multi-Pass & Multi-Rollout VLM Feature Extraction.")
-    parser.add_argument("--model_path", type=str, default="mucai/llava-v1.5-7b-m3", help="VLM checkpoint / HF path.")
+    parser.add_argument("--model_path", type=str, default=None, help="VLM checkpoint / HF path (defaults to arch standard).")
     parser.add_argument("--arch", type=str, default="m3", choices=["m3", "mqt"], help="Architecture.")
     parser.add_argument("--datasets", nargs="+", default=["pope"], help="Datasets to extract (or 'all').")
     parser.add_argument("--num_rollouts", type=int, default=5, help="Number of sampling rollouts.")
@@ -145,12 +145,15 @@ def main() -> None:
 
     set_seed(args.seed)
 
+    if args.model_path is None:
+        args.model_path = "gordonhu/MQT-LLaVA-7b" if args.arch == "mqt" else "mucai/llava-v1.5-7b-m3"
+
     dataset_keys = ALL_DATASET_KEYS if (args.datasets == ["all"] or "all" in args.datasets) else args.datasets
 
     wrapper = None
     if not args.mock:
         logger.info(f"Initializing UnifiedVLMWrapper for {args.arch.upper()} from '{args.model_path}'...")
-        wrapper = UnifiedVLMWrapper(model_path=args.model_path, precision=args.precision)
+        wrapper = UnifiedVLMWrapper(model_path=args.model_path, precision=args.precision, arch=args.arch)
 
     for ds in dataset_keys:
         process_dataset(ds, wrapper, args)
