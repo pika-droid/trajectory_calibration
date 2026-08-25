@@ -198,7 +198,7 @@ def extract_multipass_record(
     try:
         cfg = DATASET_REGISTRY.get(dataset_key, {"answer_type": "open"})
         ans_type = cfg.get("answer_type", "open")
-        qid = str(sample.get("question_id", sample.get("id", sample.get("sample_idx", 0))))
+        qid = str(sample.get("question_id", sample.get("questionId", sample.get("id", sample.get("sample_idx", sample.get("image_id", 0))))))
         # Extract ground truth cleanly across all benchmark formats
         raw_gt = sample.get("answer", sample.get("label", sample.get("ground_truth", None)))
         if raw_gt is None or raw_gt == "":

@@ -83,10 +83,14 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
         return
 
     ds = load_hf_dataset(dataset_key, subset_size=limit)
+    if not args.clean and len(existing_data) >= len(ds):
+        logger.info(f"Dataset '{dataset_key}' is already fully extracted ({len(existing_data)}/{len(ds)} samples). Skipping.")
+        return
+
     extracted = list(existing_data)
 
     for idx, sample in enumerate(tqdm(ds, desc=f"Multi-Pass {dataset_key}")):
-        q_id = str(sample.get("question_id", sample.get("id", idx)))
+        q_id = str(sample.get("question_id", sample.get("questionId", sample.get("id", sample.get("sample_idx", sample.get("image_id", idx))))))
         if q_id in processed_qids:
             continue
 
