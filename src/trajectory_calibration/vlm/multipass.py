@@ -126,9 +126,14 @@ def extract_multipass_record(
         n_gen = len(g_out.scores) if (g_out.scores is not None and len(g_out.scores) > 0) else (len(g_seq) - input_len)
         greedy_ans = wrapper.tokenizer.decode(g_seq[-n_gen:].tolist(), skip_special_tokens=True).strip()
 
-        first_logits_t = g_out.scores[0][0].detach().float()
-        first_logits_np = torch.nan_to_num(first_logits_t, nan=-1e4, posinf=1e4, neginf=-1e4).cpu().numpy().astype(np.float32)
-        conf_softmax = float(torch.max(torch.softmax(first_logits_t, dim=-1)).item())
+        if g_out.scores is not None and len(g_out.scores) > 0:
+            first_logits_t = g_out.scores[0][0].detach().float()
+            first_logits_np = torch.nan_to_num(first_logits_t, nan=-1e4, posinf=1e4, neginf=-1e4).cpu().numpy().astype(np.float32)
+            conf_softmax = float(torch.max(torch.softmax(first_logits_t, dim=-1)).item())
+        else:
+            h_vocab = getattr(wrapper.model.config, "vocab_size", 32000)
+            first_logits_np = np.zeros(h_vocab, dtype=np.float32)
+            conf_softmax = 0.5
         vqa_acc = float(evaluate_accuracy(greedy_ans, sample, dataset_key))
 
         # 2. Multi-Rollout Sampling Pass (Parallel Batched Generation: ~1.2s/sample)
