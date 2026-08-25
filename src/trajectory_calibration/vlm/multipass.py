@@ -95,9 +95,19 @@ def extract_multipass_record(
         cfg = DATASET_REGISTRY.get(dataset_key, {"answer_type": "open"})
         ans_type = cfg.get("answer_type", "open")
         qid = str(sample.get("question_id", sample.get("id", sample.get("sample_idx", 0))))
+        # Extract ground truth cleanly across all benchmark formats
+        raw_gt = sample.get("answer", sample.get("label", sample.get("ground_truth", None)))
+        if raw_gt is None or raw_gt == "":
+            raw_answers = sample.get("answers", sample.get("annotations", []))
+            if isinstance(raw_answers, list) and len(raw_answers) > 0:
+                if isinstance(raw_answers[0], dict):
+                    raw_gt = [a.get("answer", "") for a in raw_answers if isinstance(a, dict)]
+                else:
+                    raw_gt = [str(a) for a in raw_answers]
+            else:
+                raw_gt = ""
+        gt = raw_gt
         question = format_question(sample, dataset_key)
-        gt = sample.get("answer", sample.get("label", sample.get("ground_truth", "")))
-
         prompt = wrapper.format_prompt(question)
         input_ids = wrapper._llava["tokenizer_image_token"](
             prompt, wrapper.tokenizer, wrapper._llava["IMAGE_TOKEN_INDEX"], return_tensors="pt"
