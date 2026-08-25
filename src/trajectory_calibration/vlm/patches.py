@@ -7,6 +7,8 @@ from __future__ import annotations
 import functools
 from typing import Any
 
+import torch
+
 
 def apply_transformers_compatibility_patches(model: Any) -> None:
     """
@@ -21,7 +23,10 @@ def apply_transformers_compatibility_patches(model: Any) -> None:
     def patched_forward(*args: Any, **kwargs: Any) -> Any:
         kwargs.pop("cache_position", None)
         kwargs.pop("num_logits_to_keep", None)
-        return orig_forward(*args, **kwargs)
+        out = orig_forward(*args, **kwargs)
+        if hasattr(out, "logits") and out.logits is not None and torch.is_tensor(out.logits):
+            out.logits = torch.nan_to_num(out.logits, nan=-1e4, posinf=1e4, neginf=-1e4)
+        return out
 
     model.forward = patched_forward
 

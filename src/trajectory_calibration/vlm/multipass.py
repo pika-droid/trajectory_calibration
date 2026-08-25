@@ -120,8 +120,7 @@ def extract_multipass_record(
         if vt is not None:
             g_kwargs["matryoshka_vis_token_scale"] = vt
 
-        with torch.amp.autocast(autocast_dev, dtype=wrapper.dtype):
-            g_out = wrapper.model.generate(**g_kwargs)
+        g_out = wrapper.model.generate(**g_kwargs)
 
         g_seq = g_out.sequences[0]
         n_gen = len(g_out.scores) if (g_out.scores is not None and len(g_out.scores) > 0) else (len(g_seq) - input_len)
@@ -132,7 +131,7 @@ def extract_multipass_record(
         conf_softmax = float(torch.max(torch.softmax(first_logits_t, dim=-1)).item())
         vqa_acc = float(evaluate_accuracy(greedy_ans, sample, dataset_key))
 
-        # 2. Multi-Rollout Sampling Pass (iterative 1-by-1 generation matching UMPIRE / Kuhn SE to prevent multimodal batch mismatch)
+        # 2. Multi-Rollout Sampling Pass (iterative 1-by-1 generation matching UMPIRE / Kuhn SE)
         eos_id = getattr(wrapper.tokenizer, "eos_token_id", None)
         roll_texts, roll_tok_lps, roll_seq_lps, roll_embs = [], [], [], []
 
@@ -148,8 +147,7 @@ def extract_multipass_record(
             s_kwargs["matryoshka_vis_token_scale"] = vt
 
         for k in range(num_rollouts):
-            with torch.amp.autocast(autocast_dev, dtype=wrapper.dtype):
-                s_out = wrapper.model.generate(**s_kwargs)
+            s_out = wrapper.model.generate(**s_kwargs)
 
             g_ids = s_out.sequences[0, input_len:].tolist()
             act_len = (g_ids.index(eos_id) + 1) if (eos_id is not None and eos_id in g_ids) else len(g_ids)
