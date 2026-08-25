@@ -88,6 +88,12 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
         return
 
     extracted = list(existing_data)
+    if limit is not None and len(extracted) >= limit:
+        extracted = extracted[:limit]
+        torch.save(extracted, tmp_path)
+        tmp_path.replace(pt_path)
+        logger.info(f"Target limit of {limit} samples already met for '{dataset_key}'. Saved exactly {len(extracted)}.")
+        return
 
     for idx, sample in enumerate(tqdm(ds, desc=f"Multi-Pass {dataset_key}")):
         q_id = str(sample.get("question_id", sample.get("questionId", sample.get("id", sample.get("sample_idx", sample.get("image_id", idx))))))
@@ -108,6 +114,10 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
 
         extracted.append(record)
         processed_qids.add(q_id)
+
+        if limit is not None and len(extracted) >= limit:
+            logger.info(f"Target limit of {limit} samples reached for '{dataset_key}'. Stopping.")
+            break
 
         if len(extracted) % 50 == 0 and torch.cuda.is_available():
             torch.cuda.empty_cache()
