@@ -132,11 +132,14 @@ def extract_multipass_record(
         conf_softmax = float(torch.max(torch.softmax(first_logits_t, dim=-1)).item())
         vqa_acc = float(evaluate_accuracy(greedy_ans, sample, dataset_key))
 
-        # 2. Multi-Rollout Sampling Pass (aligned with UMPIRE / EigenScore top_p and renormalize_logits)
+        # 2. Multi-Rollout Sampling Pass (iterative 1-by-1 generation matching UMPIRE / Kuhn SE to prevent multimodal batch mismatch)
+        eos_id = getattr(wrapper.tokenizer, "eos_token_id", None)
+        roll_texts, roll_tok_lps, roll_seq_lps, roll_embs = [], [], [], []
+
         s_kwargs: dict[str, Any] = {
             "inputs": input_ids, "images": image_tensor, "image_sizes": image_sizes,
             "do_sample": True, "temperature": float(gen_temperature), "top_p": float(top_p),
-            "renormalize_logits": True, "num_return_sequences": int(num_rollouts),
+            "renormalize_logits": True, "num_return_sequences": 1,
             "max_new_tokens": max_new_tokens, "use_cache": True,
             "output_attentions": False, "output_hidden_states": True,
             "output_scores": True, "return_dict_in_generate": True,
@@ -144,14 +147,11 @@ def extract_multipass_record(
         if vt is not None:
             s_kwargs["matryoshka_vis_token_scale"] = vt
 
-        with torch.amp.autocast(autocast_dev, dtype=wrapper.dtype):
-            s_out = wrapper.model.generate(**s_kwargs)
-
-        eos_id = getattr(wrapper.tokenizer, "eos_token_id", None)
-        roll_texts, roll_tok_lps, roll_seq_lps, roll_embs = [], [], [], []
-
         for k in range(num_rollouts):
-            g_ids = s_out.sequences[k, input_len:].tolist()
+            with torch.amp.autocast(autocast_dev, dtype=wrapper.dtype):
+                s_out = wrapper.model.generate(**s_kwargs)
+
+            g_ids = s_out.sequences[0, input_len:].tolist()
             act_len = (g_ids.index(eos_id) + 1) if (eos_id is not None and eos_id in g_ids) else len(g_ids)
             tok_ids = g_ids[:act_len]
             roll_texts.append(wrapper.tokenizer.decode(tok_ids, skip_special_tokens=True).strip())
@@ -159,7 +159,7 @@ def extract_multipass_record(
             t_lps = []
             n_sc = len(s_out.scores) if s_out.scores is not None else 0
             for t in range(min(act_len, n_sc)):
-                logits_t = s_out.scores[t][k].detach().float()
+                logits_t = s_out.scores[t][0].detach().float()
                 t_lps.append(float(torch.log_softmax(logits_t, dim=-1)[tok_ids[t]].item()))
             t_lps = t_lps if t_lps else [0.0]
             roll_tok_lps.append(t_lps)
@@ -168,7 +168,7 @@ def extract_multipass_record(
             t_vecs = []
             n_hs = len(s_out.hidden_states) if s_out.hidden_states is not None else 0
             for t in range(min(act_len, n_hs)):
-                t_vecs.append(s_out.hidden_states[t][-1][k, -1, :].detach().float().cpu().numpy())
+                t_vecs.append(s_out.hidden_states[t][-1][0, -1, :].detach().float().cpu().numpy())
             h_dim = getattr(wrapper.model.config, "hidden_size", 4096)
             roll_embs.append(np.mean(t_vecs, axis=0).astype(np.float32) if t_vecs else np.zeros(h_dim, dtype=np.float32))
 
