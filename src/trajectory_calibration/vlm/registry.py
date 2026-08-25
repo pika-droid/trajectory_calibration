@@ -59,12 +59,6 @@ DATASET_REGISTRY: dict[str, dict[str, Any]] = {
         "default_split": "validation",
         "answer_type": "list_soft",
     },
-    "vqav2_5scale": {
-        "hf_repo": "lmms-lab/vqav2",
-        "config": None,
-        "default_split": "validation",
-        "answer_type": "list_soft",
-    },
     "scienceqa": {
         "hf_repo": "lmms-lab/ScienceQA",
         "config": "ScienceQA-IMG",
