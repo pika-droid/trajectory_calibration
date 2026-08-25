@@ -33,3 +33,6 @@ checkpoints/
 # Pytest / logs
 .pytest_cache/
 *.log
+
+# Local baseline repos
+baseline_repo/
