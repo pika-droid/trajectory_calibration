@@ -116,9 +116,11 @@ def extract_multipass_record(
         input_len = input_ids.shape[1]
         autocast_dev = wrapper.device.type if hasattr(wrapper.device, "type") else "cuda"
 
-        vt = None  # Multi-pass rollouts always evaluate at native fine scale (576 for M3, 256 for MQT)
+        vt = 256 if getattr(wrapper, "arch", "m3") == "mqt" else None
         if hasattr(wrapper.model, "config"):
             setattr(wrapper.model.config, "num_visual_tokens", vt)
+        if hasattr(wrapper.model, "model") and hasattr(wrapper.model.model, "config"):
+            setattr(wrapper.model.model.config, "num_visual_tokens", vt)
 
         # 1. Primary Greedy / Argmax Pass
         g_kwargs: dict[str, Any] = {
