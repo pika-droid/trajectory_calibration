@@ -106,7 +106,7 @@ def extract_multipass_record(
         input_len = input_ids.shape[1]
         autocast_dev = wrapper.device.type if hasattr(wrapper.device, "type") else "cuda"
 
-        vt = None if wrapper.fine_scale >= 576 else wrapper.fine_scale
+        vt = None  # Multi-pass rollouts always evaluate at native fine scale (576 for M3, 256 for MQT)
         if hasattr(wrapper.model, "config"):
             setattr(wrapper.model.config, "num_visual_tokens", vt)
 
