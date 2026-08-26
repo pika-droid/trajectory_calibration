@@ -100,6 +100,7 @@ def inspect_directory(features_dir: str, num_samples_to_show: int = 2) -> None:
 
         pct_non_blank = (non_blank_greedy / len(data)) * 100.0
         avg_unique = float(np.mean(unique_rollout_counts)) if unique_rollout_counts else 0.0
+        avg_rollouts = (total_rollouts / len(data)) if len(data) > 0 else 10.0
         avg_logit_max = float(np.mean(logit_maxes)) if logit_maxes else 0.0
         avg_emb_norm = float(np.mean(emb_norms)) if emb_norms else 0.0
 
@@ -107,7 +108,7 @@ def inspect_directory(features_dir: str, num_samples_to_show: int = 2) -> None:
             "dataset": dataset_key,
             "samples": len(data),
             "non_blank": f"{pct_non_blank:.0f}%",
-            "unique_rollouts": f"{avg_unique:.1f}/5",
+            "unique_rollouts": f"{avg_unique:.1f}/{int(round(avg_rollouts))}",
             "avg_logit_max": f"{avg_logit_max:.2f}",
             "avg_emb_norm": f"{avg_emb_norm:.2f}",
             "status": "[VALID]" if (pct_non_blank > 80 and not np.isnan(avg_emb_norm)) else "[CHECK]",
