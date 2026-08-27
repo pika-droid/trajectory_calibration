@@ -1,0 +1,25 @@
+# python 3.10
+torch
+absl-py
+accelerate
+bitsandbytes
+evaluate
+jsonlines
+matplotlib
+nltk
+numpy
+openai
+pandas
+pillow
+protobuf
+python-dotenv
+rouge-score
+scikit-learn
+seaborn
+sentencepiece
+tabulate
+tenacity
+tqdm
+transformers
+wandb
+# flash-attn # Install using `conda install -c conda-forge flash-attn`

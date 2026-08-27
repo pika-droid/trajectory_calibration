@@ -1,0 +1,34 @@
+{
+    "ln_entropy":{
+        "auc":0.61,
+        "cece":0.281,
+        "pearsonr":0.29,
+        "tpr_at_0.1_fpr":0.28,
+        "tpr_at_0.01_fpr":0.033,
+        "aurac":0.707
+    },
+    "semantic_entropy":{
+        "auc":0.599,
+        "cece":0.3,
+        "pearsonr":-0.061,
+        "tpr_at_0.1_fpr":0.283,
+        "tpr_at_0.01_fpr":0.041,
+        "aurac":0.688
+    },
+    "eigen_score":{
+        "auc":0.639,
+        "cece":0.27,
+        "pearsonr":0.203,
+        "tpr_at_0.1_fpr":0.293,
+        "tpr_at_0.01_fpr":0.042,
+        "aurac":0.721
+    },
+    "umpire":{
+        "auc":0.605,
+        "cece":0.277,
+        "pearsonr":0.165,
+        "tpr_at_0.1_fpr":0.282,
+        "tpr_at_0.01_fpr":0.051,
+        "aurac":0.69
+    }
+}

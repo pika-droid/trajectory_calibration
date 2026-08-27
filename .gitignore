@@ -34,8 +34,8 @@ checkpoints/
 .pytest_cache/
 *.log
 
-# Local baseline repos
-baseline_repo/
+# Local baseline repos (modified UMPIRE repository is tracked)
+# baseline_repo/
 
 # Wiki documentation
 wiki/

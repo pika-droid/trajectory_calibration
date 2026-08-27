@@ -1,0 +1,5 @@
+,auc,cece,pearsonr,tpr_at_0.1_fpr,tpr_at_0.01_fpr,aurac
+ln_entropy,0.615,0.341,0.172,0.139,0.0,0.022
+semantic_entropy,0.648,0.475,0.248,0.196,0.0,0.02
+eigen_score,0.648,0.478,0.005,0.086,0.0,0.023
+umpire,0.646,0.261,0.132,0.073,0.0,0.023
