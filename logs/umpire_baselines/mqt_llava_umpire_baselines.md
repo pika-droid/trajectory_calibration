@@ -16,22 +16,34 @@
 ## Methodology & Metric Formulations
 
 ### A. Evaluated Multi-Pass Methods ($K=10, T=0.5$)
-1. **`ln_entropy` (Length-Normalized Predictive Entropy)**:
-   $$\mathcal{H}_{\text{LN}}(y \mid x) = -\frac{1}{|y|} \sum_{t=1}^{|y|} \log p(y_t \mid y_{<t}, x)$$
-   Averaged token-level negative log-likelihood normalized by response token length across $K$ sampled trajectories.
 
-2. **`semantic_entropy` (Kuhn Semantic Entropy)**:
-   $$\mathcal{H}_{\text{SE}}(\mathcal{C} \mid x) = -\sum_{c \in \mathcal{C}} p(c \mid x) \log p(c \mid x)$$
-   Rollouts are clustered into equivalence classes $\mathcal{C}$ using bidirectional NLI entailment checks via `microsoft/deberta-v2-xlarge-mnli` to capture semantic uncertainty invariant to phrasing.
+#### 1. `ln_entropy` (Length-Normalized Predictive Entropy)
 
-3. **`eigen_score` (Chen EigenScore)**:
-   Computes the spectral dispersion of the normalized sentence embedding covariance matrix $\mathbf{\Sigma} = \frac{1}{K} \sum_{k=1}^K (\mathbf{z}_k - \bar{\mathbf{z}})(\mathbf{z}_k - \bar{\mathbf{z}})^\top$ via singular value decomposition (SVD):
-   $$\mathcal{E}_{\text{eigen}} = \frac{\sum_{i} \lambda_i^2}{(\sum_{i} \lambda_i)^2}$$
+$$\mathcal{H}_{\text{LN}}(y \mid x) = -\frac{1}{|y|} \sum_{t=1}^{|y|} \log p(y_t \mid y_{<t}, x)$$
 
-4. **`umpire` (Incoherence-adjusted Semantic Volume)**:
-   Combines multidimensional semantic volume (via differential entropy of embedding ellipsoid) with incoherence-based quadratic entropy penalty:
-   $$\mathcal{U} = \frac{1}{2} \log \det \left( \mathbf{\Sigma} + \epsilon \mathbf{I} \right) + \alpha_{\text{adaptive}} \cdot \sum_{i, j} \mathbf{D}_{ij}^2$$
-   where $\mathbf{D}_{ij}$ represents pairwise semantic contradiction distances.
+Averaged token-level negative log-likelihood normalized by response token length across $K$ sampled trajectories.
+
+#### 2. `semantic_entropy` (Kuhn Semantic Entropy)
+
+$$\mathcal{H}_{\text{SE}}(\mathcal{C} \mid x) = -\sum_{c \in \mathcal{C}} p(c \mid x) \log p(c \mid x)$$
+
+Rollouts are clustered into equivalence classes $\mathcal{C}$ using bidirectional NLI entailment checks via `microsoft/deberta-v2-xlarge-mnli` to capture semantic uncertainty invariant to phrasing.
+
+#### 3. `eigen_score` (Chen EigenScore)
+
+Computes the spectral dispersion of the normalized sentence embedding covariance matrix via singular value decomposition (SVD):
+
+$$\mathbf{\Sigma} = \frac{1}{K} \sum_{k=1}^K (\mathbf{z}_k - \bar{\mathbf{z}})(\mathbf{z}_k - \bar{\mathbf{z}})^\top$$
+
+$$\mathcal{E}_{\text{eigen}} = \frac{\sum_{i} \lambda_i^2}{\left(\sum_{i} \lambda_i\right)^2}$$
+
+#### 4. `umpire` (Incoherence-adjusted Semantic Volume)
+
+Combines multidimensional semantic volume (via differential entropy of embedding ellipsoid) with incoherence-based quadratic entropy penalty:
+
+$$\mathcal{U} = \frac{1}{2} \log \det \left( \mathbf{\Sigma} + \epsilon \mathbf{I} \right) + \alpha_{\text{adaptive}} \cdot \sum_{i, j} \mathbf{D}_{ij}^2$$
+
+where $\mathbf{D}_{ij}$ represents pairwise semantic contradiction distances.
 
 ### B. Evaluated Metrics
 - **`auc` (AUROC) ($\uparrow$)**: Area Under Receiver Operating Characteristic Curve for selective risk/error prediction. Higher is better.
@@ -214,9 +226,3 @@ The following table presents the unweighted macro-arithmetic mean of each uncert
 | `semantic_entropy` | 0.639 | 33.37% | 0.348 | 0.301 | 0.066 | 0.507 |
 | `eigen_score` | *0.689* | 29.57% | *0.381* | *0.357* | *0.073* | 0.540 |
 | `umpire` | **0.691** | **21.27%** | **0.403** | **0.362** | **0.095** | **0.547** |
-
-### Key Baseline Observations
-- **Top AUROC Method**: `umpire` achieves the highest average selective prediction AUROC (**0.691**).
-- **Top Calibration Method**: `umpire` attains the lowest post-hoc Calibrated ECE (**21.27%**).
-- **Top Correlation Method**: `umpire` demonstrates the strongest linear correlation (**0.403**) with model error probability.
-- **Computational Cost**: All 4 UMPIRE methods require $K=10$ stochastic rollout passes per sample ($T=0.5$), resulting in an order-of-magnitude increase in generation compute compared to greedy single-pass inference.

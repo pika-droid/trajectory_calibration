@@ -329,15 +329,3 @@ Macro-averaged evaluation metrics across all 14 datasets for **MQT-LLaVA**.
 | `textvqa` | Spline Calibration | **5.49%** | `umpire` | **0.818** | `Competitive` |
 | `vizwiz-vqa` | Spline Calibration | **6.06%** | Residual Calibrator | **0.803** | `Competitive` |
 | `vqav2` | `umpire` | **7.80%** | `umpire` | **0.790** | `Competitive` |
-
-### C. In-Depth Technical Insights & Commentary
-1. **Single-Pass Efficiency vs. Multi-Pass Sampling**:
-   - While UMPIRE baselines (`umpire`, `eigen_score`, `semantic_entropy`, `ln_entropy`) utilize $K=10$ stochastic rollout paths at $T=0.5$, their calibrated ECEs remain significantly elevated (macro mean $17.34\%$ to $28.25\%$ on M3-LLaVA, $21.27\%$ to $33.37\%$ on MQT-LLaVA).
-   - In contrast, VCPS operates on deterministic greedy decoding ($T=0.0, K=1$) and extracts trajectory-level state features, achieving an order of magnitude lower macro ECE (**3.75%** for VCPS-17D, **4.13%** for VCPS-5D on M3-LLaVA) while requiring **$10\times$ less computational overhead**.
-
-2. **Why Trajectory Calibration Excels on Structured Visual Reasoning & OCR Tasks**:
-   - On fine-grained OCR, document analysis, and perceptual reasoning tasks (e.g., `docvqa`, `infographicvqa`, `pope`, `mmbench`), autoregressive generation displays distinct trajectory dynamics where early token uncertainty propagates into error cascades.
-   - By capturing token-level entropy trajectories, top-1/top-2 logit margin gaps, hidden-state norms, and attention dispersion across decoding steps, VCPS forms a tight confidence envelope that classic scalar calibrators (TS/Platt) cannot represent.
-
-3. **Macro Trade-Offs**:
-   - **Residual Calibrator** and **VCPS** achieve the strongest macro AUROC scores (~0.69 - 0.70) among single-pass methods, matching or exceeding multi-pass sampling methods without requiring auxiliary DeBERTa NLI cross-encoders or semantic clustering pipelines.
