@@ -16,11 +16,13 @@ if str(SRC_PATH) not in sys.path:
 import numpy as np
 from trajectory_calibration.calibrators.baselines import (
     AdaptiveTemperatureScaling,
+    BetaCalibrator,
     MultiScaleEigenVariance,
     MultiScaleSemanticConsistency,
     NaiveConfidenceEstimator,
     PlattScalingEstimator,
     ProbabilityMarginEstimator,
+    QuadraticPlattScaler,
     SplineCalibrator,
     TemperatureScalingEstimator,
     TrajectoryLREstimator,
@@ -76,6 +78,8 @@ def main() -> None:
         "Naive Confidence (NC)": (NaiveConfidenceEstimator(), X_train_17d, X_test_17d),
         "Temperature Scaling (TS)": (TemperatureScalingEstimator(), X_train_17d, X_test_17d),
         "Platt Scaling (1D)": (PlattScalingEstimator(), X_train_17d, X_test_17d),
+        "Quadratic Platt (Logit-Only)": (QuadraticPlattScaler(), X_train_17d, X_test_17d),
+        "Beta Calibration": (BetaCalibrator(), X_train_17d, X_test_17d),
         "Trajectory LR (No Bias)": (TrajectoryLREstimator(fit_intercept=False), X_train_5d, X_test_5d),
         "Spline Calibration": (SplineCalibrator(), X_train_17d, X_test_17d),
         "Adaptive TS (ATS)": (AdaptiveTemperatureScaling(), X_train_5d, X_test_5d),

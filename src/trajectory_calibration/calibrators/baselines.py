@@ -5,6 +5,7 @@ Re-exports classic post-hoc calibrators (NC, TS, Platt, Spline, ATS) and
 genuine single-pass multi-scale trajectory proxies (MSSC, MSE-EIGEN, Margin).
 """
 
+from trajectory_calibration.calibrators.adaptation import BetaCalibrator
 from trajectory_calibration.calibrators.classic import (
     AdaptiveTemperatureScaling,
     NaiveConfidenceEstimator,
@@ -28,6 +29,7 @@ __all__ = [
     "SplineCalibrator",
     "AdaptiveTemperatureScaling",
     "TrajectoryLREstimator",
+    "BetaCalibrator",
     "ProbabilityMarginEstimator",
     "MultiScaleSemanticConsistency",
     "MultiScaleEigenVariance",

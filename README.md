@@ -195,28 +195,82 @@ Compares single-pass greedy calibration ($T=0.0$, $1\times$ compute) against cla
 - **M3-LLaVA**: [`logs/vcps_logs/m3_llava_vcps_vs_baselines.md`](logs/vcps_logs/m3_llava_vcps_vs_baselines.md)
 - **MQT-LLaVA**: [`logs/vcps_logs/mqt_llava_vcps_vs_baselines.md`](logs/vcps_logs/mqt_llava_vcps_vs_baselines.md)
 
-### Macro-Average Comparison Across All 14 Benchmarks
+### Macro-Average Comparison Across All 14 Benchmarks ($T_{\text{gen}} = 0.00$, $1\times$ Compute)
 
-| Model | Method | Paradigm / Regime | Sampling | Macro ECE (%) $\downarrow$ | Macro AUROC $\uparrow$ |
-| :--- | :--- | :--- | :---: | :---: | :---: |
-| **M3-LLaVA** | **VCPS-17D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | **3.75%** | 0.674 |
-| | **VCPS-5D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 4.13% | 0.688 |
-| | Platt Scaling (1D) | Classic Post-Hoc | Greedy ($T=0.0, K=1$) | *3.24%* | 0.682 |
-| | Trajectory LR (No Bias) | Linear Trajectory | Greedy ($T=0.0, K=1$) | 4.21% | 0.677 |
-| | Residual Calibrator | Feature-Aided | Greedy ($T=0.0, K=1$) | 4.37% | **0.703** |
-| | Spline Calibration | Non-Parametric | Greedy ($T=0.0, K=1$) | 4.75% | 0.669 |
-| | `umpire` | Multi-Pass Semantic Volume | Stochastic ($T=0.5, K=10$) | 17.34% | *0.698* |
-| | `ln_entropy` | Predictive Entropy | Stochastic ($T=0.5, K=10$) | 19.24% | 0.675 |
-| **MQT-LLaVA** | **VCPS-5D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | *5.43%* | 0.690 |
-| | **VCPS-17D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 5.68% | *0.694* |
-| | Residual Calibrator | Feature-Aided | Greedy ($T=0.0, K=1$) | **5.07%** | **0.705** |
-| | Trajectory LR (No Bias) | Linear Trajectory | Greedy ($T=0.0, K=1$) | 6.38% | 0.703 |
-| | Platt Scaling (1D) | Classic Post-Hoc | Greedy ($T=0.0, K=1$) | 5.88% | 0.686 |
-| | Spline Calibration | Non-Parametric | Greedy ($T=0.0, K=1$) | 5.96% | 0.685 |
-| | `umpire` | Multi-Pass Semantic Volume | Stochastic ($T=0.5, K=10$) | 21.27% | 0.691 |
-| | `ln_entropy` | Predictive Entropy | Stochastic ($T=0.5, K=10$) | 22.77% | 0.666 |
+| Model | Calibration Method | Paradigm / Regime | Sampling | Macro ECE (%) $\downarrow$ | Macro Ada-ECE (%) $\downarrow$ | Macro AUROC $\uparrow$ |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| **M3-LLaVA** | **VCPS-17D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 3.75% | 5.35% | 0.674 |
+| | **VCPS-5D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 4.13% | 5.82% | 0.688 |
+| | Residual Calibrator | Feature-Aided | Greedy ($T=0.0, K=1$) | 4.37% | 5.70% | **0.703** |
+| | Quadratic Platt (Logit-Only) | Polynomial Logit | Greedy ($T=0.0, K=1$) | **3.22%** | **4.81%** | 0.678 |
+| | Platt Scaling (1D) | Classic Linear Post-Hoc | Greedy ($T=0.0, K=1$) | *3.24%* | 5.41% | 0.682 |
+| | Trajectory LR (No Bias) | Linear Trajectory | Greedy ($T=0.0, K=1$) | 4.21% | 5.59% | 0.677 |
+| | Spline Calibration (PCHIP) | Non-Parametric | Greedy ($T=0.0, K=1$) | 4.75% | *5.35%* | 0.669 |
+| | Temperature Scaling (TS) | Classic Post-Hoc | Greedy ($T=0.0, K=1$) | 21.93% | 22.50% | 0.671 |
+| | Adaptive TS (ATS) | Adaptive Calibrator | Greedy ($T=0.0, K=1$) | 22.06% | 23.03% | 0.687 |
+| | Naive Confidence (NC) | Uncalibrated Baseline | Greedy ($T=0.0, K=1$) | 40.33% | 40.27% | 0.671 |
+| | `umpire` | Multi-Pass Semantic Volume | Stochastic ($T=0.5, K=10$) | 17.34% | - | *0.698* |
+| | `eigen_score` | SVD Covariance Dispersion | Stochastic ($T=0.5, K=10$) | 24.74% | - | 0.694 |
+| | `ln_entropy` | Predictive Entropy | Stochastic ($T=0.5, K=10$) | 19.24% | - | 0.675 |
+| | `semantic_entropy` | DeBERTa NLI Clustering | Stochastic ($T=0.5, K=10$) | 28.25% | - | 0.641 |
+| **MQT-LLaVA** | **VCPS-5D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 5.43% | 7.80% | 0.690 |
+| | **VCPS-17D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 5.68% | 7.84% | 0.694 |
+| | Residual Calibrator | Feature-Aided | Greedy ($T=0.0, K=1$) | *5.07%* | 7.32% | *0.705* |
+| | Quadratic Platt (Logit-Only) | Polynomial Logit | Greedy ($T=0.0, K=1$) | **4.90%** | **6.50%** | **0.706** |
+| | Platt Scaling (1D) | Classic Linear Post-Hoc | Greedy ($T=0.0, K=1$) | 5.88% | 7.72% | 0.686 |
+| | Trajectory LR (No Bias) | Linear Trajectory | Greedy ($T=0.0, K=1$) | 6.38% | 7.43% | 0.703 |
+| | Spline Calibration (PCHIP) | Non-Parametric | Greedy ($T=0.0, K=1$) | 5.96% | *7.02%* | 0.685 |
+| | Temperature Scaling (TS) | Classic Post-Hoc | Greedy ($T=0.0, K=1$) | 23.45% | 23.94% | 0.682 |
+| | Adaptive TS (ATS) | Adaptive Calibrator | Greedy ($T=0.0, K=1$) | 23.20% | 23.64% | 0.685 |
+| | Naive Confidence (NC) | Uncalibrated Baseline | Greedy ($T=0.0, K=1$) | 32.32% | 31.79% | 0.682 |
+| | `umpire` | Multi-Pass Semantic Volume | Stochastic ($T=0.5, K=10$) | 21.27% | - | 0.691 |
+| | `eigen_score` | SVD Covariance Dispersion | Stochastic ($T=0.5, K=10$) | 29.57% | - | 0.689 |
+| | `ln_entropy` | Predictive Entropy | Stochastic ($T=0.5, K=10$) | 22.77% | - | 0.666 |
+| | `semantic_entropy` | DeBERTa NLI Clustering | Stochastic ($T=0.5, K=10$) | 33.37% | - | 0.639 |
 
 > **Compute Takeaway**: Single-pass trajectory calibration (VCPS) achieves **$3\times$ to $5\times$ lower ECE** than multi-pass sampling baselines while operating at **$10\times$ higher inference throughput** ($K=1$ deterministic pass vs. $K=10$ stochastic rollout generations + DeBERTa NLI cross-encoder semantic clustering).
+
+---
+
+### Decoding Temperature Robustness Study ($T \in \{0.0, 0.3, 0.6, 1.0, 1.5\}$)
+
+To rigorously evaluate zero-shot calibration stability under generation temperature shifts, calibrators trained at greedy decoding ($T=0.0$) are evaluated across stochastic sampling temperatures on **4 representative benchmark archetypes**:
+1. **`pope`**: Binary object hallucination grounding (Yes/No).
+2. **`scienceqa`**: Multimodal multiple-choice science reasoning.
+3. **`textvqa`**: Fine-grained visual OCR and scene text comprehension.
+4. **`vizwiz-vqa`**: Real-world assistive vision questions with unconstrained answers.
+
+#### Macro Transfer ECE (%) Across Temperatures (Trained at $T=0.0$)
+
+| Model | Calibration Method | $T=0.0$ | $T=0.3$ | $T=0.6$ | $T=1.0$ | $T=1.5$ | Mean ECE $\downarrow$ |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **M3-LLaVA** | **VCPS-5D (Our Method)** | 5.69% | 19.40% | 9.95% | 5.14% | 9.39% | 9.91% |
+| | **VCPS-17D (Our Method)** | 5.51% | 19.69% | 10.30% | 6.37% | 11.82% | 10.74% |
+| | Residual Calibrator | 5.75% | 19.22% | **9.59%** | 5.36% | 9.92% | 9.97% |
+| | Quadratic Platt (Logit-Only) | 5.08% | 19.53% | 10.31% | **5.06%** | **8.40%** | **9.68%** |
+| | Platt Scaling (1D) | 6.12% | 19.24% | 10.00% | *5.09%* | 9.49% | 9.99% |
+| | Trajectory LR (No Bias) | **4.73%** | 19.36% | 10.26% | 7.95% | 9.38% | 10.34% |
+| | Spline Calibration (PCHIP) | 7.24% | **18.90%** | 12.48% | 6.97% | *8.51%* | 10.82% |
+| | Temperature Scaling (TS) | 9.41% | 21.90% | 14.44% | 8.66% | 11.01% | 13.08% |
+| | Naive Confidence (NC) | 10.05% | 23.60% | 15.67% | 9.45% | 10.29% | 13.81% |
+| **MQT-LLaVA** | **VCPS-5D (Our Method)** | 6.98% | 25.27% | 14.60% | 7.56% | *7.73%* | 12.43% |
+| | **VCPS-17D (Our Method)** | 7.67% | 25.74% | 15.12% | 8.57% | 8.11% | 13.04% |
+| | Residual Calibrator | 6.78% | 25.56% | 14.31% | 7.55% | 8.04% | 12.45% |
+| | Quadratic Platt (Logit-Only) | **6.28%** | 23.71% | *12.38%* | **6.49%** | **7.77%** | *11.33%* |
+| | Platt Scaling (1D) | 7.55% | 25.90% | 15.21% | *7.37%* | 8.11% | 12.83% |
+| | Trajectory LR (No Bias) | 7.56% | *20.58%* | **10.53%** | 7.72% | 9.12% | **11.10%** |
+| | Spline Calibration (PCHIP) | 7.23% | **20.09%** | 15.37% | 10.61% | 9.27% | 12.51% |
+| | Temperature Scaling (TS) | 15.85% | 28.81% | 22.35% | 19.60% | 20.26% | 21.37% |
+| | Naive Confidence (NC) | 22.68% | 41.63% | 34.74% | 27.31% | 21.06% | 29.48% |
+
+---
+
+### Leave-One-Dataset-Out (LODO) Cross-Domain Generalization
+
+Evaluates zero-shot transfer by training calibrators on 13 pooled benchmarks and testing on the held-out 14th benchmark across all 14 datasets:
+- **M3-LLaVA**: **VCPS-5D** achieves the lowest zero-shot transfer error (**$27.41\%$ Macro ECE** and **$0.697$ Macro AUROC**), outperforming 1D Platt Scaling ($28.34\%$ ECE, $0.677$ AUROC).
+- **MQT-LLaVA**: **Best 5D Trajectory / Two-Stage Residual** achieves **$21.75\%$ Macro ECE**, while **VCPS-5D** achieves top selective risk discrimination (**$0.706$ Macro AUROC**).
+- Full publication table available in [`dataset_tables/lodo_cross_dataset.tex`](dataset_tables/lodo_cross_dataset.tex).
 
 ---
 

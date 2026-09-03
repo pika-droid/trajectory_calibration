@@ -279,7 +279,72 @@ def generate_temperature_tables():
     print(f"Generated: {out_macro}")
 
 
+def generate_lodo_tables():
+    df_m3 = pd.read_csv(ROOT / "results/experiments/lodo/lodo_m3_summary.csv")
+    df_mqt = pd.read_csv(ROOT / "results/experiments/lodo/lodo_mqt_summary.csv")
+
+    def build_lodo_table(df: pd.DataFrame, arch_label: str, arch_model: str) -> str:
+        lines = [
+            "\\begin{table}[t]",
+            f"\\caption{{\\textbf{{Leave-One-Dataset-Out (LODO) Cross-Domain Transfer ({arch_model} 7B).}} Macro-averaged across all 14 held-out target benchmarks. Trained on pooled 13 benchmarks. \\textbf{{Bold}}: best; \\underline{{underline}}: second best.}}",
+            f"\\label{{tab:lodo_transfer_{arch_label}}}",
+            "\\tablestyle{4pt}{1.05}",
+            "\\resizebox{\\columnwidth}{!}{%",
+            "\\begin{tabular}{llccc}",
+            "\\toprule",
+            "\\textbf{Calibration Method} & \\textbf{Transfer Protocol} & \\textbf{Macro ECE (\\%)} $\\downarrow$ & \\textbf{Macro Ada-ECE (\\%)} $\\downarrow$ & \\textbf{Macro AUROC} $\\uparrow$ \\\\",
+            "\\midrule",
+        ]
+
+        methods_order = [
+            "Platt Scaling (1D)",
+            "Best 5D Trajectory",
+            "Two-Stage Residual",
+            "VCPS-5D (Our Method)",
+            "VCPS-17D (Our Method)",
+        ]
+
+        # Aggregate across all 14 held-out datasets
+        agg = df.groupby(["method", "transfer_mode"])[["ece_percent", "adaptive_ece_percent", "auroc"]].mean().reset_index()
+
+        rows = []
+        for m in methods_order:
+            for mode in ["Zero-Shot Base", "Target Adapted (Saerens-EM)"]:
+                sub = agg[(agg["method"] == m) & (agg["transfer_mode"] == mode)]
+                if not sub.empty:
+                    r = sub.iloc[0]
+                    rows.append((m, mode, float(r["ece_percent"]), float(r["adaptive_ece_percent"]), float(r["auroc"]), "VCPS" in m))
+
+        ece_formatted = rank_and_format([r[2] for r in rows], higher_is_better=False, decimals=2)
+        ada_formatted = rank_and_format([r[3] for r in rows], higher_is_better=False, decimals=2)
+        auc_formatted = rank_and_format([r[4] for r in rows], higher_is_better=True, decimals=3)
+
+        for i, (m, mode, _, _, _, is_vcps) in enumerate(rows):
+            ece_str = ece_formatted[i]
+            ada_str = ada_formatted[i]
+            auc_str = auc_formatted[i]
+            if is_vcps:
+                lines.append(f"\\rowcolor{{gray!10}} \\textbf{{{m}}} & {mode} & {ece_str} & {ada_str} & {auc_str} \\\\")
+            else:
+                lines.append(f"{m} & {mode} & {ece_str} & {ada_str} & {auc_str} \\\\")
+
+        lines.extend([
+            "\\bottomrule",
+            "\\end{tabular}%",
+            "}",
+            "\\end{table}",
+        ])
+        return "\n".join(lines)
+
+    t_m3 = build_lodo_table(df_m3, "m3", "M3-LLaVA")
+    t_mqt = build_lodo_table(df_mqt, "mqt", "MQT-LLaVA")
+    out_f = TABLES_DIR / "lodo_cross_dataset.tex"
+    out_f.write_text(t_m3 + "\n\n" + t_mqt + "\n", encoding="utf-8")
+    print(f"Generated: {out_f}")
+
+
 if __name__ == "__main__":
     generate_benchmark_tables()
     generate_temperature_tables()
+    generate_lodo_tables()
     print("All LaTeX tables generated successfully.")

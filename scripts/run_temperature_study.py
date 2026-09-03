@@ -46,14 +46,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--datasets",
         nargs="+",
-        default=["pope", "scienceqa", "textvqa", "vizwiz-vqa", "vqav2_5scale"],
+        default=["pope", "scienceqa", "textvqa", "vizwiz-vqa"],
         help="Datasets to evaluate across temperatures.",
     )
     parser.add_argument(
         "--temperatures",
         nargs="+",
         type=float,
-        default=[0.0, 0.3, 0.6, 0.9, 1.0, 1.5],
+        default=[0.0, 0.3, 0.6, 1.0, 1.5],
         help="Decoding temperatures to evaluate.",
     )
     parser.add_argument("--output_dir", type=str, default="results/experiments/temperature_study", help="Output directory.")

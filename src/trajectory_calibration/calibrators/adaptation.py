@@ -92,3 +92,23 @@ def apply_beta_calibration(
     c = safe_clip_probs(np.asarray(confs, dtype=np.float64))
     calib_logits = a * np.log(c) - b * np.log(1.0 - c) + c_param
     return sigmoid(calib_logits)
+
+
+class BetaCalibrator:
+    """Beta Calibration estimator (Kull et al., 2017)."""
+
+    def __init__(self) -> None:
+        self.a: float = 1.0
+        self.b: float = 1.0
+        self.c_param: float = 0.0
+
+    def fit(self, X_train: np.ndarray, y_train: np.ndarray) -> BetaCalibrator:
+        x1 = X_train[:, 0] if X_train.ndim == 2 else X_train
+        confs = sigmoid(x1)
+        self.a, self.b, self.c_param = fit_beta_calibration(confs, y_train)
+        return self
+
+    def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
+        x1 = X_test[:, 0] if X_test.ndim == 2 else X_test
+        confs = sigmoid(x1)
+        return apply_beta_calibration(confs, self.a, self.b, self.c_param)

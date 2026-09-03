@@ -3,6 +3,7 @@ Trajectory Calibration Estimators Module.
 """
 
 from trajectory_calibration.calibrators.adaptation import (
+    BetaCalibrator,
     apply_beta_calibration,
     fit_beta_calibration,
     fit_target_intercept_adaptation,
@@ -57,6 +58,7 @@ __all__ = [
     "ResidualTrajectoryCalibrator",
     "compute_aurc",
     "evaluate_full_metric_panel",
+    "BetaCalibrator",
     "run_saerens_em_binary",
     "fit_target_intercept_adaptation",
     "fit_beta_calibration",

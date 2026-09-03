@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 from trajectory_calibration.calibrators.baselines import (
     AdaptiveTemperatureScaling,
+    BetaCalibrator,
     NaiveConfidenceEstimator,
     PlattScalingEstimator,
     QuadraticPlattScaler,
@@ -27,6 +28,7 @@ def test_all_calibrators_fit_predict():
         PlattScalingEstimator(),
         QuadraticPlattScaler(),
         TrajectoryLREstimator(fit_intercept=False),
+        BetaCalibrator(),
         SplineCalibrator(),
         AdaptiveTemperatureScaling(),
         ResidualTrajectoryCalibrator(),

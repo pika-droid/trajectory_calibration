@@ -1,0 +1,47 @@
+\begin{table}[t]
+\caption{\textbf{Leave-One-Dataset-Out (LODO) Cross-Domain Transfer (M3-LLaVA 7B).} Macro-averaged across all 14 held-out target benchmarks. Trained on pooled 13 benchmarks. \textbf{Bold}: best; \underline{underline}: second best.}
+\label{tab:lodo_transfer_m3}
+\tablestyle{4pt}{1.05}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{llccc}
+\toprule
+\textbf{Calibration Method} & \textbf{Transfer Protocol} & \textbf{Macro ECE (\%)} $\downarrow$ & \textbf{Macro Ada-ECE (\%)} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ \\
+\midrule
+Platt Scaling (1D) & Zero-Shot Base & 28.34 & 29.24 & 0.677 \\
+Platt Scaling (1D) & Target Adapted (Saerens-EM) & 40.88 & 40.88 & 0.677 \\
+Best 5D Trajectory & Zero-Shot Base & \underline{27.68} & 28.26 & 0.695 \\
+Best 5D Trajectory & Target Adapted (Saerens-EM) & 40.88 & 40.88 & 0.695 \\
+Two-Stage Residual & Zero-Shot Base & \underline{27.68} & 28.26 & 0.695 \\
+Two-Stage Residual & Target Adapted (Saerens-EM) & 40.88 & 40.88 & 0.695 \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Zero-Shot Base & \textbf{27.41} & \textbf{27.73} & \textbf{0.697} \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Target Adapted (Saerens-EM) & 40.88 & 40.88 & \textbf{0.697} \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Zero-Shot Base & 27.95 & \underline{28.13} & 0.673 \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Target Adapted (Saerens-EM) & 40.88 & 40.88 & 0.673 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[t]
+\caption{\textbf{Leave-One-Dataset-Out (LODO) Cross-Domain Transfer (MQT-LLaVA 7B).} Macro-averaged across all 14 held-out target benchmarks. Trained on pooled 13 benchmarks. \textbf{Bold}: best; \underline{underline}: second best.}
+\label{tab:lodo_transfer_mqt}
+\tablestyle{4pt}{1.05}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{llccc}
+\toprule
+\textbf{Calibration Method} & \textbf{Transfer Protocol} & \textbf{Macro ECE (\%)} $\downarrow$ & \textbf{Macro Ada-ECE (\%)} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ \\
+\midrule
+Platt Scaling (1D) & Zero-Shot Base & 22.64 & 22.76 & 0.698 \\
+Platt Scaling (1D) & Target Adapted (Saerens-EM) & 26.15 & 26.16 & 0.698 \\
+Best 5D Trajectory & Zero-Shot Base & \textbf{21.75} & \textbf{21.88} & \underline{0.702} \\
+Best 5D Trajectory & Target Adapted (Saerens-EM) & 24.61 & 24.72 & 0.702 \\
+Two-Stage Residual & Zero-Shot Base & \textbf{21.75} & \textbf{21.88} & \underline{0.702} \\
+Two-Stage Residual & Target Adapted (Saerens-EM) & 24.61 & 24.72 & 0.702 \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Zero-Shot Base & 27.20 & 27.59 & \textbf{0.706} \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Target Adapted (Saerens-EM) & 36.66 & 36.66 & \textbf{0.706} \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Zero-Shot Base & \underline{21.90} & \underline{22.00} & 0.701 \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Target Adapted (Saerens-EM) & 23.93 & 23.96 & 0.701 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
