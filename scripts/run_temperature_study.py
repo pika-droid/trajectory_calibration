@@ -23,8 +23,10 @@ from trajectory_calibration.calibrators.baselines import (
     MultiScaleSemanticConsistency,
     NaiveConfidenceEstimator,
     PlattScalingEstimator,
+    QuadraticPlattScaler,
     SplineCalibrator,
     TemperatureScalingEstimator,
+    TrajectoryLREstimator,
 )
 from trajectory_calibration.calibrators.residual import (
     ResidualTrajectoryCalibrator,
@@ -44,7 +46,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--datasets",
         nargs="+",
-        default=["pope", "scienceqa", "textvqa", "vizwiz-vqa"],
+        default=["pope", "scienceqa", "textvqa", "vizwiz-vqa", "vqav2_5scale"],
         help="Datasets to evaluate across temperatures.",
     )
     parser.add_argument(
@@ -89,11 +91,12 @@ def main() -> None:
                 "Naive Confidence (NC)": NaiveConfidenceEstimator().fit(X_tr_17d, y_tr),
                 "Temperature Scaling (TS)": TemperatureScalingEstimator().fit(X_tr_17d, y_tr),
                 "Platt Scaling (1D)": PlattScalingEstimator().fit(X_tr_17d, y_tr),
+                "Trajectory LR (No Bias)": TrajectoryLREstimator(fit_intercept=False).fit(X_tr_5d, y_tr),
+                "Quadratic Platt (Logit-Only)": QuadraticPlattScaler().fit(X_tr_17d, y_tr),
                 "Spline Calibration (PCHIP)": SplineCalibrator().fit(X_tr_17d, y_tr),
                 "Adaptive TS (ATS)": AdaptiveTemperatureScaling().fit(X_tr_5d, y_tr),
                 "MSSC (Multi-Scale Proxy)": MultiScaleSemanticConsistency().fit(X_tr_17d, y_tr),
-                "Best 5D Trajectory": ResidualTrajectoryCalibrator().fit(X_tr_5d, y_tr),
-                "Two-Stage Residual": ResidualTrajectoryCalibrator().fit(X_tr_5d, y_tr),
+                "Residual Calibrator": ResidualTrajectoryCalibrator().fit(X_tr_5d, y_tr),
                 "VCPS-5D (Our Method)": VaryingCoefficientPlattScaler(slope_features=best_5d[1:3], intercept_features=best_5d[1:]).fit(X_tr_5d, y_tr),
                 "VCPS-17D (Our Method)": VaryingCoefficientPlattScaler().fit(X_tr_17d, y_tr),
             }
@@ -126,7 +129,7 @@ def main() -> None:
 
                 # Evaluate Greedy Transfer
                 for m_name, model in train_models[ds].items():
-                    X_input = X_te_5d if ("5D" in m_name or "ATS" in m_name or "Residual" in m_name) else X_te_17d
+                    X_input = X_te_5d if ("5D" in m_name or "ATS" in m_name or "Residual" in m_name or "Trajectory LR" in m_name) else X_te_17d
                     probs = model.predict_proba(X_input)
                     panel = evaluate_full_metric_panel(probs, y_te, c_te, y_train=y_tr)
                     panel["dataset"] = ds

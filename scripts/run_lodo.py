@@ -25,6 +25,7 @@ from trajectory_calibration.calibrators.adaptation import (
 from trajectory_calibration.calibrators.baselines import (
     PlattScalingEstimator,
     TemperatureScalingEstimator,
+    TrajectoryLREstimator,
 )
 from trajectory_calibration.calibrators.residual import (
     ResidualTrajectoryCalibrator,
@@ -111,6 +112,7 @@ def main() -> None:
         # Models to evaluate
         base_models = {
             "Platt Scaling (1D)": (PlattScalingEstimator(), X_train_17d, X_test_17d),
+            "Trajectory LR (No Bias)": (TrajectoryLREstimator(fit_intercept=False), X_train_5d, X_test_5d),
             "Best 5D Trajectory": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
             "Two-Stage Residual": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
             "VCPS-5D (Our Method)": (VaryingCoefficientPlattScaler(slope_features=best_5d_keys[1:3], intercept_features=best_5d_keys[1:]), X_train_5d, X_test_5d),

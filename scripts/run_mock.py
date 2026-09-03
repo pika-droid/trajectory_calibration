@@ -23,6 +23,7 @@ from trajectory_calibration.calibrators.baselines import (
     ProbabilityMarginEstimator,
     SplineCalibrator,
     TemperatureScalingEstimator,
+    TrajectoryLREstimator,
 )
 from trajectory_calibration.calibrators.residual import (
     ResidualTrajectoryCalibrator,
@@ -75,6 +76,7 @@ def main() -> None:
         "Naive Confidence (NC)": (NaiveConfidenceEstimator(), X_train_17d, X_test_17d),
         "Temperature Scaling (TS)": (TemperatureScalingEstimator(), X_train_17d, X_test_17d),
         "Platt Scaling (1D)": (PlattScalingEstimator(), X_train_17d, X_test_17d),
+        "Trajectory LR (No Bias)": (TrajectoryLREstimator(fit_intercept=False), X_train_5d, X_test_5d),
         "Spline Calibration": (SplineCalibrator(), X_train_17d, X_test_17d),
         "Adaptive TS (ATS)": (AdaptiveTemperatureScaling(), X_train_5d, X_test_5d),
         "Probability Margin (1D)": (ProbabilityMarginEstimator(), X_train_17d, X_test_17d),

@@ -201,6 +201,8 @@ def generate_vcps_vs_baselines_log(model_name, model_display, bench_path, ump_pa
         ('Naive Confidence (NC)', 'Uncalibrated Baseline', 'Single-Pass ($T=0.0$)'),
         ('Temperature Scaling (TS)', 'Classic Post-Hoc Calibrator', 'Single-Pass ($T=0.0$)'),
         ('Platt Scaling (1D)', 'Classic Post-Hoc Calibrator', 'Single-Pass ($T=0.0$)'),
+        ('Trajectory LR (No Bias)', 'Linear Trajectory Baseline', 'Single-Pass ($T=0.0$)'),
+        ('Quadratic Platt (Logit-Only)', 'Logit-Only Polynomial Baseline', 'Single-Pass ($T=0.0$)'),
         ('Spline Calibration', 'Non-Parametric Calibrator', 'Single-Pass ($T=0.0$)'),
         ('Adaptive TS (ATS)', 'Adaptive Calibrator', 'Single-Pass ($T=0.0$)'),
         ('Residual Calibrator', 'Feature-Aided Calibrator', 'Single-Pass ($T=0.0$)'),
@@ -225,7 +227,7 @@ def generate_vcps_vs_baselines_log(model_name, model_display, bench_path, ump_pa
     lines.append("> [!IMPORTANT]")
     lines.append("> **CRITICAL TEMPERATURE & COMPUTATION PROTOCOL**:")
     lines.append("> 1. **Greedy Deterministic Single-Pass ($T = 0.0, K = 1$)**:")
-    lines.append(">    - Evaluated for: **Naive Confidence (NC)**, **Temperature Scaling (TS)**, **Platt Scaling (1D)**, **Spline Calibration (PCHIP)**, **Adaptive TS (ATS)**, **Residual Calibrator**, **VCPS-5D**, and **VCPS-17D**.")
+    lines.append(">    - Evaluated for: **Naive Confidence (NC)**, **Temperature Scaling (TS)**, **Platt Scaling (1D)**, **Trajectory LR (No Bias)**, **Quadratic Platt (Logit-Only)**, **Spline Calibration (PCHIP)**, **Adaptive TS (ATS)**, **Residual Calibrator**, **VCPS-5D**, and **VCPS-17D**.")
     lines.append(">    - Evaluated on exact autoregressive logit trajectories from standard single-pass greedy decoding. Computational overhead: **$1\\times$ forward pass** (real-time zero rollout overhead).")
     lines.append("> 2. **Stochastic Multi-Pass Sampling ($T = 0.5, K = 10$)**:")
     lines.append(">    - Evaluated for: **`ln_entropy`**, **`semantic_entropy`**, **`eigen_score`**, and **`umpire`**.")
@@ -391,10 +393,10 @@ def generate_vcps_vs_baselines_log(model_name, model_display, bench_path, ump_pa
     vcps_auc_wins = win_df[win_df['vcps_won_auc']]
     
     lines.append("### A. Win-Count Summary")
-    lines.append(f"- **Overall Best ECE (#1 across ALL 12 methods)**: Our VCPS methods (**VCPS-5D** / **VCPS-17D**) achieve the absolute lowest ECE on **{len(vcps_ece_wins)} out of 14 datasets** ({len(vcps_ece_wins)/14*100:.1f}% win rate).")
+    lines.append(f"- **Overall Best ECE (#1 across ALL evaluated methods)**: Our VCPS methods (**VCPS-5D** / **VCPS-17D**) achieve the absolute lowest ECE on **{len(vcps_ece_wins)} out of 14 datasets** ({len(vcps_ece_wins)/14*100:.1f}% win rate).")
     lines.append(f"  - **Specific Datasets Won in ECE**: {', '.join([f'`{d}` ({row.best_ece_method}: **{row.best_ece_val:.2f}%**)' for d, row in vcps_ece_wins.set_index('dataset').iterrows()])}.")
     lines.append(f"- **Win Rate vs. UMPIRE Multi-Pass Baselines in ECE**: VCPS trajectory calibration achieves lower ECE than all four UMPIRE multi-pass baselines on **{14 if model_name == 'm3_llava' else 13} out of 14 datasets**.")
-    lines.append(f"- **Overall Best AUROC (#1 across ALL 12 methods)**: Our VCPS methods achieve the highest selective prediction AUROC on **{len(vcps_auc_wins)} out of 14 datasets**.")
+    lines.append(f"- **Overall Best AUROC (#1 across ALL evaluated methods)**: Our VCPS methods achieve the highest selective prediction AUROC on **{len(vcps_auc_wins)} out of 14 datasets**.")
     lines.append(f"  - **Specific Datasets Won in AUROC**: {', '.join([f'`{d}` ({row.best_auc_method}: **{row.best_auc_val:.3f}**)' for d, row in vcps_auc_wins.set_index('dataset').iterrows()])}.")
     lines.append("")
     

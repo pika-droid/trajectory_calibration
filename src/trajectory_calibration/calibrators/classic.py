@@ -176,3 +176,77 @@ class AdaptiveTemperatureScaling:
         log_T = np.clip(np.dot(Z_norm, self.weights) + self.bias, -3.0, 3.0)
         T = np.exp(log_T)
         return sigmoid(x1 / T)
+
+
+class QuadraticPlattScaler:
+    """Quadratic / Logit-Only Platt Scaling: logit(p) = gamma * x1^2 + (a0 + w) * x1 + b0."""
+
+    def __init__(self, C: float = 1.0, random_state: int = 42) -> None:
+        self.C = C
+        self.random_state = random_state
+        self.lr = LogisticRegression(
+            C=self.C, solver="lbfgs", max_iter=1000, random_state=self.random_state
+        )
+
+    def _transform(self, X: np.ndarray) -> np.ndarray:
+        X_arr = np.asarray(X, dtype=np.float64)
+        x1 = X_arr[:, 0] if X_arr.ndim == 2 else X_arr
+        return np.column_stack([x1, x1 ** 2])
+
+    def fit(self, X_train: np.ndarray, y_train: np.ndarray) -> QuadraticPlattScaler:
+        X_poly = self._transform(X_train)
+        y = np.asarray(y_train, dtype=np.float64)
+        self.lr.fit(X_poly, y)
+        return self
+
+    def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
+        X_poly = self._transform(X_test)
+        return self.lr.predict_proba(X_poly)[:, 1]
+
+    def compute_dynamic_slope(self, X: np.ndarray) -> np.ndarray:
+        """Dynamic slope d(logit)/dx1 = beta + 2 * gamma * x1."""
+        X_arr = np.asarray(X, dtype=np.float64)
+        x1 = X_arr[:, 0] if X_arr.ndim == 2 else X_arr
+        beta = float(self.lr.coef_[0][0])
+        gamma = float(self.lr.coef_[0][1])
+        return beta + 2.0 * gamma * x1
+
+    def compute_dynamic_intercept(self, X: np.ndarray) -> np.ndarray:
+        X_arr = np.asarray(X, dtype=np.float64)
+        n = len(X_arr) if X_arr.ndim == 2 else 1
+        return np.full(n, float(self.lr.intercept_[0]))
+
+    def get_effective_temperature(self, X: np.ndarray) -> np.ndarray:
+        """Instance effective temperature T_eff(x1) = 1 / |a(x1)|."""
+        slopes = self.compute_dynamic_slope(X)
+        return 1.0 / np.maximum(np.abs(slopes), 1e-4)
+
+
+class TrajectoryLREstimator:
+    """Trajectory Logistic Regression baseline without intercept (zero-bias)."""
+
+    def __init__(self, fit_intercept: bool = False, C: float = 1.0, random_state: int = 42) -> None:
+        self.fit_intercept = fit_intercept
+        self.C = C
+        self.random_state = random_state
+        self.lr = LogisticRegression(
+            fit_intercept=self.fit_intercept,
+            C=self.C,
+            solver="lbfgs",
+            max_iter=1000,
+            random_state=self.random_state,
+        )
+
+    def fit(self, X_train: np.ndarray, y_train: np.ndarray) -> TrajectoryLREstimator:
+        X = np.asarray(X_train, dtype=np.float64)
+        if X.ndim == 1:
+            X = X.reshape(-1, 1)
+        self.lr.fit(X, y_train)
+        return self
+
+    def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
+        X = np.asarray(X_test, dtype=np.float64)
+        if X.ndim == 1:
+            X = X.reshape(-1, 1)
+        return self.lr.predict_proba(X)[:, 1]
+

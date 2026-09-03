@@ -23,8 +23,10 @@ from trajectory_calibration.calibrators.baselines import (
     NaiveConfidenceEstimator,
     PlattScalingEstimator,
     ProbabilityMarginEstimator,
+    QuadraticPlattScaler,
     SplineCalibrator,
     TemperatureScalingEstimator,
+    TrajectoryLREstimator,
 )
 from trajectory_calibration.calibrators.residual import (
     ResidualTrajectoryCalibrator,
@@ -95,6 +97,8 @@ def main() -> None:
             "MSSC (Multi-Scale Proxy)": (MultiScaleSemanticConsistency(), X_train_17d, X_test_17d),
             "MSE-EIGEN (Multi-Scale)": (MultiScaleEigenVariance(), X_train_17d, X_test_17d),
             "Residual Calibrator": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
+            "Trajectory LR (No Bias)": (TrajectoryLREstimator(fit_intercept=False), X_train_5d, X_test_5d),
+            "Quadratic Platt (Logit-Only)": (QuadraticPlattScaler(), X_train_17d, X_test_17d),
             "VCPS-5D (Our Method)": (VaryingCoefficientPlattScaler(slope_features=best_5d_keys[1:3], intercept_features=best_5d_keys[1:]), X_train_5d, X_test_5d),
             "VCPS-17D (Our Method)": (VaryingCoefficientPlattScaler(), X_train_17d, X_test_17d),
         }

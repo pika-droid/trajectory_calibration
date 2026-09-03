@@ -9,8 +9,10 @@ from trajectory_calibration.calibrators.classic import (
     AdaptiveTemperatureScaling,
     NaiveConfidenceEstimator,
     PlattScalingEstimator,
+    QuadraticPlattScaler,
     SplineCalibrator,
     TemperatureScalingEstimator,
+    TrajectoryLREstimator,
 )
 from trajectory_calibration.calibrators.proxies import (
     MultiScaleEigenVariance,
@@ -22,8 +24,10 @@ __all__ = [
     "NaiveConfidenceEstimator",
     "TemperatureScalingEstimator",
     "PlattScalingEstimator",
+    "QuadraticPlattScaler",
     "SplineCalibrator",
     "AdaptiveTemperatureScaling",
+    "TrajectoryLREstimator",
     "ProbabilityMarginEstimator",
     "MultiScaleSemanticConsistency",
     "MultiScaleEigenVariance",

@@ -6,8 +6,10 @@ from trajectory_calibration.calibrators.baselines import (
     AdaptiveTemperatureScaling,
     NaiveConfidenceEstimator,
     PlattScalingEstimator,
+    QuadraticPlattScaler,
     SplineCalibrator,
     TemperatureScalingEstimator,
+    TrajectoryLREstimator,
 )
 from trajectory_calibration.calibrators.residual import ResidualTrajectoryCalibrator
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
@@ -23,6 +25,8 @@ def test_all_calibrators_fit_predict():
         NaiveConfidenceEstimator(),
         TemperatureScalingEstimator(),
         PlattScalingEstimator(),
+        QuadraticPlattScaler(),
+        TrajectoryLREstimator(fit_intercept=False),
         SplineCalibrator(),
         AdaptiveTemperatureScaling(),
         ResidualTrajectoryCalibrator(),
@@ -38,6 +42,31 @@ def test_all_calibrators_fit_predict():
         assert len(probs) == len(y)
         assert np.all(probs >= 0.0) and np.all(probs <= 1.0)
         assert not np.isnan(probs).any()
+
+
+def test_quadratic_platt_properties():
+    df = generate_mock_df("test_mock", n_samples=100, seed=42)
+    X = df[["x1", "x13", "x6", "x8", "x4"]].values
+    y = df["is_correct"].values
+
+    quad = QuadraticPlattScaler()
+    quad.fit(X, y)
+
+    probs = quad.predict_proba(X)
+    assert len(probs) == len(y)
+    assert np.all(probs >= 0.0) and np.all(probs <= 1.0)
+    assert not np.isnan(probs).any()
+
+    slopes = quad.compute_dynamic_slope(X)
+    assert len(slopes) == len(y)
+    assert not np.isnan(slopes).any()
+
+    intercepts = quad.compute_dynamic_intercept(X)
+    assert len(intercepts) == len(y)
+
+    teff = quad.get_effective_temperature(X)
+    assert len(teff) == len(y)
+    assert np.all(teff > 0.0)
 
 
 def test_proxy_calibrators_validation():
@@ -90,4 +119,28 @@ def test_load_image_from_filepath(tmp_path):
     assert loaded is not None
     assert isinstance(loaded, Image.Image)
     assert loaded.size == (32, 32)
+
+
+def test_trajectory_lr_zero_bias_properties():
+    df = generate_mock_df("test_mock", n_samples=100, seed=42)
+    X = df[["x1", "x13", "x6", "x8", "x4"]].values
+    y = df["is_correct"].values
+
+    lr_no_bias = TrajectoryLREstimator(fit_intercept=False)
+    lr_no_bias.fit(X, y)
+
+    # 1. Verify intercept is explicitly 0.0
+    assert lr_no_bias.lr.intercept_ == 0.0
+
+    # 2. Verify zero-bias property: at input X=0, logit=0 -> prob=0.5
+    zero_input = np.zeros((3, X.shape[1]))
+    probs_zero = lr_no_bias.predict_proba(zero_input)
+    assert np.allclose(probs_zero, 0.5)
+
+    # 3. Verify valid bounded probabilities on test data
+    probs = lr_no_bias.predict_proba(X)
+    assert len(probs) == len(y)
+    assert np.all(probs >= 0.0) and np.all(probs <= 1.0)
+    assert not np.isnan(probs).any()
+
 

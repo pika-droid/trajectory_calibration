@@ -1,0 +1,47 @@
+\begin{table}[t]
+\caption{\textbf{Temperature Transfer Robustness on \texttt{pope} (M3-LLaVA 7B).} ECE (\%) $\downarrow$ across sampling temperatures $T \in \{0.0, 0.3, 0.6, 1.0, 1.5\}$ (trained at $T=0.0$). \textbf{Bold}: best; \underline{underline}: second best.}
+\label{tab:temp_transfer_m3_pope}
+\tablestyle{4pt}{1.05}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Calibration Method} & \textbf{$T=0.0$} & \textbf{$T=0.3$} & \textbf{$T=0.6$} & \textbf{$T=1.0$} & \textbf{$T=1.5$} & \textbf{Mean} $\downarrow$ \\
+\midrule
+Naive Confidence (NC) & 4.03 & 9.26 & 7.64 & 4.59 & \textbf{5.09} & \underline{6.12} \\
+Temperature Scaling (TS) & 3.67 & 8.96 & 8.28 & 3.49 & 7.68 & 6.42 \\
+Platt Scaling (1D) & 3.69 & \textbf{8.91} & 8.50 & \textbf{3.07} & 6.80 & 6.20 \\
+Trajectory LR (No Bias) & 3.98 & 8.97 & \textbf{6.30} & 6.32 & 6.80 & 6.47 \\
+Quadratic Platt (Logit-Only) & 3.64 & 9.06 & 8.25 & 3.34 & 6.55 & 6.17 \\
+Spline Calibration (PCHIP) & 4.92 & 8.98 & 8.08 & 4.28 & \underline{5.90} & 6.43 \\
+Adaptive TS (ATS) & 4.63 & 9.03 & 8.26 & 4.21 & 6.89 & 6.60 \\
+Residual Calibrator & \underline{3.52} & 9.07 & \underline{7.22} & 3.63 & 8.29 & 6.35 \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & 4.28 & 8.99 & 8.00 & \underline{3.24} & 6.04 & \textbf{6.11} \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & \textbf{3.19} & \underline{8.95} & 8.27 & 5.16 & 8.34 & 6.78 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[t]
+\caption{\textbf{Temperature Transfer Robustness on \texttt{pope} (MQT-LLaVA 7B).} ECE (\%) $\downarrow$ across sampling temperatures $T \in \{0.0, 0.3, 0.6, 1.0, 1.5\}$ (trained at $T=0.0$). \textbf{Bold}: best; \underline{underline}: second best.}
+\label{tab:temp_transfer_mqt_pope}
+\tablestyle{4pt}{1.05}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Calibration Method} & \textbf{$T=0.0$} & \textbf{$T=0.3$} & \textbf{$T=0.6$} & \textbf{$T=1.0$} & \textbf{$T=1.5$} & \textbf{Mean} $\downarrow$ \\
+\midrule
+Naive Confidence (NC) & 7.04 & 11.10 & 11.31 & 8.65 & 7.70 & 9.16 \\
+Temperature Scaling (TS) & 5.86 & \textbf{10.14} & 9.55 & \underline{5.36} & 5.09 & 7.20 \\
+Platt Scaling (1D) & 4.37 & 10.30 & 9.52 & 5.56 & \underline{4.68} & 6.89 \\
+Trajectory LR (No Bias) & 4.55 & 10.75 & 10.17 & 5.56 & 6.14 & 7.43 \\
+Quadratic Platt (Logit-Only) & 4.54 & \underline{10.25} & \textbf{8.79} & 5.99 & \textbf{4.29} & \underline{6.77} \\
+Spline Calibration (PCHIP) & 7.30 & 10.72 & 10.96 & 9.43 & 7.95 & 9.27 \\
+Adaptive TS (ATS) & 5.52 & 10.26 & 9.63 & 5.81 & 5.11 & 7.27 \\
+Residual Calibrator & \textbf{3.75} & 10.50 & \underline{9.43} & \textbf{4.98} & 5.01 & \textbf{6.73} \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & \underline{4.19} & 10.96 & 9.56 & 5.56 & 5.17 & 7.09 \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & 4.65 & 10.54 & 9.60 & 6.30 & 5.95 & 7.41 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
