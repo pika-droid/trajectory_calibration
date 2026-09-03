@@ -139,22 +139,22 @@ Evaluated across all 14 vision-language benchmarks on single-pass feature matric
 
 | Calibration Method | ai2d | chartqa | docvqa | gqa | infographicvqa | lego-puzzles | mmbench | mmmu | pope | scienceqa | seedbench | textvqa | vizwiz-vqa | vqav2 |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Naive Confidence (NC)** | 41.80% | 70.70% | 73.52% | 32.43% | 84.55% | 73.16% | 28.58% | 78.76% | 4.12% | 10.66% | 32.40% | 8.72% | 16.71% | **7.74%** |
+| **Naive Confidence (NC)** | 41.80% | 70.70% | 73.52% | 32.43% | 84.55% | 73.16% | 28.58% | 78.76% | 4.12% | 10.66% | 32.40% | 8.72% | 16.71% | *7.74%* |
 | **Temperature Scaling (TS)** | 10.73% | 45.07% | 48.86% | 10.84% | 53.91% | 34.71% | 7.77% | 52.21% | *3.96%* | 9.76% | 2.64% | 8.35% | 15.56% | 10.63% |
 | **Platt Scaling (1D)** | 7.49% | 2.34% | 2.42% | 7.71% | *1.12%* | 10.07% | *4.88%* | *3.45%* | 4.05% | 7.46% | *2.25%* | 5.70% | 7.25% | 9.48% |
-| **Trajectory LR (No Bias)** | 8.58% | 3.53% | 6.31% | 6.54% | 1.65% | 10.82% | 5.86% | 4.26% | 5.15% | 4.93% | 4.34% | **2.62%** | 6.20% | 7.45% |
-| **Spline Calibration (PCHIP)** | 6.98% | 4.23% | 2.75% | **6.57%** | **0.60%** | **6.36%** | **4.45%** | **2.64%** | 5.10% | **5.16%** | **1.17%** | 10.25% | 8.45% | 10.14% |
+| **Trajectory LR (No Bias)** | 8.58% | 3.53% | 6.31% | **6.54%** | 1.65% | 10.82% | 5.86% | 4.26% | 5.15% | **4.93%** | 4.34% | **2.62%** | **6.20%** | **7.45%** |
+| **Spline Calibration (PCHIP)** | 6.98% | 4.23% | 2.75% | *6.57%* | **0.60%** | **6.36%** | **4.45%** | **2.64%** | 5.10% | *5.16%* | **1.17%** | 10.25% | 8.45% | 10.14% |
 | **Adaptive TS (ATS)** | 10.69% | 45.05% | 48.84% | 9.84% | 53.89% | 34.66% | 9.99% | 52.19% | 4.16% | 9.43% | 9.98% | 8.80% | 15.45% | 9.49% |
-| **Residual Calibrator** | 8.27% | **2.03%** | **2.36%** | *6.58%* | 1.29% | *6.80%* | 7.81% | 3.47% | 4.31% | 5.91% | 9.08% | 5.70% | *7.08%* | 9.09% |
+| **Residual Calibrator** | 8.27% | **2.03%** | **2.36%** | 6.58% | 1.29% | *6.80%* | 7.81% | 3.47% | 4.31% | 5.91% | 9.08% | 5.70% | 7.08% | 9.09% |
 | **VCPS-5D (Our Method)** | *6.71%* | 3.06% | 2.45% | 7.71% | 1.23% | 11.36% | 6.12% | 3.47% | 3.98% | 6.50% | 7.23% | *5.06%* | 7.23% | 9.35% |
-| **VCPS-17D (Our Method)** | **6.28%** | *2.14%* | *2.36%* | 7.82% | 1.29% | 10.47% | 5.10% | 3.47% | **3.57%** | *5.90%* | 4.99% | 5.80% | **6.76%** | *9.02%* |
+| **VCPS-17D (Our Method)** | **6.28%** | *2.14%* | *2.36%* | 7.82% | 1.29% | 10.47% | 5.10% | 3.47% | **3.57%** | 5.90% | 4.99% | 5.80% | *6.76%* | 9.02% |
 
 - **VCPS beats Global Temperature Scaling (TS)** on **13 / 14 datasets** (all except `seedbench`):
   `ai2d`, `chartqa`, `docvqa`, `gqa`, `infographicvqa`, `lego-puzzles`, `mmbench`, `mmmu`, `pope`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
 - **VCPS beats 1D Platt Scaling** on **8 / 14 datasets**:
   `ai2d`, `chartqa`, `docvqa`, `pope`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
-- **VCPS achieves #1 or #2 Rank** on **8 / 14 datasets**:
-  `ai2d` (1st), `chartqa` (2nd), `docvqa` (1st), `gqa` (2nd), `pope` (1st), `scienceqa` (2nd), `textvqa` (2nd), `vizwiz-vqa` (1st).
+- **VCPS achieves #1 or #2 Rank** on **6 / 14 datasets**:
+  `ai2d` (1st), `chartqa` (2nd), `docvqa` (1st), `pope` (1st), `textvqa` (2nd), `vizwiz-vqa` (2nd).
 
 ---
 
@@ -164,20 +164,20 @@ Evaluated across all 14 vision-language benchmarks on single-pass feature matric
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Naive Confidence (NC)** | 24.31% | 62.99% | 51.18% | 9.87% | 75.51% | 34.14% | 14.87% | 52.24% | 6.45% | 23.04% | 17.74% | 30.96% | 30.26% | *11.52%* |
 | **Temperature Scaling (TS)** | 13.47% | 41.54% | 46.63% | 10.14% | 52.63% | 24.08% | 10.07% | 49.32% | 5.90% | 10.44% | 7.99% | 18.27% | 28.77% | 15.96% |
-| **Platt Scaling (1D)** | *9.52%* | 7.04% | 5.04% | 10.27% | 1.09% | 11.70% | *8.24%* | 2.15% | **5.29%** | *6.51%* | **6.88%** | 11.59% | 6.81% | 15.96% |
-| **Trajectory LR (No Bias)** | 10.86% | 11.50% | 3.69% | 11.15% | 1.76% | 8.34% | 5.32% | 2.28% | 6.80% | 9.95% | 11.78% | 7.19% | 6.28% | **7.12%** |
-| **Spline Calibration (PCHIP)** | **8.98%** | 7.07% | **2.48%** | 9.78% | **0.60%** | **5.27%** | 10.04% | 2.27% | 7.97% | 7.97% | *7.65%* | *7.32%* | **5.64%** | 15.17% |
+| **Platt Scaling (1D)** | *9.52%* | 7.04% | 5.04% | 10.27% | 1.09% | 11.70% | 8.24% | 2.15% | **5.29%** | *6.51%* | **6.88%** | 11.59% | 6.81% | 15.96% |
+| **Trajectory LR (No Bias)** | 10.86% | 11.50% | *3.69%* | 11.15% | 1.76% | *8.34%* | **5.32%** | 2.28% | 6.80% | 9.95% | 11.78% | *7.19%* | *6.28%* | **7.12%** |
+| **Spline Calibration (PCHIP)** | **8.98%** | 7.07% | **2.48%** | 9.78% | **0.60%** | **5.27%** | 10.04% | 2.27% | 7.97% | 7.97% | *7.65%* | 7.32% | **5.64%** | 15.17% |
 | **Adaptive TS (ATS)** | 13.92% | 41.53% | 46.62% | **9.10%** | 52.61% | 24.08% | 9.89% | 49.32% | 6.02% | 10.18% | 8.00% | 18.15% | 28.45% | 13.10% |
-| **Residual Calibrator** | 11.34% | **6.69%** | 4.82% | *9.26%* | *1.09%* | *9.21%* | 8.53% | **2.14%** | 6.58% | 7.23% | 9.17% | **6.71%** | *6.61%* | 13.12% |
+| **Residual Calibrator** | 11.34% | **6.69%** | 4.82% | *9.26%* | *1.09%* | 9.21% | 8.53% | **2.14%** | 6.58% | 7.23% | 9.17% | **6.71%** | 6.61% | 13.12% |
 | **VCPS-5D (Our Method)** | 13.46% | *6.71%* | 4.20% | 10.26% | 1.09% | 10.56% | 8.80% | *2.15%* | 5.83% | 6.89% | 8.99% | 8.53% | 6.69% | 15.00% |
-| **VCPS-17D (Our Method)** | 11.55% | 9.74% | *3.73%* | 9.36% | 1.10% | 11.16% | **8.11%** | 2.16% | *5.69%* | **6.41%** | 9.28% | 11.61% | 7.00% | *12.86%* |
+| **VCPS-17D (Our Method)** | 11.55% | 9.74% | 3.73% | 9.36% | 1.10% | 11.16% | *8.11%* | 2.16% | *5.69%* | **6.41%** | 9.28% | 11.61% | 7.00% | 12.86% |
 
 - **VCPS beats Global Temperature Scaling (TS)** on **13 / 14 datasets** (all except `seedbench`):
   `ai2d`, `chartqa`, `docvqa`, `gqa`, `infographicvqa`, `lego-puzzles`, `mmbench`, `mmmu`, `pope`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
 - **VCPS beats 1D Platt Scaling** on **10 / 14 datasets**:
   `chartqa`, `docvqa`, `gqa`, `infographicvqa`, `lego-puzzles`, `mmbench`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
-- **VCPS achieves #1 or #2 Rank** on **10 / 14 datasets**:
-  `chartqa` (1st), `docvqa` (2nd), `gqa` (2nd), `lego-puzzles` (2nd), `mmbench` (1st), `mmmu` (2nd), `pope` (2nd), `scienceqa` (1st), `textvqa` (2nd), `vizwiz-vqa` (2nd).
+- **VCPS achieves #1 or #2 Rank** on **6 / 14 datasets**:
+  `chartqa` (2nd), `mmbench` (2nd), `mmmu` (2nd), `pope` (2nd), `scienceqa` (1st), `textvqa` (2nd).
 
 ---
 
@@ -199,7 +199,7 @@ Compares single-pass greedy calibration ($T=0.0$, $1\times$ compute) against cla
 
 | Model | Calibration Method | Paradigm / Regime | Sampling | Macro ECE (%) $\downarrow$ | Macro Ada-ECE (%) $\downarrow$ | Macro AUROC $\uparrow$ |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: |
-| **M3-LLaVA** | **VCPS-17D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 3.75% | 5.35% | 0.674 |
+| **M3-LLaVA** | **VCPS-17D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 3.75% | *5.35%* | 0.674 |
 | | **VCPS-5D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 4.13% | 5.82% | 0.688 |
 | | Residual Calibrator | Feature-Aided | Greedy ($T=0.0, K=1$) | 4.37% | 5.70% | **0.703** |
 | | Quadratic Platt (Logit-Only) | Polynomial Logit | Greedy ($T=0.0, K=1$) | **3.22%** | **4.81%** | 0.678 |
@@ -244,24 +244,24 @@ To rigorously evaluate zero-shot calibration stability under generation temperat
 
 | Model | Calibration Method | $T=0.0$ | $T=0.3$ | $T=0.6$ | $T=1.0$ | $T=1.5$ | Mean ECE $\downarrow$ |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **M3-LLaVA** | **VCPS-5D (Our Method)** | 5.69% | 19.40% | 9.95% | 5.14% | 9.39% | 9.91% |
-| | **VCPS-17D (Our Method)** | 5.51% | 19.69% | 10.30% | 6.37% | 11.82% | 10.74% |
-| | Residual Calibrator | 5.75% | 19.22% | **9.59%** | 5.36% | 9.92% | 9.97% |
-| | Quadratic Platt (Logit-Only) | 5.08% | 19.53% | 10.31% | **5.06%** | **8.40%** | **9.68%** |
-| | Platt Scaling (1D) | 6.12% | 19.24% | 10.00% | *5.09%* | 9.49% | 9.99% |
-| | Trajectory LR (No Bias) | **4.73%** | 19.36% | 10.26% | 7.95% | 9.38% | 10.34% |
-| | Spline Calibration (PCHIP) | 7.24% | **18.90%** | 12.48% | 6.97% | *8.51%* | 10.82% |
-| | Temperature Scaling (TS) | 9.41% | 21.90% | 14.44% | 8.66% | 11.01% | 13.08% |
-| | Naive Confidence (NC) | 10.05% | 23.60% | 15.67% | 9.45% | 10.29% | 13.81% |
-| **MQT-LLaVA** | **VCPS-5D (Our Method)** | 6.98% | 25.27% | 14.60% | 7.56% | *7.73%* | 12.43% |
-| | **VCPS-17D (Our Method)** | 7.67% | 25.74% | 15.12% | 8.57% | 8.11% | 13.04% |
-| | Residual Calibrator | 6.78% | 25.56% | 14.31% | 7.55% | 8.04% | 12.45% |
-| | Quadratic Platt (Logit-Only) | **6.28%** | 23.71% | *12.38%* | **6.49%** | **7.77%** | *11.33%* |
-| | Platt Scaling (1D) | 7.55% | 25.90% | 15.21% | *7.37%* | 8.11% | 12.83% |
-| | Trajectory LR (No Bias) | 7.56% | *20.58%* | **10.53%** | 7.72% | 9.12% | **11.10%** |
-| | Spline Calibration (PCHIP) | 7.23% | **20.09%** | 15.37% | 10.61% | 9.27% | 12.51% |
-| | Temperature Scaling (TS) | 15.85% | 28.81% | 22.35% | 19.60% | 20.26% | 21.37% |
-| | Naive Confidence (NC) | 22.68% | 41.63% | 34.74% | 27.31% | 21.06% | 29.48% |
+| **M3-LLaVA** | **VCPS-5D (Our Method)** | 5.10% | 20.33% | *9.99%* | 5.08% | 8.53% | *9.81%* |
+| | **VCPS-17D (Our Method)** | *4.69%* | 20.55% | 10.55% | 7.00% | 11.28% | 10.81% |
+| | Residual Calibrator | 4.82% | 20.35% | **9.42%** | 5.47% | 9.97% | 10.01% |
+| | Quadratic Platt (Logit-Only) | 4.71% | 20.29% | 10.29% | **4.79%** | **7.73%** | **9.56%** |
+| | Platt Scaling (1D) | 4.77% | 20.35% | 10.25% | *4.98%* | 8.78% | 9.83% |
+| | Trajectory LR (No Bias) | **4.16%** | *20.16%* | 10.48% | 7.53% | 9.36% | 10.34% |
+| | Spline Calibration (PCHIP) | 6.90% | **19.21%** | 12.43% | 6.69% | *7.93%* | 10.63% |
+| | Temperature Scaling (TS) | 9.16% | 22.46% | 14.55% | 8.74% | 11.08% | 13.20% |
+| | Naive Confidence (NC) | 10.03% | 24.48% | 15.81% | 9.95% | 9.98% | 14.05% |
+| **MQT-LLaVA** | **VCPS-5D (Our Method)** | 6.60% | 25.66% | 14.25% | 6.94% | *7.11%* | 12.11% |
+| | **VCPS-17D (Our Method)** | 7.35% | 25.89% | 15.06% | 8.48% | 7.62% | 12.88% |
+| | Residual Calibrator | *5.78%* | 25.85% | 14.48% | *6.52%* | 7.95% | 12.12% |
+| | Quadratic Platt (Logit-Only) | **5.50%** | 23.77% | *10.87%* | **6.40%** | **6.88%** | *10.68%* |
+| | Platt Scaling (1D) | 7.15% | 26.21% | 14.52% | 7.31% | 7.62% | 12.56% |
+| | Trajectory LR (No Bias) | 6.59% | *20.41%* | **10.25%** | 7.05% | 8.51% | **10.56%** |
+| | Spline Calibration (PCHIP) | 6.62% | **20.09%** | 14.79% | 10.58% | 8.27% | 12.07% |
+| | Temperature Scaling (TS) | 15.68% | 28.93% | 22.36% | 19.03% | 20.27% | 21.25% |
+| | Naive Confidence (NC) | 22.96% | 41.79% | 34.81% | 27.27% | 21.03% | 29.57% |
 
 ---
 
