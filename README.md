@@ -174,10 +174,10 @@ Evaluated across all 14 vision-language benchmarks on single-pass feature matric
 
 - **VCPS beats Global Temperature Scaling (TS)** on **13 / 14 datasets** (all except `seedbench`):
   `ai2d`, `chartqa`, `docvqa`, `gqa`, `infographicvqa`, `lego-puzzles`, `mmbench`, `mmmu`, `pope`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
-- **VCPS beats 1D Platt Scaling** on **10 / 14 datasets**:
-  `chartqa`, `docvqa`, `gqa`, `infographicvqa`, `lego-puzzles`, `mmbench`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
-- **VCPS achieves #1 or #2 Rank** on **6 / 14 datasets**:
-  `chartqa` (2nd), `mmbench` (2nd), `mmmu` (2nd), `pope` (2nd), `scienceqa` (1st), `textvqa` (2nd).
+- **VCPS beats 1D Platt Scaling** on **11 / 14 datasets** (all except `ai2d`, `pope`, `seedbench`):
+  `chartqa`, `docvqa`, `gqa`, `infographicvqa`, `lego-puzzles`, `mmbench`, `mmmu`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
+- **VCPS achieves #1 or #2 Rank** on **5 / 14 datasets**:
+  `chartqa` (2nd), `mmbench` (2nd), `mmmu` (2nd), `pope` (2nd), `scienceqa` (1st).
 
 ---
 
