@@ -36,14 +36,14 @@ In each table:
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 41.80% | 41.80% | 0.598 | `COLLAPSED` |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 8.56% | 10.73% | 0.598 | `COLLAPSED` |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | *3.49%* | 7.49% | 0.598 | `VALID` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 7.27% | 8.57% | **0.645** | `VALID` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 7.27% | 8.57% | *0.645* | `VALID` |
 | Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 7.27% | 8.57% | **0.645** | `VALID` |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | **3.14%** | 7.06% | 0.598 | `VALID` |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 6.04% | 6.98% | 0.594 | `VALID` |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 8.50% | 10.69% | 0.598 | `COLLAPSED` |
 | Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 5.35% | 8.27% | 0.613 | `VALID` |
 | VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 5.68% | 8.38% | 0.638 | `VALID` |
-| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 6.39% | 8.92% | *0.638* | `VALID` |
+| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 6.39% | 8.92% | 0.638 | `VALID` |
 | `ln_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 29.40% | - | 0.617 | `VALID` |
 | `semantic_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 31.60% | - | 0.604 | `VALID` |
 | `eigen_score` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 27.20% | - | 0.607 | `VALID` |
@@ -57,8 +57,8 @@ In each table:
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 70.70% | 70.70% | 0.835 | `COLLAPSED` |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 45.45% | 45.07% | 0.835 | `COLLAPSED` |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 2.96% | 2.34% | 0.835 | `VALID` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | **2.35%** | 3.55% | 0.833 | `VALID` |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | *2.55%* | 3.13% | **0.842** | `VALID` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | **2.30%** | 3.55% | 0.833 | `VALID` |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | *2.53%* | 3.13% | **0.842** | `VALID` |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | 3.13% | 2.12% | 0.835 | `VALID` |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 3.92% | 4.23% | 0.807 | `VALID` |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 45.43% | 45.05% | 0.835 | `COLLAPSED` |
@@ -78,8 +78,8 @@ In each table:
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 73.52% | 73.52% | 0.732 | `COLLAPSED` |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 48.86% | 48.86% | 0.732 | `COLLAPSED` |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | *1.80%* | 2.42% | 0.732 | `COLLAPSED` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | **1.51%** | 3.13% | 0.725 | `COLLAPSED` |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 5.19% | 6.00% | 0.566 | `COLLAPSED` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | **1.53%** | 2.75% | 0.725 | `COLLAPSED` |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 5.20% | 6.00% | 0.567 | `COLLAPSED` |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | 2.11% | 2.33% | 0.732 | `COLLAPSED` |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 1.98% | 2.75% | 0.715 | `COLLAPSED` |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 48.84% | 48.84% | 0.732 | `COLLAPSED` |
@@ -99,8 +99,8 @@ In each table:
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 32.54% | 32.43% | 0.685 | `COLLAPSED` |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 8.24% | 10.84% | 0.685 | `VALID` |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | **4.08%** | 7.71% | 0.685 | `VALID` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 5.41% | 5.78% | 0.699 | `VALID` |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 4.51% | 7.42% | 0.686 | `VALID` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 5.41% | 5.72% | 0.700 | `VALID` |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 4.33% | 7.41% | 0.686 | `VALID` |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | *4.23%* | 7.71% | 0.685 | `VALID` |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 5.93% | 6.57% | 0.697 | `VALID` |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 8.86% | 9.84% | 0.702 | `VALID` |
@@ -120,8 +120,8 @@ In each table:
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 84.55% | 84.55% | 0.425 | `COLLAPSED` |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 53.91% | 53.91% | 0.425 | `COLLAPSED` |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | *0.04%* | 1.12% | 0.575 | `COLLAPSED` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | **0.02%** | 1.00% | *0.640* | `COLLAPSED` |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 0.27% | 1.41% | 0.502 | `COLLAPSED` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | **0.02%** | 0.99% | *0.644* | `COLLAPSED` |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 0.27% | 1.42% | 0.504 | `COLLAPSED` |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | 0.05% | 1.24% | **0.696** | `COLLAPSED` |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 0.60% | 0.60% | 0.500 | `COLLAPSED` |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 53.89% | 53.89% | 0.425 | `COLLAPSED` |
@@ -162,7 +162,7 @@ In each table:
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 28.62% | 28.58% | 0.629 | `COLLAPSED` |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 6.68% | 7.77% | 0.629 | `VALID` |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | *3.07%* | 4.88% | 0.629 | `VALID` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 5.03% | 6.59% | *0.690* | `VALID` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 5.03% | 6.60% | *0.690* | `VALID` |
 | Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 5.99% | 5.77% | 0.679 | `VALID` |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | **1.61%** | 4.36% | 0.634 | `VALID` |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 4.66% | 4.45% | 0.623 | `VALID` |
@@ -183,8 +183,8 @@ In each table:
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 78.76% | 78.76% | **0.639** | `COLLAPSED` |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 52.21% | 52.21% | **0.639** | `COLLAPSED` |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | *1.81%* | 3.45% | **0.639** | `COLLAPSED` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 1.84% | 3.72% | 0.604 | `COLLAPSED` |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 2.55% | 3.90% | *0.619* | `COLLAPSED` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 1.96% | 3.59% | 0.607 | `COLLAPSED` |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 2.60% | 3.92% | *0.621* | `COLLAPSED` |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | 2.26% | 4.10% | 0.274 | `COLLAPSED` |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | **1.45%** | 2.64% | 0.555 | `COLLAPSED` |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 52.19% | 52.19% | **0.639** | `COLLAPSED` |
@@ -204,8 +204,8 @@ In each table:
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 4.03% | 4.12% | 0.752 | `VALID` |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 3.67% | 3.96% | 0.752 | `VALID` |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 3.69% | 4.05% | 0.752 | `VALID` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 4.36% | 5.81% | 0.752 | `VALID` |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 4.31% | 5.53% | 0.750 | `VALID` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 4.51% | 6.32% | 0.752 | `VALID` |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 4.36% | 5.56% | 0.750 | `VALID` |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | 3.64% | 4.06% | 0.752 | `VALID` |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 4.92% | 5.10% | 0.754 | `VALID` |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 4.63% | 4.16% | *0.757* | `VALID` |
@@ -225,8 +225,8 @@ In each table:
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 11.08% | 10.66% | 0.701 | `COLLAPSED` |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 8.69% | 9.76% | 0.701 | `VALID` |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 3.63% | 7.46% | 0.701 | `VALID` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | **3.02%** | 5.85% | **0.707** | `VALID` |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 5.33% | 6.85% | 0.701 | `VALID` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | **3.09%** | 5.03% | **0.707** | `VALID` |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 5.12% | 6.85% | 0.701 | `VALID` |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | *3.18%* | 4.13% | 0.680 | `VALID` |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 4.44% | 5.16% | 0.695 | `VALID` |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 7.70% | 9.43% | *0.705* | `VALID` |
@@ -267,14 +267,14 @@ In each table:
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 8.32% | 8.72% | 0.832 | `VALID` |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 8.70% | 8.35% | 0.832 | `VALID` |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 5.01% | 5.70% | 0.832 | `VALID` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | *4.64%* | 4.01% | *0.841* | `VALID` |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | **3.62%** | 2.93% | **0.841** | `VALID` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 4.78% | 4.41% | *0.841* | `VALID` |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | **3.54%** | 2.93% | **0.841** | `VALID` |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | 4.77% | 4.73% | 0.832 | `VALID` |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 10.11% | 10.25% | 0.832 | `VALID` |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 8.22% | 8.80% | 0.832 | `VALID` |
 | Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 5.01% | 5.70% | 0.834 | `VALID` |
 | VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 5.66% | 5.46% | 0.834 | `VALID` |
-| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 4.66% | 5.16% | 0.834 | `VALID` |
+| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | *4.66%* | 5.16% | 0.834 | `VALID` |
 | `ln_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 11.80% | - | 0.811 | `VALID` |
 | `semantic_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 28.20% | - | 0.774 | `VALID` |
 | `eigen_score` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 26.60% | - | 0.814 | `VALID` |
@@ -288,8 +288,8 @@ In each table:
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 16.71% | 16.71% | 0.835 | `VALID` |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 15.56% | 15.56% | 0.835 | `VALID` |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 6.76% | 7.25% | 0.835 | `VALID` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | *5.13%* | 4.19% | 0.827 | `VALID` |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | **4.90%** | 6.11% | 0.821 | `VALID` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | *5.11%* | 4.18% | 0.827 | `VALID` |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | **4.93%** | 6.50% | 0.821 | `VALID` |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | 7.26% | 7.41% | 0.835 | `VALID` |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 8.13% | 8.45% | 0.826 | `VALID` |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 15.45% | 15.45% | 0.835 | `VALID` |
@@ -309,8 +309,8 @@ In each table:
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 8.51% | 7.74% | 0.756 | `VALID` |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 10.48% | 10.63% | 0.756 | `VALID` |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 7.13% | 9.48% | 0.756 | `VALID` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 6.16% | 6.64% | 0.775 | `VALID` |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 5.92% | 6.02% | 0.777 | `VALID` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 6.15% | 6.64% | 0.775 | `VALID` |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 5.91% | 6.01% | 0.776 | `VALID` |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | **3.69%** | 5.09% | 0.769 | `VALID` |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 7.25% | 10.14% | 0.761 | `VALID` |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 9.10% | 9.49% | 0.765 | `VALID` |
@@ -333,8 +333,8 @@ Macro-averaged evaluation metrics across all 14 datasets for **M3-LLaVA**.
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 40.33% | 40.27% | 0.671 |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 21.93% | 22.50% | 0.671 |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | *3.24%* | 5.41% | 0.682 |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 3.88% | 5.28% | **0.713** |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 4.62% | 5.59% | 0.694 |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 3.91% | 5.25% | **0.713** |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 4.59% | 5.62% | 0.695 |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | **3.22%** | 4.81% | 0.678 |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 4.75% | 5.35% | 0.669 |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 22.06% | 23.03% | 0.687 |
@@ -360,17 +360,17 @@ Macro-averaged evaluation metrics across all 14 datasets for **M3-LLaVA**.
 ### B. Detailed Win Breakdown Table
 | Dataset | Lowest ECE Method | Best ECE (%) | Highest AUROC Method | Best AUROC | VCPS Win Status |
 | :--- | :--- | :---: | :--- | :---: | :---: |
-| `ai2d` | Quadratic Platt (Logit-Only) | **3.14%** | Trajectory LR | **0.645** | `Competitive` |
-| `chartqa` | Trajectory LR | **2.35%** | Trajectory LR (No Bias) | **0.842** | `Competitive` |
-| `docvqa` | Trajectory LR | **1.51%** | `umpire` | **0.834** | `Competitive` |
+| `ai2d` | Quadratic Platt (Logit-Only) | **3.14%** | Trajectory LR (No Bias) | **0.645** | `Competitive` |
+| `chartqa` | Trajectory LR | **2.30%** | Trajectory LR (No Bias) | **0.842** | `Competitive` |
+| `docvqa` | Trajectory LR | **1.53%** | `umpire` | **0.834** | `Competitive` |
 | `gqa` | Platt Scaling (1D) | **4.08%** | `umpire` | **0.712** | `Competitive` |
 | `infographicvqa` | Trajectory LR | **0.02%** | Quadratic Platt (Logit-Only) | **0.696** | `Competitive` |
 | `lego-puzzles` | Platt Scaling (1D) | **0.71%** | Quadratic Platt (Logit-Only) | **0.668** | `Competitive` |
 | `mmbench` | Quadratic Platt (Logit-Only) | **1.61%** | VCPS-17D (Our Method) | **0.695** | `Top AUROC` |
 | `mmmu` | Spline Calibration | **1.45%** | Naive Confidence (NC) | **0.639** | `Competitive` |
 | `pope` | VCPS-17D (Our Method) | **3.15%** | VCPS-17D (Our Method) | **0.761** | `Top ECE, Top AUROC` |
-| `scienceqa` | Trajectory LR | **3.02%** | Trajectory LR | **0.707** | `Competitive` |
+| `scienceqa` | Trajectory LR | **3.09%** | Trajectory LR | **0.707** | `Competitive` |
 | `seedbench` | Spline Calibration | **0.72%** | `eigen_score` | **0.655** | `Competitive` |
-| `textvqa` | Trajectory LR (No Bias) | **3.62%** | Trajectory LR (No Bias) | **0.841** | `Competitive` |
-| `vizwiz-vqa` | Trajectory LR (No Bias) | **4.90%** | VCPS-5D (Our Method) | **0.836** | `Top AUROC` |
+| `textvqa` | Trajectory LR (No Bias) | **3.54%** | Trajectory LR (No Bias) | **0.841** | `Competitive` |
+| `vizwiz-vqa` | Trajectory LR (No Bias) | **4.93%** | VCPS-5D (Our Method) | **0.836** | `Top AUROC` |
 | `vqav2` | Quadratic Platt (Logit-Only) | **3.69%** | `umpire` | **0.819** | `Competitive` |
