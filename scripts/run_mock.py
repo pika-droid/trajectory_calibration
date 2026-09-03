@@ -80,6 +80,7 @@ def main() -> None:
         "Platt Scaling (1D)": (PlattScalingEstimator(), X_train_17d, X_test_17d),
         "Quadratic Platt (Logit-Only)": (QuadraticPlattScaler(), X_train_17d, X_test_17d),
         "Beta Calibration": (BetaCalibrator(), X_train_17d, X_test_17d),
+        "Trajectory LR": (TrajectoryLREstimator(fit_intercept=True), X_train_5d, X_test_5d),
         "Trajectory LR (No Bias)": (TrajectoryLREstimator(fit_intercept=False), X_train_5d, X_test_5d),
         "Spline Calibration": (SplineCalibrator(), X_train_17d, X_test_17d),
         "Adaptive TS (ATS)": (AdaptiveTemperatureScaling(), X_train_5d, X_test_5d),
@@ -96,7 +97,11 @@ def main() -> None:
     print("-" * 85)
 
     for name, (model, X_tr, X_te) in calibrators.items():
-        model.fit(X_tr, y_train)
+        if isinstance(model, VaryingCoefficientPlattScaler):
+            feat_names = best_5d_keys if "5D" in name else FEATURE_KEYS
+            model.fit(X_tr, y_train, feature_names=feat_names)
+        else:
+            model.fit(X_tr, y_train)
         probs = model.predict_proba(X_te)
         panel = evaluate_full_metric_panel(probs, y_test, c_test_576, y_train=y_train)
         print(f"{name:<28} | {panel['ece_percent']:<8.2f} | {panel['adaptive_ece_percent']:<11.2f} | {panel['auroc']:<7.3f} | {panel['brier']:<7.4f} | {panel['status']:<9}")

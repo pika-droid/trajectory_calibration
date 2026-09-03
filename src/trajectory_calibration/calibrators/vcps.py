@@ -53,38 +53,42 @@ class VaryingCoefficientPlattScaler:
         self.w: np.ndarray | None = None
         self.feature_names: list[str] | None = None
 
-    def fit(
+    def _build_objective(
         self,
         X_train: np.ndarray,
         y_train: np.ndarray,
         feature_names: list[str] | None = None,
-    ) -> VaryingCoefficientPlattScaler:
+    ) -> tuple[Any, np.ndarray]:
         X = np.asarray(X_train, dtype=np.float64)
         y = np.asarray(y_train, dtype=np.float64)
         n, d = X.shape
-
         self.feature_names = feature_names or [f"x{i}" for i in range(1, d + 1)]
         x1 = X[:, 0]
-
         X_norm = self.scaler.fit_transform(X)
 
-        slope_idx = [self.feature_names.index(f) for f in self.slope_features if f in self.feature_names]
-        int_idx = [self.feature_names.index(f) for f in self.intercept_features if f in self.feature_names]
+        matched_slope = [f for f in self.slope_features if f in self.feature_names]
+        if len(matched_slope) < len(self.slope_features):
+            missing = set(self.slope_features) - set(self.feature_names)
+            logger.warning(
+                f"VCPS slope features {missing} not found in feature_names {self.feature_names}. "
+                f"Falling back to positional indices. Pass feature_names to fit()."
+            )
 
-        if not slope_idx:
-            slope_idx = list(range(1, min(3, d)))
-        if not int_idx:
-            int_idx = list(range(1, min(5, d)))
+        matched_int = [f for f in self.intercept_features if f in self.feature_names]
+        if len(matched_int) < len(self.intercept_features):
+            missing = set(self.intercept_features) - set(self.feature_names)
+            logger.warning(
+                f"VCPS intercept features {missing} not found in feature_names {self.feature_names}. "
+                f"Falling back to positional indices. Pass feature_names to fit()."
+            )
 
-        self._slope_idx = slope_idx
-        self._int_idx = int_idx
-        k_slope = len(slope_idx)
-        k_int = len(int_idx)
+        slope_idx = [self.feature_names.index(f) for f in matched_slope] or list(range(1, min(3, d)))
+        int_idx = [self.feature_names.index(f) for f in matched_int] or list(range(1, min(5, d)))
+        self._slope_idx, self._int_idx = slope_idx, int_idx
+        k_slope, k_int = len(slope_idx), len(int_idx)
 
-        lr = LogisticRegression(C=1000.0, solver="lbfgs", max_iter=1000)
-        lr.fit(x1.reshape(-1, 1), y)
-        init_a0 = float(lr.coef_[0][0])
-        init_b0 = float(lr.intercept_[0])
+        lr = LogisticRegression(C=1000.0, solver="lbfgs", max_iter=1000).fit(x1.reshape(-1, 1), y)
+        init_a0, init_b0 = float(lr.coef_[0][0]), float(lr.intercept_[0])
 
         def objective(params: np.ndarray) -> tuple[float, np.ndarray]:
             if self.mode == "1d_platt":
@@ -100,13 +104,12 @@ class VaryingCoefficientPlattScaler:
                 b0, w = params[1 + k_slope], params[2 + k_slope :]
 
             if self.mode in ["full", "slope_only"]:
-                slope_log = np.clip(np.log(max(init_a0, 0.1)) + np.dot(X_norm[:, slope_idx], gamma), -3.0, 3.0)
+                slope_log = np.clip(np.log(max(a0, 0.1)) + np.dot(X_norm[:, slope_idx], gamma), -3.0, 3.0)
                 a_x = np.exp(slope_log)
             else:
-                a_x = np.full(n, max(init_a0, 0.1))
+                a_x = np.full(n, max(a0, 0.1))
 
             b_x = b0 + np.dot(X_norm[:, int_idx], w) if self.mode in ["full", "intercept_only"] else np.full(n, b0)
-
             logits = a_x * x1 + b_x
             p = sigmoid(logits)
 
@@ -116,7 +119,7 @@ class VaryingCoefficientPlattScaler:
             total_loss = nll + reg_gamma + reg_w
 
             r = (p - y) / n
-            grad_a0 = np.sum(r * x1 * a_x)
+            grad_a0 = np.sum(r * x1 * a_x * (1.0 / max(a0, 0.1))) if a0 > 0.1 else 0.0
             grad_gamma = np.dot(X_norm[:, slope_idx].T, r * x1 * a_x) + (gamma / self.C_slope)
             grad_b0 = np.sum(r)
             grad_w = np.dot(X_norm[:, int_idx].T, r) + (w / self.C_intercept)
@@ -141,8 +144,18 @@ class VaryingCoefficientPlattScaler:
         else:
             x0 = np.concatenate([[init_a0], np.zeros(k_slope), [init_b0], np.zeros(k_int)])
 
+        return objective, x0
+
+    def fit(
+        self,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        feature_names: list[str] | None = None,
+    ) -> VaryingCoefficientPlattScaler:
+        objective, x0 = self._build_objective(X_train, y_train, feature_names=feature_names)
         res = minimize(objective, x0=x0, jac=True, method="L-BFGS-B")
         p_opt = res.x
+        k_slope, k_int = len(self._slope_idx), len(self._int_idx)
         self.a0 = float(p_opt[0])
         if self.mode == "full":
             self.gamma, self.b0, self.w = p_opt[1 : 1 + k_slope], float(p_opt[1 + k_slope]), p_opt[2 + k_slope :]
@@ -152,7 +165,6 @@ class VaryingCoefficientPlattScaler:
             self.gamma, self.b0, self.w = np.zeros(k_slope), float(p_opt[1]), p_opt[2:]
         else:
             self.gamma, self.b0, self.w = np.zeros(k_slope), float(p_opt[1]), np.zeros(k_int)
-
         return self
 
     def compute_dynamic_slope(self, X: np.ndarray) -> np.ndarray:

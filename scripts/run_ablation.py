@@ -14,6 +14,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import StratifiedKFold
 
 SRC_PATH = Path(__file__).resolve().parent.parent / "src"
 if str(SRC_PATH) not in sys.path:
@@ -151,7 +152,7 @@ def main() -> None:
         elif k == len(FEATURE_KEYS):
             current_subset = FEATURE_KEYS
         else:
-            # Stepwise greedy addition
+            # Stepwise greedy addition using 3-fold CV on training data only
             while len(selected_features) < k:
                 best_cand = None
                 best_cand_ece = 1e9
@@ -159,11 +160,18 @@ def main() -> None:
                     if cand in selected_features:
                         continue
                     cand_cols = [FEATURE_KEYS.index(f) for f in selected_features + [cand]]
-                    lr_cand = LogisticRegression(C=1.0, max_iter=1000).fit(X_train_full[:, cand_cols], y_train)
-                    c_preds = lr_cand.predict_proba(X_test_full[:, cand_cols])[:, 1]
-                    c_ece = compute_adaptive_ece(c_preds, y_test, n_bins=15)
-                    if c_ece < best_cand_ece:
-                        best_cand_ece = c_ece
+                    # Cross-validate on TRAINING data only
+                    cv_eces = []
+                    skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=args.seed)
+                    for tr_cv, va_cv in skf.split(X_train_full[:, cand_cols], y_train):
+                        lr_cv = LogisticRegression(C=1.0, max_iter=1000).fit(
+                            X_train_full[tr_cv][:, cand_cols], y_train[tr_cv]
+                        )
+                        va_preds = lr_cv.predict_proba(X_train_full[va_cv][:, cand_cols])[:, 1]
+                        cv_eces.append(compute_adaptive_ece(va_preds, y_train[va_cv], n_bins=15))
+                    mean_cv_ece = float(np.mean(cv_eces))
+                    if mean_cv_ece < best_cand_ece:
+                        best_cand_ece = mean_cv_ece
                         best_cand = cand
                 if best_cand:
                     selected_features.append(best_cand)

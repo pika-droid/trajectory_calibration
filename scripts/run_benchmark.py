@@ -100,14 +100,18 @@ def main() -> None:
             "MSSC (Multi-Scale Proxy)": (MultiScaleSemanticConsistency(), X_train_17d, X_test_17d),
             "MSE-EIGEN (Multi-Scale)": (MultiScaleEigenVariance(), X_train_17d, X_test_17d),
             "Residual Calibrator": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
+            "Trajectory LR": (TrajectoryLREstimator(fit_intercept=True), X_train_5d, X_test_5d),
             "Trajectory LR (No Bias)": (TrajectoryLREstimator(fit_intercept=False), X_train_5d, X_test_5d),
-            "Quadratic Platt (Logit-Only)": (QuadraticPlattScaler(), X_train_17d, X_test_17d),
             "VCPS-5D (Our Method)": (VaryingCoefficientPlattScaler(slope_features=best_5d_keys[1:3], intercept_features=best_5d_keys[1:]), X_train_5d, X_test_5d),
             "VCPS-17D (Our Method)": (VaryingCoefficientPlattScaler(), X_train_17d, X_test_17d),
         }
 
         for m_name, (model, X_tr, X_te) in methods.items():
-            model.fit(X_tr, y_train)
+            if isinstance(model, VaryingCoefficientPlattScaler):
+                feat_names = best_5d_keys if "5D" in m_name else FEATURE_KEYS
+                model.fit(X_tr, y_train, feature_names=feat_names)
+            else:
+                model.fit(X_tr, y_train)
             probs = model.predict_proba(X_te)
             panel = evaluate_full_metric_panel(probs, y_test, c_test_576, y_train=y_train)
             panel["dataset"] = ds

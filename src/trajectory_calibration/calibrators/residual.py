@@ -43,20 +43,23 @@ def compute_aurc(probs: np.ndarray | list[float], y: np.ndarray | list[float]) -
     n = len(p)
     if n == 0:
         return 0.0
+    if n == 1:
+        pred = 1.0 if p[0] >= 0.5 else 0.0
+        return 0.0 if labels[0] == pred else 1.0
 
-    order = np.argsort(-p)
+    confidence = np.maximum(p, 1.0 - p)  # Confidence for binary classification
+    order = np.argsort(-confidence)  # Sort by descending confidence
     y_sorted = labels[order]
+    p_sorted = p[order]
 
-    cum_correct = np.cumsum(y_sorted)
-    coverage = np.arange(1, n + 1) / n
-    precision = cum_correct / np.arange(1, n + 1)
-    risk = 1.0 - precision
+    # Risk = 1 - accuracy at each coverage level
+    cum_correct = np.cumsum((y_sorted == (p_sorted >= 0.5).astype(float)))
+    coverage = np.arange(1, n + 1)
+    risk = 1.0 - cum_correct / coverage
 
     if _trapezoid is not None:
-        aurc = float(_trapezoid(risk, coverage))
-    else:
-        aurc = float(np.sum((risk[:-1] + risk[1:]) / 2.0 * np.diff(coverage)))
-    return aurc
+        return float(_trapezoid(risk, dx=1.0 / n))
+    return float(np.sum((risk[:-1] + risk[1:]) / 2.0 * (1.0 / n)))
 
 
 class ResidualTrajectoryCalibrator:

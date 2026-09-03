@@ -42,8 +42,11 @@ def find_feature_file(
     if ds_name:
         candidates.extend([
             path / arch_folder / temp_folder / f"{ds_name}.pt",
+            path / arch_folder / temp_folder / f"{ds_name}_5scale.pt",
             path / arch_folder / "temp_0.0" / f"{ds_name}.pt",
+            path / arch_folder / "temp_0.0" / f"{ds_name}_5scale.pt",
             path / arch_folder / f"{ds_name}.pt",
+            path / arch_folder / f"{ds_name}_5scale.pt",
             path / ds_name / "full_extracted_features.pt",
             path / f"{ds_name}.pt",
             path / f"{ds_name}_5scale.pt",

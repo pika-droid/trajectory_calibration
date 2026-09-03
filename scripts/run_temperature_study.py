@@ -80,6 +80,7 @@ def main() -> None:
         try:
             df_0 = load_dataset_features(args.features_dir, ds_name=ds, arch=args.arch, gen_temperature=0.0, fine_scale=fine_scale)
             tr_idx, te_idx = get_stratified_split(df_0, test_size=0.2, random_state=args.seed)
+            test_qids = set(df_0.iloc[te_idx]["question_id"].values)
             tr_df = df_0.iloc[tr_idx].reset_index(drop=True)
 
             X_tr_17d = tr_df[FEATURE_KEYS].values
@@ -91,17 +92,18 @@ def main() -> None:
                 "Naive Confidence (NC)": NaiveConfidenceEstimator().fit(X_tr_17d, y_tr),
                 "Temperature Scaling (TS)": TemperatureScalingEstimator().fit(X_tr_17d, y_tr),
                 "Platt Scaling (1D)": PlattScalingEstimator().fit(X_tr_17d, y_tr),
+                "Trajectory LR": TrajectoryLREstimator(fit_intercept=True).fit(X_tr_5d, y_tr),
                 "Trajectory LR (No Bias)": TrajectoryLREstimator(fit_intercept=False).fit(X_tr_5d, y_tr),
                 "Quadratic Platt (Logit-Only)": QuadraticPlattScaler().fit(X_tr_17d, y_tr),
                 "Spline Calibration (PCHIP)": SplineCalibrator().fit(X_tr_17d, y_tr),
                 "Adaptive TS (ATS)": AdaptiveTemperatureScaling().fit(X_tr_5d, y_tr),
                 "MSSC (Multi-Scale Proxy)": MultiScaleSemanticConsistency().fit(X_tr_17d, y_tr),
                 "Residual Calibrator": ResidualTrajectoryCalibrator().fit(X_tr_5d, y_tr),
-                "VCPS-5D (Our Method)": VaryingCoefficientPlattScaler(slope_features=best_5d[1:3], intercept_features=best_5d[1:]).fit(X_tr_5d, y_tr),
-                "VCPS-17D (Our Method)": VaryingCoefficientPlattScaler().fit(X_tr_17d, y_tr),
+                "VCPS-5D (Our Method)": VaryingCoefficientPlattScaler(slope_features=best_5d[1:3], intercept_features=best_5d[1:]).fit(X_tr_5d, y_tr, feature_names=best_5d),
+                "VCPS-17D (Our Method)": VaryingCoefficientPlattScaler().fit(X_tr_17d, y_tr, feature_names=FEATURE_KEYS),
             }
             train_models[ds] = models
-            train_splits[ds] = (y_tr, best_5d)
+            train_splits[ds] = (y_tr, best_5d, test_qids)
             print(f"Trained greedy anchor models on {ds.upper()} (N_train={len(tr_df)})")
         except Exception as e:
             print(f"Warning: Could not train T=0.0 anchor for {ds}: {e}")
@@ -117,14 +119,16 @@ def main() -> None:
                 continue
             try:
                 df_T = load_dataset_features(args.features_dir, ds_name=ds, arch=args.arch, gen_temperature=T, fine_scale=fine_scale)
-                _, te_idx = get_stratified_split(df_T, test_size=0.2, random_state=args.seed)
-                te_df = df_T.iloc[te_idx].reset_index(drop=True)
+                y_tr, best_5d, test_qids = train_splits[ds]
+
+                te_mask = df_T["question_id"].isin(test_qids)
+                te_df = df_T[te_mask].reset_index(drop=True)
+                tr_df_T = df_T[~te_mask].reset_index(drop=True)
 
                 X_te_17d = te_df[FEATURE_KEYS].values
                 y_te = te_df["is_correct"].values
                 c_te = te_df["c_576"].values
 
-                y_tr, best_5d = train_splits[ds]
                 X_te_5d = te_df[best_5d].values
 
                 # Evaluate Greedy Transfer
@@ -139,15 +143,16 @@ def main() -> None:
                     transfer_results.append(panel)
 
                 # Dynamic Slope & Parameter Tracking: Independent Refit at Temperature T
-                tr_idx, _ = get_stratified_split(df_T, test_size=0.2, random_state=args.seed)
-                tr_df_T = df_T.iloc[tr_idx].reset_index(drop=True)
                 X_tr_T_17d = tr_df_T[FEATURE_KEYS].values
                 y_tr_T = tr_df_T["is_correct"].values
                 best_5d_T = select_best_5d_subset(X_tr_T_17d, y_tr_T, FEATURE_KEYS)
                 X_tr_T_5d = tr_df_T[best_5d_T].values
                 X_te_T_5d = te_df[best_5d_T].values
 
-                vcps_refit = VaryingCoefficientPlattScaler(slope_features=best_5d_T[1:3], intercept_features=best_5d_T[1:]).fit(X_tr_T_5d, y_tr_T)
+                vcps_refit = VaryingCoefficientPlattScaler(
+                    slope_features=best_5d_T[1:3],
+                    intercept_features=best_5d_T[1:],
+                ).fit(X_tr_T_5d, y_tr_T, feature_names=best_5d_T)
                 vcps_probs = vcps_refit.predict_proba(X_te_T_5d)
                 panel_refit = evaluate_full_metric_panel(vcps_probs, y_te, c_te, y_train=y_tr_T)
 

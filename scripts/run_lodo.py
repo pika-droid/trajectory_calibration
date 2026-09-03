@@ -112,6 +112,7 @@ def main() -> None:
         # Models to evaluate
         base_models = {
             "Platt Scaling (1D)": (PlattScalingEstimator(), X_train_17d, X_test_17d),
+            "Trajectory LR": (TrajectoryLREstimator(fit_intercept=True), X_train_5d, X_test_5d),
             "Trajectory LR (No Bias)": (TrajectoryLREstimator(fit_intercept=False), X_train_5d, X_test_5d),
             "Best 5D Trajectory": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
             "Two-Stage Residual": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
@@ -120,7 +121,11 @@ def main() -> None:
         }
 
         for m_name, (model, X_tr, X_te) in base_models.items():
-            model.fit(X_tr, y_train)
+            if isinstance(model, VaryingCoefficientPlattScaler):
+                feat_names = best_5d_keys if "5D" in m_name else FEATURE_KEYS
+                model.fit(X_tr, y_train, feature_names=feat_names)
+            else:
+                model.fit(X_tr, y_train)
             base_probs = model.predict_proba(X_te)
 
             # Mode 1: Zero-Shot Base (No target supervision)

@@ -223,30 +223,50 @@ class QuadraticPlattScaler:
 
 
 class TrajectoryLREstimator:
-    """Trajectory Logistic Regression baseline without intercept (zero-bias)."""
+    """Trajectory Logistic Regression baseline with internal standardization."""
 
-    def __init__(self, fit_intercept: bool = False, C: float = 1.0, random_state: int = 42) -> None:
+    def __init__(
+        self,
+        fit_intercept: bool = True,
+        C: float = 1.0,
+        random_state: int = 42,
+    ) -> None:
         self.fit_intercept = fit_intercept
-        self.C = C
+        self.C = float(C)
         self.random_state = random_state
-        self.lr = LogisticRegression(
-            fit_intercept=self.fit_intercept,
-            C=self.C,
-            solver="lbfgs",
-            max_iter=1000,
-            random_state=self.random_state,
-        )
+        self._scaler = StandardScaler(with_mean=self.fit_intercept)
+        self._lr: LogisticRegression | None = None
+
+    @property
+    def lr(self) -> LogisticRegression | None:
+        return self._lr
+
+    @lr.setter
+    def lr(self, val: LogisticRegression | None) -> None:
+        self._lr = val
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray) -> TrajectoryLREstimator:
         X = np.asarray(X_train, dtype=np.float64)
         if X.ndim == 1:
             X = X.reshape(-1, 1)
-        self.lr.fit(X, y_train)
+        y = np.asarray(y_train, dtype=np.float64)
+        X_scaled = self._scaler.fit_transform(X)
+        self._lr = LogisticRegression(
+            C=self.C,
+            fit_intercept=self.fit_intercept,
+            max_iter=1000,
+            solver="lbfgs",
+            random_state=self.random_state,
+        ).fit(X_scaled, y)
         return self
 
     def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
         X = np.asarray(X_test, dtype=np.float64)
         if X.ndim == 1:
             X = X.reshape(-1, 1)
-        return self.lr.predict_proba(X)[:, 1]
+        if self._lr is None:
+            raise RuntimeError("TrajectoryLREstimator must be fitted before predict_proba.")
+        X_scaled = self._scaler.transform(X)
+        return self._lr.predict_proba(X_scaled)[:, 1]
+
 
