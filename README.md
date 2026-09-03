@@ -141,21 +141,21 @@ Evaluated across all 14 vision-language benchmarks on single-pass feature matric
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Naive Confidence (NC)** | 41.80% | 70.70% | 73.52% | 32.43% | 84.55% | 73.16% | 28.58% | 78.76% | 4.12% | 10.66% | 32.40% | 8.72% | 16.71% | 7.74% |
 | Temperature Scaling (TS) | 10.73% | 45.07% | 48.86% | 10.84% | 53.91% | 34.71% | 7.77% | 52.21% | *3.96%* | 9.76% | 2.64% | 8.35% | 15.56% | 10.63% |
-| Platt Scaling (1D) | 7.49% | 2.34% | 2.42% | 7.71% | 1.12% | 10.07% | *4.88%* | *3.45%* | 4.05% | 7.46% | *2.25%* | 5.70% | 7.25% | 9.48% |
-| Trajectory LR | 8.57% | 3.55% | 3.13% | **5.78%** | *1.00%* | 10.52% | 6.59% | 3.72% | 5.81% | *5.85%* | 4.60% | *4.01%* | **4.19%** | *6.64%* |
+| Platt Scaling (1D) | *7.49%* | 2.34% | *2.42%* | 7.71% | 1.12% | 10.07% | *4.88%* | *3.45%* | 4.05% | 7.46% | *2.25%* | 5.70% | 7.25% | 9.48% |
+| Trajectory LR | 8.57% | 3.55% | 3.13% | **5.78%** | *1.00%* | 10.52% | 6.59% | 3.72% | 5.81% | 5.85% | 4.60% | *4.01%* | **4.19%** | *6.64%* |
 | Trajectory LR (No Bias) | 8.57% | 3.13% | 6.00% | 7.42% | 1.41% | 10.41% | 5.77% | 3.90% | 5.53% | 6.85% | 4.23% | **2.93%** | *6.11%* | **6.02%** |
-| Spline Calibration (PCHIP) | **6.98%** | 4.23% | 2.75% | *6.57%* | **0.60%** | **6.36%** | **4.45%** | **2.64%** | 5.10% | **5.16%** | **1.17%** | 10.25% | 8.45% | 10.14% |
+| Spline Calibration (PCHIP) | **6.98%** | 4.23% | 2.75% | 6.57% | **0.60%** | **6.36%** | **4.45%** | **2.64%** | 5.10% | **5.16%** | **1.17%** | 10.25% | 8.45% | 10.14% |
 | Adaptive TS (ATS) | 10.69% | 45.05% | 48.84% | 9.84% | 53.89% | 34.66% | 9.99% | 52.19% | 4.16% | 9.43% | 9.98% | 8.80% | 15.45% | 9.49% |
 | Residual Calibrator | 8.27% | **2.03%** | **2.36%** | 6.58% | 1.29% | *6.80%* | 7.81% | 3.47% | 4.31% | 5.91% | 9.08% | 5.70% | 7.08% | 9.09% |
-| **VCPS-5D (Our Method)** | 8.38% | 2.88% | 2.51% | 7.08% | 1.23% | 11.97% | 6.97% | 3.50% | 4.02% | 5.43% | 8.21% | 5.46% | 7.02% | 9.36% |
-| **VCPS-17D (Our Method)** | 8.92% | *2.33%* | 2.75% | 6.56% | 1.31% | 11.86% | 6.18% | 3.49% | **3.47%** | 6.00% | 7.83% | 5.16% | 7.18% | 8.14% |
+| **VCPS-5D (Our Method)** | 8.38% | 2.88% | 2.51% | 7.08% | 1.23% | 11.97% | 6.97% | 3.50% | 4.02% | *5.43%* | 8.21% | 5.46% | 7.02% | 9.36% |
+| **VCPS-17D (Our Method)** | 8.92% | *2.33%* | 2.75% | *6.56%* | 1.31% | 11.86% | 6.18% | 3.49% | **3.47%** | 6.00% | 7.83% | 5.16% | 7.18% | 8.14% |
 
 - **VCPS beats Global Temperature Scaling (TS)** on **13 / 14 datasets** (all except `seedbench`):
   `ai2d`, `chartqa`, `docvqa`, `gqa`, `infographicvqa`, `lego-puzzles`, `mmbench`, `mmmu`, `pope`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
 - **VCPS beats 1D Platt Scaling** on **7 / 14 datasets**:
   `chartqa`, `gqa`, `pope`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
-- **VCPS achieves #1 or #2 Rank** on **5 / 14 datasets**:
-  `chartqa` (2nd), `gqa` (2nd), `pope` (1st), `textvqa` (3rd), `vizwiz-vqa` (3rd).
+- **VCPS achieves #1 or #2 Rank** on **4 / 14 datasets**:
+  `pope` (1st), `chartqa` (2nd), `gqa` (2nd), `scienceqa` (2nd).
 
 ---
 
@@ -174,12 +174,12 @@ Evaluated across all 14 vision-language benchmarks on single-pass feature matric
 | **VCPS-5D (Our Method)** | 13.46% | **6.18%** | 4.84% | 9.28% | 1.09% | 12.18% | 7.95% | 2.15% | 6.61% | 7.05% | 9.04% | 7.01% | 5.75% | 11.16% |
 | **VCPS-17D (Our Method)** | 11.90% | *6.49%* | 4.17% | **8.02%** | 1.09% | 10.44% | 8.15% | 2.15% | *5.36%* | *6.28%* | 7.55% | 6.74% | 6.22% | 11.68% |
 
-- **VCPS beats Global Temperature Scaling (TS)** on **13 / 14 datasets** (all except `seedbench`):
-  `ai2d`, `chartqa`, `docvqa`, `gqa`, `infographicvqa`, `lego-puzzles`, `mmbench`, `mmmu`, `pope`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
-- **VCPS beats 1D Platt Scaling** on **10 / 14 datasets**:
-  `chartqa`, `docvqa`, `gqa`, `infographicvqa`, `lego-puzzles`, `mmbench`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
-- **VCPS achieves #1 or #2 Rank** on **5 / 14 datasets**:
-  `chartqa` (1st & 2nd), `gqa` (1st), `pope` (2nd), `scienceqa` (2nd).
+- **VCPS beats Global Temperature Scaling (TS)** on **14 / 14 datasets**:
+  `ai2d`, `chartqa`, `docvqa`, `gqa`, `infographicvqa`, `lego-puzzles`, `mmbench`, `mmmu`, `pope`, `scienceqa`, `seedbench`, `textvqa`, `vizwiz-vqa`, `vqav2`.
+- **VCPS beats 1D Platt Scaling** on **11 / 14 datasets** (all except `ai2d`, `pope`, `seedbench`):
+  `chartqa`, `docvqa`, `gqa`, `infographicvqa`, `lego-puzzles`, `mmbench`, `mmmu`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
+- **VCPS achieves #1 or #2 Rank** on **4 / 14 datasets**:
+  `chartqa` (1st), `gqa` (1st), `pope` (2nd), `scienceqa` (2nd).
 
 ---
 
