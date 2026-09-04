@@ -62,15 +62,14 @@ def main() -> None:
         X_train = train_df[feature_keys].values
         X_test = test_df[feature_keys].values
         vcps = VaryingCoefficientPlattScaler(
-            slope_features=feature_keys[1:3],
-            intercept_features=feature_keys[1:],
+            feature_set="5d",
             random_state=args.seed,
         )
     else:
         feature_keys = FEATURE_KEYS
         X_train = X_train_17d
         X_test = X_test_17d
-        vcps = VaryingCoefficientPlattScaler(random_state=args.seed)
+        vcps = VaryingCoefficientPlattScaler(feature_set="17d", random_state=args.seed)
 
     print("Fitting VCPS...")
     vcps.fit(X_train, y_train, feature_names=feature_keys)

@@ -102,8 +102,8 @@ def main() -> None:
             "Residual Calibrator": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
             "Trajectory LR": (TrajectoryLREstimator(fit_intercept=True), X_train_5d, X_test_5d),
             "Trajectory LR (No Bias)": (TrajectoryLREstimator(fit_intercept=False), X_train_5d, X_test_5d),
-            "VCPS-5D (Our Method)": (VaryingCoefficientPlattScaler(slope_features=best_5d_keys[1:3], intercept_features=best_5d_keys[1:]), X_train_5d, X_test_5d),
-            "VCPS-17D (Our Method)": (VaryingCoefficientPlattScaler(), X_train_17d, X_test_17d),
+            "VCPS-5D (Our Method)": (VaryingCoefficientPlattScaler(feature_set="5d"), X_train_5d, X_test_5d),
+            "VCPS-17D (Our Method)": (VaryingCoefficientPlattScaler(feature_set="17d"), X_train_17d, X_test_17d),
         }
 
         for m_name, (model, X_tr, X_te) in methods.items():

@@ -8,7 +8,8 @@ linear functions of multi-scale trajectory signatures z:
     a(z) = exp(a0 + gamma^T z_slope)  (strictly positive dynamic slope)
     b(z) = b0 + w^T z_intercept
 
-Includes exact analytical gradients and L-BFGS-B optimization.
+Includes dynamic binding across all 17 trajectory signatures (VCPS-17D, 36 params)
+or stepwise selected subsets (VCPS-5D, 12 params), with analytical L-BFGS-B gradients.
 """
 
 from __future__ import annotations
@@ -37,13 +38,15 @@ class VaryingCoefficientPlattScaler:
         slope_features: list[str] | None = None,
         intercept_features: list[str] | None = None,
         mode: str = "full",  # "full", "slope_only", "intercept_only", "1d_platt"
+        feature_set: str | None = None,
         random_state: int = 42,
     ) -> None:
         self.C_slope = float(C_slope)
         self.C_intercept = float(C_intercept)
-        self.slope_features = slope_features or ["x13", "x6"]
-        self.intercept_features = intercept_features or ["x13", "x6", "x8", "x4"]
+        self.slope_features = slope_features
+        self.intercept_features = intercept_features
         self.mode = mode
+        self.feature_set = feature_set.lower().strip() if feature_set is not None else None
         self.random_state = random_state
 
         self.scaler = StandardScaler()
@@ -52,6 +55,20 @@ class VaryingCoefficientPlattScaler:
         self.b0: float = 0.0
         self.w: np.ndarray | None = None
         self.feature_names: list[str] | None = None
+        self.n_features_in_: int | None = None
+
+    @property
+    def n_params(self) -> int:
+        """Total number of optimized parameters based on mode and active features."""
+        if self.mode == "1d_platt":
+            return 2
+        k_slope = len(self._slope_idx) if hasattr(self, "_slope_idx") else 0
+        k_int = len(self._int_idx) if hasattr(self, "_int_idx") else 0
+        if self.mode == "slope_only":
+            return 1 + k_slope + 1
+        if self.mode == "intercept_only":
+            return 1 + 1 + k_int
+        return 1 + k_slope + 1 + k_int
 
     def _build_objective(
         self,
@@ -62,28 +79,55 @@ class VaryingCoefficientPlattScaler:
         X = np.asarray(X_train, dtype=np.float64)
         y = np.asarray(y_train, dtype=np.float64)
         n, d = X.shape
+        self.n_features_in_ = d
         self.feature_names = feature_names or [f"x{i}" for i in range(1, d + 1)]
         x1 = X[:, 0]
         X_norm = self.scaler.fit_transform(X)
 
-        matched_slope = [f for f in self.slope_features if f in self.feature_names]
-        if len(matched_slope) < len(self.slope_features):
-            missing = set(self.slope_features) - set(self.feature_names)
-            logger.warning(
-                f"VCPS slope features {missing} not found in feature_names {self.feature_names}. "
-                f"Falling back to positional indices. Pass feature_names to fit()."
-            )
+        non_anchor = [f for f in self.feature_names if f != "x1"]
 
-        matched_int = [f for f in self.intercept_features if f in self.feature_names]
-        if len(matched_int) < len(self.intercept_features):
-            missing = set(self.intercept_features) - set(self.feature_names)
-            logger.warning(
-                f"VCPS intercept features {missing} not found in feature_names {self.feature_names}. "
-                f"Falling back to positional indices. Pass feature_names to fit()."
-            )
+        # Dynamic slope binding
+        if self.slope_features is not None:
+            matched_slope = [f for f in self.slope_features if f in self.feature_names]
+            if len(matched_slope) < len(self.slope_features):
+                missing = set(self.slope_features) - set(self.feature_names)
+                logger.warning(f"VCPS slope features {missing} not in feature_names {self.feature_names}")
+            slope_features = matched_slope if matched_slope else self.slope_features
+            slope_idx = [self.feature_names.index(f) for f in slope_features if f in self.feature_names]
+            if not slope_idx:
+                slope_idx = list(range(1, min(3, d)))
+        elif self.feature_set == "5d":
+            slope_features = non_anchor[:5]
+            slope_idx = [self.feature_names.index(f) for f in slope_features]
+        elif self.feature_set == "17d" or d >= 18:
+            slope_features = non_anchor
+            slope_idx = [self.feature_names.index(f) for f in slope_features]
+        else:
+            slope_features = non_anchor
+            slope_idx = [self.feature_names.index(f) for f in slope_features]
 
-        slope_idx = [self.feature_names.index(f) for f in matched_slope] or list(range(1, min(3, d)))
-        int_idx = [self.feature_names.index(f) for f in matched_int] or list(range(1, min(5, d)))
+        # Dynamic intercept binding
+        if self.intercept_features is not None:
+            matched_int = [f for f in self.intercept_features if f in self.feature_names]
+            if len(matched_int) < len(self.intercept_features):
+                missing = set(self.intercept_features) - set(self.feature_names)
+                logger.warning(f"VCPS intercept features {missing} not in feature_names {self.feature_names}")
+            int_features = matched_int if matched_int else self.intercept_features
+            int_idx = [self.feature_names.index(f) for f in int_features if f in self.feature_names]
+            if not int_idx:
+                int_idx = list(range(1, min(5, d)))
+        elif self.feature_set == "5d":
+            int_features = non_anchor[:5]
+            int_idx = [self.feature_names.index(f) for f in int_features]
+        elif self.feature_set == "17d" or d >= 18:
+            int_features = non_anchor
+            int_idx = [self.feature_names.index(f) for f in int_features]
+        else:
+            int_features = non_anchor
+            int_idx = [self.feature_names.index(f) for f in int_features]
+
+        self.slope_features_ = slope_features
+        self.intercept_features_ = int_features
         self._slope_idx, self._int_idx = slope_idx, int_idx
         k_slope, k_int = len(slope_idx), len(int_idx)
 

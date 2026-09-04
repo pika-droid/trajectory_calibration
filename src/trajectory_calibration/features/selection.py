@@ -46,14 +46,15 @@ def select_best_5d_subset(
     X_train: np.ndarray, y_train: np.ndarray, feature_keys: list[str]
 ) -> list[str]:
     """
-    Forward stepwise selection algorithm to pick the top 5 features minimizing NLL.
+    Forward stepwise selection algorithm to pick the top 5 trajectory signatures minimizing NLL.
 
-    Strictly anchors to 'x1' (Final Logit) to prevent prediction collapse.
+    Strictly anchors to 'x1' (Final Logit) to prevent prediction collapse, selecting
+    5 trajectory signatures (total 6 features: x1 + 5 signatures).
     """
     selected = ["x1"] if "x1" in feature_keys else [feature_keys[0]]
     remaining = [k for k in feature_keys if k not in selected]
 
-    while len(selected) < min(5, len(feature_keys)) and remaining:
+    while len(selected) < min(6, len(feature_keys)) and remaining:
         best_candidate = None
         best_nll = float("inf")
 

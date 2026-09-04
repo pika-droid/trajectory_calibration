@@ -30,8 +30,8 @@
 | **Temperature Scaling (TS)** | $p = \sigma(x_1 / T)$ | 1 | Global Scalar $T$ |
 | **1D Platt Scaling** | $p = \sigma(a_0 x_1 + b_0)$ | 2 | Linear Logit $x_1$ |
 | **Quadratic Platt (Logit-Only)** | $p = \sigma(\gamma x_1^2 + \beta x_1 + b_0)$ | 3 | Quadratic Logit $[x_1, x_1^2]$ |
-| **VCPS-5D (Our Method)** | $p = \sigma(\exp(a_0 + \gamma^T z_{\text{slope}}) x_1 + b_0 + w^T z_{\text{int}})$ | 7 | Multi-Scale Visual Trajectory $z \in \mathbb{R}^4$ |
-| **VCPS-17D (Our Method)** | $p = \sigma(\exp(a_0 + \gamma^T z_{\text{all}}) x_1 + b_0 + w^T z_{\text{all}})$ | 35 | Full Trajectory Signature $z \in \mathbb{R}^{17}$ |
+| **VCPS-5D (Our Method)** | $p = \sigma(\exp(a_0 + \gamma^T z_{\text{slope}}) x_1 + b_0 + w^T z_{\text{int}})$ | 12 | Stepwise Visual Trajectory $z \in \mathbb{R}^5$ |
+| **VCPS-17D (Our Method)** | $p = \sigma(\exp(a_0 + \gamma^T z_{\text{all}}) x_1 + b_0 + w^T z_{\text{all}})$ | 36 | Full Trajectory Signature $z \in \mathbb{R}^{17}$ |
 
 ---
 

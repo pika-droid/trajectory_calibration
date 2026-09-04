@@ -88,8 +88,8 @@ def main() -> None:
         "MSSC (Multi-Scale Proxy)": (MultiScaleSemanticConsistency(), X_train_17d, X_test_17d),
         "MSE-EIGEN (Multi-Scale)": (MultiScaleEigenVariance(), X_train_17d, X_test_17d),
         "Residual Calibrator": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
-        "VCPS-5D (Our Method)": (VaryingCoefficientPlattScaler(slope_features=best_5d_keys[1:3], intercept_features=best_5d_keys[1:]), X_train_5d, X_test_5d),
-        "VCPS-17D (Our Method)": (VaryingCoefficientPlattScaler(slope_features=["x13", "x6"], intercept_features=["x13", "x6", "x8", "x4"]), X_train_17d, X_test_17d),
+        "VCPS-5D (Our Method)": (VaryingCoefficientPlattScaler(feature_set="5d"), X_train_5d, X_test_5d),
+        "VCPS-17D (Our Method)": (VaryingCoefficientPlattScaler(feature_set="17d"), X_train_17d, X_test_17d),
     }
 
     print("\n" + "-" * 85)

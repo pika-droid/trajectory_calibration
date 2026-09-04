@@ -99,8 +99,8 @@ def main() -> None:
                 "Adaptive TS (ATS)": AdaptiveTemperatureScaling().fit(X_tr_5d, y_tr),
                 "MSSC (Multi-Scale Proxy)": MultiScaleSemanticConsistency().fit(X_tr_17d, y_tr),
                 "Residual Calibrator": ResidualTrajectoryCalibrator().fit(X_tr_5d, y_tr),
-                "VCPS-5D (Our Method)": VaryingCoefficientPlattScaler(slope_features=best_5d[1:3], intercept_features=best_5d[1:]).fit(X_tr_5d, y_tr, feature_names=best_5d),
-                "VCPS-17D (Our Method)": VaryingCoefficientPlattScaler().fit(X_tr_17d, y_tr, feature_names=FEATURE_KEYS),
+                "VCPS-5D (Our Method)": VaryingCoefficientPlattScaler(feature_set="5d").fit(X_tr_5d, y_tr, feature_names=best_5d),
+                "VCPS-17D (Our Method)": VaryingCoefficientPlattScaler(feature_set="17d").fit(X_tr_17d, y_tr, feature_names=FEATURE_KEYS),
             }
             train_models[ds] = models
             train_splits[ds] = (y_tr, best_5d, test_qids)
@@ -150,8 +150,7 @@ def main() -> None:
                 X_te_T_5d = te_df[best_5d_T].values
 
                 vcps_refit = VaryingCoefficientPlattScaler(
-                    slope_features=best_5d_T[1:3],
-                    intercept_features=best_5d_T[1:],
+                    feature_set="5d",
                 ).fit(X_tr_T_5d, y_tr_T, feature_names=best_5d_T)
                 vcps_probs = vcps_refit.predict_proba(X_te_T_5d)
                 panel_refit = evaluate_full_metric_panel(vcps_probs, y_te, c_te, y_train=y_tr_T)

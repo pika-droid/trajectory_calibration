@@ -72,7 +72,7 @@ def plot_calibration_curves(out_dir: Path, arch: str = "m3", seed: int = 42):
             nc_probs = NaiveConfidenceEstimator().fit(X_tr_17d, y_tr).predict_proba(X_te_17d)
             platt_probs = PlattScalingEstimator().fit(X_tr_17d, y_tr).predict_proba(X_te_17d)
             quad_probs = QuadraticPlattScaler().fit(X_tr_17d, y_tr).predict_proba(X_te_17d)
-            vcps = VaryingCoefficientPlattScaler(slope_features=best_5d[1:3], intercept_features=best_5d[1:]).fit(X_tr_5d, y_tr, feature_names=best_5d)
+            vcps = VaryingCoefficientPlattScaler(feature_set="5d").fit(X_tr_5d, y_tr, feature_names=best_5d)
             vcps_probs = vcps.predict_proba(X_te_5d)
 
             models_dict = {
@@ -222,7 +222,7 @@ def plot_dynamic_slope_distributions(out_dir: Path, arch: str = "m3", seed: int 
         X_te_5d = te_df[best_5d].values
 
         quad = QuadraticPlattScaler().fit(X_tr_17d, y_tr)
-        vcps = VaryingCoefficientPlattScaler(slope_features=best_5d[1:3], intercept_features=best_5d[1:]).fit(X_tr_5d, y_tr, feature_names=best_5d)
+        vcps = VaryingCoefficientPlattScaler(feature_set="5d").fit(X_tr_5d, y_tr, feature_names=best_5d)
 
         slopes_quad = quad.compute_dynamic_slope(X_te_17d)
         slopes_vcps = vcps.compute_dynamic_slope(X_te_5d)

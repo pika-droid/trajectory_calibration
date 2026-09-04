@@ -136,16 +136,12 @@ def main() -> None:
                 "Trajectory LR": (TrajectoryLREstimator(fit_intercept=True, random_state=seed), X_train_5d, X_test_5d),
                 "Trajectory LR (No Bias)": (TrajectoryLREstimator(fit_intercept=False, random_state=seed), X_train_5d, X_test_5d),
                 "VCPS-5D (Our Method)": (
-                    VaryingCoefficientPlattScaler(
-                        slope_features=best_5d_keys[1:3],
-                        intercept_features=best_5d_keys[1:],
-                        random_state=seed,
-                    ),
+                    VaryingCoefficientPlattScaler(feature_set="5d", random_state=seed),
                     X_train_5d,
                     X_test_5d,
                 ),
                 "VCPS-17D (Our Method)": (
-                    VaryingCoefficientPlattScaler(random_state=seed),
+                    VaryingCoefficientPlattScaler(feature_set="17d", random_state=seed),
                     X_train_17d,
                     X_test_17d,
                 ),
