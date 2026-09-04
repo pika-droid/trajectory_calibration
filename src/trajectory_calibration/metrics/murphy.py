@@ -32,6 +32,7 @@ def compute_murphy_brier_decomposition(
     bin_boundaries = np.linspace(0.0, 1.0, n_bins + 1)
     resolution = 0.0
     reliability = 0.0
+    within = 0.0
 
     for i in range(n_bins):
         bin_lower, bin_upper = bin_boundaries[i], bin_boundaries[i + 1]
@@ -48,12 +49,14 @@ def compute_murphy_brier_decomposition(
 
             resolution += prop_k * ((acc_k - base_rate) ** 2)
             reliability += prop_k * ((conf_k - acc_k) ** 2)
+            within += np.sum((p[in_bin] - conf_k) ** 2) / n
 
-    brier = uncertainty - resolution + reliability
+    brier = uncertainty - resolution + reliability + within
 
     return {
         "brier": float(brier),
         "uncertainty": float(uncertainty),
         "resolution": float(resolution),
         "reliability": float(reliability),
+        "within": float(within),
     }

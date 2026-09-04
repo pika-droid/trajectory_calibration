@@ -8,7 +8,7 @@ Prediction Standard Deviation (collapse check), and AUROC.
 from __future__ import annotations
 
 import numpy as np
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
 
 
 def compute_brier(confidences: np.ndarray | list[float], accuracies: np.ndarray | list[float]) -> float:
@@ -21,7 +21,7 @@ def compute_brier(confidences: np.ndarray | list[float], accuracies: np.ndarray 
     accs = np.asarray(accuracies, dtype=np.float64)
     if len(confs) == 0:
         return 0.0
-    return float(np.mean((confs - accs) ** 2))
+    return float(brier_score_loss(accs, confs))
 
 
 def compute_nll(confidences: np.ndarray | list[float], accuracies: np.ndarray | list[float], eps: float = 1e-12) -> float:
@@ -34,8 +34,10 @@ def compute_nll(confidences: np.ndarray | list[float], accuracies: np.ndarray | 
     accs = np.asarray(accuracies, dtype=np.float64)
     if len(confs) == 0:
         return 0.0
-    c = np.clip(confs, eps, 1.0 - eps)
-    return float(-np.mean(accs * np.log(c) + (1.0 - accs) * np.log(1.0 - c)))
+    confs_clipped = np.clip(confs, eps, 1.0 - eps)
+    if len(np.unique(accs)) < 2:
+        return float(log_loss(accs, confs_clipped, labels=[0, 1]))
+    return float(log_loss(accs, confs_clipped))
 
 
 def compute_prediction_std(probs: np.ndarray | list[float]) -> float:

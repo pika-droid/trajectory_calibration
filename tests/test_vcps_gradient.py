@@ -44,11 +44,15 @@ def test_vcps_gradient_consistency():
         # 2. Check at a perturbed point
         np.random.seed(123)
         x_perturbed = x0 + 0.1 * np.random.randn(len(x0))
-        # Ensure a0 > 0.1
-        x_perturbed[0] = max(float(x_perturbed[0]), 0.5)
 
         cg_err_perturbed = check_grad(func, grad, x_perturbed)
         assert cg_err_perturbed < 1e-5, f"check_grad error {cg_err_perturbed} >= 1e-5 for mode={mode} at x_perturbed"
+
+        # Check specifically when base slope a0 < 0.1 (alpha0 = -2.5 -> a0 ~ 0.082)
+        x_small = x_perturbed.copy()
+        x_small[0] = -2.5
+        cg_err_small = check_grad(func, grad, x_small)
+        assert cg_err_small < 1e-5, f"check_grad error {cg_err_small} >= 1e-5 for mode={mode} at small a0 < 0.1"
 
         # 3. Explicit finite-difference relative error check
         analytical_val, analytical_grad = objective(x_perturbed)

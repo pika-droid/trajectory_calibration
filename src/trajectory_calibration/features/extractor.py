@@ -10,7 +10,16 @@ import numpy as np
 from trajectory_calibration.utils.helpers import clean_text
 
 
-def compute_features_from_sample(item: dict[str, Any], fine_scale: int = 576) -> dict[str, float | int | str]:
+SCALE_LOG_576 = np.log(np.array([1, 9, 36, 144, 576], dtype=np.float64))
+DENOM_576 = float(np.sum((SCALE_LOG_576 - np.mean(SCALE_LOG_576)) ** 2))
+
+SCALE_LOG_256 = np.log(np.array([1, 9, 36, 144, 256], dtype=np.float64))
+DENOM_256 = float(np.sum((SCALE_LOG_256 - np.mean(SCALE_LOG_256)) ** 2))
+
+
+def compute_features_from_sample(
+    item: dict[str, Any], fine_scale: int = 576, idx: int = 0
+) -> dict[str, float | int | str]:
     """
     Extracts the 18-D trajectory feature vector (1 base anchor x1 + 17 multi-scale trajectory signatures)
     from a multi-scale inference sample.
@@ -35,7 +44,15 @@ def compute_features_from_sample(item: dict[str, Any], fine_scale: int = 576) ->
     eps = 1e-7
 
     lp_arr = np.log(np.clip(c_arr, eps, 1.0))
-    scale_log = np.log(np.array(scales, dtype=np.float64))
+    if fine_scale == 576:
+        scale_log = SCALE_LOG_576
+        denom = DENOM_576
+    elif fine_scale == 256:
+        scale_log = SCALE_LOG_256
+        denom = DENOM_256
+    else:
+        scale_log = np.log(np.array(scales, dtype=np.float64))
+        denom = float(np.sum((scale_log - np.mean(scale_log)) ** 2))
 
     # x1: Final Logit (inverse sigmoid on c_final)
     c_final_clipped = np.clip(c_arr[-1], eps, 1.0 - eps)
@@ -52,7 +69,6 @@ def compute_features_from_sample(item: dict[str, Any], fine_scale: int = 576) ->
     x8 = float(max(0.0, coarse_max - mid_min))
 
     # x9: Log-Scale Slope
-    denom = np.sum((scale_log - np.mean(scale_log)) ** 2)
     x9 = float(np.sum((scale_log - np.mean(scale_log)) * (c_arr - np.mean(c_arr))) / denom) if denom > 0 else 0.0
 
     # x10: Logprob Gain
@@ -67,8 +83,8 @@ def compute_features_from_sample(item: dict[str, Any], fine_scale: int = 576) ->
     unique_answers = set(norm_answers)
     x13 = float(1.0 / max(1, len(unique_answers)))
 
-    # x14: Relative Gain Ratio
-    x14 = float(c_arr[-1] / (c_arr[1] + eps))
+    # x14: Relative Gain Ratio (clipped to [0.0, 50.0])
+    x14 = float(np.clip(c_arr[-1] / (c_arr[1] + eps), 0.0, 50.0))
     # x15: Mid-Fine Gain Contrast
     x15 = float((c_arr[-1] - c_arr[3]) - (c_arr[3] - c_arr[1]))
     # x17: End-Scale Spike Ratio
@@ -78,21 +94,23 @@ def compute_features_from_sample(item: dict[str, Any], fine_scale: int = 576) ->
     bin_entropy = -(c_arr * np.log(np.clip(c_arr, eps, 1.0)) + (1.0 - c_arr) * np.log(np.clip(1.0 - c_arr, eps, 1.0)))
     x18 = float(np.sum((scale_log - np.mean(scale_log)) * (bin_entropy - np.mean(bin_entropy))) / denom) if denom > 0 else 0.0
 
-    # x19: Relative Margin Growth
-    x19 = float(m_arr[-1] / (m_arr[1] + eps))
+    # x19: Relative Margin Growth (clipped to [0.0, 50.0])
+    x19 = float(np.clip(m_arr[-1] / (m_arr[1] + eps), 0.0, 50.0))
     # x20: Answer Flip Frequency
     flips = sum(1 for i in range(len(norm_answers) - 1) if norm_answers[i] != norm_answers[i + 1])
     x20 = float(flips / (len(norm_answers) - 1)) if len(norm_answers) > 1 else 0.0
-    # x21: Logit Trajectory Convexity
-    x21 = float((c_arr[-1] - c_arr[3]) - (c_arr[3] - c_arr[2]))
-    # x22: First-to-Final Jump Ratio
-    x22 = float((c_arr[-1] - c_arr[0]) / (c_arr[-1] + eps))
+    # x21: Logit Trajectory Convexity (calculated on margin/logit trajectories m_arr)
+    x21 = float((m_arr[-1] - m_arr[3]) - (m_arr[3] - m_arr[2]))
+    # x22: First-to-Final Jump Ratio (clipped to [0.0, 50.0])
+    x22 = float(np.clip((c_arr[-1] - c_arr[0]) / (c_arr[-1] + eps), 0.0, 50.0))
 
     acc_final = accuracies[-1]
     if "is_correct" in item:
         is_correct = int(item["is_correct"])
     else:
         is_correct = 1 if acc_final >= 0.5 else 0
+
+    qid = item.get("question_id") or item.get("id") or item.get("questionId") or item.get("sample_idx")
 
     return {
         "x1": x1,
@@ -116,6 +134,6 @@ def compute_features_from_sample(item: dict[str, Any], fine_scale: int = 576) ->
         "c_576": float(c_arr[-1]),
         "is_correct": is_correct,
         "vqa_accuracy": float(acc_final),
-        "question_id": item.get("question_id", 0),
+        "question_id": qid if qid is not None else f"sample_{idx}",
         "answer_type": item.get("answer_type", "open"),
     }

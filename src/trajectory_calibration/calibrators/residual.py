@@ -57,9 +57,7 @@ def compute_aurc(probs: np.ndarray | list[float], y: np.ndarray | list[float]) -
     coverage = np.arange(1, n + 1)
     risk = 1.0 - cum_correct / coverage
 
-    if _trapezoid is not None:
-        return float(_trapezoid(risk, dx=1.0 / n))
-    return float(np.sum((risk[:-1] + risk[1:]) / 2.0 * (1.0 / n)))
+    return float(np.mean(risk))
 
 
 class ResidualTrajectoryCalibrator:
@@ -84,8 +82,7 @@ class ResidualTrajectoryCalibrator:
 
         # Stage 1: Platt on x1
         self.stage1_lr.fit(x1, y)
-        p1 = self.stage1_lr.predict_proba(x1)[:, 1]
-        l1 = get_logits(p1)
+        l1 = self.stage1_lr.decision_function(x1)
 
         # Stage 2: Fit residual weights on Z with l1 as fixed GLM offset
         Z = X[:, 1:] if d > 1 else X
@@ -110,8 +107,7 @@ class ResidualTrajectoryCalibrator:
     def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
         X = np.asarray(X_test, dtype=np.float64)
         x1 = X[:, [0]]
-        p1 = self.stage1_lr.predict_proba(x1)[:, 1]
-        l1 = get_logits(p1)
+        l1 = self.stage1_lr.decision_function(x1)
 
         Z = X[:, 1:] if X.shape[1] > 1 else X
         Z_norm = self.scaler.transform(Z)

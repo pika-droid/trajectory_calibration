@@ -176,6 +176,9 @@ def main() -> None:
 
     df_transfer.to_csv(out_dir / f"temperature_transfer_{args.arch}_summary.csv", index=False)
     df_tracking.to_csv(out_dir / f"temperature_tracking_{args.arch}_summary.csv", index=False)
+    if out_dir.name in ["m3", "mqt"]:
+        df_transfer.to_csv(out_dir.parent / f"temperature_transfer_{args.arch}_summary.csv", index=False)
+        df_tracking.to_csv(out_dir.parent / f"temperature_tracking_{args.arch}_summary.csv", index=False)
 
     print("\n" + "=" * 85)
     print(f" GREEDY TRANSFER MACRO-MEAN ECE (%) ACROSS TEMPERATURES")

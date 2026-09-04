@@ -7,6 +7,7 @@ from __future__ import annotations
 import logging
 import numpy as np
 from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.preprocessing import StandardScaler
 
 from trajectory_calibration.metrics.scoring import compute_nll
 
@@ -57,6 +58,8 @@ def select_best_5d_subset(
     while len(selected) < min(6, len(feature_keys)) and remaining:
         best_candidate = None
         best_nll = float("inf")
+        min_vif_candidate = None
+        min_vif_val = float("inf")
 
         for candidate in remaining:
             trial = selected + [candidate]
@@ -66,13 +69,23 @@ def select_best_5d_subset(
             # VIF Collinearity filter (< 10.0)
             if X_trial.shape[1] > 1:
                 vifs = [variance_inflation_factor(X_trial, i) for i in range(X_trial.shape[1])]
-                if any(v > 10.0 for v in vifs):
-                    continue
+                max_vif = float(np.max(vifs))
+            else:
+                max_vif = 1.0
+
+            if max_vif < min_vif_val:
+                min_vif_val = max_vif
+                min_vif_candidate = candidate
+
+            if max_vif > 10.0:
+                continue
 
             try:
+                scaler = StandardScaler()
+                X_trial_scaled = scaler.fit_transform(X_trial)
                 lr = LogisticRegression(C=1.0, solver="lbfgs", max_iter=1000)
-                lr.fit(X_trial, y_train)
-                probs = lr.predict_proba(X_trial)[:, 1]
+                lr.fit(X_trial_scaled, y_train)
+                probs = lr.predict_proba(X_trial_scaled)[:, 1]
                 nll = compute_nll(probs, y_train)
                 if nll < best_nll:
                     best_nll = nll
@@ -84,7 +97,10 @@ def select_best_5d_subset(
         if best_candidate is not None:
             selected.append(best_candidate)
             remaining.remove(best_candidate)
+        elif min_vif_candidate is not None:
+            selected.append(min_vif_candidate)
+            remaining.remove(min_vif_candidate)
         else:
-            selected.append(remaining.pop(0))
+            break
 
     return selected

@@ -43,12 +43,19 @@ from trajectory_calibration.features.trajectory import (
 from trajectory_calibration.utils.helpers import set_seed
 
 
+ALL_14_DATASETS = [
+    "ai2d", "chartqa", "docvqa", "gqa", "infographicvqa", "lego-puzzles",
+    "mmbench", "mmmu", "pope", "scienceqa", "seedbench", "textvqa",
+    "vizwiz-vqa", "vqav2",
+]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run comprehensive multi-dataset calibration benchmark.")
     parser.add_argument("--features_dir", type=str, default="data/features", help="Base directory of extracted features.")
     parser.add_argument("--arch", type=str, default="m3", choices=["m3", "mqt"], help="Model architecture.")
     parser.add_argument("--gen_temperature", type=float, default=0.0, help="Decoding temperature.")
-    parser.add_argument("--datasets", nargs="+", default=["pope", "scienceqa", "textvqa", "vizwiz-vqa"], help="Datasets to evaluate.")
+    parser.add_argument("--datasets", nargs="+", default=ALL_14_DATASETS, help="Datasets to evaluate.")
     parser.add_argument("--output_dir", type=str, default="results/experiments/benchmark", help="Output directory.")
     parser.add_argument("--seed", type=int, default=42, help="Random seed.")
     args = parser.parse_args()
@@ -125,6 +132,8 @@ def main() -> None:
     results_df = pd.DataFrame(all_results)
     csv_out = out_dir / f"benchmark_{args.arch}_summary.csv"
     results_df.to_csv(csv_out, index=False)
+    if out_dir.name in ["m3", "mqt"]:
+        results_df.to_csv(out_dir.parent / f"benchmark_{args.arch}_summary.csv", index=False)
     print(f"\nSaved full results to {csv_out}")
 
     pivot_ece = results_df.pivot(index="method", columns="dataset", values="adaptive_ece_percent")

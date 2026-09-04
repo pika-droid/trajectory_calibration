@@ -1,5 +1,5 @@
 \begin{table}[t]
-\caption{\textbf{Calibration Benchmark on \texttt{lego-puzzles} (M3-LLaVA 7B).} \textbf{Bold}: best; \underline{underline}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\caption{\textbf{Calibration Benchmark on \texttt{lego-puzzles} (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
 \label{tab:benchmark_m3_legopuzzles}
 \tablestyle{4pt}{1.05}
 \resizebox{\columnwidth}{!}{%
@@ -9,26 +9,26 @@
 \midrule
 Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 73.16 & 73.16 & 0.477 \\
 Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 34.71 & 34.71 & 0.477 \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \underline{0.71} & 10.07 & 0.477 \\
-Trajectory LR & Single-Pass ($T = 0.0$) & 3.03 & 9.24 & 0.599 \\
-Trajectory LR (No Bias) & Single-Pass ($T = 0.0$) & 5.98 & 10.21 & \underline{0.650} \\
-Quadratic Platt (Logit-Only) & Single-Pass ($T = 0.0$) & 4.34 & 10.04 & \textbf{0.668} \\
-Spline Calibration & Single-Pass ($T = 0.0$) & 6.36 & \textbf{6.36} & 0.500 \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{0.71} & 11.89 & 0.477 \\
+Trajectory LR & Single-Pass ($T = 0.0$) & 8.27 & 11.23 & \textit{0.640} \\
+Trajectory LR (No Bias) & Single-Pass ($T = 0.0$) & 7.78 & 12.14 & 0.640 \\
+Quadratic Platt (Logit-Only) & Single-Pass ($T = 0.0$) & 4.34 & 9.74 & \textbf{0.668} \\
+Spline Calibration & Single-Pass ($T = 0.0$) & 1.99 & 11.78 & 0.569 \\
 Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 34.66 & 34.66 & 0.477 \\
 LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & 21.20 & - & 0.551 \\
 Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & 25.00 & - & 0.582 \\
 EigenScore & Multi-Pass ($T = 0.5, K = 10$) & 15.00 & - & 0.571 \\
 UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & 11.00 & - & 0.588 \\
-Residual Calibrator & Single-Pass ($T = 0.0$) & \textbf{0.59} & 10.54 & 0.541 \\
-\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & 6.03 & 12.78 & 0.517 \\
-\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Single-Pass ($T = 0.0$) & 8.39 & \underline{8.71} & 0.525 \\
+Residual Calibrator & Single-Pass ($T = 0.0$) & \textit{0.84} & \textit{8.07} & 0.525 \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & 1.55 & 8.93 & 0.501 \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Single-Pass ($T = 0.0$) & 4.16 & \textbf{7.39} & 0.544 \\
 \bottomrule
 \end{tabular}%
 }
 \end{table}
 
 \begin{table}[t]
-\caption{\textbf{Calibration Benchmark on \texttt{lego-puzzles} (MQT-LLaVA 7B).} \textbf{Bold}: best; \underline{underline}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\caption{\textbf{Calibration Benchmark on \texttt{lego-puzzles} (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
 \label{tab:benchmark_mqt_legopuzzles}
 \tablestyle{4pt}{1.05}
 \resizebox{\columnwidth}{!}{%
@@ -36,21 +36,21 @@ Residual Calibrator & Single-Pass ($T = 0.0$) & \textbf{0.59} & 10.54 & 0.541 \\
 \toprule
 \textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 34.60 & 34.14 & 0.510 \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 23.68 & 24.08 & 0.510 \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{0.60} & 11.70 & 0.490 \\
-Trajectory LR & Single-Pass ($T = 0.0$) & 2.34 & 7.96 & \underline{0.610} \\
-Trajectory LR (No Bias) & Single-Pass ($T = 0.0$) & 4.07 & \underline{6.20} & 0.609 \\
-Quadratic Platt (Logit-Only) & Single-Pass ($T = 0.0$) & 5.99 & 9.18 & 0.582 \\
-Spline Calibration & Single-Pass ($T = 0.0$) & 4.15 & \textbf{5.27} & 0.522 \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 23.68 & 24.08 & 0.510 \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 34.60 & 33.80 & 0.510 \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 23.68 & 23.68 & 0.510 \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{0.60} & 12.43 & 0.490 \\
+Trajectory LR & Single-Pass ($T = 0.0$) & 9.25 & 9.41 & 0.587 \\
+Trajectory LR (No Bias) & Single-Pass ($T = 0.0$) & 8.99 & 12.96 & \textbf{0.629} \\
+Quadratic Platt (Logit-Only) & Single-Pass ($T = 0.0$) & 5.99 & \textit{7.21} & 0.582 \\
+Spline Calibration & Single-Pass ($T = 0.0$) & 5.27 & 10.35 & 0.519 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 23.68 & 23.68 & 0.511 \\
 LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & 25.30 & - & 0.531 \\
 Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & 45.20 & - & 0.533 \\
 EigenScore & Multi-Pass ($T = 0.5, K = 10$) & 39.40 & - & 0.502 \\
 UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & 27.60 & - & 0.537 \\
-Residual Calibrator & Single-Pass ($T = 0.0$) & 1.88 & 9.07 & 0.585 \\
-\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & \underline{1.82} & 10.69 & 0.579 \\
-\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Single-Pass ($T = 0.0$) & 2.93 & 11.80 & \textbf{0.613} \\
+Residual Calibrator & Single-Pass ($T = 0.0$) & 3.85 & 7.93 & 0.554 \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & 7.33 & 11.99 & \textit{0.626} \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Single-Pass ($T = 0.0$) & \textit{3.46} & \textbf{6.29} & 0.610 \\
 \bottomrule
 \end{tabular}%
 }

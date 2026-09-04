@@ -1,5 +1,5 @@
 \begin{table}[t]
-\caption{\textbf{Temperature Transfer Robustness on \texttt{textvqa} (M3-LLaVA 7B).} ECE (\%) $\downarrow$ across sampling temperatures $T \in \{0.0, 0.3, 0.6, 1.0, 1.5\}$ (trained at $T=0.0$). \textbf{Bold}: best; \underline{underline}: second best.}
+\caption{\textbf{Temperature Transfer Robustness on \texttt{textvqa} (M3-LLaVA 7B).} ECE (\%) $\downarrow$ across sampling temperatures $T \in \{0.0, 0.3, 0.6, 1.0, 1.5\}$ (trained at $T=0.0$). \textbf{Bold}: best; \textit{italic}: second best.}
 \label{tab:temp_transfer_m3_textvqa}
 \tablestyle{4pt}{1.05}
 \resizebox{\columnwidth}{!}{%
@@ -7,24 +7,24 @@
 \toprule
 \textbf{Calibration Method} & \textbf{$T=0.0$} & \textbf{$T=0.3$} & \textbf{$T=0.6$} & \textbf{$T=1.0$} & \textbf{$T=1.5$} & \textbf{Mean} $\downarrow$ \\
 \midrule
-Naive Confidence (NC) & 8.32 & 25.60 & 15.71 & 7.40 & \underline{7.83} & 12.97 \\
+Naive Confidence (NC) & 8.32 & 25.60 & 15.71 & 7.40 & \textit{7.83} & 12.97 \\
 Temperature Scaling (TS) & 8.70 & 24.77 & 14.74 & 7.62 & 8.07 & 12.78 \\
-Platt Scaling (1D) & 5.01 & 22.86 & 12.64 & \underline{4.14} & 9.70 & 10.87 \\
-Trajectory LR & 5.56 & 23.01 & 11.96 & 12.08 & 10.42 & 12.61 \\
-Trajectory LR (No Bias) & \textbf{3.55} & 22.75 & \underline{11.42} & 9.80 & 8.41 & 11.19 \\
+Platt Scaling (1D) & 5.01 & 22.86 & 12.64 & 4.14 & 9.70 & 10.87 \\
+Trajectory LR & 5.12 & 23.00 & \textit{10.69} & 7.12 & 10.45 & 11.28 \\
+Trajectory LR (No Bias) & 5.03 & \textit{22.77} & 11.49 & 5.80 & 9.61 & 10.94 \\
 Quadratic Platt (Logit-Only) & 4.77 & 23.73 & 11.83 & 6.13 & \textbf{7.61} & 10.81 \\
-Spline Calibration (PCHIP) & 10.11 & 25.08 & 16.27 & 12.03 & 11.15 & 14.93 \\
-Adaptive TS (ATS) & 8.38 & 25.36 & 14.57 & 7.18 & 9.40 & 12.98 \\
-Residual Calibrator & \underline{4.73} & 23.05 & 12.04 & 5.39 & 9.93 & 11.03 \\
-\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & 5.03 & \underline{22.64} & 11.86 & 4.40 & 9.70 & \underline{10.73} \\
-\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & 5.77 & \textbf{22.50} & \textbf{10.74} & \textbf{3.79} & 9.21 & \textbf{10.40} \\
+Spline Calibration (PCHIP) & \textbf{2.97} & 23.17 & \textbf{10.55} & 4.97 & 8.32 & \textbf{10.00} \\
+Adaptive TS (ATS) & 8.27 & 25.23 & 14.67 & 7.25 & 9.32 & 12.95 \\
+Residual Calibrator & \textit{4.71} & 23.76 & 11.71 & \textbf{3.85} & 9.82 & 10.77 \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & 5.01 & 23.13 & 11.87 & \textit{4.09} & 9.28 & 10.68 \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & 5.78 & \textbf{21.70} & 10.83 & 4.47 & 9.45 & \textit{10.45} \\
 \bottomrule
 \end{tabular}%
 }
 \end{table}
 
 \begin{table}[t]
-\caption{\textbf{Temperature Transfer Robustness on \texttt{textvqa} (MQT-LLaVA 7B).} ECE (\%) $\downarrow$ across sampling temperatures $T \in \{0.0, 0.3, 0.6, 1.0, 1.5\}$ (trained at $T=0.0$). \textbf{Bold}: best; \underline{underline}: second best.}
+\caption{\textbf{Temperature Transfer Robustness on \texttt{textvqa} (MQT-LLaVA 7B).} ECE (\%) $\downarrow$ across sampling temperatures $T \in \{0.0, 0.3, 0.6, 1.0, 1.5\}$ (trained at $T=0.0$). \textbf{Bold}: best; \textit{italic}: second best.}
 \label{tab:temp_transfer_mqt_textvqa}
 \tablestyle{4pt}{1.05}
 \resizebox{\columnwidth}{!}{%
@@ -35,14 +35,14 @@ Residual Calibrator & \underline{4.73} & 23.05 & 12.04 & 5.39 & 9.93 & 11.03 \\
 Naive Confidence (NC) & 31.24 & 54.81 & 47.84 & 40.67 & 33.47 & 41.61 \\
 Temperature Scaling (TS) & 17.62 & 28.32 & 24.97 & 26.22 & 31.34 & 25.69 \\
 Platt Scaling (1D) & 9.78 & 28.11 & 15.58 & 9.87 & 8.30 & 14.33 \\
-Trajectory LR & 6.52 & 21.23 & 10.20 & \textbf{4.07} & 5.73 & \underline{9.55} \\
-Trajectory LR (No Bias) & 7.81 & \textbf{11.75} & \underline{8.60} & \underline{5.19} & \textbf{4.66} & \textbf{7.60} \\
+Trajectory LR & 7.46 & \textit{22.60} & 10.65 & \textit{4.65} & 5.28 & \textit{10.13} \\
+Trajectory LR (No Bias) & 9.00 & \textbf{11.69} & \textit{7.73} & \textbf{3.84} & \textit{4.80} & \textbf{7.41} \\
 Quadratic Platt (Logit-Only) & 7.55 & 25.41 & \textbf{7.31} & 8.87 & 7.30 & 11.29 \\
-Spline Calibration (PCHIP) & \textbf{5.49} & \underline{15.63} & 14.70 & 14.57 & 15.63 & 13.20 \\
-Adaptive TS (ATS) & 18.16 & 29.76 & 25.94 & 26.96 & 31.58 & 26.48 \\
-Residual Calibrator & 6.88 & 27.61 & 15.09 & 8.15 & 6.80 & 12.91 \\
-\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & \underline{6.42} & 27.64 & 14.57 & 8.53 & 5.18 & 12.47 \\
-\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & 8.02 & 24.85 & 13.23 & 6.77 & \underline{4.71} & 11.52 \\
+Spline Calibration (PCHIP) & \textit{5.94} & 31.63 & 16.99 & 10.08 & 8.37 & 14.60 \\
+Adaptive TS (ATS) & 18.55 & 30.27 & 26.31 & 27.51 & 31.68 & 26.86 \\
+Residual Calibrator & \textbf{5.27} & 26.96 & 14.94 & 7.86 & 6.84 & 12.37 \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & 6.13 & 27.26 & 14.59 & 7.93 & \textbf{4.69} & 12.12 \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & 8.14 & 24.88 & 12.94 & 6.90 & 5.20 & 11.61 \\
 \bottomrule
 \end{tabular}%
 }

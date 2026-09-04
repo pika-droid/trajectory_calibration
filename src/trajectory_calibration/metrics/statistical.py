@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import Callable
 import numpy as np
+from scipy.stats import bootstrap
 from sklearn.linear_model import LogisticRegression
 
 
@@ -47,7 +48,7 @@ def bootstrap_ci(
     seed: int = 42,
 ) -> tuple[float, float]:
     """
-    Empirical bootstrap confidence interval for any calibration metric.
+    Empirical bootstrap confidence interval for any calibration metric using scipy.stats.bootstrap.
 
     Returns: (lower_bound, upper_bound)
     """
@@ -57,15 +58,32 @@ def bootstrap_ci(
     if n == 0:
         return 0.0, 0.0
 
-    rng = np.random.RandomState(seed)
-    bootstrap_values = []
-    alpha = (1.0 - ci) / 2.0
+    def statistic(p_s: np.ndarray, y_s: np.ndarray, axis: int = -1) -> np.ndarray:
+        if p_s.ndim == 1:
+            return np.array(metric_fn(p_s, y_s))
+        return np.array([metric_fn(p_s[i], y_s[i]) for i in range(p_s.shape[0])])
 
-    for _ in range(n_bootstrap):
-        idx = rng.randint(0, n, size=n)
-        val = metric_fn(p[idx], labels[idx])
-        bootstrap_values.append(val)
+    try:
+        res = bootstrap(
+            (p, labels),
+            statistic=statistic,
+            paired=True,
+            confidence_level=ci,
+            n_resamples=n_bootstrap,
+            random_state=seed,
+            method="percentile",
+        )
+        return float(res.confidence_interval.low), float(res.confidence_interval.high)
+    except Exception:
+        rng = np.random.RandomState(seed)
+        bootstrap_values = []
+        alpha = (1.0 - ci) / 2.0
 
-    lower = float(np.percentile(bootstrap_values, 100.0 * alpha))
-    upper = float(np.percentile(bootstrap_values, 100.0 * (1.0 - alpha)))
-    return lower, upper
+        for _ in range(n_bootstrap):
+            idx = rng.randint(0, n, size=n)
+            val = metric_fn(p[idx], labels[idx])
+            bootstrap_values.append(val)
+
+        lower = float(np.percentile(bootstrap_values, 100.0 * alpha))
+        upper = float(np.percentile(bootstrap_values, 100.0 * (1.0 - alpha)))
+        return lower, upper

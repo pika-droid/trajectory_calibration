@@ -39,7 +39,9 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
         gt_clean = clean_text(gt_ans)
         if pred_norm == gt_clean or pred_clean == gt_ans.lower():
             return 1.0
-        if len(pred_norm) >= 3 and (_is_word_match(pred_norm, gt_clean) or _is_word_match(gt_clean, pred_norm)):
+
+        # Require ground-truth containment inside the prediction
+        if len(gt_clean) >= 3 and _is_word_match(gt_clean, pred_norm):
             return 1.0
         return 0.0
 
@@ -53,11 +55,9 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
         for gt in gt_answers:
             gt_text = gt.get("answer", "") if isinstance(gt, dict) else str(gt)
             gt_clean = clean_text(gt_text)
-            if (
-                gt_clean == pred_norm
-                or pred_clean == str(gt_text).strip().lower()
-                or (len(pred_norm) >= 3 and (_is_word_match(pred_norm, gt_clean) or _is_word_match(gt_clean, pred_norm)))
-            ):
+            if gt_clean == pred_norm or pred_clean == str(gt_text).strip().lower():
+                match_count += 1
+            elif len(gt_clean) >= 3 and _is_word_match(gt_clean, pred_norm):
                 match_count += 1
         return min(1.0, match_count / 3.0) if match_count > 0 else 0.0
 

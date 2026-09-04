@@ -82,7 +82,7 @@ def rank_and_format(vals: list[float | None], higher_is_better: bool = False, de
         if abs(v - best_val) < 1e-6:
             formatted.append(f"\\textbf{{{s}}}")
         elif second_val is not None and abs(v - second_val) < 1e-6:
-            formatted.append(f"\\underline{{{s}}}")
+            formatted.append(f"\\textit{{{s}}}")
         else:
             formatted.append(s)
     return formatted
@@ -95,7 +95,7 @@ def generate_single_table(df_bench: pd.DataFrame, df_ump: pd.DataFrame, ds: str,
 
     lines = [
         "\\begin{table}[t]",
-        f"\\caption{{\\textbf{{{macro_prefix}Calibration Benchmark {caption_name} ({arch_model} 7B).}} \\textbf{{Bold}}: best; \\underline{{underline}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
+        f"\\caption{{\\textbf{{{macro_prefix}Calibration Benchmark {caption_name} ({arch_model} 7B).}} \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
         f"\\label{{{tab_label}}}",
         "\\tablestyle{4pt}{1.05}",
         "\\resizebox{\\columnwidth}{!}{%",
@@ -185,6 +185,23 @@ def generate_benchmark_tables():
     (TABLES_DIR / "macro_mean.tex").write_text(macro_m3 + "\n\n" + macro_mqt + "\n", encoding="utf-8")
     print(f"Generated: {TABLES_DIR / 'macro_mean.tex'}")
 
+    # 3. Calculate and display win statistics on Adaptive ECE against published baselines
+    our_methods = {"VCPS-5D (Our Method)", "VCPS-17D (Our Method)", "Residual Calibrator"}
+    target_methods = [m[0] for m in TARGET_METHODS_ORDER if m[0] not in UMP_DISPLAY_NAMES]
+    for arch_name, df_arch in [("M3-LLaVA", df_m3), ("MQT-LLaVA", df_mqt)]:
+        our_wins = 0
+        total_ds = 0
+        datasets = df_arch["dataset"].unique()
+        for ds in datasets:
+            sub = df_arch[(df_arch["dataset"] == ds) & (df_arch["method"].isin(target_methods))]
+            if sub.empty:
+                continue
+            total_ds += 1
+            min_row = sub.loc[sub["adaptive_ece"].idxmin()]
+            if min_row["method"] in our_methods:
+                our_wins += 1
+        print(f"[Win Statistics - {arch_name}] Our trajectory methods won on {our_wins}/{total_ds} datasets on Adaptive ECE.")
+
 
 def generate_temperature_tables():
     df_m3 = pd.read_csv(ROOT / "results/experiments/temperature_study/temperature_transfer_m3_summary.csv")
@@ -205,7 +222,6 @@ def generate_temperature_tables():
         "VCPS-5D (Our Method)",
         "VCPS-17D (Our Method)",
     ]
-
     target_temps = [0.0, 0.3, 0.6, 1.0, 1.5]
     temp_datasets = ["pope", "scienceqa", "textvqa", "vizwiz-vqa"]
 
@@ -215,7 +231,7 @@ def generate_temperature_tables():
 
         lines = [
             "\\begin{table}[t]",
-            f"\\caption{{\\textbf{{Temperature Transfer Robustness on {caption_name} ({arch_model} 7B).}} ECE (\\%) $\\downarrow$ across sampling temperatures $T \\in \\{{0.0, 0.3, 0.6, 1.0, 1.5\\}}$ (trained at $T=0.0$). \\textbf{{Bold}}: best; \\underline{{underline}}: second best.}}",
+            f"\\caption{{\\textbf{{Temperature Transfer Robustness on {caption_name} ({arch_model} 7B).}} ECE (\\%) $\\downarrow$ across sampling temperatures $T \\in \\{{0.0, 0.3, 0.6, 1.0, 1.5\\}}$ (trained at $T=0.0$). \\textbf{{Bold}}: best; \\textit{{italic}}: second best.}}",
             f"\\label{{{tab_label}}}",
             "\\tablestyle{4pt}{1.05}",
             "\\resizebox{\\columnwidth}{!}{%",
@@ -288,7 +304,7 @@ def generate_lodo_tables():
     def build_lodo_table(df: pd.DataFrame, arch_label: str, arch_model: str) -> str:
         lines = [
             "\\begin{table}[t]",
-            f"\\caption{{\\textbf{{Leave-One-Dataset-Out (LODO) Cross-Domain Transfer ({arch_model} 7B).}} Macro-averaged across all 14 held-out target benchmarks. Trained on pooled 13 benchmarks. \\textbf{{Bold}}: best; \\underline{{underline}}: second best.}}",
+            f"\\caption{{\\textbf{{Leave-One-Dataset-Out (LODO) Cross-Domain Transfer ({arch_model} 7B).}} Macro-averaged across all 14 held-out target benchmarks. Trained on pooled 13 benchmarks. \\textbf{{Bold}}: best; \\textit{{italic}}: second best.}}",
             f"\\label{{tab:lodo_transfer_{arch_label}}}",
             "\\tablestyle{4pt}{1.05}",
             "\\resizebox{\\columnwidth}{!}{%",

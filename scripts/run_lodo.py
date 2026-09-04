@@ -146,6 +146,8 @@ def main() -> None:
     df_lodo = pd.DataFrame(all_lodo_results)
     csv_path = out_dir / f"lodo_{args.arch}_summary.csv"
     df_lodo.to_csv(csv_path, index=False)
+    if out_dir.name in ["m3", "mqt"]:
+        df_lodo.to_csv(out_dir.parent / f"lodo_{args.arch}_summary.csv", index=False)
     print(f"\nSaved full LODO transfer results to {csv_path}")
 
     # Print Macro-Mean Summary

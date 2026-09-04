@@ -8,9 +8,9 @@ target intercept shifting, and Beta calibration (Kull et al., 2017).
 from __future__ import annotations
 
 import numpy as np
-from scipy.optimize import minimize_scalar
-from sklearn.linear_model import LogisticRegression
+from scipy.optimize import minimize, root_scalar
 
+from trajectory_calibration.metrics.scoring import compute_nll
 from trajectory_calibration.utils.math import get_logits, safe_clip_probs, sigmoid
 
 
@@ -52,17 +52,26 @@ def fit_target_intercept_adaptation(
 ) -> np.ndarray:
     """
     Shifts the calibrated logit intercept to align mean probability with the target base rate.
+    Uses Brent's root-finding method on [-30.0, 30.0].
     """
     preds_s = safe_clip_probs(np.asarray(preds_source, dtype=np.float64))
     source_logits = get_logits(preds_s)
     target_mean = float(np.mean(target_unlabeled_guess))
 
-    def obj(alpha_d: float) -> float:
+    def f(alpha_d: float) -> float:
         shifted_p = sigmoid(source_logits + alpha_d)
-        return float((np.mean(shifted_p) - target_mean) ** 2)
+        return float(np.mean(shifted_p) - target_mean)
 
-    res = minimize_scalar(obj, bounds=(-10.0, 10.0), method="bounded")
-    best_alpha = float(res.x)
+    f_neg = f(-30.0)
+    f_pos = f(30.0)
+    if f_neg * f_pos <= 0:
+        sol = root_scalar(f, bracket=[-30.0, 30.0], method="brentq")
+        best_alpha = float(sol.root)
+    elif f_neg > 0:
+        best_alpha = -30.0
+    else:
+        best_alpha = 30.0
+
     return sigmoid(source_logits + best_alpha)
 
 
@@ -71,17 +80,38 @@ def fit_beta_calibration(
 ) -> tuple[float, float, float]:
     """
     Fits Beta Calibration (Kull et al., 2017): logit(p) = a * ln(c) - b * ln(1 - c) + c_param.
+    Monotonicity constraint requires a >= 0 and b >= 0.
     """
     c = safe_clip_probs(np.asarray(confs_train, dtype=np.float64))
-    y = np.asarray(y_train, dtype=np.int64)
+    y = np.asarray(y_train, dtype=np.float64)
+    n = len(c)
+    if n == 0:
+        return 1.0, 1.0, 0.0
 
-    X_beta = np.column_stack([np.log(c), -np.log(1.0 - c)])
-    lr = LogisticRegression(C=1000.0, solver="lbfgs", max_iter=1000)
-    lr.fit(X_beta, y)
+    z1 = np.log(c)
+    z2 = -np.log(1.0 - c)
 
-    a = float(lr.coef_[0][0])
-    b = float(lr.coef_[0][1])
-    c_param = float(lr.intercept_[0])
+    def loss_and_grad(params: np.ndarray) -> tuple[float, np.ndarray]:
+        a_val, b_val, c_p = params[0], params[1], params[2]
+        logits = a_val * z1 + b_val * z2 + c_p
+        p = sigmoid(logits)
+        loss = compute_nll(p, y)
+        r = (p - y) / n
+        grad_a = float(np.dot(z1, r))
+        grad_b = float(np.dot(z2, r))
+        grad_c = float(np.sum(r))
+        return loss, np.array([grad_a, grad_b, grad_c])
+
+    res = minimize(
+        loss_and_grad,
+        x0=np.array([1.0, 1.0, 0.0]),
+        jac=True,
+        bounds=[(0.0, None), (0.0, None), (None, None)],
+        method="L-BFGS-B",
+    )
+    a = float(max(res.x[0], 0.0))
+    b = float(max(res.x[1], 0.0))
+    c_param = float(res.x[2])
     return a, b, c_param
 
 

@@ -77,8 +77,8 @@ def compute_adaptive_ece(probs: np.ndarray | list[float], y: np.ndarray | list[f
     """
     Adaptive ECE with equal-mass (quantile) binning.
 
-    Ensures every bin has approximately N / n_bins samples, eliminating distortion
-    from sparse bins in equal-width ECE.
+    Partitions sorted sample indices into equal-mass bins, eliminating quantile edge collapse
+    when confidences repeat.
     """
     p = np.asarray(probs, dtype=np.float64)
     labels = np.asarray(y, dtype=np.float64)
@@ -86,32 +86,16 @@ def compute_adaptive_ece(probs: np.ndarray | list[float], y: np.ndarray | list[f
     if n == 0:
         return 0.0
 
-    quantiles = np.linspace(0.0, 100.0, n_bins + 1)
-    bin_edges = np.percentile(p, quantiles)
-    bin_edges[0] = 0.0
-    bin_edges[-1] = 1.0
+    sorted_indices = np.argsort(p)
+    bin_groups = np.array_split(sorted_indices, n_bins)
+    ece = 0.0
+    for group in bin_groups:
+        if len(group) == 0:
+            continue
+        bin_p, bin_y = p[group], labels[group]
+        ece += (len(group) / n) * abs(float(np.mean(bin_p) - np.mean(bin_y)))
 
-    bin_edges = np.unique(bin_edges)
-    actual_bins = len(bin_edges) - 1
-    if actual_bins <= 0:
-        return float(np.abs(np.mean(p) - np.mean(labels)))
-
-    ada_ece = 0.0
-    for i in range(actual_bins):
-        b_low, b_high = bin_edges[i], bin_edges[i + 1]
-        if i == actual_bins - 1:
-            in_bin = (p >= b_low) & (p <= b_high)
-        else:
-            in_bin = (p >= b_low) & (p < b_high)
-
-        n_k = np.sum(in_bin)
-        if n_k > 0:
-            prop_k = n_k / n
-            acc_k = np.mean(labels[in_bin])
-            conf_k = np.mean(p[in_bin])
-            ada_ece += prop_k * np.abs(conf_k - acc_k)
-
-    return float(ada_ece)
+    return float(ece)
 
 
 def compute_kde_ece(probs: np.ndarray | list[float], y: np.ndarray | list[float], n_grid: int = 100) -> float:

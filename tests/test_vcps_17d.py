@@ -86,7 +86,6 @@ def test_vcps_17d_gradient_finite_difference() -> None:
         # 2. Scipy check_grad at a perturbed point
         np.random.seed(999)
         x_perturbed = x0 + 0.05 * np.random.randn(len(x0))
-        x_perturbed[0] = max(float(x_perturbed[0]), 0.5)
 
         cg_err_perturbed = check_grad(func, grad, x_perturbed)
         assert cg_err_perturbed < 1e-5, f"check_grad error {cg_err_perturbed} >= 1e-5 for mode={mode} at perturbed"

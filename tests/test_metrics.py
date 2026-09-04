@@ -37,7 +37,9 @@ def test_murphy_decomposition_identity():
     y = (rng.rand(200) > 0.4).astype(float)
 
     decomp = compute_murphy_brier_decomposition(probs, y, n_bins=10)
-    expected_brier = decomp["uncertainty"] - decomp["resolution"] + decomp["reliability"]
+    expected_brier = (
+        decomp["uncertainty"] - decomp["resolution"] + decomp["reliability"] + decomp["within"]
+    )
     assert pytest.approx(decomp["brier"], abs=1e-4) == expected_brier
 
 

@@ -50,6 +50,7 @@ class VaryingCoefficientPlattScaler:
         self.random_state = random_state
 
         self.scaler = StandardScaler()
+        self.alpha0: float = 0.0
         self.a0: float = 1.0
         self.gamma: np.ndarray | None = None
         self.b0: float = 0.0
@@ -133,25 +134,26 @@ class VaryingCoefficientPlattScaler:
 
         lr = LogisticRegression(C=1000.0, solver="lbfgs", max_iter=1000).fit(x1.reshape(-1, 1), y)
         init_a0, init_b0 = float(lr.coef_[0][0]), float(lr.intercept_[0])
+        init_alpha0 = float(np.log(max(init_a0, 1e-4)))
 
         def objective(params: np.ndarray) -> tuple[float, np.ndarray]:
             if self.mode == "1d_platt":
-                a0, b0 = params[0], params[1]
+                alpha0, b0 = params[0], params[1]
                 gamma, w = np.zeros(k_slope), np.zeros(k_int)
             elif self.mode == "slope_only":
-                a0, gamma, b0 = params[0], params[1 : 1 + k_slope], params[1 + k_slope]
+                alpha0, gamma, b0 = params[0], params[1 : 1 + k_slope], params[1 + k_slope]
                 w = np.zeros(k_int)
             elif self.mode == "intercept_only":
-                a0, gamma, b0, w = params[0], np.zeros(k_slope), params[1], params[2:]
+                alpha0, gamma, b0, w = params[0], np.zeros(k_slope), params[1], params[2:]
             else:  # full
-                a0, gamma = params[0], params[1 : 1 + k_slope]
+                alpha0, gamma = params[0], params[1 : 1 + k_slope]
                 b0, w = params[1 + k_slope], params[2 + k_slope :]
 
             if self.mode in ["full", "slope_only"]:
-                slope_log = np.clip(np.log(max(a0, 0.1)) + np.dot(X_norm[:, slope_idx], gamma), -3.0, 3.0)
+                slope_log = np.clip(alpha0 + np.dot(X_norm[:, slope_idx], gamma), -3.0, 3.0)
                 a_x = np.exp(slope_log)
             else:
-                a_x = np.full(n, max(a0, 0.1))
+                a_x = np.full(n, np.exp(alpha0))
 
             b_x = b0 + np.dot(X_norm[:, int_idx], w) if self.mode in ["full", "intercept_only"] else np.full(n, b0)
             logits = a_x * x1 + b_x
@@ -163,30 +165,30 @@ class VaryingCoefficientPlattScaler:
             total_loss = nll + reg_gamma + reg_w
 
             r = (p - y) / n
-            grad_a0 = np.sum(r * x1 * a_x * (1.0 / max(a0, 0.1))) if a0 > 0.1 else 0.0
+            grad_alpha0 = float(np.sum(r * x1 * a_x))
             grad_gamma = np.dot(X_norm[:, slope_idx].T, r * x1 * a_x) + (gamma / self.C_slope)
-            grad_b0 = np.sum(r)
+            grad_b0 = float(np.sum(r))
             grad_w = np.dot(X_norm[:, int_idx].T, r) + (w / self.C_intercept)
 
             if self.mode == "1d_platt":
-                grad = np.array([grad_a0, grad_b0])
+                grad = np.array([grad_alpha0, grad_b0])
             elif self.mode == "slope_only":
-                grad = np.concatenate([[grad_a0], grad_gamma, [grad_b0]])
+                grad = np.concatenate([[grad_alpha0], grad_gamma, [grad_b0]])
             elif self.mode == "intercept_only":
-                grad = np.concatenate([[grad_a0], [grad_b0], grad_w])
+                grad = np.concatenate([[grad_alpha0], [grad_b0], grad_w])
             else:
-                grad = np.concatenate([[grad_a0], grad_gamma, [grad_b0], grad_w])
+                grad = np.concatenate([[grad_alpha0], grad_gamma, [grad_b0], grad_w])
 
             return float(total_loss), grad
 
         if self.mode == "1d_platt":
-            x0 = np.array([init_a0, init_b0])
+            x0 = np.array([init_alpha0, init_b0])
         elif self.mode == "slope_only":
-            x0 = np.concatenate([[init_a0], np.zeros(k_slope), [init_b0]])
+            x0 = np.concatenate([[init_alpha0], np.zeros(k_slope), [init_b0]])
         elif self.mode == "intercept_only":
-            x0 = np.concatenate([[init_a0], [init_b0], np.zeros(k_int)])
+            x0 = np.concatenate([[init_alpha0], [init_b0], np.zeros(k_int)])
         else:
-            x0 = np.concatenate([[init_a0], np.zeros(k_slope), [init_b0], np.zeros(k_int)])
+            x0 = np.concatenate([[init_alpha0], np.zeros(k_slope), [init_b0], np.zeros(k_int)])
 
         return objective, x0
 
@@ -200,7 +202,8 @@ class VaryingCoefficientPlattScaler:
         res = minimize(objective, x0=x0, jac=True, method="L-BFGS-B")
         p_opt = res.x
         k_slope, k_int = len(self._slope_idx), len(self._int_idx)
-        self.a0 = float(p_opt[0])
+        self.alpha0 = float(p_opt[0])
+        self.a0 = float(np.exp(self.alpha0))
         if self.mode == "full":
             self.gamma, self.b0, self.w = p_opt[1 : 1 + k_slope], float(p_opt[1 + k_slope]), p_opt[2 + k_slope :]
         elif self.mode == "slope_only":
@@ -215,9 +218,9 @@ class VaryingCoefficientPlattScaler:
         """Calculates dynamic slope a(z) for each sample."""
         X_norm = self.scaler.transform(X)
         if self.mode in ["full", "slope_only"] and self.gamma is not None:
-            slope_log = np.clip(np.log(max(self.a0, 0.1)) + np.dot(X_norm[:, self._slope_idx], self.gamma), -3.0, 3.0)
+            slope_log = np.clip(self.alpha0 + np.dot(X_norm[:, self._slope_idx], self.gamma), -3.0, 3.0)
             return np.exp(slope_log)
-        return np.full(len(X), max(self.a0, 0.1))
+        return np.full(len(X), np.exp(self.alpha0))
 
     def compute_dynamic_intercept(self, X: np.ndarray) -> np.ndarray:
         """Calculates dynamic intercept b(z) for each sample."""
@@ -226,13 +229,17 @@ class VaryingCoefficientPlattScaler:
             return self.b0 + np.dot(X_norm[:, self._int_idx], self.w)
         return np.full(len(X), self.b0)
 
+    def _predict_logits(self, X: np.ndarray) -> np.ndarray:
+        """Computes calibrated logits: a(z) * x1 + b(z)."""
+        X_arr = np.asarray(X, dtype=np.float64)
+        x1 = X_arr[:, 0]
+        a_x = self.compute_dynamic_slope(X_arr)
+        b_x = self.compute_dynamic_intercept(X_arr)
+        return a_x * x1 + b_x
+
     def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
         """Computes calibrated probabilities: sigma(a(z) * x1 + b(z))."""
-        X = np.asarray(X_test, dtype=np.float64)
-        x1 = X[:, 0]
-        a_x = self.compute_dynamic_slope(X)
-        b_x = self.compute_dynamic_intercept(X)
-        return sigmoid(a_x * x1 + b_x)
+        return sigmoid(self._predict_logits(X_test))
 
     def get_effective_temperature(self, X: np.ndarray) -> np.ndarray:
         """Returns instance effective temperature T_eff(z) = 1 / a(z)."""

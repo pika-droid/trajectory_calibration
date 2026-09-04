@@ -103,10 +103,14 @@ def test_word_boundary_accuracy_evaluation():
     sample_phone = {"answer": "phone"}
     assert evaluate_accuracy("one", sample_phone, "chartqa") == 0.0
 
-    # Legitimate word boundary match
-    sample_dog = {"answer": "a brown dog"}
-    assert evaluate_accuracy("dog", sample_dog, "chartqa") == 1.0
-    assert evaluate_accuracy("brown", sample_dog, "chartqa") == 1.0
+    # Ground-truth containment in longer prediction
+    sample_dog = {"answer": "dog"}
+    assert evaluate_accuracy("a brown dog", sample_dog, "chartqa") == 1.0
+    assert evaluate_accuracy("brown dog", sample_dog, "chartqa") == 1.0
+
+    # Substring of ground truth is rejected
+    sample_phrase = {"answer": "a brown dog"}
+    assert evaluate_accuracy("dog", sample_phrase, "chartqa") == 0.0
 
 
 def test_load_image_from_filepath(tmp_path):

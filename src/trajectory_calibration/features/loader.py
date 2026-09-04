@@ -82,18 +82,24 @@ def load_dataset_features(
 
     raw_data = safe_torch_load(pt_path)
     rows = []
-    for item in raw_data:
-        feat_dict = compute_features_from_sample(item, fine_scale=fine_scale)
+    for idx, item in enumerate(raw_data):
+        feat_dict = compute_features_from_sample(item, fine_scale=fine_scale, idx=idx)
         rows.append(feat_dict)
 
     df = pd.DataFrame(rows)
 
-    # POPE Deduplication Guard
-    if "question_id" in df.columns:
+    # Deduplication Guard: Only drop duplicates if genuine non-trivial duplicate IDs are present (> 1 unique ID)
+    if "question_id" in df.columns and len(df) > 1:
         initial_len = len(df)
-        df = df.drop_duplicates(subset=["question_id"]).reset_index(drop=True)
-        if len(df) < initial_len:
-            logger.info(f"Deduplicated dataset: {initial_len} -> {len(df)} unique question_ids.")
+        n_unique = df["question_id"].nunique()
+        if 1 < n_unique < initial_len:
+            df = df.drop_duplicates(subset=["question_id"]).reset_index(drop=True)
+            if len(df) < initial_len:
+                logger.info(f"Deduplicated dataset: {initial_len} -> {len(df)} unique question_ids.")
+        elif n_unique == 1 and initial_len > 1:
+            logger.warning(
+                f"Skipping deduplication: all {initial_len} samples share the same question_id ({df['question_id'].iloc[0]})."
+            )
 
     return df
 
