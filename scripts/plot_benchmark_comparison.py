@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.calibration import calibration_curve
 
 # Set publication style
 plt.style.use('seaborn-v0_8-whitegrid' if 'seaborn-v0_8-whitegrid' in plt.style.available else 'default')
@@ -85,23 +86,13 @@ def plot_calibration_curves(out_dir: Path, arch: str = "m3", seed: int = 42):
             # Ideal diagonal
             ax.plot([0, 1], [0, 1], "k--", alpha=0.5, label="Perfect Calibration" if ds == datasets[0] else "")
 
-            # Binning for reliability curves
             n_bins = 10
-            bins = np.linspace(0.0, 1.0, n_bins + 1)
-
             for m_label, (probs, color, ls) in models_dict.items():
-                bin_accs = []
-                bin_confs = []
-                for i in range(n_bins):
-                    mask = (probs >= bins[i]) & (probs < bins[i + 1] if i < n_bins - 1 else probs <= bins[i + 1])
-                    if np.any(mask):
-                        bin_confs.append(np.mean(probs[mask]))
-                        bin_accs.append(np.mean(y_te[mask]))
-
+                bin_accs, bin_confs = calibration_curve(y_te, probs, n_bins=n_bins)
                 ax.plot(bin_confs, bin_accs, marker="o", markersize=5, label=m_label if ds == datasets[0] else "", color=color, linestyle=ls, linewidth=2)
 
             ax.set_title(f"{d_name} ({arch.upper()})", fontweight="bold")
-            ax.set_xlabel("Confidence $\hat{p}$")
+            ax.set_xlabel(r"Confidence $\hat{p}$")
             if ds == datasets[0]:
                 ax.set_ylabel("Empirical Accuracy")
             ax.set_xlim(0, 1)

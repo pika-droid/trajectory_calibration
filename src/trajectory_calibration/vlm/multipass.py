@@ -91,9 +91,17 @@ def _extract_single_rollout(
     eos_id = getattr(wrapper.tokenizer, "eos_token_id", None)
     h_dim = getattr(wrapper.model.config, "hidden_size", 4096)
 
-    full_seq = sequences[k_idx]
-    gen_tokens = full_seq[-n_sc:].tolist() if n_sc > 0 else (full_seq[input_len:].tolist() if len(full_seq) > input_len else full_seq.tolist())
-    act_len = (gen_tokens.index(eos_id) + 1) if (eos_id is not None and eos_id in gen_tokens) else len(gen_tokens)
+    if n_sc > 0:
+        gen_tokens = full_seq[-n_sc:].tolist()
+    elif len(full_seq) > input_len:
+        gen_tokens = full_seq[input_len:].tolist()
+    else:
+        gen_tokens = full_seq.tolist()
+
+    if eos_id is not None and eos_id in gen_tokens:
+        act_len = gen_tokens.index(eos_id) + 1
+    else:
+        act_len = len(gen_tokens)
     tok_ids = gen_tokens[:act_len]
     text = wrapper.tokenizer.decode(tok_ids, skip_special_tokens=True).strip()
 

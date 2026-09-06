@@ -23,7 +23,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 
 from trajectory_calibration.metrics.scoring import compute_nll
-from trajectory_calibration.utils.math import get_logits, sigmoid
+from trajectory_calibration.utils.math import sigmoid
 
 logger = logging.getLogger("trajectory_calibration.calibrators.vcps")
 
@@ -150,9 +150,13 @@ class VaryingCoefficientPlattScaler:
                 b0, w = params[1 + k_slope], params[2 + k_slope :]
 
             if self.mode in ["full", "slope_only"]:
-                slope_log = np.clip(alpha0 + np.dot(X_norm[:, slope_idx], gamma), -3.0, 3.0)
+                slope_raw = alpha0 + np.dot(X_norm[:, slope_idx], gamma)
+                active_mask = (slope_raw >= -3.0) & (slope_raw <= 3.0)
+                slope_log = np.clip(slope_raw, -3.0, 3.0)
                 a_x = np.exp(slope_log)
             else:
+                slope_raw = np.full(n, alpha0)
+                active_mask = np.ones(n, dtype=bool)
                 a_x = np.full(n, np.exp(alpha0))
 
             b_x = b0 + np.dot(X_norm[:, int_idx], w) if self.mode in ["full", "intercept_only"] else np.full(n, b0)
@@ -165,8 +169,9 @@ class VaryingCoefficientPlattScaler:
             total_loss = nll + reg_gamma + reg_w
 
             r = (p - y) / n
-            grad_alpha0 = float(np.sum(r * x1 * a_x))
-            grad_gamma = np.dot(X_norm[:, slope_idx].T, r * x1 * a_x) + (gamma / self.C_slope)
+            r_slope = r * x1 * a_x * active_mask if self.mode in ["full", "slope_only"] else r * x1 * a_x
+            grad_alpha0 = float(np.sum(r_slope))
+            grad_gamma = np.dot(X_norm[:, slope_idx].T, r_slope) + (gamma / self.C_slope)
             grad_b0 = float(np.sum(r))
             grad_w = np.dot(X_norm[:, int_idx].T, r) + (w / self.C_intercept)
 

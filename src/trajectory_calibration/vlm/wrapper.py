@@ -95,8 +95,19 @@ class UnifiedVLMWrapper:
         return image_tensor, [image.size]
 
     def format_prompt(self, question: str) -> str:
-        img_tok = self._llava["DEFAULT_IM_START_TOKEN"] + self._llava["DEFAULT_IMAGE_TOKEN"] + self._llava["DEFAULT_IM_END_TOKEN"] if getattr(self.model.config, "mm_use_im_start_end", False) else self._llava["DEFAULT_IMAGE_TOKEN"]
-        qs = re.sub(self._llava["IMAGE_PLACEHOLDER"], img_tok, question) if self._llava["IMAGE_PLACEHOLDER"] in question else f"{img_tok}\n{question}"
+        if getattr(self.model.config, "mm_use_im_start_end", False):
+            img_tok = (
+                self._llava["DEFAULT_IM_START_TOKEN"]
+                + self._llava["DEFAULT_IMAGE_TOKEN"]
+                + self._llava["DEFAULT_IM_END_TOKEN"]
+            )
+        else:
+            img_tok = self._llava["DEFAULT_IMAGE_TOKEN"]
+
+        if self._llava["IMAGE_PLACEHOLDER"] in question:
+            qs = re.sub(self._llava["IMAGE_PLACEHOLDER"], img_tok, question)
+        else:
+            qs = f"{img_tok}\n{question}"
         qs += "\nAnswer the question using a single word or phrase."
         conv = self._llava["conv_templates"][self.conv_mode].copy()
         conv.append_message(conv.roles[0], qs)

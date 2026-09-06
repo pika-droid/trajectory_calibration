@@ -12,6 +12,8 @@ import logging
 import re
 from typing import Any
 import numpy as np
+from scipy.special import logsumexp
+from scipy.stats import entropy
 
 from trajectory_calibration.utils.helpers import clean_text
 
@@ -40,6 +42,13 @@ class FastStringEntailment:
         for op1, op2 in binary_opposites:
             if (t1 == op1 and t2 == op2) or (t1 == op2 and t2 == op1):
                 return 0
+
+        # Negation polarity guard: prevent false positive entailments
+        negation_words = {"not", "no", "never", "none"}
+        words1 = set(re.findall(r"\b\w+\b", t1.lower()))
+        words2 = set(re.findall(r"\b\w+\b", t2.lower()))
+        if bool(words1 & negation_words) != bool(words2 & negation_words):
+            return 0
 
         # Word boundary matching for phrase containment
         if len(t1.split()) > 1 or len(t2.split()) > 1:
@@ -118,15 +127,12 @@ def logsumexp_by_id(
     unique_ids = sorted(list(set(semantic_ids)))
     cluster_log_probs = []
 
-    max_lp = float(np.max(lps))
-    total_logsumexp = max_lp + np.log(np.sum(np.exp(lps - max_lp)))
+    total_logsumexp = float(logsumexp(lps))
 
     for uid in unique_ids:
         id_indices = [pos for pos, x in enumerate(semantic_ids) if x == uid]
         id_lps = lps[id_indices]
-
-        max_c = float(np.max(id_lps))
-        cluster_lse = max_c + np.log(np.sum(np.exp(id_lps - max_c)))
+        cluster_lse = float(logsumexp(id_lps))
         norm_cluster_lp = cluster_lse - total_logsumexp
         cluster_log_probs.append(float(norm_cluster_lp))
 
@@ -146,8 +152,7 @@ def compute_semantic_entropy(
     probs = np.exp(cluster_log_probs)
     probs = probs / np.sum(probs)
 
-    se = -np.sum(probs * np.log(np.clip(probs, 1e-12, 1.0)))
-    return float(max(0.0, se))
+    return float(max(0.0, entropy(probs)))
 
 
 def cluster_assignment_entropy(semantic_ids: list[int]) -> float:
@@ -157,8 +162,7 @@ def cluster_assignment_entropy(semantic_ids: list[int]) -> float:
     counts = np.bincount(semantic_ids)
     probs = counts / len(semantic_ids)
     probs = probs[probs > 0]
-    entropy = -np.sum(probs * np.log(probs))
-    return float(max(0.0, entropy))
+    return float(max(0.0, entropy(probs)))
 
 
 compute_cluster_assignment_entropy = cluster_assignment_entropy

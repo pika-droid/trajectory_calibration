@@ -19,12 +19,10 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from trajectory_calibration.calibrators.adaptation import (
-    fit_target_intercept_adaptation,
     run_saerens_em_binary,
 )
 from trajectory_calibration.calibrators.baselines import (
     PlattScalingEstimator,
-    TemperatureScalingEstimator,
     TrajectoryLREstimator,
 )
 from trajectory_calibration.calibrators.residual import (
@@ -34,7 +32,6 @@ from trajectory_calibration.calibrators.residual import (
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
 from trajectory_calibration.features.trajectory import (
     FEATURE_KEYS,
-    get_stratified_split,
     load_dataset_features,
     select_best_5d_subset,
 )

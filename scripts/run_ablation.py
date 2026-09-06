@@ -21,14 +21,11 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from trajectory_calibration.calibrators.residual import evaluate_full_metric_panel
-from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
 from trajectory_calibration.features.trajectory import (
     FEATURE_KEYS,
     calculate_vif,
     get_stratified_split,
     load_dataset_features,
-    select_best_5d_subset,
-    sigmoid,
 )
 from trajectory_calibration.metrics.calibration import compute_adaptive_ece, compute_auroc
 from trajectory_calibration.utils.helpers import set_seed

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from typing import Any
 import numpy as np
+from scipy.special import logit
 
 from trajectory_calibration.utils.helpers import clean_text
 
@@ -56,7 +57,7 @@ def compute_features_from_sample(
 
     # x1: Final Logit (inverse sigmoid on c_final)
     c_final_clipped = np.clip(c_arr[-1], eps, 1.0 - eps)
-    x1 = float(np.log(c_final_clipped / (1.0 - c_final_clipped)))
+    x1 = float(logit(c_final_clipped))
     # x3: Confidence Gain (c_fine - c_9)
     x3 = float(c_arr[-1] - c_arr[1])
     # x4: Monotonicity Count

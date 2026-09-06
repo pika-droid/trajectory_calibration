@@ -24,7 +24,7 @@ def fit_calibration_slope_intercept(
     p = np.asarray(probs, dtype=np.float64)
     labels = np.asarray(y, dtype=np.int64)
     if len(np.unique(labels)) < 2:
-        return 0.0, 1.0
+        return 1.0, 0.0
 
     c = np.clip(p, eps, 1.0 - eps)
     logits = np.log(c / (1.0 - c)).reshape(-1, 1)

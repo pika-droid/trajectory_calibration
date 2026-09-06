@@ -8,7 +8,6 @@ Extracts per-scale confidences, margins, logprobs, and answers across visual tok
 
 import argparse
 import logging
-import os
 import random
 import sys
 from pathlib import Path
@@ -21,7 +20,6 @@ if str(SRC_PATH) not in sys.path:
 import torch
 from trajectory_calibration.utils.helpers import safe_torch_load, set_seed
 from trajectory_calibration.vlm.datasets import (
-    ALL_DATASET_KEYS,
     evaluate_accuracy,
     format_question,
     load_hf_dataset,

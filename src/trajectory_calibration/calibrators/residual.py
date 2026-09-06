@@ -12,26 +12,19 @@ from scipy.optimize import minimize
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 
-try:
-    from scipy.integrate import trapezoid as _trapezoid
-except ImportError:
-    _trapezoid = getattr(np, "trapezoid", getattr(np, "trapz", None))
-
 from trajectory_calibration.features.diagnostics import evaluate_model_diagnostics
 from trajectory_calibration.metrics.ece import (
     compute_adaptive_ece,
     compute_ece,
     compute_kde_ece,
-    compute_mce,
 )
 from trajectory_calibration.metrics.murphy import compute_murphy_brier_decomposition
 from trajectory_calibration.metrics.scoring import (
     compute_auroc,
     compute_brier,
     compute_nll,
-    compute_prediction_std,
 )
-from trajectory_calibration.utils.math import get_logits, sigmoid
+from trajectory_calibration.utils.math import sigmoid
 
 logger = logging.getLogger("trajectory_calibration.calibrators.residual")
 

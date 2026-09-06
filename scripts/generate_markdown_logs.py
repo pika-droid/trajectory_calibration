@@ -187,6 +187,67 @@ def generate_umpire_log(model_name, model_display, csv_path, out_path):
         f.write("\n".join(lines))
     print(f"Written: {out_path}")
 
+def _format_markdown_comparison_table(
+    df_table: pd.DataFrame,
+    ece_col: str = "ece_pct",
+    adaptive_ece_col: str = "adaptive_ece_pct",
+    auroc_col: str = "auroc",
+    status_col: str | None = "status",
+    is_macro: bool = False,
+) -> list[str]:
+    """Formats comparison DataFrame into markdown table lines with rankings and formatting."""
+    ece_ranks = rank_values(df_table[ece_col].tolist(), higher_is_better=False)
+    auc_ranks = rank_values(df_table[auroc_col].tolist(), higher_is_better=True)
+
+    table_lines = []
+    if is_macro:
+        table_lines.append("| Calibration Method | Category | Regime / Sampling | Macro ECE (%) $\\downarrow$ | Macro Adaptive ECE (%) $\\downarrow$ | Macro AUROC $\\uparrow$ |")
+        table_lines.append("| :--- | :--- | :---: | :---: | :---: | :---: |")
+    else:
+        table_lines.append("| Calibration Method | Category | Regime / Sampling | ECE (%) $\\downarrow$ | Adaptive ECE (%) $\\downarrow$ | AUROC $\\uparrow$ | Status |")
+        table_lines.append("| :--- | :--- | :---: | :---: | :---: | :---: | :---: |")
+
+    for idx, (_, r) in enumerate(df_table.iterrows()):
+        m_disp = r["method"]
+        cat_disp = r["category"]
+        reg_disp = r["regime"]
+
+        ece_f = format_num(r[ece_col], ece_ranks[idx], is_percentage=True, decimals=2)
+        aece_f = format_num(r[adaptive_ece_col], 0, is_percentage=True, decimals=2) if pd.notnull(r[adaptive_ece_col]) else "-"
+        auc_f = format_num(r[auroc_col], auc_ranks[idx], is_percentage=False, decimals=3)
+
+        if is_macro:
+            table_lines.append(f"| {m_disp} | {cat_disp} | {reg_disp} | {ece_f} | {aece_f} | {auc_f} |")
+        else:
+            stat_disp = f"`{r[status_col]}`" if status_col and status_col in r else "`VALID`"
+            table_lines.append(f"| {m_disp} | {cat_disp} | {reg_disp} | {ece_f} | {aece_f} | {auc_f} | {stat_disp} |")
+
+    table_lines.append("")
+    return table_lines
+
+
+TARGET_METHODS_BENCH = [
+    ('Naive Confidence (NC)', 'Uncalibrated Baseline', 'Single-Pass ($T=0.0$)'),
+    ('Temperature Scaling (TS)', 'Classic Post-Hoc Calibrator', 'Single-Pass ($T=0.0$)'),
+    ('Platt Scaling (1D)', 'Classic Post-Hoc Calibrator', 'Single-Pass ($T=0.0$)'),
+    ('Trajectory LR', 'Linear Trajectory Baseline', 'Single-Pass ($T=0.0$)'),
+    ('Trajectory LR (No Bias)', 'Linear Trajectory Baseline (Zero-Bias)', 'Single-Pass ($T=0.0$)'),
+    ('Quadratic Platt (Logit-Only)', 'Logit-Only Polynomial Baseline', 'Single-Pass ($T=0.0$)'),
+    ('Spline Calibration', 'Non-Parametric Calibrator', 'Single-Pass ($T=0.0$)'),
+    ('Adaptive TS (ATS)', 'Adaptive Calibrator', 'Single-Pass ($T=0.0$)'),
+    ('Residual Calibrator', 'Feature-Aided Calibrator', 'Single-Pass ($T=0.0$)'),
+    ('VCPS-5D (Our Method)', 'Proposed Trajectory Calibration', 'Single-Pass ($T=0.0$)'),
+    ('VCPS-17D (Our Method)', 'Proposed Trajectory Calibration', 'Single-Pass ($T=0.0$)')
+]
+
+TARGET_METHODS_UMP = [
+    ('ln_entropy', 'UMPIRE Multi-Pass Baseline', 'Multi-Pass ($T=0.5, K=10$)'),
+    ('semantic_entropy', 'UMPIRE Multi-Pass Baseline', 'Multi-Pass ($T=0.5, K=10$)'),
+    ('eigen_score', 'UMPIRE Multi-Pass Baseline', 'Multi-Pass ($T=0.5, K=10$)'),
+    ('umpire', 'UMPIRE Multi-Pass Baseline', 'Multi-Pass ($T=0.5, K=10$)')
+]
+
+
 # -------------------------------------------------------------
 # Generate VCPS vs Baselines Log
 # -------------------------------------------------------------
@@ -196,27 +257,8 @@ def generate_vcps_vs_baselines_log(model_name, model_display, bench_path, ump_pa
     df_u = pd.read_csv(ump_path)
     
     datasets = sorted(df_u['dataset'].unique())
-    
-    target_methods_bench = [
-        ('Naive Confidence (NC)', 'Uncalibrated Baseline', 'Single-Pass ($T=0.0$)'),
-        ('Temperature Scaling (TS)', 'Classic Post-Hoc Calibrator', 'Single-Pass ($T=0.0$)'),
-        ('Platt Scaling (1D)', 'Classic Post-Hoc Calibrator', 'Single-Pass ($T=0.0$)'),
-        ('Trajectory LR', 'Linear Trajectory Baseline', 'Single-Pass ($T=0.0$)'),
-        ('Trajectory LR (No Bias)', 'Linear Trajectory Baseline (Zero-Bias)', 'Single-Pass ($T=0.0$)'),
-        ('Quadratic Platt (Logit-Only)', 'Logit-Only Polynomial Baseline', 'Single-Pass ($T=0.0$)'),
-        ('Spline Calibration', 'Non-Parametric Calibrator', 'Single-Pass ($T=0.0$)'),
-        ('Adaptive TS (ATS)', 'Adaptive Calibrator', 'Single-Pass ($T=0.0$)'),
-        ('Residual Calibrator', 'Feature-Aided Calibrator', 'Single-Pass ($T=0.0$)'),
-        ('VCPS-5D (Our Method)', 'Proposed Trajectory Calibration', 'Single-Pass ($T=0.0$)'),
-        ('VCPS-17D (Our Method)', 'Proposed Trajectory Calibration', 'Single-Pass ($T=0.0$)')
-    ]
-    
-    target_methods_ump = [
-        ('ln_entropy', 'UMPIRE Multi-Pass Baseline', 'Multi-Pass ($T=0.5, K=10$)'),
-        ('semantic_entropy', 'UMPIRE Multi-Pass Baseline', 'Multi-Pass ($T=0.5, K=10$)'),
-        ('eigen_score', 'UMPIRE Multi-Pass Baseline', 'Multi-Pass ($T=0.5, K=10$)'),
-        ('umpire', 'UMPIRE Multi-Pass Baseline', 'Multi-Pass ($T=0.5, K=10$)')
-    ]
+    target_methods_bench = TARGET_METHODS_BENCH
+    target_methods_ump = TARGET_METHODS_UMP
     
     lines = []
     lines.append(f"# VCPS Trajectory Calibration vs. Baselines: {model_display}")
@@ -308,22 +350,7 @@ def generate_vcps_vs_baselines_log(model_name, model_display, bench_path, ump_pa
         
         lines.append(f"### Benchmark: `{d}`")
         lines.append(f"**Dataset**: `{d}` | **Model**: {model_display}")
-        lines.append("")
-        lines.append("| Calibration Method | Category | Regime / Sampling | ECE (%) $\\downarrow$ | Adaptive ECE (%) $\\downarrow$ | AUROC $\\uparrow$ | Status |")
-        lines.append("| :--- | :--- | :---: | :---: | :---: | :---: | :---: |")
-        
-        for idx, (_, r) in enumerate(tdf.iterrows()):
-            m_disp = r['method']
-            cat_disp = r['category']
-            reg_disp = r['regime']
-            
-            ece_f = format_num(r['ece_pct'], ece_ranks[idx], is_percentage=True, decimals=2)
-            aece_f = format_num(r['adaptive_ece_pct'], 0, is_percentage=True, decimals=2) if pd.notnull(r['adaptive_ece_pct']) else "-"
-            auc_f = format_num(r['auroc'], auc_ranks[idx], is_percentage=False, decimals=3)
-            stat_disp = f"`{r['status']}`"
-            
-            lines.append(f"| {m_disp} | {cat_disp} | {reg_disp} | {ece_f} | {aece_f} | {auc_f} | {stat_disp} |")
-        lines.append("")
+        lines.extend(_format_markdown_comparison_table(tdf, is_macro=False))
     
     # ---------------------------------------------------------
     # Section 2: Macro-Average Summary Table
@@ -363,23 +390,7 @@ def generate_vcps_vs_baselines_log(model_name, model_display, bench_path, ump_pa
             })
             
     mdf = pd.DataFrame(macro_rows)
-    macro_ece_ranks = rank_values(mdf['ece_pct'].tolist(), higher_is_better=False)
-    macro_auc_ranks = rank_values(mdf['auroc'].tolist(), higher_is_better=True)
-    
-    lines.append("| Calibration Method | Category | Regime / Sampling | Macro ECE (%) $\\downarrow$ | Macro Adaptive ECE (%) $\\downarrow$ | Macro AUROC $\\uparrow$ |")
-    lines.append("| :--- | :--- | :---: | :---: | :---: | :---: |")
-    
-    for idx, (_, r) in enumerate(mdf.iterrows()):
-        m_disp = r['method']
-        cat_disp = r['category']
-        reg_disp = r['regime']
-        
-        ece_f = format_num(r['ece_pct'], macro_ece_ranks[idx], is_percentage=True, decimals=2)
-        aece_f = format_num(r['adaptive_ece_pct'], 0, is_percentage=True, decimals=2) if pd.notnull(r['adaptive_ece_pct']) else "-"
-        auc_f = format_num(r['auroc'], macro_auc_ranks[idx], is_percentage=False, decimals=3)
-        
-        lines.append(f"| {m_disp} | {cat_disp} | {reg_disp} | {ece_f} | {aece_f} | {auc_f} |")
-    lines.append("")
+    lines.extend(_format_markdown_comparison_table(mdf, is_macro=True))
     
     # ---------------------------------------------------------
     # Section 3: Win-Count & Comparative Analysis

@@ -38,7 +38,9 @@ class TemperatureScalingEstimator:
     """Global Temperature Scaling: optimizes single parameter T in [0.01, 20.0]."""
 
     def __init__(self, t_min: float = 0.01, t_max: float = 20.0) -> None:
-        self.t_min, self.t_max, self.T_opt = t_min, t_max, 1.0
+        self.t_min = t_min
+        self.t_max = t_max
+        self.T_opt = 1.0
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray) -> TemperatureScalingEstimator:
         x1 = X_train[:, 0] if X_train.ndim == 2 else X_train
@@ -75,23 +77,83 @@ class PlattScalingEstimator:
 
 
 class SplineCalibrator:
-    """Non-parametric monotonic calibration via Isotonic Regression."""
+    """Monotonic cubic spline calibration via PCHIP (Gupta et al., 2020)."""
 
     def __init__(self, n_knots: int = 5, y_min: float = 0.0, y_max: float = 1.0) -> None:
         self.n_knots = n_knots
-        self.iso = IsotonicRegression(y_min=y_min, y_max=y_max, out_of_bounds="clip")
+        self.y_min = y_min
+        self.y_max = y_max
+        self.spline: PchipInterpolator | None = None
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray) -> SplineCalibrator:
         x1 = X_train[:, 0] if X_train.ndim == 2 else X_train
         confs = sigmoid(x1)
         y = np.asarray(y_train, dtype=np.float64)
-        self.iso.fit(confs, y)
+
+        n = len(confs)
+        k = max(2, self.n_knots)
+
+        mean_y = float(np.mean(y)) if n > 0 else 0.5
+
+        if n < 2:
+            x_knots = np.linspace(0.0, 1.0, k + 1)
+            y_knots = np.full(k + 1, mean_y)
+            self.spline = PchipInterpolator(x_knots, y_knots)
+            return self
+
+        # 1. Partition [0, 1] into K knot bins using empirical quantiles of training confidences
+        quantiles = np.linspace(0.0, 1.0, k + 1)
+        raw_knots = np.quantile(confs, quantiles)
+
+        # Strictly enforce x_0 = 0.0, x_K = 1.0, and x_0 < x_1 < ... < x_K
+        eps = 1e-4
+        x_knots = np.zeros(k + 1)
+        x_knots[0] = 0.0
+        x_knots[-1] = 1.0
+
+        # Forward pass: ensure x_knots[i] >= x_knots[i-1] + eps
+        for i in range(1, k):
+            x_knots[i] = max(raw_knots[i], x_knots[i - 1] + eps)
+
+        # Backward pass: ensure x_knots[i] <= x_knots[i+1] - eps
+        for i in range(k - 1, 0, -1):
+            x_knots[i] = min(x_knots[i], x_knots[i + 1] - eps)
+
+        # Fallback to uniform grid if quantile collapse occurred
+        if np.any(np.diff(x_knots) <= 0):
+            x_knots = np.linspace(0.0, 1.0, k + 1)
+
+        # 2. Estimate empirical accuracy in each bin
+        bin_accs = []
+        for i in range(k):
+            low, high = x_knots[i], x_knots[i + 1]
+            mask = (confs >= low) & (confs <= high) if i == 0 else (confs > low) & (confs <= high)
+            if np.any(mask):
+                bin_accs.append(float(np.mean(y[mask])))
+            else:
+                bin_accs.append(mean_y)
+
+        raw_y = np.zeros(k + 1)
+        raw_y[0] = bin_accs[0]
+        raw_y[-1] = bin_accs[-1]
+        for i in range(1, k):
+            raw_y[i] = 0.5 * (bin_accs[i - 1] + bin_accs[i])
+
+        # Apply IsotonicRegression to guarantee strict monotonicity y_0 <= y_1 <= ... <= y_K
+        iso = IsotonicRegression(y_min=self.y_min, y_max=self.y_max, out_of_bounds="clip")
+        y_knots = iso.fit_transform(x_knots, raw_y)
+
+        # 3. Fit PchipInterpolator to strictly preserve monotonicity without overshoot
+        self.spline = PchipInterpolator(x_knots, y_knots)
         return self
 
     def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
+        if self.spline is None:
+            raise RuntimeError("SplineCalibrator must be fitted before predict_proba.")
         x1 = X_test[:, 0] if X_test.ndim == 2 else X_test
         confs = sigmoid(x1)
-        return np.clip(self.iso.predict(confs), 0.0, 1.0)
+        preds = self.spline(confs)
+        return np.clip(preds, self.y_min, self.y_max)
 
 
 class AdaptiveTemperatureScaling:
@@ -159,17 +221,23 @@ class QuadraticPlattScaler:
         self.poly = PolynomialFeatures(degree=self.degree, include_bias=False)
         self.lr = LogisticRegression(C=self.C, solver="lbfgs", max_iter=1000, random_state=self.random_state)
 
-    def _transform(self, X: np.ndarray) -> np.ndarray:
+    def _extract_x1(self, X: np.ndarray) -> np.ndarray:
         arr = np.asarray(X, dtype=np.float64)
-        x1 = (arr[:, 0] if arr.ndim == 2 else arr).reshape(-1, 1)
-        return self.poly.fit_transform(x1) if not hasattr(self.poly, "n_features_in_") else self.poly.transform(x1)
+        return (arr[:, 0] if arr.ndim == 2 else arr).reshape(-1, 1)
+
+    def _transform(self, X: np.ndarray) -> np.ndarray:
+        return self.poly.transform(self._extract_x1(X))
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray) -> QuadraticPlattScaler:
-        self.lr.fit(self._transform(X_train), np.asarray(y_train, dtype=np.float64))
+        x1 = self._extract_x1(X_train)
+        X_poly = self.poly.fit_transform(x1)
+        self.lr.fit(X_poly, np.asarray(y_train, dtype=np.float64))
         return self
 
     def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
-        return self.lr.predict_proba(self._transform(X_test))[:, 1]
+        x1 = self._extract_x1(X_test)
+        X_poly = self.poly.transform(x1)
+        return self.lr.predict_proba(X_poly)[:, 1]
 
     def compute_dynamic_slope(self, X: np.ndarray) -> np.ndarray:
         arr = np.asarray(X, dtype=np.float64)

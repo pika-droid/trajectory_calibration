@@ -11,6 +11,7 @@ Implements token-probability confidence scorers following the CVS Health UQLM st
 from __future__ import annotations
 
 import numpy as np
+from scipy.stats import entropy
 
 
 class WhiteBoxScorers:
@@ -58,8 +59,7 @@ class WhiteBoxScorers:
         p = np.asarray(token_distribution, dtype=np.float64)
         p = np.clip(p, eps, 1.0)
         p = p / np.sum(p)
-        h = -np.sum(p * (np.log(p) / np.log(base)))
-        return float(h)
+        return float(entropy(p, base=base))
 
     @staticmethod
     def mean_token_negentropy(

@@ -60,16 +60,22 @@ def compute_eigenscore_gram(embeddings: np.ndarray, jitter: float = 1e-3) -> flo
 def compute_logdet(k_matrix: np.ndarray, alpha: float = 1e-8) -> float:
     """
     Computes log-determinant volume of covariance / kernel matrix: log det(K + alpha * I).
+    Guarantees strictly finite values via eigenvalue thresholding (Issue 12).
     """
     arr = np.asarray(k_matrix, dtype=np.float64)
     if arr.ndim != 2 or arr.shape[0] != arr.shape[1]:
         return 0.0
-    reg_k = arr + np.eye(arr.shape[0]) * alpha
     try:
-        return float(fast_logdet(reg_k))
+        evals = np.maximum(np.linalg.eigvalsh(arr), 0.0) + alpha
+        return float(np.sum(np.log(evals)))
     except Exception:
-        sign, logdet = np.linalg.slogdet(reg_k)
-        return float(logdet) if sign > 0 else 0.0
+        reg_k = arr + np.eye(arr.shape[0]) * alpha
+        try:
+            val = float(fast_logdet(reg_k))
+            return val if np.isfinite(val) else 0.0
+        except Exception:
+            sign, logdet = np.linalg.slogdet(reg_k)
+            return float(logdet) if sign > 0 else 0.0
 
 
 def compute_umpire_metric(
@@ -79,14 +85,18 @@ def compute_umpire_metric(
     jitter: float = 1e-8,
 ) -> float:
     """
-    Computes UMPIRE Uncertainty Metric: LogDet(G) + alpha * ||1 - P(seq)||_1.
+    Computes UMPIRE Uncertainty Metric: 1/(2*k) * LogDet(G) + alpha * 1/k * ||1 - P(seq)||_1.
     """
     arr = np.asarray(embeddings, dtype=np.float64)
+    k = len(arr)
+    if k == 0:
+        return 0.0
+
     normed = normalize_embedding(arr)
     gram = np.matmul(normed, normed.T)
-    v_logdet = compute_logdet(gram, alpha=jitter)
+    v_logdet = compute_logdet(gram, alpha=jitter) / (2.0 * k)
 
     seq_probs = np.exp(np.asarray(sequence_log_probs, dtype=np.float64))
-    prob_penalty = float(np.sum(1.0 - seq_probs))
+    prob_penalty = float(np.sum(1.0 - seq_probs)) / k
 
     return float(v_logdet + alpha_param * prob_penalty)
