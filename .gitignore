@@ -37,8 +37,9 @@ checkpoints/
 # Local baseline repos (modified UMPIRE repository is tracked)
 # baseline_repo/
 
-# Wiki documentation
+# Local documentation (kept local only)
 wiki/
+docs/
 
 # Temporary reference files
 kuhn2023.pdf

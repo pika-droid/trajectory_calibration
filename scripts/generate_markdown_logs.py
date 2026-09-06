@@ -357,9 +357,9 @@ def generate_vcps_vs_baselines_log(model_name, model_display, bench_path, ump_pa
     # ---------------------------------------------------------
     lines.append("---")
     lines.append("")
-    lines.append("## Section 2: Macro-Average Summary Table (Across All 14 Benchmarks)")
+    lines.append("## Section 2: Macro-Average Summary Table (15 Methods Across All 14 Datasets)")
     lines.append("")
-    lines.append(f"Macro-averaged evaluation metrics across all 14 datasets for **{model_display}**.")
+    lines.append(f"Macro-averaged evaluation metrics of 15 benchmark methods across all 14 datasets for **{model_display}**.")
     lines.append("")
     
     # Compute macro aggregates

@@ -310,9 +310,9 @@ In each table:
 
 ---
 
-## Section 2: Macro-Average Summary Table (Across All 14 Benchmarks)
+## Section 2: Macro-Average Summary Table (15 Methods Across All 14 Datasets)
 
-Macro-averaged evaluation metrics across all 14 datasets for **M3-LLaVA**.
+Macro-averaged evaluation metrics of 15 benchmark methods across all 14 datasets for **M3-LLaVA**.
 
 | Calibration Method | Category | Regime / Sampling | Macro ECE (%) $\downarrow$ | Macro Adaptive ECE (%) $\downarrow$ | Macro AUROC $\uparrow$ |
 | :--- | :--- | :---: | :---: | :---: | :---: |

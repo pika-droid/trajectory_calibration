@@ -24,6 +24,7 @@ This project focuses on **Elastic Multi-Scale Uncertainty Quantification (UQ)** 
 - **AUROC**: Area Under the Receiver Operating Characteristic curve measuring selective prediction discrimination between correct and incorrect answers. Higher is better.
 - **LODO (Leave-One-Dataset-Out)**: 14-fold cross-dataset evaluation protocol where calibrators train on 13 pooled benchmarks and evaluate zero-shot on the 14th held-out benchmark.
 - **14 Vision-Language Benchmarks**: ai2d, chartqa, docvqa, gqa, infographicvqa, lego-puzzles, mmbench, mmmu, pope, scienceqa, seedbench, textvqa, vizwiz-vqa, vqav2.
+- **15 Benchmark Calibration Methods**: Naive Confidence (NC), Temperature Scaling (TS), Platt Scaling (1D), Trajectory LR, Trajectory LR (No Bias), Quadratic Platt (Logit-Only), Spline Calibration, Adaptive TS (ATS), LN-Entropy, Semantic Entropy, EigenScore, UMPIRE, Residual Calibrator, VCPS-5D (Our Method), VCPS-17D (Our Method).
 
 ### 4. Ranking & Presentation Rules (Option A Adopted)
 - **Universal Application**: Apply Rank 1 (**bold**) and Rank 2 (*italic*) formatting to all metric columns across all tables:

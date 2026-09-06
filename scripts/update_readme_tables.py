@@ -119,7 +119,7 @@ def generate_ada_ece_table_and_bullets(arch: str, arch_label: str) -> str:
 
 def generate_macro_table() -> str:
     lines = [
-        "### Macro-Average Comparison Across All 14 Benchmarks ($T_{\\text{gen}} = 0.00$, $1\\times$ Compute)\n",
+        "### Macro-Average Comparison Across 15 Methods on 14 Datasets ($T_{\\text{gen}} = 0.00$, $1\\times$ Compute)\n",
         "| Model | Calibration Method | Paradigm / Regime | Sampling | Macro ECE (%) $\\downarrow$ | Macro Ada-ECE (%) $\\downarrow$ | Macro AUROC $\\uparrow$ |",
         "| :--- | :--- | :--- | :--- | :---: | :---: | :---: |",
     ]
@@ -288,7 +288,7 @@ def main():
 
     # 3. Update Macro-Average Comparison Table
     macro_section = generate_macro_table()
-    macro_pattern = re.compile(r"### Macro-Average Comparison Across All 14 Benchmarks.*?(?=\n---\n\n### Decoding Temperature)", re.DOTALL)
+    macro_pattern = re.compile(r"### Macro-Average Comparison.*?(?=\n---\n\n### Decoding Temperature)", re.DOTALL)
     if not macro_pattern.search(readme_text):
         raise RuntimeError("Could not find Macro-Average Comparison section in README.md")
     readme_text = macro_pattern.sub(lambda m: macro_section, readme_text)

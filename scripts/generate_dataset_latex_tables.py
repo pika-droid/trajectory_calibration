@@ -89,7 +89,7 @@ def rank_and_format(vals: list[float | None], higher_is_better: bool = False, de
 
 
 def generate_single_table(df_bench: pd.DataFrame, df_ump: pd.DataFrame, ds: str, arch_label: str, arch_model: str, is_macro: bool = False) -> str:
-    caption_name = f"on \\texttt{{{ds}}}" if not is_macro else "Across All 14 Benchmarks"
+    caption_name = f"on \\texttt{{{ds}}}" if not is_macro else "of 15 Methods Across All 14 Datasets"
     tab_label = f"tab:benchmark_{arch_label}_{DATASET_NAME_MAP.get(ds, ds)}" if not is_macro else f"tab:benchmark_macro_{arch_label}"
     macro_prefix = "Macro-Averaged " if is_macro else ""
 
