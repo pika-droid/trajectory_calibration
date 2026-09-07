@@ -145,6 +145,8 @@ def main() -> None:
     df_lodo.to_csv(csv_path, index=False)
     if out_dir.name in ["m3", "mqt"]:
         df_lodo.to_csv(out_dir.parent / f"lodo_{args.arch}_summary.csv", index=False)
+    elif (out_dir / args.arch).exists():
+        df_lodo.to_csv(out_dir / args.arch / f"lodo_{args.arch}_summary.csv", index=False)
     print(f"\nSaved full LODO transfer results to {csv_path}")
 
     # Print Macro-Mean Summary

@@ -26,6 +26,7 @@ from trajectory_calibration.calibrators.classic import (
     SplineCalibrator,
 )
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
+from trajectory_calibration.features.definitions import FEATURE_KEYS
 from trajectory_calibration.features.extractor import compute_features_from_sample
 from trajectory_calibration.metrics.ece import compute_adaptive_ece
 from trajectory_calibration.metrics.statistical import fit_calibration_slope_intercept
@@ -354,3 +355,31 @@ def test_scipy_standard_library_consistency() -> None:
 
     cae = cluster_assignment_entropy([0, 1, 0, 1])
     assert pytest.approx(cae, abs=1e-5) == np.log(2.0)
+
+
+def test_17d_feature_extraction_completeness_and_ablation() -> None:
+    """Verify feature extraction produces exactly 17 features, with x21 completely ablated and no legacy gaps."""
+    sample = {
+        "features": {
+            1: {"conf_softmax": 0.4, "margin": 0.1, "answer": "yes", "vqa_accuracy": 1.0},
+            9: {"conf_softmax": 0.5, "margin": 0.2, "answer": "yes", "vqa_accuracy": 1.0},
+            36: {"conf_softmax": 0.6, "margin": 0.3, "answer": "yes", "vqa_accuracy": 1.0},
+            144: {"conf_softmax": 0.7, "margin": 0.4, "answer": "yes", "vqa_accuracy": 1.0},
+            576: {"conf_softmax": 0.8, "margin": 0.5, "answer": "yes", "vqa_accuracy": 1.0},
+        },
+    }
+    feats = compute_features_from_sample(sample, fine_scale=576)
+
+    # Assert exactly 17 'x' features matching FEATURE_KEYS
+    extracted_x = [k for k in feats if k.startswith("x")]
+    assert len(extracted_x) == 17
+    assert sorted(extracted_x, key=lambda s: int(s[1:])) == [f"x{i}" for i in range(1, 18)]
+    assert FEATURE_KEYS == [f"x{i}" for i in range(1, 18)]
+
+    # Assert ablated feature x21 is completely absent
+    assert "x21" not in feats
+
+    # Assert legacy non-contiguous keys are absent
+    for legacy_key in ["x18", "x19", "x20", "x22"]:
+        assert legacy_key not in feats
+

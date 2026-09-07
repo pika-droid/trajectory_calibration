@@ -1,5 +1,5 @@
 """
-Unit test suite for VCPS-17D Dynamic Signature Binding and Full 36-Parameter Optimization.
+Unit test suite for VCPS-17D Dynamic Signature Binding and Full 34-Parameter Optimization.
 """
 
 from __future__ import annotations
@@ -14,27 +14,27 @@ from trajectory_calibration.features.trajectory import generate_mock_df
 
 
 def test_vcps_17d_signature_binding() -> None:
-    """Verify that VCPS-17D binds all 17 non-anchor trajectory signatures (36 parameters)."""
+    """Verify that VCPS-17D binds all 16 non-anchor trajectory signatures (34 parameters)."""
     df = generate_mock_df("test_17d_mock", n_samples=120, seed=42)
     X = df[FEATURE_KEYS].values
     y = df["is_correct"].values
-    assert X.shape[1] == 18
+    assert X.shape[1] == 17
 
     vcps = VaryingCoefficientPlattScaler(feature_set="17d", random_state=42)
     vcps.fit(X, y, feature_names=FEATURE_KEYS)
 
     expected_signatures = [k for k in FEATURE_KEYS if k != "x1"]
-    assert len(expected_signatures) == 17
-    assert vcps.n_features_in_ == 18
-    assert vcps.n_params == 36
+    assert len(expected_signatures) == 16
+    assert vcps.n_features_in_ == 17
+    assert vcps.n_params == 34
 
-    assert len(vcps._slope_idx) == 17
-    assert len(vcps._int_idx) == 17
+    assert len(vcps._slope_idx) == 16
+    assert len(vcps._int_idx) == 16
     assert vcps.slope_features_ == expected_signatures
     assert vcps.intercept_features_ == expected_signatures
 
-    assert vcps.gamma is not None and len(vcps.gamma) == 17
-    assert vcps.w is not None and len(vcps.w) == 17
+    assert vcps.gamma is not None and len(vcps.gamma) == 16
+    assert vcps.w is not None and len(vcps.w) == 16
     assert isinstance(vcps.a0, float)
     assert isinstance(vcps.b0, float)
 
@@ -42,7 +42,7 @@ def test_vcps_17d_signature_binding() -> None:
 def test_vcps_17d_gradient_finite_difference() -> None:
     """Verify analytical gradients match finite-difference approximations for full 17D binding."""
     np.random.seed(42)
-    n, d = 150, 18
+    n, d = 150, 17
     X = np.random.randn(n, d)
     # Ensure realistic anchor logit range and non-trivial labels
     y = (X[:, 0] + 0.2 * X[:, 1] - 0.15 * X[:, 2] > 0).astype(float)
@@ -62,11 +62,11 @@ def test_vcps_17d_gradient_finite_difference() -> None:
         objective, x0 = vcps._build_objective(X, y, feature_names=feature_names)
 
         if mode == "full":
-            assert len(x0) == 36
-            assert vcps.n_params == 36
+            assert len(x0) == 34
+            assert vcps.n_params == 34
         elif mode in ["slope_only", "intercept_only"]:
-            assert len(x0) == 19
-            assert vcps.n_params == 19
+            assert len(x0) == 18
+            assert vcps.n_params == 18
         else:  # 1d_platt
             assert len(x0) == 2
             assert vcps.n_params == 2
@@ -146,36 +146,70 @@ def test_vcps_17d_predict_proba_validity() -> None:
 def test_vcps_5d_binding_and_explicit_override() -> None:
     """Verify feature_set='5d' binds all 5 signatures for slope and intercept (12 params)."""
     df = generate_mock_df("test_5d_override", n_samples=80, seed=42)
-    five_keys = ["x1", "x13", "x6", "x8", "x4", "x20"]  # x1 anchor + 5 trajectory signatures
+    five_keys = ["x1", "x2", "x3", "x4", "x5", "x6"]  # x1 anchor + 5 trajectory signatures
     X_5d = df[five_keys].values
     y = df["is_correct"].values
 
     # Test 5D dynamic binding
     vcps_5d = VaryingCoefficientPlattScaler(feature_set="5d", random_state=42)
     vcps_5d.fit(X_5d, y, feature_names=five_keys)
-    assert vcps_5d.slope_features_ == ["x13", "x6", "x8", "x4", "x20"]
-    assert vcps_5d.intercept_features_ == ["x13", "x6", "x8", "x4", "x20"]
+    assert vcps_5d.slope_features_ == ["x2", "x3", "x4", "x5", "x6"]
+    assert vcps_5d.intercept_features_ == ["x2", "x3", "x4", "x5", "x6"]
     assert vcps_5d.n_params == 12  # 1 + 5 + 1 + 5
 
     # Test explicit override
     vcps_override = VaryingCoefficientPlattScaler(
         feature_set="17d",
         slope_features=["x6"],
-        intercept_features=["x8", "x4"],
+        intercept_features=["x2", "x4"],
         random_state=42,
     )
     vcps_override.fit(X_5d, y, feature_names=five_keys)
     assert vcps_override.slope_features_ == ["x6"]
-    assert vcps_override.intercept_features_ == ["x8", "x4"]
+    assert vcps_override.intercept_features_ == ["x2", "x4"]
     assert vcps_override.n_params == 5  # 1 + 1 + 1 + 2
 
-    # Test 5D dynamic binding when passed an 18-D matrix directly
-    df_18 = generate_mock_df("test_5d_on_18d", n_samples=80, seed=42)
-    X_18 = df_18[FEATURE_KEYS].values
-    y_18 = df_18["is_correct"].values
-    vcps_5d_on_18 = VaryingCoefficientPlattScaler(feature_set="5d", random_state=42)
-    vcps_5d_on_18.fit(X_18, y_18, feature_names=FEATURE_KEYS)
-    assert len(vcps_5d_on_18.slope_features_) == 5
-    assert len(vcps_5d_on_18.intercept_features_) == 5
-    assert vcps_5d_on_18.n_params == 12  # 1 + 5 + 1 + 5
+    # Test 5D dynamic binding when passed a 17-D matrix directly
+    df_17 = generate_mock_df("test_5d_on_17d", n_samples=80, seed=42)
+    X_17 = df_17[FEATURE_KEYS].values
+    y_17 = df_17["is_correct"].values
+    vcps_5d_on_17 = VaryingCoefficientPlattScaler(feature_set="5d", random_state=42)
+    vcps_5d_on_17.fit(X_17, y_17, feature_names=FEATURE_KEYS)
+    assert len(vcps_5d_on_17.slope_features_) == 5
+    assert len(vcps_5d_on_17.intercept_features_) == 5
+    assert vcps_5d_on_17.n_params == 12  # 1 + 5 + 1 + 5
+
+
+def test_vcps_custom_features_fallback_and_no_feature_names() -> None:
+    """Verify custom unmatched feature names fallback cleanly and fit without feature_names succeeds."""
+    df_17 = generate_mock_df("test_unmatched", n_samples=60, seed=42)
+    X_17 = df_17[FEATURE_KEYS].values
+    y_17 = df_17["is_correct"].values
+
+    # 1. Custom unmatched feature names: ensure slope_features_ matches _slope_idx
+    vcps_unmatched = VaryingCoefficientPlattScaler(
+        slope_features=["nonexistent_slope_feature"],
+        intercept_features=["nonexistent_intercept_feature"],
+        random_state=42,
+    )
+    vcps_unmatched.fit(X_17, y_17, feature_names=FEATURE_KEYS)
+    assert len(vcps_unmatched.slope_features_) == len(vcps_unmatched._slope_idx)
+    assert len(vcps_unmatched.intercept_features_) == len(vcps_unmatched._int_idx)
+    assert len(vcps_unmatched.gamma) == len(vcps_unmatched.slope_features_)
+    assert len(vcps_unmatched.w) == len(vcps_unmatched.intercept_features_)
+    probs = vcps_unmatched.predict_proba(X_17)
+    assert len(probs) == len(y_17)
+
+    # 2. Fit without specifying feature_names: should auto-generate x1..x17 and bind 34 params
+    vcps_auto = VaryingCoefficientPlattScaler(feature_set="17d", random_state=42)
+    vcps_auto.fit(X_17, y_17)
+    assert vcps_auto.n_features_in_ == 17
+    assert vcps_auto.n_params == 34
+    assert vcps_auto.feature_names == [f"x{i}" for i in range(1, 18)]
+    assert len(vcps_auto.slope_features_) == 16
+    assert len(vcps_auto.intercept_features_) == 16
+    probs_auto = vcps_auto.predict_proba(X_17)
+    assert len(probs_auto) == len(y_17)
+
+
 

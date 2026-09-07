@@ -13,10 +13,10 @@ This project focuses on **Elastic Multi-Scale Uncertainty Quantification (UQ)** 
 - **MQT-LLaVA**: Matryoshka Query Transformer LLaVA using fixed token budgets across scales  \in \{1, 9, 36, 144, 256\}$.
 
 ### 2. Features & Trajectories
-- **$ Anchor Invariant**: The base uncalibrated log-odds anchor  = \ln(c_{\text{fine}} / (1 - c_{\text{fine}}))$ at fine visual scale. It must never be ablated or standardized with mean subtraction, preserving  = 0 \iff c = 0.5$.
-- **Trajectory Signatures ( = [x_3, \dots, x_{22}]$)**: 17 scalar signatures capturing cross-scale confidence gains, monotonicity counts, variance, log-scale slope, acceleration, and answer stability across visual resolutions.
-- **VCPS-17D**: Varying-Coefficient Platt Scaling binding all 17 trajectory signatures into dynamic slope (\mathbf{z}) = \exp(\alpha_0 + \mathbf{z}^T \boldsymbol{\gamma})$ and dynamic intercept (\mathbf{z}) = b_0 + \mathbf{z}^T \mathbf{w}$ (36 parameters total).
-- **VCPS-5D**: Parsimonious subset binding 5 forward-stepwise selected signatures into slope and intercept (12 parameters total).
+- **$\ell$ Anchor Invariant ($x_1$)**: The base uncalibrated log-odds anchor $\ell = x_1 = \ln(c_{\text{fine}} / (1 - c_{\text{fine}}))$ at fine visual scale. It must never be ablated or standardized with mean subtraction, preserving $\ell = 0 \iff c = 0.5$.
+- **Trajectory Signatures ($\mathbf{z} = [x_2, \dots, x_{17}]$)**: 16 scalar signatures capturing cross-scale monotonicity counts, answer stability, entropy decay, variance, log-scale slope, acceleration, and confidence gains across visual resolutions, ordered contiguously by calibration importance.
+- **VCPS-17D**: Varying-Coefficient Platt Scaling operating over the 17-D feature representation ($x_1$ anchor + $\mathbf{z} \in \mathbb{R}^{16}$) binding all 16 trajectory signatures into dynamic slope $a(\mathbf{z}) = \exp(\alpha_0 + \mathbf{z}^T \boldsymbol{\gamma})$ and dynamic intercept $b(\mathbf{z}) = b_0 + \mathbf{z}^T \mathbf{w}$ (34 parameters total).
+- **VCPS-5D**: Parsimonious subset binding 5 signatures (defaulting to top 5 importance-ranked signatures $\mathbf{z}_{1..5} = [x_2, \dots, x_6]$, or forward-stepwise selected signatures) into slope and intercept (12 parameters total).
 
 ### 3. Evaluation Metrics & Benchmarks
 - **Adaptive ECE (Ada-ECE)**: Equal-frequency (quantile partitioned) Expected Calibration Error, preventing empty bin collapse. Lower is better.

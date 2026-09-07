@@ -134,6 +134,8 @@ def main() -> None:
     results_df.to_csv(csv_out, index=False)
     if out_dir.name in ["m3", "mqt"]:
         results_df.to_csv(out_dir.parent / f"benchmark_{args.arch}_summary.csv", index=False)
+    elif (out_dir / args.arch).exists():
+        results_df.to_csv(out_dir / args.arch / f"benchmark_{args.arch}_summary.csv", index=False)
     print(f"\nSaved full results to {csv_out}")
 
     pivot_ece = results_df.pivot(index="method", columns="dataset", values="adaptive_ece_percent")

@@ -55,7 +55,7 @@ def main() -> None:
 
     print(f"Loading pilot features from: {pt_file}...")
     df = load_dataset_features(pt_file, fine_scale=576)
-    print(f"Loaded {len(df)} samples. Features: {len(FEATURE_KEYS)} trajectory signatures.")
+    print(f"Loaded {len(df)} samples. Features: {len(FEATURE_KEYS)} trajectory features (1 anchor + 16 signatures).")
 
     train_idx, test_idx = get_stratified_split(df, test_size=0.2, random_state=42)
     train_df = df.iloc[train_idx].reset_index(drop=True)

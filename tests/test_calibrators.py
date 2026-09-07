@@ -14,12 +14,12 @@ from trajectory_calibration.calibrators.baselines import (
 )
 from trajectory_calibration.calibrators.residual import ResidualTrajectoryCalibrator
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
-from trajectory_calibration.features.trajectory import generate_mock_df
+from trajectory_calibration.features.trajectory import FEATURE_KEYS, generate_mock_df
 
 
 def test_all_calibrators_fit_predict():
     df = generate_mock_df("test_mock", n_samples=80, seed=42)
-    X = df[["x1", "x13", "x6", "x8", "x4"]].values
+    X = df[["x1", "x2", "x3", "x4", "x5"]].values
     y = df["is_correct"].values
 
     models = [
@@ -48,7 +48,7 @@ def test_all_calibrators_fit_predict():
 
 def test_quadratic_platt_properties():
     df = generate_mock_df("test_mock", n_samples=100, seed=42)
-    X = df[["x1", "x13", "x6", "x8", "x4"]].values
+    X = df[["x1", "x2", "x3", "x4", "x5"]].values
     y = df["is_correct"].values
 
     quad = QuadraticPlattScaler()
@@ -77,20 +77,58 @@ def test_proxy_calibrators_validation():
         MultiScaleEigenVariance,
         ProbabilityMarginEstimator,
     )
-    df = generate_mock_df("test_mock", n_samples=30, seed=42)
-    X_5d = df[["x1", "x13", "x6", "x8", "x4"]].values
+    df = generate_mock_df("test_mock", n_samples=40, seed=42)
+    X_17d = df[FEATURE_KEYS].values
     y = df["is_correct"].values
 
-    # Passing feature_names should succeed
-    mssc = MultiScaleSemanticConsistency(feature_names=["x1", "x13", "x6", "x8", "x4"])
-    mssc.fit(X_5d, y)
-    preds = mssc.predict_proba(X_5d)
-    assert len(preds) == len(y)
+    # 1. MultiScaleSemanticConsistency: targets x3 (idx 2)
+    mssc = MultiScaleSemanticConsistency(feature_names=FEATURE_KEYS)
+    mssc.fit(X_17d, y)
+    preds_mssc = mssc.predict_proba(X_17d)
+    assert len(preds_mssc) == len(y)
+    assert np.all(preds_mssc >= 0.0) and np.all(preds_mssc <= 1.0)
 
-    # Missing column in feature_names should raise ValueError
-    with pytest.raises(ValueError):
-        mssc_bad = MultiScaleSemanticConsistency(feature_names=["x1", "x6", "x8"])
-        mssc_bad.fit(X_5d[:, :3], y)
+    # MSSC fallback without feature_names (uses fallback_idx=2)
+    mssc_fallback = MultiScaleSemanticConsistency()
+    mssc_fallback.fit(X_17d, y)
+    preds_mssc_fb = mssc_fallback.predict_proba(X_17d)
+    assert np.allclose(preds_mssc, preds_mssc_fb)
+
+    # 2. MultiScaleEigenVariance: targets x13 (idx 12)
+    msev = MultiScaleEigenVariance(feature_names=FEATURE_KEYS)
+    msev.fit(X_17d, y)
+    preds_msev = msev.predict_proba(X_17d)
+    assert len(preds_msev) == len(y)
+    assert np.all(preds_msev >= 0.0) and np.all(preds_msev <= 1.0)
+
+    # MSE-EIGEN fallback without feature_names (uses fallback_idx=12)
+    msev_fallback = MultiScaleEigenVariance()
+    msev_fallback.fit(X_17d, y)
+    preds_msev_fb = msev_fallback.predict_proba(X_17d)
+    assert np.allclose(preds_msev, preds_msev_fb)
+
+    # 3. ProbabilityMarginEstimator: targets x17 (idx 16)
+    pme = ProbabilityMarginEstimator(feature_names=FEATURE_KEYS)
+    pme.fit(X_17d, y)
+    preds_pme = pme.predict_proba(X_17d)
+    assert len(preds_pme) == len(y)
+    assert np.all(preds_pme >= 0.0) and np.all(preds_pme <= 1.0)
+
+    # ProbabilityMargin fallback without feature_names (uses fallback_idx=16)
+    pme_fallback = ProbabilityMarginEstimator()
+    pme_fallback.fit(X_17d, y)
+    preds_pme_fb = pme_fallback.predict_proba(X_17d)
+    assert np.allclose(preds_pme, preds_pme_fb)
+
+    # 4. Error cases: missing feature name raises ValueError
+    with pytest.raises(ValueError, match="not found in provided feature_names"):
+        mssc_bad = MultiScaleSemanticConsistency(feature_names=["x1", "x4", "x5"])
+        mssc_bad.fit(X_17d[:, :3], y)
+
+    # Fallback exceeds column count raises ValueError
+    with pytest.raises(ValueError, match="fallback index 16 exceeds column count"):
+        pme_short = ProbabilityMarginEstimator()
+        pme_short.fit(X_17d[:, :5], y)
 
 
 def test_word_boundary_accuracy_evaluation():
@@ -129,7 +167,7 @@ def test_load_image_from_filepath(tmp_path):
 
 def test_trajectory_lr_zero_bias_properties():
     df = generate_mock_df("test_mock", n_samples=100, seed=42)
-    X = df[["x1", "x13", "x6", "x8", "x4"]].values
+    X = df[["x1", "x2", "x3", "x4", "x5"]].values
     y = df["is_correct"].values
 
     lr_no_bias = TrajectoryLREstimator(fit_intercept=False)

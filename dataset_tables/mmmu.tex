@@ -7,21 +7,21 @@
 \toprule
 \textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 78.76 & 78.76 & \textit{0.639} \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 52.21 & 52.21 & \textit{0.639} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{1.81} & \textit{3.44} & \textit{0.639} \\
-Trajectory LR & Single-Pass ($T = 0.0$) & 2.06 & 3.64 & \textit{0.639} \\
-Trajectory LR (No Bias) & Single-Pass ($T = 0.0$) & 2.79 & 4.99 & 0.548 \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 78.76 & 78.76 & 0.639 \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 52.21 & 52.21 & 0.639 \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{1.81} & \textit{3.44} & 0.639 \\
+Trajectory LR & Single-Pass ($T = 0.0$) & 2.06 & 3.64 & \textbf{0.645} \\
+Trajectory LR (No Bias) & Single-Pass ($T = 0.0$) & 2.85 & 5.05 & 0.550 \\
 Quadratic Platt (Logit-Only) & Single-Pass ($T = 0.0$) & 2.26 & 4.09 & 0.274 \\
 Spline Calibration & Single-Pass ($T = 0.0$) & \textbf{0.24} & \textbf{3.03} & 0.573 \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 52.19 & 52.19 & \textit{0.639} \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 52.19 & 52.19 & 0.639 \\
 LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & 36.40 & - & 0.566 \\
 Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & 47.60 & - & 0.568 \\
 EigenScore & Multi-Pass ($T = 0.5, K = 10$) & 50.10 & - & 0.602 \\
 UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & 39.70 & - & 0.592 \\
-Residual Calibrator & Single-Pass ($T = 0.0$) & 1.85 & 3.46 & \textit{0.639} \\
-\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & 1.89 & 3.48 & \textit{0.639} \\
-\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Single-Pass ($T = 0.0$) & 1.98 & 3.47 & \textbf{0.643} \\
+Residual Calibrator & Single-Pass ($T = 0.0$) & 1.85 & 3.46 & 0.639 \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & 1.89 & 3.48 & 0.639 \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Single-Pass ($T = 0.0$) & 1.98 & 3.47 & \textit{0.643} \\
 \bottomrule
 \end{tabular}%
 }
@@ -50,7 +50,7 @@ EigenScore & Multi-Pass ($T = 0.5, K = 10$) & 45.50 & - & \textit{0.627} \\
 UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & 37.70 & - & 0.598 \\
 Residual Calibrator & Single-Pass ($T = 0.0$) & 0.16 & 2.15 & 0.350 \\
 \rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & 0.15 & 2.15 & 0.350 \\
-\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Single-Pass ($T = 0.0$) & 0.15 & 2.14 & 0.391 \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Single-Pass ($T = 0.0$) & 0.15 & 2.14 & 0.394 \\
 \bottomrule
 \end{tabular}%
 }

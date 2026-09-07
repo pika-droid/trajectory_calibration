@@ -13,7 +13,7 @@ from trajectory_calibration.features.extractor import compute_features_from_samp
 def generate_mock_df(
     ds_name: str = "mock_ds", n_samples: int = 100, seed: int = 42, fine_scale: int = 576
 ) -> pd.DataFrame:
-    """Generates synthetic 18-D feature DataFrames (1 anchor + 17 trajectory signatures) for CPU smoke tests."""
+    """Generates synthetic 17-D feature DataFrames (1 anchor + 16 trajectory signatures) for CPU smoke tests."""
     rng = np.random.RandomState(seed)
     scales = [1, 9, 36, 144, fine_scale]
 

@@ -5,7 +5,7 @@ Trajectory Feature Sensitivity & Ablation Study Suite.
 Implements:
 - Univariate Feature Ranking (evaluates calibration power of each trajectory feature in isolation)
 - Leave-One-Out (LOO) Feature Degradation Sensitivity (measures Delta ECE when dropping feature j)
-- Pareto-Optimal Subset Progression (K in {1, 2, 3, 5, 7, 10, 18} with VIF collinearity tracking)
+- Pareto-Optimal Subset Progression (K in {1, 2, 3, 5, 7, 10, 17} with VIF collinearity tracking)
 """
 
 import argparse
@@ -133,7 +133,7 @@ def main() -> None:
     print(df_loo.round(3).to_string(index=False))
 
     # =========================================================================
-    # PARETO SUBSET PROGRESSION (K in {1, 2, 3, 5, 7, 10, 18})
+    # PARETO SUBSET PROGRESSION (K in {1, 2, 3, 5, 7, 10, 17})
     # =========================================================================
     print("\n" + "=" * 80)
     print(f" PARETO SUBSET PROGRESSION [{args.arch.upper()}]")
@@ -193,6 +193,19 @@ def main() -> None:
     df_pareto.to_csv(out_dir / f"ablation_{args.arch}_pareto_progression.csv", index=False)
     print(df_pareto.round(3).to_string(index=False))
     print("=" * 80)
+
+    # Synchronize to arch subdirectory if it exists (or parent if run inside arch folder)
+    target_dirs = []
+    if (out_dir / args.arch).exists():
+        target_dirs.append(out_dir / args.arch)
+    if out_dir.name in ["m3", "mqt"]:
+        target_dirs.append(out_dir.parent)
+
+    for target_dir in target_dirs:
+        df_uni.to_csv(target_dir / f"ablation_{args.arch}_univariate_ranking.csv", index=False)
+        df_loo.to_csv(target_dir / f"ablation_{args.arch}_loo_sensitivity.csv", index=False)
+        df_pareto.to_csv(target_dir / f"ablation_{args.arch}_pareto_progression.csv", index=False)
+        print(f"Synchronized ablation results to {target_dir}")
 
 
 if __name__ == "__main__":

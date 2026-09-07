@@ -8,7 +8,7 @@ linear functions of multi-scale trajectory signatures z:
     a(z) = exp(a0 + gamma^T z_slope)  (strictly positive dynamic slope)
     b(z) = b0 + w^T z_intercept
 
-Includes dynamic binding across all 17 trajectory signatures (VCPS-17D, 36 params)
+Includes dynamic binding across all 16 trajectory signatures (VCPS-17D, 34 params)
 or stepwise selected subsets (VCPS-5D, 12 params), with analytical L-BFGS-B gradients.
 """
 
@@ -93,14 +93,16 @@ class VaryingCoefficientPlattScaler:
             if len(matched_slope) < len(self.slope_features):
                 missing = set(self.slope_features) - set(self.feature_names)
                 logger.warning(f"VCPS slope features {missing} not in feature_names {self.feature_names}")
-            slope_features = matched_slope if matched_slope else self.slope_features
-            slope_idx = [self.feature_names.index(f) for f in slope_features if f in self.feature_names]
-            if not slope_idx:
+            if matched_slope:
+                slope_features = matched_slope
+                slope_idx = [self.feature_names.index(f) for f in slope_features]
+            else:
                 slope_idx = list(range(1, min(3, d)))
+                slope_features = [self.feature_names[i] for i in slope_idx]
         elif self.feature_set == "5d":
             slope_features = non_anchor[:5]
             slope_idx = [self.feature_names.index(f) for f in slope_features]
-        elif self.feature_set == "17d" or d >= 18:
+        elif self.feature_set == "17d" or d >= 17:
             slope_features = non_anchor
             slope_idx = [self.feature_names.index(f) for f in slope_features]
         else:
@@ -113,14 +115,16 @@ class VaryingCoefficientPlattScaler:
             if len(matched_int) < len(self.intercept_features):
                 missing = set(self.intercept_features) - set(self.feature_names)
                 logger.warning(f"VCPS intercept features {missing} not in feature_names {self.feature_names}")
-            int_features = matched_int if matched_int else self.intercept_features
-            int_idx = [self.feature_names.index(f) for f in int_features if f in self.feature_names]
-            if not int_idx:
+            if matched_int:
+                int_features = matched_int
+                int_idx = [self.feature_names.index(f) for f in int_features]
+            else:
                 int_idx = list(range(1, min(5, d)))
+                int_features = [self.feature_names[i] for i in int_idx]
         elif self.feature_set == "5d":
             int_features = non_anchor[:5]
             int_idx = [self.feature_names.index(f) for f in int_features]
-        elif self.feature_set == "17d" or d >= 18:
+        elif self.feature_set == "17d" or d >= 17:
             int_features = non_anchor
             int_idx = [self.feature_names.index(f) for f in int_features]
         else:

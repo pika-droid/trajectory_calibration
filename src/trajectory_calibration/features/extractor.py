@@ -22,7 +22,7 @@ def compute_features_from_sample(
     item: dict[str, Any], fine_scale: int = 576, idx: int = 0
 ) -> dict[str, float | int | str]:
     """
-    Extracts the 18-D trajectory feature vector (1 base anchor x1 + 17 multi-scale trajectory signatures)
+    Extracts the 17-D trajectory feature vector (1 base anchor x1 + 16 multi-scale trajectory signatures)
     from a multi-scale inference sample.
     """
     feats = item.get("features", {})
@@ -58,52 +58,60 @@ def compute_features_from_sample(
     # x1: Final Logit (inverse sigmoid on c_final)
     c_final_clipped = np.clip(c_arr[-1], eps, 1.0 - eps)
     x1 = float(logit(c_final_clipped))
-    # x3: Confidence Gain (c_fine - c_9)
-    x3 = float(c_arr[-1] - c_arr[1])
-    # x4: Monotonicity Count
-    x4 = float(np.sum(c_arr[1:] > c_arr[:-1]))
-    # x6: Confidence Variance
-    x6 = float(np.var(c_arr))
-    # x8: Scale Dip Depth
-    coarse_max = max(c_arr[0], c_arr[1])
-    mid_min = min(c_arr[2], c_arr[3])
-    x8 = float(max(0.0, coarse_max - mid_min))
 
-    # x9: Log-Scale Slope
-    x9 = float(np.sum((scale_log - np.mean(scale_log)) * (c_arr - np.mean(c_arr))) / denom) if denom > 0 else 0.0
+    # x2: Monotonicity Count (old x4)
+    x2 = float(np.sum(c_arr[1:] > c_arr[:-1]))
 
-    # x10: Logprob Gain
-    x10 = float(lp_arr[-1] - lp_arr[1])
-    # x11: Logprob Variance
-    x11 = float(np.var(lp_arr))
-    # x12: Logprob Acceleration
-    x12 = float((lp_arr[-1] - lp_arr[3]) - (lp_arr[3] - lp_arr[2]))
-
-    # x13: Discrete Answer Stability
+    # x3: Discrete Answer Stability (old x13)
     norm_answers = [clean_text(a) for a in answers]
     unique_answers = set(norm_answers)
-    x13 = float(1.0 / max(1, len(unique_answers)))
+    x3 = float(1.0 / max(1, len(unique_answers)))
 
-    # x14: Relative Gain Ratio (clipped to [0.0, 50.0])
-    x14 = float(np.clip(c_arr[-1] / (c_arr[1] + eps), 0.0, 50.0))
-    # x15: Mid-Fine Gain Contrast
-    x15 = float((c_arr[-1] - c_arr[3]) - (c_arr[3] - c_arr[1]))
-    # x17: End-Scale Spike Ratio
-    x17 = float(c_arr[-1] - np.mean(c_arr[:-1]))
-
-    # x18: Scale Entropy Slope
+    # x4: Scale Entropy Slope (old x18)
     bin_entropy = -(c_arr * np.log(np.clip(c_arr, eps, 1.0)) + (1.0 - c_arr) * np.log(np.clip(1.0 - c_arr, eps, 1.0)))
-    x18 = float(np.sum((scale_log - np.mean(scale_log)) * (bin_entropy - np.mean(bin_entropy))) / denom) if denom > 0 else 0.0
+    x4 = float(np.sum((scale_log - np.mean(scale_log)) * (bin_entropy - np.mean(bin_entropy))) / denom) if denom > 0 else 0.0
 
-    # x19: Relative Margin Growth (clipped to [0.0, 50.0])
-    x19 = float(np.clip(m_arr[-1] / (m_arr[1] + eps), 0.0, 50.0))
-    # x20: Answer Flip Frequency
+    # x5: Logprob Variance (old x11)
+    x5 = float(np.var(lp_arr))
+
+    # x6: Scale Dip Depth (old x8)
+    coarse_max = max(c_arr[0], c_arr[1])
+    mid_min = min(c_arr[2], c_arr[3])
+    x6 = float(max(0.0, coarse_max - mid_min))
+
+    # x7: Answer Flip Frequency (old x20)
     flips = sum(1 for i in range(len(norm_answers) - 1) if norm_answers[i] != norm_answers[i + 1])
-    x20 = float(flips / (len(norm_answers) - 1)) if len(norm_answers) > 1 else 0.0
-    # x21: Logit Trajectory Convexity (calculated on margin/logit trajectories m_arr)
-    x21 = float((m_arr[-1] - m_arr[3]) - (m_arr[3] - m_arr[2]))
-    # x22: First-to-Final Jump Ratio (clipped to [0.0, 50.0])
-    x22 = float(np.clip((c_arr[-1] - c_arr[0]) / (c_arr[-1] + eps), 0.0, 50.0))
+    x7 = float(flips / (len(norm_answers) - 1)) if len(norm_answers) > 1 else 0.0
+
+    # x8: Mid-Fine Gain Contrast (old x15)
+    x8 = float((c_arr[-1] - c_arr[3]) - (c_arr[3] - c_arr[1]))
+
+    # x9: Log-Scale Slope (old x9)
+    x9 = float(np.sum((scale_log - np.mean(scale_log)) * (c_arr - np.mean(c_arr))) / denom) if denom > 0 else 0.0
+
+    # x10: Confidence Gain (c_fine - c_9) (old x3)
+    x10 = float(c_arr[-1] - c_arr[1])
+
+    # x11: Logprob Acceleration (old x12)
+    x11 = float((lp_arr[-1] - lp_arr[3]) - (lp_arr[3] - lp_arr[2]))
+
+    # x12: First-to-Final Jump Ratio (clipped to [0.0, 50.0]) (old x22)
+    x12 = float(np.clip((c_arr[-1] - c_arr[0]) / (c_arr[-1] + eps), 0.0, 50.0))
+
+    # x13: Confidence Variance (old x6)
+    x13 = float(np.var(c_arr))
+
+    # x14: Relative Gain Ratio (clipped to [0.0, 50.0]) (old x14)
+    x14 = float(np.clip(c_arr[-1] / (c_arr[1] + eps), 0.0, 50.0))
+
+    # x15: End-Scale Spike Ratio (old x17)
+    x15 = float(c_arr[-1] - np.mean(c_arr[:-1]))
+
+    # x16: Logprob Gain (old x10)
+    x16 = float(lp_arr[-1] - lp_arr[1])
+
+    # x17: Relative Margin Growth (clipped to [0.0, 50.0]) (old x19)
+    x17 = float(np.clip(m_arr[-1] / (m_arr[1] + eps), 0.0, 50.0))
 
     acc_final = accuracies[-1]
     if "is_correct" in item:
@@ -115,9 +123,12 @@ def compute_features_from_sample(
 
     return {
         "x1": x1,
+        "x2": x2,
         "x3": x3,
         "x4": x4,
+        "x5": x5,
         "x6": x6,
+        "x7": x7,
         "x8": x8,
         "x9": x9,
         "x10": x10,
@@ -126,12 +137,8 @@ def compute_features_from_sample(
         "x13": x13,
         "x14": x14,
         "x15": x15,
+        "x16": x16,
         "x17": x17,
-        "x18": x18,
-        "x19": x19,
-        "x20": x20,
-        "x21": x21,
-        "x22": x22,
         "c_576": float(c_arr[-1]),
         "is_correct": is_correct,
         "vqa_accuracy": float(acc_final),

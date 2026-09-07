@@ -22,7 +22,7 @@ $$\text{logit}(p(\mathbf{x})) = a(\mathbf{z}) \cdot x_1 + b(\mathbf{z})$$
 
 $$a(\mathbf{z}) = \exp(a_0 + \boldsymbol{\gamma}^T \mathbf{z}_{\text{slope}}), \quad b(\mathbf{z}) = b_0 + \mathbf{w}^T \mathbf{z}_{\text{intercept}}$$
 
-- **VCPS-17D (Full Signature Binding)**: Dynamically binds all 17 non-anchor trajectory signatures ($x_3, x_4, \dots, x_{22}$) for both dynamic slope $\boldsymbol{\gamma}$ and dynamic intercept $\mathbf{w}$, optimizing **36 parameters** ($1 + 17 + 1 + 17 = 2K + 2$): scalar log-slope base $a_0$, 17 slope weights $\boldsymbol{\gamma}$, scalar intercept base $b_0$, and 17 intercept weights $\mathbf{w}$ across an 18-D input ($x_1 + \mathbf{z}_{17}$).
+- **VCPS-17D (Full Signature Binding)**: Dynamically binds all 16 non-anchor trajectory signatures ($x_2, x_3, \dots, x_{17}$) for both dynamic slope $\boldsymbol{\gamma}$ and dynamic intercept $\mathbf{w}$, optimizing **34 parameters** ($1 + 16 + 1 + 16 = 2K + 2$): scalar log-slope base $a_0$, 16 slope weights $\boldsymbol{\gamma}$, scalar intercept base $b_0$, and 16 intercept weights $\mathbf{w}$ across a 17-D input ($x_1 + \mathbf{z}_{16}$).
 - **VCPS-5D (Stepwise Subset)**: Binds 5 forward-stepwise selected trajectory signatures for both dynamic slope $\boldsymbol{\gamma}$ and dynamic intercept $\mathbf{w}$, optimizing **12 parameters** ($1 + 5 + 1 + 5 = 2K + 2$): scalar log-slope base $a_0$, 5 slope weights $\boldsymbol{\gamma}$, scalar intercept base $b_0$, and 5 intercept weights $\mathbf{w}$ across a 6-D input ($x_1 + \mathbf{z}_5$).
 
 3. **Pareto Dominance**: Outperforms standard post-hoc temperature scaling while maintaining **1x inference cost**.
@@ -32,7 +32,7 @@ $$a(\mathbf{z}) = \exp(a_0 + \boldsymbol{\gamma}^T \mathbf{z}_{\text{slope}}), \
 ## Key Features
 
 - **Strict Modularity**: Every source file in `src/trajectory_calibration/` is structured as a clean, single-responsibility module.
-- **Primary Calibration Method**: Varying-Coefficient Platt Scaling (**VCPS-17D** with full 36-parameter dynamic binding across all 17 trajectory signatures, and **VCPS-5D** with stepwise subset binding) with exact analytical gradients and L-BFGS-B optimization.
+- **Primary Calibration Method**: Varying-Coefficient Platt Scaling (**VCPS-17D** with full 34-parameter dynamic binding across all 16 trajectory signatures, and **VCPS-5D** with stepwise subset binding) with exact analytical gradients and L-BFGS-B optimization.
 - **Canonical UQ Baseline Suite**:
   - **UQLM White-Box Scorers** ([CVS Health UQLM](https://github.com/cvs-health/uqlm)): Sequence Probability (Joint / Length-Normalized), Min Token Probability, Mean Token Negentropy, and Top-1/Top-2 Probability Margin.
   - **Semantic Entropy & NLI Clustering** ([Kuhn et al., 2023 / UMPIRE OpenReview](https://openreview.net/forum?id=c9TWeKZQR4)): DeBERTa-v2-xlarge bidirectional NLI entailment clustering, LogSumExp cluster aggregation, and Cluster Assignment Entropy.
@@ -56,8 +56,8 @@ src/trajectory_calibration/
 │   ├── helpers.py           (70 LOC)  - safe_torch_load, set_seed, clean_text
 │   └── __init__.py          (18 LOC)  - Re-exports
 ├── features/
-│   ├── definitions.py       (30 LOC)  - FEATURE_NAMES and 18 signature FEATURE_KEYS
-│   ├── extractor.py         (120 LOC) - compute_features_from_sample (18-D vector: 1 anchor + 17 signatures)
+│   ├── definitions.py       (30 LOC)  - FEATURE_NAMES and 17 feature FEATURE_KEYS
+│   ├── extractor.py         (120 LOC) - compute_features_from_sample (17-D vector: 1 anchor + 16 signatures)
 │   ├── loader.py            (115 LOC) - find_feature_file, load_dataset_features, splits
 │   ├── selection.py         (89 LOC)  - select_best_5d_subset (x1-anchored), VIF filters
 │   ├── diagnostics.py       (65 LOC)  - evaluate_model_diagnostics (Health panel)
@@ -67,7 +67,7 @@ src/trajectory_calibration/
 ├── calibrators/
 │   ├── classic.py           (178 LOC) - NC, TS (bounded), 1D Platt, Spline, ATS
 │   ├── proxies.py           (163 LOC) - MSSC, MSE-EIGEN, UQLM proxy baseline estimators
-│   ├── vcps.py              - VaryingCoefficientPlattScaler (VCPS-17D 36 params, VCPS-5D 12 params, Analytical L-BFGS-B)
+│   ├── vcps.py              - VaryingCoefficientPlattScaler (VCPS-17D 34 params, VCPS-5D 12 params, Analytical L-BFGS-B)
 │   ├── residual.py          (138 LOC) - ResidualTrajectoryCalibrator, AURC (trapezoid)
 │   ├── adaptation.py        (94 LOC)  - Saerens-EM (2002), Target Intercept, Beta Calib
 │   ├── baselines.py         (40 LOC)  - Facade re-exporting classic and proxy estimators
@@ -135,10 +135,10 @@ Runs the entire calibrator pipeline across all 15 benchmark methods on synthetic
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
 from trajectory_calibration.features.definitions import FEATURE_KEYS
 
-# VCPS-17D: Dynamically binds all 17 trajectory signatures (36 parameters total)
+# VCPS-17D: Dynamically binds all 16 trajectory signatures (34 parameters total)
 vcps_17d = VaryingCoefficientPlattScaler(feature_set="17d")
-vcps_17d.fit(X_train_18d, y_train, feature_names=FEATURE_KEYS)
-probs_17d = vcps_17d.predict_proba(X_test_18d)
+vcps_17d.fit(X_train_17d, y_train, feature_names=FEATURE_KEYS)
+probs_17d = vcps_17d.predict_proba(X_test_17d)
 
 # VCPS-5D: Binds stepwise-selected 5-signature subset (12 parameters total, 6-feature input: x1 + 5 signatures)
 vcps_5d = VaryingCoefficientPlattScaler(feature_set="5d")
@@ -162,13 +162,13 @@ Evaluated across all 14 vision-language benchmarks on single-pass feature matric
 | **Naive Confidence (NC)** | 41.80% | 70.70% | 73.52% | 32.43% | 84.55% | 73.16% | 28.58% | 78.76% | 4.30% | 10.66% | 32.40% | 9.07% | 16.71% | 8.06% |
 | Temperature Scaling (TS) | 9.38% | 45.07% | 48.86% | 9.90% | 53.91% | 34.71% | 7.88% | 52.21% | 4.23% | 9.76% | 6.16% | 8.92% | 16.03% | 10.51% |
 | Platt Scaling (1D) | **5.19%** | 2.35% | 2.39% | 6.70% | 1.13% | 11.89% | 5.50% | *3.44%* | 4.33% | 7.46% | *5.98%* | 6.11% | 7.69% | 9.71% |
-| Trajectory LR | 9.58% | 4.01% | *2.36%* | 5.79% | **1.09%** | 11.23% | 6.37% | 3.64% | 5.64% | 6.43% | **5.74%** | 5.00% | *4.84%* | *6.13%* |
-| Trajectory LR (No Bias) | 8.58% | 4.27% | 3.99% | 8.51% | 1.18% | 12.14% | 5.60% | 4.99% | 5.65% | 6.33% | 6.32% | 4.89% | **4.50%** | 6.59% |
+| Trajectory LR | 9.58% | 4.01% | *2.36%* | 5.79% | **1.09%** | **8.81%** | 6.37% | 3.64% | 5.64% | 6.43% | **5.74%** | 5.00% | *4.84%* | *6.13%* |
+| Trajectory LR (No Bias) | 8.58% | 4.27% | 3.99% | 8.51% | 1.18% | 11.61% | 5.60% | 5.05% | 5.65% | 6.33% | 6.32% | 4.89% | **4.50%** | 6.59% |
 | Spline Calibration | *7.68%* | 3.80% | **1.93%** | 6.44% | 1.23% | 12.33% | *4.81%* | **3.03%** | *3.82%* | 7.51% | 7.60% | *4.86%* | 8.37% | 8.21% |
 | Adaptive TS (ATS) | 10.25% | 45.05% | 48.84% | 9.41% | 53.89% | 34.66% | 9.89% | 52.19% | 3.87% | 8.47% | 10.36% | 8.50% | 15.46% | 9.28% |
-| Residual Calibrator | 8.13% | 2.27% | 2.40% | 5.74% | *1.13%* | *8.07%* | 7.56% | 3.46% | **3.81%** | *6.05%* | 10.21% | 5.34% | 7.43% | 9.16% |
-| **VCPS-5D (Our Method)** | 9.85% | **2.19%** | 2.65% | *5.41%* | 1.31% | 8.13% | **4.54%** | 3.48% | 4.03% | **5.88%** | 7.58% | 5.00% | 7.40% | 8.10% |
-| **VCPS-17D (Our Method)** | 9.58% | *2.23%* | 3.11% | **5.26%** | 1.22% | **6.49%** | 5.39% | 3.47% | 3.86% | 6.62% | 8.23% | **4.02%** | 6.68% | **4.52%** |
+| Residual Calibrator | 8.13% | 2.27% | 2.40% | 5.74% | *1.13%* | *8.94%* | 7.56% | 3.46% | **3.81%** | *6.05%* | 10.21% | 5.34% | 7.43% | 9.16% |
+| **VCPS-5D (Our Method)** | 9.85% | **2.19%** | 2.65% | *5.41%* | 1.31% | 10.78% | **4.54%** | 3.48% | 4.03% | **5.88%** | 7.58% | 5.00% | 7.40% | 8.10% |
+| **VCPS-17D (Our Method)** | 9.57% | *2.22%* | 3.11% | **5.25%** | 1.22% | 9.19% | 4.99% | 3.47% | 3.86% | 6.62% | 7.82% | **4.02%** | 6.68% | **4.82%** |
 
 - **VCPS vs. Global Temperature Scaling (TS)**:
   - **Family Win**: VCPS beats TS on **12 / 14 datasets** (all except `ai2d`, `seedbench`).
@@ -177,8 +177,8 @@ Evaluated across all 14 vision-language benchmarks on single-pass feature matric
   - **Family Win**: VCPS beats 1D Platt Scaling on **9 / 14 datasets**:
     `chartqa`, `gqa`, `lego-puzzles`, `mmbench`, `pope`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
   - **Separate Counts**: VCPS-17D alone beats 1D Platt on **9 / 14 datasets**; VCPS-5D alone beats 1D Platt on **9 / 14 datasets**.
-- **Our Trajectory Methods (VCPS-5D, VCPS-17D, Residual Calibrator)** win the #1 lowest Adaptive ECE on **8 / 14 benchmarks**:
-  `chartqa` (VCPS-5D: **2.19%**), `gqa` (VCPS-17D: **5.26%**), `lego-puzzles` (VCPS-17D: **6.49%**), `mmbench` (VCPS-5D: **4.54%**), `pope` (Residual: **3.81%**), `scienceqa` (VCPS-5D: **5.88%**), `textvqa` (VCPS-17D: **4.02%**), `vqav2` (VCPS-17D: **4.52%**).
+- **Our Trajectory Methods (VCPS-5D, VCPS-17D, Residual Calibrator)** win the #1 lowest Adaptive ECE on **7 / 14 benchmarks**:
+  `chartqa` (VCPS-5D: **2.19%**), `gqa` (VCPS-17D: **5.25%**), `mmbench` (VCPS-5D: **4.54%**), `pope` (Residual: **3.81%**), `scienceqa` (VCPS-5D: **5.88%**), `textvqa` (VCPS-17D: **4.02%**), `vqav2` (VCPS-17D: **4.82%**).
 ---
 
 ### MQT-LLaVA: Adaptive ECE (%) [Lower is Better]
@@ -188,23 +188,23 @@ Evaluated across all 14 vision-language benchmarks on single-pass feature matric
 | **Naive Confidence (NC)** | 24.32% | 62.99% | 51.18% | 10.19% | 75.51% | 33.80% | 15.27% | 52.24% | 6.18% | 23.04% | 17.74% | 30.96% | 30.26% | 10.93% |
 | Temperature Scaling (TS) | 13.01% | 41.54% | 46.63% | 10.61% | 52.63% | 23.68% | 10.24% | 49.32% | *5.44%* | 10.84% | 10.44% | 18.67% | 28.77% | 16.04% |
 | Platt Scaling (1D) | *9.51%* | 8.03% | 4.56% | 10.60% | 1.11% | 12.43% | 8.38% | 2.14% | **4.79%** | 6.78% | *8.62%* | 11.82% | 5.76% | 14.95% |
-| Trajectory LR | 12.45% | 7.42% | *4.05%* | *10.13%* | **0.95%** | 9.41% | *7.15%* | **2.00%** | 6.16% | **5.34%** | 9.60% | *7.00%* | *5.07%* | *9.75%* |
-| Trajectory LR (No Bias) | 12.99% | 11.53% | 8.93% | **9.92%** | 1.50% | 12.96% | **6.05%** | 4.00% | 6.58% | 8.60% | 10.35% | 7.11% | 10.66% | 11.39% |
+| Trajectory LR | 12.45% | 8.98% | *3.09%* | *10.13%* | **0.95%** | 9.41% | **4.25%** | **2.00%** | 6.16% | **5.34%** | 9.60% | *7.00%* | *5.07%* | *9.75%* |
+| Trajectory LR (No Bias) | 12.99% | 11.82% | 9.33% | **9.92%** | 1.50% | 12.96% | *5.67%* | 4.00% | 6.58% | 8.60% | 10.35% | 7.11% | 10.66% | 11.39% |
 | Spline Calibration | **8.64%** | **4.71%** | 4.22% | 10.31% | *1.08%* | 8.21% | 7.75% | *2.13%* | 6.42% | 7.04% | 8.82% | **5.43%** | **4.29%** | 10.70% |
-| Adaptive TS (ATS) | 13.92% | 41.53% | 46.62% | 10.51% | 52.61% | 23.68% | 10.53% | 49.31% | 6.62% | 10.49% | 9.95% | 18.34% | 28.45% | 13.21% |
-| Residual Calibrator | 11.34% | 7.30% | 4.38% | 10.49% | 1.11% | *7.93%* | 7.27% | 2.15% | 6.01% | 5.88% | **8.47%** | 7.44% | 5.53% | 12.40% |
-| **VCPS-5D (Our Method)** | 12.43% | *5.83%* | 4.37% | 10.42% | 1.10% | 11.99% | 7.57% | 2.15% | 7.14% | 5.53% | 9.43% | 7.23% | 5.62% | 10.42% |
-| **VCPS-17D (Our Method)** | 12.31% | 7.61% | **3.04%** | 10.72% | 1.10% | **6.30%** | 8.61% | 2.14% | 5.92% | *5.38%* | 9.01% | 7.36% | 5.63% | **7.74%** |
+| Adaptive TS (ATS) | 13.92% | 41.53% | 46.62% | 10.51% | 52.61% | 23.68% | 10.13% | 49.31% | 6.62% | 10.49% | 9.95% | 18.34% | 28.45% | 13.21% |
+| Residual Calibrator | 11.34% | 7.90% | 5.06% | 10.49% | 1.11% | *7.93%* | 5.96% | 2.15% | 6.01% | 5.88% | **8.47%** | 7.44% | 5.53% | 12.40% |
+| **VCPS-5D (Our Method)** | 12.43% | *6.98%* | 5.04% | 10.42% | 1.10% | 11.99% | 6.67% | 2.15% | 7.14% | 5.53% | 9.43% | 7.23% | 5.62% | 10.42% |
+| **VCPS-17D (Our Method)** | 12.30% | 7.05% | **3.05%** | 10.20% | 1.10% | **7.40%** | 6.68% | 2.14% | 5.93% | *5.37%* | 10.03% | 7.36% | 5.63% | **7.74%** |
 
 - **VCPS vs. Global Temperature Scaling (TS)**:
   - **Family Win**: VCPS beats TS on **13 / 14 datasets** (all except `pope`).
-  - **Separate Counts**: VCPS-17D alone beats TS on **12 / 14 datasets**; VCPS-5D alone beats TS on **13 / 14 datasets**.
+  - **Separate Counts**: VCPS-17D alone beats TS on **13 / 14 datasets**; VCPS-5D alone beats TS on **13 / 14 datasets**.
 - **VCPS vs. 1D Platt Scaling**:
   - **Family Win**: VCPS beats 1D Platt Scaling on **10 / 14 datasets**:
     `chartqa`, `docvqa`, `gqa`, `infographicvqa`, `lego-puzzles`, `mmbench`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
-  - **Separate Counts**: VCPS-17D alone beats 1D Platt on **8 / 14 datasets**; VCPS-5D alone beats 1D Platt on **10 / 14 datasets**.
+  - **Separate Counts**: VCPS-17D alone beats 1D Platt on **10 / 14 datasets**; VCPS-5D alone beats 1D Platt on **9 / 14 datasets**.
 - **Our Trajectory Methods (VCPS-5D, VCPS-17D, Residual Calibrator)** win the #1 lowest Adaptive ECE on **4 / 14 benchmarks**:
-  `docvqa` (VCPS-17D: **3.04%**), `lego-puzzles` (VCPS-17D: **6.30%**), `seedbench` (Residual: **8.47%**), `vqav2` (VCPS-17D: **7.74%**).
+  `docvqa` (VCPS-17D: **3.05%**), `lego-puzzles` (VCPS-17D: **7.40%**), `seedbench` (Residual: **8.47%**), `vqav2` (VCPS-17D: **7.74%**).
 ---
 
 ## Benchmark Logs & Multi-Pass Baselines (UMPIRE Paper)
@@ -226,13 +226,13 @@ Compares single-pass greedy calibration ($T=0.0$, $1\times$ compute) against cla
 | Model | Calibration Method | Paradigm / Regime | Sampling | Macro ECE (%) $\downarrow$ | Macro Ada-ECE (%) $\downarrow$ | Macro AUROC $\uparrow$ |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: |
 | **M3-LLaVA** | Quadratic Platt (Logit-Only) | Polynomial Logit | Greedy ($T=0.0, K=1$) | **3.22%** | **4.95%** | 0.678 |
-|  | **VCPS-17D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 4.18% | *5.05%* | 0.698 |
+|  | **VCPS-17D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 4.11% | *5.20%* | 0.698 |
 |  | Spline Calibration | Non-Parametric (Isotonic) | Greedy ($T=0.0, K=1$) | 3.45% | 5.83% | 0.669 |
-|  | **VCPS-5D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 3.95% | 5.40% | 0.694 |
-|  | Trajectory LR | Linear Trajectory | Greedy ($T=0.0, K=1$) | 4.49% | 5.56% | **0.718** |
+|  | **VCPS-5D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 3.94% | 5.59% | 0.695 |
+|  | Trajectory LR | Linear Trajectory | Greedy ($T=0.0, K=1$) | 4.41% | 5.39% | **0.718** |
 |  | Platt Scaling (1D) | Classic Linear Post-Hoc | Greedy ($T=0.0, K=1$) | *3.24%* | 5.70% | 0.682 |
-|  | Residual Calibrator | Feature-Aided | Greedy ($T=0.0, K=1$) | 4.20% | 5.77% | 0.702 |
-|  | Trajectory LR (No Bias) | Linear Trajectory (Zero-Bias) | Greedy ($T=0.0, K=1$) | 4.34% | 5.97% | *0.703* |
+|  | Residual Calibrator | Feature-Aided | Greedy ($T=0.0, K=1$) | 4.32% | 5.83% | 0.702 |
+|  | Trajectory LR (No Bias) | Linear Trajectory (Zero-Bias) | Greedy ($T=0.0, K=1$) | 4.59% | 5.93% | *0.703* |
 |  | Temperature Scaling (TS) | Classic Post-Hoc | Greedy ($T=0.0, K=1$) | 21.93% | 22.68% | 0.671 |
 |  | Adaptive TS (ATS) | Adaptive Calibrator | Greedy ($T=0.0, K=1$) | 21.86% | 22.87% | 0.685 |
 |  | Naive Confidence (NC) | Uncalibrated Baseline | Greedy ($T=0.0, K=1$) | 40.33% | 40.33% | 0.671 |
@@ -241,15 +241,15 @@ Compares single-pass greedy calibration ($T=0.0$, $1\times$ compute) against cla
 |  | `ln_entropy` | Predictive Entropy | Stochastic ($T=0.5, K=10$) | 19.24% | - | 0.675 |
 |  | `semantic_entropy` | DeBERTa NLI Clustering | Stochastic ($T=0.5, K=10$) | 28.25% | - | 0.641 |
 | **MQT-LLaVA** | Quadratic Platt (Logit-Only) | Polynomial Logit | Greedy ($T=0.0, K=1$) | 4.90% | *6.53%* | 0.706 |
-|  | **VCPS-17D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | *4.73%* | 6.63% | *0.716* |
+|  | **VCPS-17D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | *4.89%* | 6.57% | *0.716* |
 |  | Spline Calibration | Non-Parametric (Isotonic) | Greedy ($T=0.0, K=1$) | **3.21%** | **6.41%** | 0.693 |
-|  | **VCPS-5D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 5.28% | 7.23% | 0.707 |
-|  | Trajectory LR | Linear Trajectory | Greedy ($T=0.0, K=1$) | 6.19% | 6.89% | **0.775** |
+|  | **VCPS-5D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 5.28% | 7.30% | 0.705 |
+|  | Trajectory LR | Linear Trajectory | Greedy ($T=0.0, K=1$) | 5.86% | 6.73% | **0.775** |
 |  | Platt Scaling (1D) | Classic Linear Post-Hoc | Greedy ($T=0.0, K=1$) | 5.88% | 7.82% | 0.686 |
-|  | Residual Calibrator | Feature-Aided | Greedy ($T=0.0, K=1$) | 5.17% | 6.98% | 0.702 |
-|  | Trajectory LR (No Bias) | Linear Trajectory (Zero-Bias) | Greedy ($T=0.0, K=1$) | 7.27% | 8.75% | 0.676 |
+|  | Residual Calibrator | Feature-Aided | Greedy ($T=0.0, K=1$) | 5.26% | 6.98% | 0.701 |
+|  | Trajectory LR (No Bias) | Linear Trajectory (Zero-Bias) | Greedy ($T=0.0, K=1$) | 7.17% | 8.78% | 0.672 |
 |  | Temperature Scaling (TS) | Classic Post-Hoc | Greedy ($T=0.0, K=1$) | 23.45% | 24.13% | 0.682 |
-|  | Adaptive TS (ATS) | Adaptive Calibrator | Greedy ($T=0.0, K=1$) | 23.15% | 23.98% | 0.685 |
+|  | Adaptive TS (ATS) | Adaptive Calibrator | Greedy ($T=0.0, K=1$) | 23.24% | 23.96% | 0.685 |
 |  | Naive Confidence (NC) | Uncalibrated Baseline | Greedy ($T=0.0, K=1$) | 32.32% | 31.76% | 0.682 |
 |  | `umpire` | Multi-Pass Semantic Volume | Stochastic ($T=0.5, K=10$) | 21.27% | - | 0.691 |
 |  | `eigen_score` | SVD Covariance Dispersion | Stochastic ($T=0.5, K=10$) | 29.57% | - | 0.689 |
@@ -284,7 +284,7 @@ To rigorously evaluate zero-shot calibration stability under generation temperat
 |  | Trajectory LR (No Bias) | 7.78% | *17.63%* | **9.33%** | *5.31%* | **6.62%** | *9.33%* |
 |  | Trajectory LR | *5.45%* | 21.76% | 10.36% | **4.78%** | 7.67% | 10.00% |
 |  | Quadratic Platt (Logit-Only) | 5.50% | 21.60% | 10.20% | 6.13% | *7.53%* | 10.19% |
-|  | **VCPS-17D (Our Method)** | 6.00% | 23.48% | 12.26% | 5.61% | 7.90% | 11.05% |
+|  | **VCPS-17D (Our Method)** | 6.13% | 23.51% | 12.24% | 5.59% | 7.71% | 11.04% |
 |  | **VCPS-5D (Our Method)** | 5.70% | 24.17% | 12.78% | 5.86% | 7.89% | 11.28% |
 |  | Residual Calibrator | 5.54% | 24.29% | 12.97% | 6.30% | 7.98% | 11.42% |
 |  | Platt Scaling (1D) | 7.15% | 24.62% | 13.47% | 7.46% | 8.74% | 12.29% |
@@ -311,28 +311,27 @@ The [`baseline_repo/`](baseline_repo/) directory contains adapted baseline frame
 
 ---
 
-## 18-D Trajectory Feature Space (1 Base Anchor + 17 Trajectory Signatures: $x_1, x_3 \dots x_{22}$)
+## 17-D Trajectory Feature Space (1 Base Anchor + 16 Trajectory Signatures: $x_1 \dots x_{17}$)
 
 | Key | Feature Name | Formula | Scientific Meaning |
 | :--- | :--- | :--- | :--- |
 | **`x1`** | **Final Logit** | $\ln(c_{\text{fine}} / (1 - c_{\text{fine}}))$ | Primary uncalibrated confidence anchor ($m=576/256$) |
-| **`x3`** | **Confidence Gain** | $c_{\text{fine}} - c_9$ | Visual resolution sensitivity (fine minus coarse) |
-| **`x4`** | **Monotonicity Count** | $\sum_{i=1}^4 \mathbb{I}(c_{m_{i+1}} > c_{m_i})$ | Monotonic confidence trajectory consistency |
-| **`x6`** | **Confidence Variance** | $\text{Var}([c_1, c_9, c_{36}, c_{144}, c_{\text{fine}}])$ | Fluctuation/dispersion across visual scales |
-| **`x8`** | **Scale Dip Depth** | $\max(0, \max(c_1, c_9) - \min(c_{36}, c_{144}))$ | Mid-scale visual confusion indicator |
+| **`x2`** | **Monotonicity Count** | $\sum_{i=1}^4 \mathbb{I}(c_{m_{i+1}} > c_{m_i})$ | Monotonic confidence trajectory consistency |
+| **`x3`** | **Discrete Answer Stability** | $1 / \text{UniqueAnswers}$ | Inverse count of distinct decoded strings across 5 scales |
+| **`x4`** | **Scale Entropy Slope** | OLS slope of binary entropy $H(c_m)$ vs $\ln m$ | Rate of information gain with resolution |
+| **`x5`** | **Logprob Variance** | $\text{Var}([\ln c_1, \dots, \ln c_{\text{fine}}])$ | Log-likelihood stability across scales |
+| **`x6`** | **Scale Dip Depth** | $\max(0, \max(c_1, c_9) - \min(c_{36}, c_{144}))$ | Mid-scale visual confusion indicator |
+| **`x7`** | **Answer Flip Frequency** | $\frac{1}{4} \sum_{i=1}^4 \mathbb{I}(\text{ans}(m_i) \neq \text{ans}(m_{i+1}))$ | Textual prediction volatility across scales |
+| **`x8`** | **Mid-Fine Gain Contrast** | $(c_{\text{fine}} - c_{144}) - (c_{144} - c_9)$ | Second discrete derivative on confidences |
 | **`x9`** | **Log-Scale Slope** | $\frac{\sum (\ln m_i - \overline{\ln m})(c_{m_i} - \bar{c})}{\sum (\ln m_i - \overline{\ln m})^2}$ | Logarithmic rate of confidence growth |
-| **`x10`** | **Logprob Gain** | $\ln c_{\text{fine}} - \ln c_9$ | Probability magnitude shift in log-space |
-| **`x11`** | **Logprob Variance** | $\text{Var}([\ln c_1, \dots, \ln c_{\text{fine}}])$ | Log-likelihood stability across scales |
-| **`x12`** | **Logprob Acceleration** | $(\ln c_{\text{fine}} - \ln c_{144}) - (\ln c_{144} - \ln c_{36})$ | Discrete 2nd derivative of log-confidence |
-| **`x13`** | **Answer Stability** | $1 / \text{UniqueAnswers}$ | Inverse count of distinct decoded strings across 5 scales |
+| **`x10`** | **Confidence Gain** | $c_{\text{fine}} - c_9$ | Visual resolution sensitivity (fine minus coarse) |
+| **`x11`** | **Logprob Acceleration** | $(\ln c_{\text{fine}} - \ln c_{144}) - (\ln c_{144} - \ln c_{36})$ | Discrete 2nd derivative of log-confidence |
+| **`x12`** | **First-to-Final Jump Ratio** | $(c_{\text{fine}} - c_1) / (c_{\text{fine}} + \epsilon)$ | Relative span from single-token to full scale |
+| **`x13`** | **Confidence Variance** | $\text{Var}([c_1, c_9, c_{36}, c_{144}, c_{\text{fine}}])$ | Fluctuation/dispersion across visual scales |
 | **`x14`** | **Relative Gain Ratio** | $c_{\text{fine}} / (c_9 + \epsilon)$ | Multiplicative confidence enhancement ratio |
-| **`x15`** | **Mid-Fine Contrast** | $(c_{\text{fine}} - c_{144}) - (c_{144} - c_9)$ | Convexity of mid-to-fine transition |
-| **`x17`** | **End-Scale Spike** | $c_{\text{fine}} - \frac{1}{4}\sum_{i=1}^4 c_{m_i}$ | Sudden fine-scale confidence jump |
-| **`x18`** | **Entropy Slope** | OLS slope of binary entropy $H(c_m)$ vs $\ln m$ | Rate of information gain with resolution |
-| **`x19`** | **Margin Growth** | $\text{margin}_{\text{fine}} / (\text{margin}_9 + \epsilon)$ | Top-1 vs Top-2 separation growth |
-| **`x20`** | **Answer Flip Freq** | $\frac{1}{4} \sum_{i=1}^4 \mathbb{I}(\text{ans}(m_i) \neq \text{ans}(m_{i+1}))$ | Textual prediction volatility across scales |
-| **`x21`** | **Logit Trajectory Convexity** | $(m_{\text{fine}} - m_{144}) - (m_{144} - m_{36})$ | High-resolution margin/logit curve convexity |
-| **`x22`** | **Jump Ratio** | $(c_{\text{fine}} - c_1) / (c_{\text{fine}} + \epsilon)$ | Relative span from single-token to full scale |
+| **`x15`** | **End-Scale Spike Ratio** | $c_{\text{fine}} - \frac{1}{4}\sum_{i=1}^4 c_{m_i}$ | Sudden fine-scale confidence jump |
+| **`x16`** | **Logprob Gain** | $\ln c_{\text{fine}} - \ln c_9$ | Probability magnitude shift in log-space |
+| **`x17`** | **Relative Margin Growth** | $\text{margin}_{\text{fine}} / (\text{margin}_9 + \epsilon)$ | Top-1 vs Top-2 separation growth |
 
 ---
 

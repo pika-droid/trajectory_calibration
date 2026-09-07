@@ -42,7 +42,7 @@ In each table:
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 8.54% | 10.25% | 0.605 | `COLLAPSED` |
 | Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 5.35% | 8.13% | 0.613 | `VALID` |
 | VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 5.96% | 9.85% | *0.638* | `VALID` |
-| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 6.53% | 9.58% | 0.637 | `VALID` |
+| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 6.72% | 9.57% | 0.637 | `VALID` |
 | `ln_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 29.40% | - | 0.617 | `VALID` |
 | `semantic_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 31.60% | - | 0.604 | `VALID` |
 | `eigen_score` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 27.20% | - | 0.607 | `VALID` |
@@ -62,7 +62,7 @@ In each table:
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 45.43% | 45.05% | 0.835 | `COLLAPSED` |
 | Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 3.32% | 2.27% | 0.836 | `VALID` |
 | VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 3.08% | 2.19% | *0.837* | `VALID` |
-| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | **2.62%** | 2.23% | **0.838** | `VALID` |
+| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | **2.67%** | 2.22% | **0.838** | `VALID` |
 | `ln_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 8.90% | - | 0.734 | `VALID` |
 | `semantic_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 25.80% | - | 0.790 | `VALID` |
 | `eigen_score` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 19.30% | - | 0.818 | `VALID` |
@@ -82,7 +82,7 @@ In each table:
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 48.84% | 48.84% | 0.732 | `COLLAPSED` |
 | Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 1.84% | 2.40% | 0.733 | `COLLAPSED` |
 | VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 2.05% | 2.65% | 0.738 | `COLLAPSED` |
-| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 2.17% | 3.11% | 0.740 | `COLLAPSED` |
+| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 2.17% | 3.11% | 0.739 | `COLLAPSED` |
 | `ln_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 15.80% | - | 0.786 | `VALID` |
 | `semantic_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 37.10% | - | 0.809 | `VALID` |
 | `eigen_score` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 29.70% | - | *0.830* | `VALID` |
@@ -102,7 +102,7 @@ In each table:
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 8.86% | 9.41% | 0.701 | `VALID` |
 | Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 6.42% | 5.74% | 0.697 | `VALID` |
 | VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 5.38% | 5.41% | 0.709 | `VALID` |
-| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 5.09% | 5.26% | *0.710* | `VALID` |
+| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 5.02% | 5.25% | *0.710* | `VALID` |
 | `ln_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 18.80% | - | 0.696 | `VALID` |
 | `semantic_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 25.30% | - | 0.623 | `VALID` |
 | `eigen_score` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 17.60% | - | 0.690 | `VALID` |
@@ -135,14 +135,14 @@ In each table:
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 73.16% | 73.16% | 0.477 | `COLLAPSED` |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 34.71% | 34.71% | 0.477 | `COLLAPSED` |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | **0.71%** | 11.89% | 0.477 | `COLLAPSED` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 8.27% | 11.23% | *0.640* | `SCRAMBLED` |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 7.78% | 12.14% | 0.640 | `SCRAMBLED` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 7.19% | 8.81% | 0.634 | `SCRAMBLED` |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 11.28% | 11.61% | *0.641* | `SCRAMBLED` |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | 4.34% | 9.74% | **0.668** | `SCRAMBLED` |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 6.28% | 12.33% | 0.571 | `VALID` |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 34.66% | 34.66% | 0.477 | `COLLAPSED` |
-| Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | *0.84%* | 8.07% | 0.525 | `VALID` |
-| VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 1.13% | 8.13% | 0.504 | `VALID` |
-| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 4.76% | 6.49% | 0.544 | `VALID` |
+| Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 2.45% | 8.94% | 0.528 | `COLLAPSED` |
+| VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | *0.90%* | 10.78% | 0.513 | `VALID` |
+| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 3.65% | 9.19% | 0.546 | `VALID` |
 | `ln_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 21.20% | - | 0.551 | `VALID` |
 | `semantic_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 25.00% | - | 0.582 | `VALID` |
 | `eigen_score` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 15.00% | - | 0.571 | `VALID` |
@@ -162,7 +162,7 @@ In each table:
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 8.78% | 9.89% | 0.689 | `VALID` |
 | Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 5.53% | 7.56% | 0.679 | `VALID` |
 | VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 4.92% | 4.54% | 0.691 | `VALID` |
-| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 4.49% | 5.39% | **0.693** | `VALID` |
+| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 4.49% | 4.99% | **0.693** | `VALID` |
 | `ln_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 20.50% | - | 0.660 | `VALID` |
 | `semantic_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 22.00% | - | 0.646 | `VALID` |
 | `eigen_score` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 18.20% | - | 0.681 | `VALID` |
@@ -175,14 +175,14 @@ In each table:
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 78.76% | 78.76% | 0.639 | `COLLAPSED` |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 52.21% | 52.21% | 0.639 | `COLLAPSED` |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | *1.81%* | 3.44% | 0.639 | `COLLAPSED` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 2.06% | 3.64% | *0.639* | `COLLAPSED` |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 2.79% | 4.99% | 0.548 | `COLLAPSED` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 2.06% | 3.64% | **0.645** | `COLLAPSED` |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 2.85% | 5.05% | 0.550 | `COLLAPSED` |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | 2.26% | 4.09% | 0.274 | `COLLAPSED` |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | **0.24%** | 3.03% | 0.573 | `COLLAPSED` |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 52.19% | 52.19% | 0.639 | `COLLAPSED` |
 | Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 1.85% | 3.46% | 0.639 | `COLLAPSED` |
 | VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 1.89% | 3.48% | 0.639 | `COLLAPSED` |
-| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 1.98% | 3.47% | **0.643** | `COLLAPSED` |
+| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 1.98% | 3.47% | *0.643* | `COLLAPSED` |
 | `ln_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 36.40% | - | 0.566 | `VALID` |
 | `semantic_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 47.60% | - | 0.568 | `VALID` |
 | `eigen_score` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 50.10% | - | 0.602 | `VALID` |
@@ -242,7 +242,7 @@ In each table:
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | **1.09%** | 10.36% | 0.581 | `COLLAPSED` |
 | Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 8.58% | 10.21% | 0.641 | `VALID` |
 | VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 6.92% | 7.58% | 0.639 | `VALID` |
-| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 7.66% | 8.23% | 0.639 | `VALID` |
+| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 7.66% | 7.82% | 0.639 | `VALID` |
 | `ln_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 23.30% | - | 0.644 | `VALID` |
 | `semantic_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 25.00% | - | 0.629 | `VALID` |
 | `eigen_score` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 22.70% | - | **0.655** | `VALID` |
@@ -302,7 +302,7 @@ In each table:
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 8.63% | 9.28% | 0.767 | `VALID` |
 | Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 6.15% | 9.16% | 0.761 | `VALID` |
 | VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 5.31% | 8.10% | 0.768 | `VALID` |
-| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | *4.69%* | 4.52% | 0.783 | `VALID` |
+| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | *4.56%* | 4.82% | 0.783 | `VALID` |
 | `ln_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 12.40% | - | 0.787 | `VALID` |
 | `semantic_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 11.40% | - | 0.690 | `VALID` |
 | `eigen_score` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 6.20% | - | *0.816* | `VALID` |
@@ -319,14 +319,14 @@ Macro-averaged evaluation metrics of 15 benchmark methods across all 14 datasets
 | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 40.33% | 40.33% | 0.671 |
 | Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 21.93% | 22.68% | 0.671 |
 | Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | *3.24%* | 5.70% | 0.682 |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 4.49% | 5.56% | **0.718** |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 4.34% | 5.97% | *0.703* |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 4.41% | 5.39% | **0.718** |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 4.59% | 5.93% | *0.703* |
 | Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | **3.22%** | 4.95% | 0.678 |
 | Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 3.45% | 5.83% | 0.669 |
 | Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 21.86% | 22.87% | 0.685 |
-| Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 4.20% | 5.77% | 0.702 |
-| VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 3.95% | 5.40% | 0.694 |
-| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 4.18% | 5.05% | 0.698 |
+| Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 4.32% | 5.83% | 0.702 |
+| VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 3.94% | 5.59% | 0.695 |
+| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 4.11% | 5.20% | 0.698 |
 | `ln_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 19.24% | - | 0.675 |
 | `semantic_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 28.25% | - | 0.641 |
 | `eigen_score` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 24.74% | - | 0.694 |
@@ -338,22 +338,22 @@ Macro-averaged evaluation metrics of 15 benchmark methods across all 14 datasets
 
 ### A. Win-Count Summary
 - **Overall Best ECE (#1 across ALL evaluated methods)**: Our VCPS methods (**VCPS-5D** / **VCPS-17D**) achieve the absolute lowest ECE on **2 out of 14 datasets** (14.3% win rate).
-  - **Specific Datasets Won in ECE**: `chartqa` (VCPS-17D (Our Method): **2.62%**), `pope` (VCPS-17D (Our Method): **3.38%**).
+  - **Specific Datasets Won in ECE**: `chartqa` (VCPS-17D (Our Method): **2.67%**), `pope` (VCPS-17D (Our Method): **3.38%**).
 - **Win Rate vs. UMPIRE Multi-Pass Baselines in ECE**: VCPS trajectory calibration achieves lower ECE than all four UMPIRE multi-pass baselines on **14 out of 14 datasets**.
-- **Overall Best AUROC (#1 across ALL evaluated methods)**: Our VCPS methods achieve the highest selective prediction AUROC on **5 out of 14 datasets**.
-  - **Specific Datasets Won in AUROC**: `chartqa` (VCPS-17D (Our Method): **0.838**), `mmbench` (VCPS-17D (Our Method): **0.693**), `mmmu` (VCPS-17D (Our Method): **0.643**), `pope` (VCPS-17D (Our Method): **0.765**), `vizwiz-vqa` (VCPS-17D (Our Method): **0.837**).
+- **Overall Best AUROC (#1 across ALL evaluated methods)**: Our VCPS methods achieve the highest selective prediction AUROC on **4 out of 14 datasets**.
+  - **Specific Datasets Won in AUROC**: `chartqa` (VCPS-17D (Our Method): **0.838**), `mmbench` (VCPS-17D (Our Method): **0.693**), `pope` (VCPS-17D (Our Method): **0.765**), `vizwiz-vqa` (VCPS-17D (Our Method): **0.837**).
 
 ### B. Detailed Win Breakdown Table
 | Dataset | Lowest ECE Method | Best ECE (%) | Highest AUROC Method | Best AUROC | VCPS Win Status |
 | :--- | :--- | :---: | :--- | :---: | :---: |
 | `ai2d` | Spline Calibration | **0.74%** | Trajectory LR | **0.645** | `Competitive` |
-| `chartqa` | VCPS-17D (Our Method) | **2.62%** | VCPS-17D (Our Method) | **0.838** | `Top ECE, Top AUROC` |
+| `chartqa` | VCPS-17D (Our Method) | **2.67%** | VCPS-17D (Our Method) | **0.838** | `Top ECE, Top AUROC` |
 | `docvqa` | Spline Calibration | **1.28%** | `umpire` | **0.834** | `Competitive` |
 | `gqa` | Platt Scaling (1D) | **4.08%** | `umpire` | **0.712** | `Competitive` |
 | `infographicvqa` | Trajectory LR | **0.01%** | Quadratic Platt (Logit-Only) | **0.696** | `Competitive` |
 | `lego-puzzles` | Platt Scaling (1D) | **0.71%** | Quadratic Platt (Logit-Only) | **0.668** | `Competitive` |
 | `mmbench` | Spline Calibration | **1.46%** | VCPS-17D (Our Method) | **0.693** | `Top AUROC` |
-| `mmmu` | Spline Calibration | **0.24%** | VCPS-17D (Our Method) | **0.643** | `Top AUROC` |
+| `mmmu` | Spline Calibration | **0.24%** | Trajectory LR | **0.645** | `Competitive` |
 | `pope` | VCPS-17D (Our Method) | **3.38%** | VCPS-17D (Our Method) | **0.765** | `Top ECE, Top AUROC` |
 | `scienceqa` | Trajectory LR | **2.60%** | Adaptive TS (ATS) | **0.705** | `Competitive` |
 | `seedbench` | Adaptive TS (ATS) | **1.09%** | `eigen_score` | **0.655** | `Competitive` |

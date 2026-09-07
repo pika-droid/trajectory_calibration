@@ -2,9 +2,9 @@
 Uncertainty Quantification (UQ) single-pass trajectory proxies.
 
 Provides scikit-learn estimators for:
-- Multi-Scale Semantic Consistency (MSSC / single-pass semantic stability on x13)
-- Multi-Scale Eigen Variance (MSE-EIGEN / single-pass trajectory dispersion on x6)
-- Probability Margin (Single-pass top-1 vs top-2 margin on x19)
+- Multi-Scale Semantic Consistency (MSSC / single-pass semantic stability on x3)
+- Multi-Scale Eigen Variance (MSE-EIGEN / single-pass trajectory dispersion on x13)
+- Probability Margin (Single-pass top-1 vs top-2 margin on x17)
 """
 
 from __future__ import annotations
@@ -39,7 +39,7 @@ def _resolve_feature_col(
 
 
 class MultiScaleSemanticConsistency:
-    """Single-pass Multi-Scale Semantic Consistency proxy (scaled on x13)."""
+    """Single-pass Multi-Scale Semantic Consistency proxy (scaled on x3)."""
 
     def __init__(self, C: float = 1.0, feature_names: list[str] | None = None) -> None:
         self.C = C
@@ -54,17 +54,17 @@ class MultiScaleSemanticConsistency:
     ) -> MultiScaleSemanticConsistency:
         if feature_names is not None:
             self.feature_names = feature_names
-        scores = _resolve_feature_col(X_train, "x13", self.feature_names, fallback_idx=9)
+        scores = _resolve_feature_col(X_train, "x3", self.feature_names, fallback_idx=2)
         self.lr.fit(scores, y_train)
         return self
 
     def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
-        scores = _resolve_feature_col(X_test, "x13", self.feature_names, fallback_idx=9)
+        scores = _resolve_feature_col(X_test, "x3", self.feature_names, fallback_idx=2)
         return self.lr.predict_proba(scores)[:, 1]
 
 
 class MultiScaleEigenVariance:
-    """Single-pass trajectory covariance dispersion proxy (scaled on x6)."""
+    """Single-pass trajectory covariance dispersion proxy (scaled on x13)."""
 
     def __init__(self, C: float = 1.0, feature_names: list[str] | None = None) -> None:
         self.C = C
@@ -79,17 +79,17 @@ class MultiScaleEigenVariance:
     ) -> MultiScaleEigenVariance:
         if feature_names is not None:
             self.feature_names = feature_names
-        scores = _resolve_feature_col(X_train, "x6", self.feature_names, fallback_idx=3)
+        scores = _resolve_feature_col(X_train, "x13", self.feature_names, fallback_idx=12)
         self.lr.fit(scores, y_train)
         return self
 
     def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
-        scores = _resolve_feature_col(X_test, "x6", self.feature_names, fallback_idx=3)
+        scores = _resolve_feature_col(X_test, "x13", self.feature_names, fallback_idx=12)
         return self.lr.predict_proba(scores)[:, 1]
 
 
 class ProbabilityMarginEstimator:
-    """Probability Margin proxy calibrated via Platt scaling (scaled on x19)."""
+    """Probability Margin proxy calibrated via Platt scaling (scaled on x17)."""
 
     def __init__(self, C: float = 1.0, feature_names: list[str] | None = None) -> None:
         self.C = C
@@ -104,10 +104,11 @@ class ProbabilityMarginEstimator:
     ) -> ProbabilityMarginEstimator:
         if feature_names is not None:
             self.feature_names = feature_names
-        scores = _resolve_feature_col(X_train, "x19", self.feature_names, fallback_idx=14)
+        scores = _resolve_feature_col(X_train, "x17", self.feature_names, fallback_idx=16)
         self.lr.fit(scores, y_train)
         return self
 
     def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
-        scores = _resolve_feature_col(X_test, "x19", self.feature_names, fallback_idx=14)
+        scores = _resolve_feature_col(X_test, "x17", self.feature_names, fallback_idx=16)
         return self.lr.predict_proba(scores)[:, 1]
+
