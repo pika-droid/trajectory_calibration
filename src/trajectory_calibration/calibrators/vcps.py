@@ -9,7 +9,7 @@ linear functions of multi-scale trajectory signatures z:
     b(z) = b0 + w^T z_intercept
 
 Includes dynamic binding across all 16 trajectory signatures (VCPS-17D, 34 params)
-or stepwise selected subsets (VCPS-5D, 12 params), with analytical L-BFGS-B gradients.
+or stepwise selected subsets (VCPS-5D, 10 params), with analytical L-BFGS-B gradients.
 """
 
 from __future__ import annotations
@@ -102,7 +102,7 @@ class VaryingCoefficientPlattScaler:
                 slope_idx = list(range(1, min(3, d)))
                 slope_features = [self.feature_names[i] for i in slope_idx]
         elif self.feature_set == "5d":
-            slope_features = non_anchor[:5]
+            slope_features = non_anchor[:4]
             slope_idx = [self.feature_names.index(f) for f in slope_features]
         elif self.feature_set == "17d" or d >= 17:
             slope_features = non_anchor
@@ -126,7 +126,7 @@ class VaryingCoefficientPlattScaler:
                 int_idx = list(range(1, min(5, d)))
                 int_features = [self.feature_names[i] for i in int_idx]
         elif self.feature_set == "5d":
-            int_features = non_anchor[:5]
+            int_features = non_anchor[:4]
             int_idx = [self.feature_names.index(f) for f in int_features]
         elif self.feature_set == "17d" or d >= 17:
             int_features = non_anchor

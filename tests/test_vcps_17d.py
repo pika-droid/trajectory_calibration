@@ -145,28 +145,28 @@ def test_vcps_17d_predict_proba_validity() -> None:
 
 
 def test_vcps_5d_binding_and_explicit_override() -> None:
-    """Verify feature_set='5d' binds all 5 signatures for slope and intercept (12 params)."""
+    """Verify feature_set='5d' binds 4 signatures for slope and intercept (10 params)."""
     df = generate_mock_df("test_5d_override", n_samples=80, seed=42)
-    five_keys = ["x1", "x2", "x3", "x4", "x5", "x6"]  # x1 anchor + 5 trajectory signatures
+    five_keys = ["x1", "x2", "x3", "x4", "x5"]  # x1 anchor + 4 trajectory signatures = 5D
     X_5d = df[five_keys].values
     y = df["is_correct"].values
 
     # Test 5D dynamic binding
     vcps_5d = VaryingCoefficientPlattScaler(feature_set="5d", random_state=42)
     vcps_5d.fit(X_5d, y, feature_names=five_keys)
-    assert vcps_5d.slope_features_ == ["x2", "x3", "x4", "x5", "x6"]
-    assert vcps_5d.intercept_features_ == ["x2", "x3", "x4", "x5", "x6"]
-    assert vcps_5d.n_params == 12  # 1 + 5 + 1 + 5
+    assert vcps_5d.slope_features_ == ["x2", "x3", "x4", "x5"]
+    assert vcps_5d.intercept_features_ == ["x2", "x3", "x4", "x5"]
+    assert vcps_5d.n_params == 10  # 1 + 4 + 1 + 4
 
     # Test explicit override
     vcps_override = VaryingCoefficientPlattScaler(
         feature_set="17d",
-        slope_features=["x6"],
+        slope_features=["x5"],
         intercept_features=["x2", "x4"],
         random_state=42,
     )
     vcps_override.fit(X_5d, y, feature_names=five_keys)
-    assert vcps_override.slope_features_ == ["x6"]
+    assert vcps_override.slope_features_ == ["x5"]
     assert vcps_override.intercept_features_ == ["x2", "x4"]
     assert vcps_override.n_params == 5  # 1 + 1 + 1 + 2
 
@@ -176,9 +176,41 @@ def test_vcps_5d_binding_and_explicit_override() -> None:
     y_17 = df_17["is_correct"].values
     vcps_5d_on_17 = VaryingCoefficientPlattScaler(feature_set="5d", random_state=42)
     vcps_5d_on_17.fit(X_17, y_17, feature_names=FEATURE_KEYS)
-    assert len(vcps_5d_on_17.slope_features_) == 5
-    assert len(vcps_5d_on_17.intercept_features_) == 5
-    assert vcps_5d_on_17.n_params == 12  # 1 + 5 + 1 + 5
+    assert len(vcps_5d_on_17.slope_features_) == 4
+    assert len(vcps_5d_on_17.intercept_features_) == 4
+    assert vcps_5d_on_17.n_params == 10  # 1 + 4 + 1 + 4
+
+
+def test_vcps_5d_parameter_count_and_signatures() -> None:
+    """Verify VCPS-5D parameter count (10 params in full mode) and 4-signature binding."""
+    df = generate_mock_df("test_5d_params", n_samples=100, seed=42)
+    five_keys = ["x1", "x2", "x3", "x4", "x5"]  # 1 anchor + 4 signatures
+    X = df[five_keys].values
+    y = df["is_correct"].values
+
+    # Full mode: 1 + 4 + 1 + 4 = 10 params
+    vcps_full = VaryingCoefficientPlattScaler(mode="full", feature_set="5d", random_state=42)
+    vcps_full.fit(X, y, feature_names=five_keys)
+    assert vcps_full.n_features_in_ == 5
+    assert vcps_full.n_params == 10
+    assert len(vcps_full.slope_features_) == 4
+    assert len(vcps_full.intercept_features_) == 4
+    assert vcps_full.gamma is not None and len(vcps_full.gamma) == 4
+    assert vcps_full.w is not None and len(vcps_full.w) == 4
+
+    # Slope-only mode: 1 + 4 + 1 = 6 params
+    vcps_slope = VaryingCoefficientPlattScaler(mode="slope_only", feature_set="5d", random_state=42)
+    vcps_slope.fit(X, y, feature_names=five_keys)
+    assert vcps_slope.n_params == 6
+    assert len(vcps_slope.slope_features_) == 4
+
+    # Intercept-only mode: 1 + 1 + 4 = 6 params
+    vcps_int = VaryingCoefficientPlattScaler(
+        mode="intercept_only", feature_set="5d", random_state=42
+    )
+    vcps_int.fit(X, y, feature_names=five_keys)
+    assert vcps_int.n_params == 6
+    assert len(vcps_int.intercept_features_) == 4
 
 
 def test_vcps_custom_features_fallback_and_no_feature_names() -> None:
@@ -211,3 +243,14 @@ def test_vcps_custom_features_fallback_and_no_feature_names() -> None:
     assert len(vcps_auto.intercept_features_) == 16
     probs_auto = vcps_auto.predict_proba(X_17)
     assert len(probs_auto) == len(y_17)
+
+    # 3. Fit 5D without specifying feature_names: should auto-generate x1..x5 and bind 10 params
+    vcps_auto_5d = VaryingCoefficientPlattScaler(feature_set="5d", random_state=42)
+    vcps_auto_5d.fit(X_17[:, :5], y_17)
+    assert vcps_auto_5d.n_features_in_ == 5
+    assert vcps_auto_5d.n_params == 10
+    assert vcps_auto_5d.feature_names == [f"x{i}" for i in range(1, 6)]
+    assert len(vcps_auto_5d.slope_features_) == 4
+    assert len(vcps_auto_5d.intercept_features_) == 4
+    probs_auto_5d = vcps_auto_5d.predict_proba(X_17[:, :5])
+    assert len(probs_auto_5d) == len(y_17)

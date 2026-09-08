@@ -26,7 +26,7 @@ $$\text{logit}(p(\mathbf{x})) = a(\mathbf{z}) \cdot x_1 + b(\mathbf{z})$$
 $$a(\mathbf{z}) = \exp(a_0 + \boldsymbol{\gamma}^T \mathbf{z}_{\text{slope}}), \quad b(\mathbf{z}) = b_0 + \mathbf{w}^T \mathbf{z}_{\text{intercept}}$$
 
 - **VCPS-17D (Full Signature Binding)**: Dynamically binds all 16 non-anchor trajectory signatures ($x_2, x_3, \dots, x_{17}$) for both dynamic slope $\boldsymbol{\gamma}$ and dynamic intercept $\mathbf{w}$, optimizing **34 parameters** ($1 + 16 + 1 + 16 = 2K + 2$): scalar log-slope base $a_0$, 16 slope weights $\boldsymbol{\gamma}$, scalar intercept base $b_0$, and 16 intercept weights $\mathbf{w}$ across a 17-D input ($x_1 + \mathbf{z}_{16}$).
-- **VCPS-5D (Stepwise Subset)**: Binds 5 forward-stepwise selected trajectory signatures for both dynamic slope $\boldsymbol{\gamma}$ and dynamic intercept $\mathbf{w}$, optimizing **12 parameters** ($1 + 5 + 1 + 5 = 2K + 2$): scalar log-slope base $a_0$, 5 slope weights $\boldsymbol{\gamma}$, scalar intercept base $b_0$, and 5 intercept weights $\mathbf{w}$ across a 6-D input ($x_1 + \mathbf{z}_5$).
+- **VCPS-5D (Stepwise Subset)**: Binds 4 forward-stepwise selected trajectory signatures for both dynamic slope $\boldsymbol{\gamma}$ and dynamic intercept $\mathbf{w}$, optimizing **10 parameters** ($1 + 4 + 1 + 4 = 2K + 2$): scalar log-slope base $a_0$, 4 slope weights $\boldsymbol{\gamma}$, scalar intercept base $b_0$, and 4 intercept weights $\mathbf{w}$ across a 5-D input ($x_1 + \mathbf{z}_4$).
 
 3. **Pareto Dominance**: Outperforms standard post-hoc temperature scaling while maintaining **1x inference cost**.
 
@@ -70,7 +70,7 @@ src/trajectory_calibration/
 ├── calibrators/
 │   ├── classic.py           (178 LOC) - NC, TS (bounded), 1D Platt, Spline, ATS
 │   ├── proxies.py           (163 LOC) - MSSC, MSE-EIGEN, UQLM proxy baseline estimators
-│   ├── vcps.py              - VaryingCoefficientPlattScaler (VCPS-17D 34 params, VCPS-5D 12 params, Analytical L-BFGS-B)
+│   ├── vcps.py              - VaryingCoefficientPlattScaler (VCPS-17D 34 params, VCPS-5D 10 params, Analytical L-BFGS-B)
 │   ├── residual.py          (138 LOC) - ResidualTrajectoryCalibrator, AURC (trapezoid)
 │   ├── adaptation.py        (94 LOC)  - Saerens-EM (2002), Target Intercept, Beta Calib
 │   ├── baselines.py         (40 LOC)  - Facade re-exporting classic and proxy estimators
@@ -143,10 +143,10 @@ vcps_17d = VaryingCoefficientPlattScaler(feature_set="17d")
 vcps_17d.fit(X_train_17d, y_train, feature_names=FEATURE_KEYS)
 probs_17d = vcps_17d.predict_proba(X_test_17d)
 
-# VCPS-5D: Binds stepwise-selected 5-signature subset (12 parameters total, 6-feature input: x1 + 5 signatures)
+# VCPS-5D: Binds stepwise-selected 4-signature subset (10 parameters total, 5-feature input: x1 + 4 signatures)
 vcps_5d = VaryingCoefficientPlattScaler(feature_set="5d")
-vcps_5d.fit(X_train_6d, y_train, feature_names=best_5d_keys)
-probs_5d = vcps_5d.predict_proba(X_test_6d)
+vcps_5d.fit(X_train_5d, y_train, feature_names=best_5d_keys)
+probs_5d = vcps_5d.predict_proba(X_test_5d)
 ```
 
 ---

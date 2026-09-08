@@ -65,9 +65,9 @@ def test_select_best_5d_subset():
     y = df["is_correct"].values
 
     subset = select_best_5d_subset(X, y, FEATURE_KEYS)
-    assert len(subset) == 6  # 1 anchor + 5 trajectory signatures
+    assert len(subset) == 5  # 1 anchor + 4 trajectory signatures
     assert subset[0] == "x1"  # x1 is always root anchor
-    assert len([k for k in subset if k != "x1"]) == 5
+    assert len([k for k in subset if k != "x1"]) == 4
 
 
 def test_stratified_split_fallback_small_sample():
