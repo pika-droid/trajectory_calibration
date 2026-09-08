@@ -91,11 +91,20 @@ def generate_ada_ece_table_and_bullets(arch: str, arch_label: str) -> str:
                 row.append(s)
         lines.append("| " + " | ".join(row) + " |")
 
+    lines.extend(format_analytical_bullets(sub_pivot, ranks))
+    return "\n".join(lines)
+
+
+def format_analytical_bullets(
+    sub_pivot: pd.DataFrame, ranks: dict[str, tuple[float, float | None]]
+) -> list[str]:
+    lines: list[str] = []
     ts_vals = sub_pivot.loc["Temperature Scaling (TS)"]
     vcps5_vals = sub_pivot.loc["VCPS-5D (Our Method)"]
     vcps17_vals = sub_pivot.loc["VCPS-17D (Our Method)"]
     platt_vals = sub_pivot.loc["Platt Scaling (1D)"]
 
+    # 1. VCPS vs TS
     family_ts_wins = [
         ds for ds in ALL_14_DATASETS if min(vcps5_vals[ds], vcps17_vals[ds]) < ts_vals[ds]
     ]
@@ -105,23 +114,6 @@ def generate_ada_ece_table_and_bullets(arch: str, arch_label: str) -> str:
     loss_formatted = ", ".join([f"`{d}`" for d in family_ts_losses])
     ts_loss_str = f" (all except {loss_formatted})" if family_ts_losses else ""
 
-    family_platt_wins = [
-        ds for ds in ALL_14_DATASETS if min(vcps5_vals[ds], vcps17_vals[ds]) < platt_vals[ds]
-    ]
-    vcps17_platt_wins = [ds for ds in ALL_14_DATASETS if vcps17_vals[ds] < platt_vals[ds]]
-    vcps5_platt_wins = [ds for ds in ALL_14_DATASETS if vcps5_vals[ds] < platt_vals[ds]]
-    platt_formatted = ", ".join([f"`{d}`" for d in family_platt_wins])
-
-    traj_methods = ["VCPS-5D (Our Method)", "VCPS-17D (Our Method)", "Residual Calibrator"]
-    num_1_wins = []
-    for ds in ALL_14_DATASETS:
-        best_val, _ = ranks[ds]
-        for tm in traj_methods:
-            if abs(sub_pivot.loc[tm, ds] - best_val) < 1e-5:
-                short_m = "VCPS-17D" if "17D" in tm else ("VCPS-5D" if "5D" in tm else "Residual")
-                num_1_wins.append(f"`{ds}` ({short_m}: **{best_val:.2f}%**)")
-                break
-
     lines.append("")
     lines.append("- **VCPS vs. Global Temperature Scaling (TS)**:")
     lines.append(
@@ -130,6 +122,15 @@ def generate_ada_ece_table_and_bullets(arch: str, arch_label: str) -> str:
     lines.append(
         f"  - **Separate Counts**: VCPS-17D alone beats TS on **{len(vcps17_ts_wins)} / 14 datasets**; VCPS-5D alone beats TS on **{len(vcps5_ts_wins)} / 14 datasets**."
     )
+
+    # 2. VCPS vs 1D Platt
+    family_platt_wins = [
+        ds for ds in ALL_14_DATASETS if min(vcps5_vals[ds], vcps17_vals[ds]) < platt_vals[ds]
+    ]
+    vcps17_platt_wins = [ds for ds in ALL_14_DATASETS if vcps17_vals[ds] < platt_vals[ds]]
+    vcps5_platt_wins = [ds for ds in ALL_14_DATASETS if vcps5_vals[ds] < platt_vals[ds]]
+    platt_formatted = ", ".join([f"`{d}`" for d in family_platt_wins])
+
     lines.append("- **VCPS vs. 1D Platt Scaling**:")
     lines.append(
         f"  - **Family Win**: VCPS beats 1D Platt Scaling on **{len(family_platt_wins)} / 14 datasets**:"
@@ -138,12 +139,107 @@ def generate_ada_ece_table_and_bullets(arch: str, arch_label: str) -> str:
     lines.append(
         f"  - **Separate Counts**: VCPS-17D alone beats 1D Platt on **{len(vcps17_platt_wins)} / 14 datasets**; VCPS-5D alone beats 1D Platt on **{len(vcps5_platt_wins)} / 14 datasets**."
     )
+
+    # 3. Trajectory Platt (5D & 17D) vs. TS and 1D Platt
+    has_tp5 = "Trajectory Platt (5D)" in sub_pivot.index
+    has_tp17 = "Trajectory Platt (17D)" in sub_pivot.index
+    if has_tp5 or has_tp17:
+        lines.append("- **Trajectory Platt vs. Global Temperature Scaling (TS)**:")
+        if has_tp5 and has_tp17:
+            tp5_vals = sub_pivot.loc["Trajectory Platt (5D)"]
+            tp17_vals = sub_pivot.loc["Trajectory Platt (17D)"]
+            family_tp_ts_wins = [
+                ds for ds in ALL_14_DATASETS if min(tp5_vals[ds], tp17_vals[ds]) < ts_vals[ds]
+            ]
+            family_tp_ts_losses = [ds for ds in ALL_14_DATASETS if ds not in family_tp_ts_wins]
+            tp_loss_str = (
+                f" (all except {', '.join([f'`{d}`' for d in family_tp_ts_losses])})"
+                if family_tp_ts_losses
+                else ""
+            )
+            tp17_ts_wins = [ds for ds in ALL_14_DATASETS if tp17_vals[ds] < ts_vals[ds]]
+            tp5_ts_wins = [ds for ds in ALL_14_DATASETS if tp5_vals[ds] < ts_vals[ds]]
+            lines.append(
+                f"  - **Family Win**: Trajectory Platt beats TS on **{len(family_tp_ts_wins)} / 14 datasets**{tp_loss_str}."
+            )
+            lines.append(
+                f"  - **Separate Counts**: Trajectory Platt (17D) alone beats TS on **{len(tp17_ts_wins)} / 14 datasets**; Trajectory Platt (5D) alone beats TS on **{len(tp5_ts_wins)} / 14 datasets**."
+            )
+        elif has_tp17:
+            tp17_vals = sub_pivot.loc["Trajectory Platt (17D)"]
+            tp17_ts_wins = [ds for ds in ALL_14_DATASETS if tp17_vals[ds] < ts_vals[ds]]
+            lines.append(
+                f"  - **Separate Counts**: Trajectory Platt (17D) alone beats TS on **{len(tp17_ts_wins)} / 14 datasets**."
+            )
+        elif has_tp5:
+            tp5_vals = sub_pivot.loc["Trajectory Platt (5D)"]
+            tp5_ts_wins = [ds for ds in ALL_14_DATASETS if tp5_vals[ds] < ts_vals[ds]]
+            lines.append(
+                f"  - **Separate Counts**: Trajectory Platt (5D) alone beats TS on **{len(tp5_ts_wins)} / 14 datasets**."
+            )
+
+        lines.append("- **Trajectory Platt vs. 1D Platt Scaling**:")
+        if has_tp5 and has_tp17:
+            tp5_vals = sub_pivot.loc["Trajectory Platt (5D)"]
+            tp17_vals = sub_pivot.loc["Trajectory Platt (17D)"]
+            family_tp_platt_wins = [
+                ds for ds in ALL_14_DATASETS if min(tp5_vals[ds], tp17_vals[ds]) < platt_vals[ds]
+            ]
+            tp_platt_formatted = ", ".join([f"`{d}`" for d in family_tp_platt_wins])
+            tp17_platt_wins = [ds for ds in ALL_14_DATASETS if tp17_vals[ds] < platt_vals[ds]]
+            tp5_platt_wins = [ds for ds in ALL_14_DATASETS if tp5_vals[ds] < platt_vals[ds]]
+            lines.append(
+                f"  - **Family Win**: Trajectory Platt beats 1D Platt Scaling on **{len(family_tp_platt_wins)} / 14 datasets**:"
+            )
+            lines.append(f"    {tp_platt_formatted}.")
+            lines.append(
+                f"  - **Separate Counts**: Trajectory Platt (17D) alone beats 1D Platt on **{len(tp17_platt_wins)} / 14 datasets**; Trajectory Platt (5D) alone beats 1D Platt on **{len(tp5_platt_wins)} / 14 datasets**."
+            )
+        elif has_tp17:
+            tp17_vals = sub_pivot.loc["Trajectory Platt (17D)"]
+            tp17_platt_wins = [ds for ds in ALL_14_DATASETS if tp17_vals[ds] < platt_vals[ds]]
+            lines.append(
+                f"  - **Separate Counts**: Trajectory Platt (17D) alone beats 1D Platt on **{len(tp17_platt_wins)} / 14 datasets**."
+            )
+        elif has_tp5:
+            tp5_vals = sub_pivot.loc["Trajectory Platt (5D)"]
+            tp5_platt_wins = [ds for ds in ALL_14_DATASETS if tp5_vals[ds] < platt_vals[ds]]
+            lines.append(
+                f"  - **Separate Counts**: Trajectory Platt (5D) alone beats 1D Platt on **{len(tp5_platt_wins)} / 14 datasets**."
+            )
+
+    # 4. Top-1 #1 lowest Adaptive ECE
+    traj_candidates = [
+        "VCPS-5D (Our Method)",
+        "VCPS-17D (Our Method)",
+        "Trajectory Platt (5D)",
+        "Trajectory Platt (17D)",
+        "Residual Calibrator",
+    ]
+    traj_methods = [m for m in traj_candidates if m in sub_pivot.index]
+    num_1_wins = []
+    for ds in ALL_14_DATASETS:
+        best_val, _ = ranks[ds]
+        for tm in traj_methods:
+            if abs(sub_pivot.loc[tm, ds] - best_val) < 1e-5:
+                if "17D" in tm and "VCPS" in tm:
+                    short_m = "VCPS-17D"
+                elif "5D" in tm and "VCPS" in tm:
+                    short_m = "VCPS-5D"
+                elif "17D" in tm and "Platt" in tm:
+                    short_m = "TP-17D"
+                elif "5D" in tm and "Platt" in tm:
+                    short_m = "TP-5D"
+                else:
+                    short_m = "Residual"
+                num_1_wins.append(f"`{ds}` ({short_m}: **{best_val:.2f}%**)")
+                break
+
     lines.append(
-        f"- **Our Trajectory Methods (VCPS-5D, VCPS-17D, Residual Calibrator)** win the #1 lowest Adaptive ECE on **{len(num_1_wins)} / 14 benchmarks**:"
+        f"- **Our Trajectory Methods ({', '.join(traj_methods)})** win the #1 lowest Adaptive ECE on **{len(num_1_wins)} / 14 benchmarks**:"
     )
     lines.append(f"  {', '.join(num_1_wins)}.")
-
-    return "\n".join(lines)
+    return lines
 
 
 def generate_macro_table() -> str:
@@ -282,7 +378,9 @@ def generate_temp_table() -> str:
         t_df = pd.read_csv(
             ROOT / f"results/experiments/temperature_study/temperature_transfer_{arch}_summary.csv"
         )
-        t_mean = t_df.groupby(["method", "temperature"])["ece_percent"].mean().unstack()
+        t_mean = t_df.pivot_table(
+            index="method", columns="temperature", values="ece_percent", aggfunc="mean"
+        )
         t_sub = t_mean.loc[[m for m in methods if m in t_mean.index], [0.0, 0.3, 0.6, 1.0, 1.5]]
         t_sub["mean_ece"] = t_sub.mean(axis=1)
         t_sub = t_sub.sort_values("mean_ece")

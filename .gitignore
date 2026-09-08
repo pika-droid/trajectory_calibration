@@ -35,12 +35,19 @@ checkpoints/
 .hypothesis/
 *.log
 
-# AI Agent directories
+# AI Agent files and directories (kept fully local)
 .agents/
 .agent/
 .gemini/
 .claude/
 .system_generated/
+AGENTS.md
+agents.md
+agent.md
+CONTEXT.md
+context.md
+CLAUDE.md
+claude.md
 
 # Local baseline repos (modified UMPIRE repository is tracked)
 # baseline_repo/
@@ -48,7 +55,3 @@ checkpoints/
 # Local documentation (kept local only)
 wiki/
 docs/
-
-# Temporary reference files
-kuhn2023.pdf
-kuhn_text.txt
