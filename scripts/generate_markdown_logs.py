@@ -232,6 +232,8 @@ TARGET_METHODS_BENCH = [
     ('Platt Scaling (1D)', 'Classic Post-Hoc Calibrator', 'Single-Pass ($T=0.0$)'),
     ('Trajectory LR', 'Linear Trajectory Baseline', 'Single-Pass ($T=0.0$)'),
     ('Trajectory LR (No Bias)', 'Linear Trajectory Baseline (Zero-Bias)', 'Single-Pass ($T=0.0$)'),
+    ('Trajectory Platt (5D)', 'Trajectory Platt Baseline (5D)', 'Single-Pass ($T=0.0$)'),
+    ('Trajectory Platt (17D)', 'Trajectory Platt Baseline (17D)', 'Single-Pass ($T=0.0$)'),
     ('Quadratic Platt (Logit-Only)', 'Logit-Only Polynomial Baseline', 'Single-Pass ($T=0.0$)'),
     ('Spline Calibration', 'Non-Parametric Calibrator', 'Single-Pass ($T=0.0$)'),
     ('Adaptive TS (ATS)', 'Adaptive Calibrator', 'Single-Pass ($T=0.0$)'),
@@ -270,7 +272,7 @@ def generate_vcps_vs_baselines_log(model_name, model_display, bench_path, ump_pa
     lines.append("> [!IMPORTANT]")
     lines.append("> **CRITICAL TEMPERATURE & COMPUTATION PROTOCOL**:")
     lines.append("> 1. **Greedy Deterministic Single-Pass ($T = 0.0, K = 1$)**:")
-    lines.append(">    - Evaluated for: **Naive Confidence (NC)**, **Temperature Scaling (TS)**, **Platt Scaling (1D)**, **Trajectory LR (No Bias)**, **Quadratic Platt (Logit-Only)**, **Spline Calibration (PCHIP)**, **Adaptive TS (ATS)**, **Residual Calibrator**, **VCPS-5D**, and **VCPS-17D**.")
+    lines.append(">    - Evaluated for: **Naive Confidence (NC)**, **Temperature Scaling (TS)**, **Platt Scaling (1D)**, **Trajectory LR**, **Trajectory LR (No Bias)**, **Trajectory Platt (5D)**, **Trajectory Platt (17D)**, **Quadratic Platt (Logit-Only)**, **Spline Calibration (PCHIP)**, **Adaptive TS (ATS)**, **Residual Calibrator**, **VCPS-5D**, and **VCPS-17D**.")
     lines.append(">    - Evaluated on exact autoregressive logit trajectories from standard single-pass greedy decoding. Computational overhead: **$1\\times$ forward pass** (real-time zero rollout overhead).")
     lines.append("> 2. **Stochastic Multi-Pass Sampling ($T = 0.5, K = 10$)**:")
     lines.append(">    - Evaluated for: **`ln_entropy`**, **`semantic_entropy`**, **`eigen_score`**, and **`umpire`**.")

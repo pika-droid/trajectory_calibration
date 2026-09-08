@@ -27,6 +27,7 @@ from trajectory_calibration.calibrators.baselines import (
     SplineCalibrator,
     TemperatureScalingEstimator,
     TrajectoryLREstimator,
+    TrajectoryPlattScaler,
 )
 from trajectory_calibration.calibrators.residual import (
     ResidualTrajectoryCalibrator,
@@ -94,6 +95,8 @@ def main() -> None:
                 "Platt Scaling (1D)": PlattScalingEstimator().fit(X_tr_17d, y_tr),
                 "Trajectory LR": TrajectoryLREstimator(fit_intercept=True).fit(X_tr_5d, y_tr),
                 "Trajectory LR (No Bias)": TrajectoryLREstimator(fit_intercept=False).fit(X_tr_5d, y_tr),
+                "Trajectory Platt (5D)": TrajectoryPlattScaler(n_features=len(best_5d)).fit(X_tr_5d, y_tr),
+                "Trajectory Platt (17D)": TrajectoryPlattScaler(n_features=len(FEATURE_KEYS)).fit(X_tr_17d, y_tr),
                 "Quadratic Platt (Logit-Only)": QuadraticPlattScaler().fit(X_tr_17d, y_tr),
                 "Spline Calibration (PCHIP)": SplineCalibrator().fit(X_tr_17d, y_tr),
                 "Adaptive TS (ATS)": AdaptiveTemperatureScaling().fit(X_tr_5d, y_tr),

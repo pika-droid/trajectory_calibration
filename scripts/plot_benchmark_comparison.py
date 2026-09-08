@@ -124,12 +124,14 @@ def plot_temperature_transfer(out_dir: Path):
         "Naive Confidence (NC)",
         "Temperature Scaling (TS)",
         "Platt Scaling (1D)",
+        "Trajectory Platt (5D)",
+        "Trajectory Platt (17D)",
         "Quadratic Platt (Logit-Only)",
         "Spline Calibration (PCHIP)",
         "Residual Calibrator",
         "VCPS-5D (Our Method)",
     ]
-    colors = ["#94a3b8", "#a855f7", "#f59e0b", "#3b82f6", "#ec4899", "#6366f1", "#10b981"]
+    colors = ["#94a3b8", "#a855f7", "#f59e0b", "#06b6d4", "#8b5cf6", "#3b82f6", "#ec4899", "#6366f1", "#10b981"]
 
     for ax, csv_file, model_label in zip(axes, [m3_csv, mqt_csv], ["M3-LLaVA (7B)", "MQT-LLaVA (7B)"]):
         if not csv_file.exists():

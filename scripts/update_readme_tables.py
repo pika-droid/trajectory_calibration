@@ -35,6 +35,8 @@ ADA_ECE_DISPLAY_METHODS = [
     "Platt Scaling (1D)",
     "Trajectory LR",
     "Trajectory LR (No Bias)",
+    "Trajectory Platt (5D)",
+    "Trajectory Platt (17D)",
     "Spline Calibration",
     "Adaptive TS (ATS)",
     "Residual Calibrator",
@@ -47,7 +49,8 @@ def generate_ada_ece_table_and_bullets(arch: str, arch_label: str) -> str:
     csv_path = ROOT / f"results/experiments/benchmark/benchmark_{arch}_summary.csv"
     df = pd.read_csv(csv_path)
     pivot = df.pivot(index="method", columns="dataset", values="adaptive_ece_percent")
-    sub_pivot = pivot.loc[ADA_ECE_DISPLAY_METHODS, ALL_14_DATASETS]
+    available_methods = [m for m in ADA_ECE_DISPLAY_METHODS if m in pivot.index]
+    sub_pivot = pivot.loc[available_methods, ALL_14_DATASETS]
 
     ranks = {}
     for ds in ALL_14_DATASETS:
@@ -61,7 +64,7 @@ def generate_ada_ece_table_and_bullets(arch: str, arch_label: str) -> str:
     lines.append("| Calibration Method | " + " | ".join(ALL_14_DATASETS) + " |")
     lines.append("| :--- | " + " | ".join([":---:"] * len(ALL_14_DATASETS)) + " |")
 
-    for m in ADA_ECE_DISPLAY_METHODS:
+    for m in available_methods:
         row_name = f"**{m}**" if ("VCPS" in m or "Naive" in m) else m
         row = [row_name]
         for ds in ALL_14_DATASETS:
@@ -119,7 +122,7 @@ def generate_ada_ece_table_and_bullets(arch: str, arch_label: str) -> str:
 
 def generate_macro_table() -> str:
     lines = [
-        "### Macro-Average Comparison Across 15 Methods on 14 Datasets ($T_{\\text{gen}} = 0.00$, $1\\times$ Compute)\n",
+        "### Macro-Average Comparison Across 17 Methods on 14 Datasets ($T_{\\text{gen}} = 0.00$, $1\\times$ Compute)\n",
         "| Model | Calibration Method | Paradigm / Regime | Sampling | Macro ECE (%) $\\downarrow$ | Macro Ada-ECE (%) $\\downarrow$ | Macro AUROC $\\uparrow$ |",
         "| :--- | :--- | :--- | :--- | :---: | :---: | :---: |",
     ]
@@ -133,6 +136,8 @@ def generate_macro_table() -> str:
         ("Platt Scaling (1D)", "Classic Linear Post-Hoc", "Greedy ($T=0.0, K=1$)"),
         ("Residual Calibrator", "Feature-Aided", "Greedy ($T=0.0, K=1$)"),
         ("Trajectory LR (No Bias)", "Linear Trajectory (Zero-Bias)", "Greedy ($T=0.0, K=1$)"),
+        ("Trajectory Platt (5D)", "Platt on 5D features", "Greedy ($T=0.0, K=1$)"),
+        ("Trajectory Platt (17D)", "Platt on 17D features", "Greedy ($T=0.0, K=1$)"),
         ("Temperature Scaling (TS)", "Classic Post-Hoc", "Greedy ($T=0.0, K=1$)"),
         ("Adaptive TS (ATS)", "Adaptive Calibrator", "Greedy ($T=0.0, K=1$)"),
         ("Naive Confidence (NC)", "Uncalibrated Baseline", "Greedy ($T=0.0, K=1$)"),
@@ -150,11 +155,15 @@ def generate_macro_table() -> str:
         for m, paradigm, sampling in methods_order:
             if m in ["umpire", "eigen_score", "ln_entropy", "semantic_entropy"]:
                 sub = ump_df[ump_df["method"] == m]
+                if sub.empty:
+                    continue
                 ece = float(sub["cece"].mean() * 100.0)
                 ada_ece = None
                 auroc = float(sub["auc"].mean())
             else:
                 sub = bench_df[bench_df["method"] == m]
+                if sub.empty:
+                    continue
                 ece = float(sub["ece_percent"].mean())
                 ada_ece = float(sub["adaptive_ece_percent"].mean())
                 auroc = float(sub["auroc"].mean())
@@ -228,6 +237,8 @@ def generate_temp_table() -> str:
         "VCPS-17D (Our Method)",
         "Trajectory LR (No Bias)",
         "Trajectory LR",
+        "Trajectory Platt (5D)",
+        "Trajectory Platt (17D)",
         "Temperature Scaling (TS)",
         "Adaptive TS (ATS)",
         "Naive Confidence (NC)",

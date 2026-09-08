@@ -21,6 +21,7 @@ from trajectory_calibration.calibrators.baselines import (
     SplineCalibrator,
     TemperatureScalingEstimator,
     TrajectoryLREstimator,
+    TrajectoryPlattScaler,
 )
 from trajectory_calibration.calibrators.classic import (
     AdaptiveTemperatureScaling,
@@ -51,6 +52,7 @@ __all__ = [
     "SplineCalibrator",
     "AdaptiveTemperatureScaling",
     "TrajectoryLREstimator",
+    "TrajectoryPlattScaler",
     "ProbabilityMarginEstimator",
     "MultiScaleSemanticConsistency",
     "MultiScaleEigenVariance",

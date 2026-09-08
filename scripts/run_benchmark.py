@@ -28,6 +28,7 @@ from trajectory_calibration.calibrators.baselines import (
     SplineCalibrator,
     TemperatureScalingEstimator,
     TrajectoryLREstimator,
+    TrajectoryPlattScaler,
 )
 from trajectory_calibration.calibrators.residual import (
     ResidualTrajectoryCalibrator,
@@ -109,6 +110,8 @@ def main() -> None:
             "Residual Calibrator": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
             "Trajectory LR": (TrajectoryLREstimator(fit_intercept=True), X_train_5d, X_test_5d),
             "Trajectory LR (No Bias)": (TrajectoryLREstimator(fit_intercept=False), X_train_5d, X_test_5d),
+            "Trajectory Platt (5D)": (TrajectoryPlattScaler(n_features=len(best_5d_keys)), X_train_5d, X_test_5d),
+            "Trajectory Platt (17D)": (TrajectoryPlattScaler(n_features=len(FEATURE_KEYS)), X_train_17d, X_test_17d),
             "VCPS-5D (Our Method)": (VaryingCoefficientPlattScaler(feature_set="5d"), X_train_5d, X_test_5d),
             "VCPS-17D (Our Method)": (VaryingCoefficientPlattScaler(feature_set="17d"), X_train_17d, X_test_17d),
         }

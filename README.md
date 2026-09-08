@@ -113,7 +113,7 @@ python -m venv .venv
 
 ### 2. Fast CPU Smoke Test (~3 seconds)
 
-Runs the entire calibrator pipeline across all 15 benchmark methods on synthetic pilot features with zero GPU requirements:
+Runs the entire calibrator pipeline across all 17 benchmark methods on synthetic pilot features with zero GPU requirements:
 
 ```bash
 # Windows
@@ -221,7 +221,7 @@ Compares single-pass greedy calibration ($T=0.0$, $1\times$ compute) against cla
 - **M3-LLaVA**: [`logs/vcps_logs/m3_llava_vcps_vs_baselines.md`](logs/vcps_logs/m3_llava_vcps_vs_baselines.md)
 - **MQT-LLaVA**: [`logs/vcps_logs/mqt_llava_vcps_vs_baselines.md`](logs/vcps_logs/mqt_llava_vcps_vs_baselines.md)
 
-### Macro-Average Comparison Across 15 Methods on 14 Datasets ($T_{\text{gen}} = 0.00$, $1\times$ Compute)
+### Macro-Average Comparison Across 17 Methods on 14 Datasets ($T_{\text{gen}} = 0.00$, $1\times$ Compute)
 
 | Model | Calibration Method | Paradigm / Regime | Sampling | Macro ECE (%) $\downarrow$ | Macro Ada-ECE (%) $\downarrow$ | Macro AUROC $\uparrow$ |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: |

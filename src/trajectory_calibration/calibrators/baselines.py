@@ -21,6 +21,7 @@ from trajectory_calibration.calibrators.proxies import (
     MultiScaleSemanticConsistency,
     ProbabilityMarginEstimator,
 )
+from trajectory_calibration.calibrators.trajectory_platt import TrajectoryPlattScaler
 
 __all__ = [
     "NaiveConfidenceEstimator",
@@ -31,6 +32,7 @@ __all__ = [
     "SplineCalibrator",
     "AdaptiveTemperatureScaling",
     "TrajectoryLREstimator",
+    "TrajectoryPlattScaler",
     "BetaCalibrator",
     "ProbabilityMarginEstimator",
     "MultiScaleSemanticConsistency",

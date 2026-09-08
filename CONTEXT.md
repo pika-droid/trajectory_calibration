@@ -17,6 +17,7 @@ This project focuses on **Elastic Multi-Scale Uncertainty Quantification (UQ)** 
 - **Trajectory Signatures ($\mathbf{z} = [x_2, \dots, x_{17}]$)**: 16 scalar signatures capturing cross-scale monotonicity counts, answer stability, entropy decay, variance, log-scale slope, acceleration, and confidence gains across visual resolutions, ordered contiguously by calibration importance.
 - **VCPS-17D**: Varying-Coefficient Platt Scaling operating over the 17-D feature representation ($x_1$ anchor + $\mathbf{z} \in \mathbb{R}^{16}$) binding all 16 trajectory signatures into dynamic slope $a(\mathbf{z}) = \exp(\alpha_0 + \mathbf{z}^T \boldsymbol{\gamma})$ and dynamic intercept $b(\mathbf{z}) = b_0 + \mathbf{z}^T \mathbf{w}$ (34 parameters total).
 - **VCPS-5D**: Parsimonious subset binding 5 signatures (defaulting to top 5 importance-ranked signatures $\mathbf{z}_{1..5} = [x_2, \dots, x_6]$, or forward-stepwise selected signatures) into slope and intercept (12 parameters total).
+- **Trajectory Platt Scaler**: Baseline calibrator generalizing 1D Platt scaling to multi-dimensional trajectory features via $p = \sigma(\mathbf{a}^T \mathbf{z} + b)$, optimizing explicit `torch.nn.Parameter` objects $\mathbf{a}$ and $b$ via `torch.optim.LBFGS` (benchmarking 5D and 17D variants).
 
 ### 3. Evaluation Metrics & Benchmarks
 - **Adaptive ECE (Ada-ECE)**: Equal-frequency (quantile partitioned) Expected Calibration Error, preventing empty bin collapse. Lower is better.
@@ -24,7 +25,7 @@ This project focuses on **Elastic Multi-Scale Uncertainty Quantification (UQ)** 
 - **AUROC**: Area Under the Receiver Operating Characteristic curve measuring selective prediction discrimination between correct and incorrect answers. Higher is better.
 - **LODO (Leave-One-Dataset-Out)**: 14-fold cross-dataset evaluation protocol where calibrators train on 13 pooled benchmarks and evaluate zero-shot on the 14th held-out benchmark.
 - **14 Vision-Language Benchmarks**: ai2d, chartqa, docvqa, gqa, infographicvqa, lego-puzzles, mmbench, mmmu, pope, scienceqa, seedbench, textvqa, vizwiz-vqa, vqav2.
-- **15 Benchmark Calibration Methods**: Naive Confidence (NC), Temperature Scaling (TS), Platt Scaling (1D), Trajectory LR, Trajectory LR (No Bias), Quadratic Platt (Logit-Only), Spline Calibration, Adaptive TS (ATS), LN-Entropy, Semantic Entropy, EigenScore, UMPIRE, Residual Calibrator, VCPS-5D (Our Method), VCPS-17D (Our Method).
+- **17 Benchmark Calibration Methods**: Naive Confidence (NC), Temperature Scaling (TS), Platt Scaling (1D), Trajectory LR, Trajectory LR (No Bias), Trajectory Platt (5D), Trajectory Platt (17D), Quadratic Platt (Logit-Only), Spline Calibration, Adaptive TS (ATS), LN-Entropy, Semantic Entropy, EigenScore, UMPIRE, Residual Calibrator, VCPS-5D (Our Method), VCPS-17D (Our Method).
 
 ### 4. Ranking & Presentation Rules (Option A Adopted)
 - **Universal Application**: Apply Rank 1 (**bold**) and Rank 2 (*italic*) formatting to all metric columns across all tables:

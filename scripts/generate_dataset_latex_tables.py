@@ -44,6 +44,8 @@ TARGET_METHODS_ORDER = [
     ("Platt Scaling (1D)", "Single-Pass ($T = 0.0$)", False),
     ("Trajectory LR", "Single-Pass ($T = 0.0$)", False),
     ("Trajectory LR (No Bias)", "Single-Pass ($T = 0.0$)", False),
+    ("Trajectory Platt (5D)", "Single-Pass ($T = 0.0$)", False),
+    ("Trajectory Platt (17D)", "Single-Pass ($T = 0.0$)", False),
     ("Quadratic Platt (Logit-Only)", "Single-Pass ($T = 0.0$)", False),
     ("Spline Calibration", "Single-Pass ($T = 0.0$)", False),
     ("Adaptive TS (ATS)", "Single-Pass ($T = 0.0$)", False),
@@ -89,21 +91,8 @@ def rank_and_format(vals: list[float | None], higher_is_better: bool = False, de
 
 
 def generate_single_table(df_bench: pd.DataFrame, df_ump: pd.DataFrame, ds: str, arch_label: str, arch_model: str, is_macro: bool = False) -> str:
-    caption_name = f"on \\texttt{{{ds}}}" if not is_macro else "of 15 Methods Across All 14 Datasets"
     tab_label = f"tab:benchmark_{arch_label}_{DATASET_NAME_MAP.get(ds, ds)}" if not is_macro else f"tab:benchmark_macro_{arch_label}"
     macro_prefix = "Macro-Averaged " if is_macro else ""
-
-    lines = [
-        "\\begin{table}[t]",
-        f"\\caption{{\\textbf{{{macro_prefix}Calibration Benchmark {caption_name} ({arch_model} 7B).}} \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
-        f"\\label{{{tab_label}}}",
-        "\\tablestyle{4pt}{1.05}",
-        "\\resizebox{\\columnwidth}{!}{%",
-        "\\begin{tabular}{lcccc}",
-        "\\toprule",
-        f"\\textbf{{Calibration Method}} & \\textbf{{Regime / Sampling}} & \\textbf{{{macro_prefix}ECE (\\%)}} $\\downarrow$ & \\textbf{{{macro_prefix}Ada-ECE (\\%)}} $\\downarrow$ & \\textbf{{{macro_prefix}AUROC}} $\\uparrow$ \\\\",
-        "\\midrule",
-    ]
 
     rows = []
     for m_key, regime, is_vcps in TARGET_METHODS_ORDER:
@@ -137,6 +126,19 @@ def generate_single_table(df_bench: pd.DataFrame, df_ump: pd.DataFrame, ds: str,
 
     if not rows:
         return ""
+
+    caption_name = f"on \\texttt{{{ds}}}" if not is_macro else f"of {len(rows)} Methods Across All 14 Datasets"
+    lines = [
+        "\\begin{table}[t]",
+        f"\\caption{{\\textbf{{{macro_prefix}Calibration Benchmark {caption_name} ({arch_model} 7B).}} \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
+        f"\\label{{{tab_label}}}",
+        "\\tablestyle{4pt}{1.05}",
+        "\\resizebox{\\columnwidth}{!}{%",
+        "\\begin{tabular}{lcccc}",
+        "\\toprule",
+        f"\\textbf{{Calibration Method}} & \\textbf{{Regime / Sampling}} & \\textbf{{{macro_prefix}ECE (\\%)}} $\\downarrow$ & \\textbf{{{macro_prefix}Ada-ECE (\\%)}} $\\downarrow$ & \\textbf{{{macro_prefix}AUROC}} $\\uparrow$ \\\\",
+        "\\midrule",
+    ]
 
     ece_formatted = rank_and_format([r[3] for r in rows], higher_is_better=False, decimals=2)
     ada_ece_formatted = rank_and_format([r[4] for r in rows], higher_is_better=False, decimals=2)
@@ -215,6 +217,8 @@ def generate_temperature_tables():
         "Platt Scaling (1D)",
         "Trajectory LR",
         "Trajectory LR (No Bias)",
+        "Trajectory Platt (5D)",
+        "Trajectory Platt (17D)",
         "Quadratic Platt (Logit-Only)",
         "Spline Calibration (PCHIP)",
         "Adaptive TS (ATS)",

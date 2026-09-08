@@ -11,6 +11,7 @@ from trajectory_calibration.calibrators.baselines import (
     SplineCalibrator,
     TemperatureScalingEstimator,
     TrajectoryLREstimator,
+    TrajectoryPlattScaler,
 )
 from trajectory_calibration.calibrators.residual import ResidualTrajectoryCalibrator
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
@@ -28,6 +29,7 @@ def test_all_calibrators_fit_predict():
         PlattScalingEstimator(),
         QuadraticPlattScaler(),
         TrajectoryLREstimator(fit_intercept=False),
+        TrajectoryPlattScaler(n_features=5),
         BetaCalibrator(),
         SplineCalibrator(),
         AdaptiveTemperatureScaling(),
