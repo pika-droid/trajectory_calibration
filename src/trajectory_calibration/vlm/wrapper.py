@@ -9,9 +9,10 @@ import os
 import re
 import warnings
 from typing import Any
-from PIL import Image
+
 import torch
 import transformers
+from PIL import Image
 
 from trajectory_calibration.utils.config import ARCH_SCALES
 from trajectory_calibration.vlm.llava_compat import load_llava_modules
@@ -35,9 +36,15 @@ class UnifiedVLMWrapper:
         self.fine_scale = self.scales[-1]
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.dtype = torch.bfloat16 if precision == "bf16" else (torch.float16 if precision == "fp16" else torch.float32)
+        self.dtype = (
+            torch.bfloat16
+            if precision == "bf16"
+            else (torch.float16 if precision == "fp16" else torch.float32)
+        )
 
-        logger.info(f"Initializing UnifiedVLMWrapper for {self.arch.upper()} on {self.device} ({precision}).")
+        logger.info(
+            f"Initializing UnifiedVLMWrapper for {self.arch.upper()} on {self.device} ({precision})."
+        )
 
         self._llava = load_llava_modules(self.arch)
         load_pretrained_model = self._llava["load_pretrained_model"]
@@ -48,7 +55,11 @@ class UnifiedVLMWrapper:
             raise ImportError(f"LLaVA library could not be loaded for architecture: {self.arch}")
 
         disable_torch_init()
-        actual_path = model_path if os.path.exists(model_path) else ("gordonhu/MQT-LLaVA-7b" if self.arch == "mqt" else "mucai/llava-v1.5-7b-m3")
+        actual_path = (
+            model_path
+            if os.path.exists(model_path)
+            else ("gordonhu/MQT-LLaVA-7b" if self.arch == "mqt" else "mucai/llava-v1.5-7b-m3")
+        )
         self.model_name = get_model_name_from_path(actual_path)
 
         old_verbosity = transformers.logging.get_verbosity()
@@ -91,7 +102,9 @@ class UnifiedVLMWrapper:
 
     def preprocess_image(self, image: Image.Image) -> tuple[torch.Tensor, list[tuple[int, int]]]:
         process_images = self._llava["process_images"]
-        image_tensor = process_images([image], self.image_processor, self.model.config).to(self.device, dtype=self.dtype)
+        image_tensor = process_images([image], self.image_processor, self.model.config).to(
+            self.device, dtype=self.dtype
+        )
         return image_tensor, [image.size]
 
     def format_prompt(self, question: str) -> str:
@@ -125,14 +138,24 @@ class UnifiedVLMWrapper:
     ) -> dict[str, Any]:
         """Fast forward pass with output_attentions=False to enable FlashAttention."""
         prompt = self.format_prompt(question)
-        input_ids = self._llava["tokenizer_image_token"](prompt, self.tokenizer, self._llava["IMAGE_TOKEN_INDEX"], return_tensors="pt").unsqueeze(0).to(self.device)
+        input_ids = (
+            self._llava["tokenizer_image_token"](
+                prompt, self.tokenizer, self._llava["IMAGE_TOKEN_INDEX"], return_tensors="pt"
+            )
+            .unsqueeze(0)
+            .to(self.device)
+        )
         image_tensor, image_sizes = self.preprocess_image(image)
 
-        vt = None if (num_visual_tokens is not None and num_visual_tokens >= 576) else num_visual_tokens
+        vt = (
+            None
+            if (num_visual_tokens is not None and num_visual_tokens >= 576)
+            else num_visual_tokens
+        )
         if hasattr(self.model, "config"):
-            setattr(self.model.config, "num_visual_tokens", vt)
+            self.model.config.num_visual_tokens = vt
         if hasattr(self.model, "model") and hasattr(self.model.model, "config"):
-            setattr(self.model.model.config, "num_visual_tokens", vt)
+            self.model.model.config.num_visual_tokens = vt
 
         gen_kwargs: dict[str, Any] = {
             "inputs": input_ids,
@@ -155,21 +178,39 @@ class UnifiedVLMWrapper:
             outputs = self.model.generate(**gen_kwargs)
 
         gen_sequence = outputs.sequences[0]
-        num_gen = len(outputs.scores) if (outputs.scores is not None and len(outputs.scores) > 0) else (len(gen_sequence) - input_ids.shape[1])
-        pred_answer = self.tokenizer.decode(gen_sequence[-num_gen:].tolist(), skip_special_tokens=True).strip()
+        num_gen = (
+            len(outputs.scores)
+            if (outputs.scores is not None and len(outputs.scores) > 0)
+            else (len(gen_sequence) - input_ids.shape[1])
+        )
+        pred_answer = self.tokenizer.decode(
+            gen_sequence[-num_gen:].tolist(), skip_special_tokens=True
+        ).strip()
 
-        first_token_logits = torch.nan_to_num(outputs.scores[0][0].detach().float(), nan=-1e4, posinf=1e4, neginf=-1e4)
-        probs = torch.softmax(first_token_logits, dim=-1)
-        top2_vals, _ = torch.topk(probs, 2, dim=-1)
+        if outputs.scores is not None and len(outputs.scores) > 0:
+            first_token_logits = torch.nan_to_num(
+                outputs.scores[0][0].detach().float(), nan=-1e4, posinf=1e4, neginf=-1e4
+            )
+            probs = torch.softmax(first_token_logits, dim=-1)
+            top2_vals, _ = torch.topk(probs, 2, dim=-1)
+            conf_softmax = float(top2_vals[0].item())
+            margin = float((top2_vals[0] - top2_vals[1]).item())
+        else:
+            conf_softmax = 0.5
+            margin = 0.0
 
         return {
             "answer": pred_answer,
-            "conf_softmax": float(top2_vals[0].item()),
-            "margin": float((top2_vals[0] - top2_vals[1]).item()),
+            "conf_softmax": conf_softmax,
+            "margin": margin,
         }
 
     def sweep(
-        self, image: Image.Image, question: str, scales: list[int] | None = None, gen_temperature: float = 0.0
+        self,
+        image: Image.Image,
+        question: str,
+        scales: list[int] | None = None,
+        gen_temperature: float = 0.0,
     ) -> dict[int, dict[str, Any]]:
         """Sweeps generation across configured visual scales."""
         target_scales = scales or self.scales
@@ -177,5 +218,7 @@ class UnifiedVLMWrapper:
         for m in target_scales:
             if m > self.fine_scale:
                 raise ValueError(f"Scale m={m} exceeds maximum of {self.fine_scale}.")
-            results[m] = self.forward_fast(image=image, question=question, num_visual_tokens=m, gen_temperature=gen_temperature)
+            results[m] = self.forward_fast(
+                image=image, question=question, num_visual_tokens=m, gen_temperature=gen_temperature
+            )
         return results

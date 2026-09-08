@@ -32,7 +32,15 @@ checkpoints/
 
 # Pytest / logs
 .pytest_cache/
+.hypothesis/
 *.log
+
+# AI Agent directories
+.agents/
+.agent/
+.gemini/
+.claude/
+.system_generated/
 
 # Local baseline repos (modified UMPIRE repository is tracked)
 # baseline_repo/
@@ -44,4 +52,3 @@ docs/
 # Temporary reference files
 kuhn2023.pdf
 kuhn_text.txt
-

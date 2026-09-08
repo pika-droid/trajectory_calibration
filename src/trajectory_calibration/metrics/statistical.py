@@ -7,7 +7,9 @@ empirical bootstrap confidence interval estimation.
 
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
+from typing import Any
+
 import numpy as np
 from scipy.stats import bootstrap
 from sklearn.linear_model import LogisticRegression
@@ -32,8 +34,8 @@ def fit_calibration_slope_intercept(
     try:
         lr = LogisticRegression(C=1000.0, solver="lbfgs", max_iter=1000)
         lr.fit(logits, labels)
-        slope = float(lr.coef_[0][0])
-        intercept = float(lr.intercept_[0])
+        slope = float(np.asarray(lr.coef_).ravel()[0])
+        intercept = float(np.asarray(lr.intercept_).ravel()[0])
         return slope, intercept
     except Exception:
         return 1.0, 0.0
@@ -64,15 +66,15 @@ def bootstrap_ci(
         return np.array([metric_fn(p_s[i], y_s[i]) for i in range(p_s.shape[0])])
 
     try:
-        res = bootstrap(
-            (p, labels),
-            statistic=statistic,
-            paired=True,
-            confidence_level=ci,
-            n_resamples=n_bootstrap,
-            random_state=seed,
-            method="percentile",
-        )
+        kwargs: dict[str, Any] = {
+            "statistic": statistic,
+            "paired": True,
+            "confidence_level": ci,
+            "n_resamples": n_bootstrap,
+            "random_state": seed,
+            "method": "percentile",
+        }
+        res: Any = bootstrap((p, labels), **kwargs)
         return float(res.confidence_interval.low), float(res.confidence_interval.high)
     except Exception:
         rng = np.random.RandomState(seed)

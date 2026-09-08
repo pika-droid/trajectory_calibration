@@ -39,8 +39,20 @@ gpu = [
 dev = [
     "pytest>=7.0.0",
     "pytest-cov",
-    "black",
-    "flake8",
+    "ruff>=0.16.6",
+    "pre-commit>=3.7.0",
+    "pyright>=1.1.390",
+    "hypothesis>=6.100.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov",
+    "ruff>=0.16.6",
+    "pre-commit>=3.7.0",
+    "pyright>=1.1.390",
+    "hypothesis>=6.100.0",
 ]
 
 [tool.setuptools.packages.find]
@@ -49,4 +61,67 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src", "."]
-norecursedirs = ["baseline_repo", ".venv", "build", "dist", "llava_src", "data", "results"]
+norecursedirs = ["baseline_repo", ".venv", ".hypothesis", "build", "dist", "llava_src", "data", "results"]
+
+[tool.pyright]
+include = ["src"]
+exclude = [
+    "**/__pycache__",
+    ".venv",
+    "baseline_repo",
+    "llava_src",
+    "data",
+    "results",
+    "pilot_features_1k",
+    "build",
+    "dist",
+]
+pythonVersion = "3.10"
+typeCheckingMode = "standard"
+reportMissingTypeStubs = false
+reportUnknownMemberType = false
+
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+exclude = [
+    ".git",
+    ".venv",
+    "baseline_repo",
+    "llava_src",
+    "data",
+    "results",
+    "pilot_features_1k",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes (syntax, unused vars/imports)
+    "I",      # isort (clean, deterministic import order)
+    "B",      # flake8-bugbear (common bug patterns)
+    "UP",     # pyupgrade (modernize Python 3.10+ syntax)
+    "SIM",    # flake8-simplify
+    "RUF",    # Ruff-specific rules
+]
+ignore = [
+    "E501",   # line length violations (handled by ruff format)
+    "SIM108", # ternary operator suggestions where if/else is clearer
+    "RUF001", # ambiguous character in string (used for math/unicode symbols)
+    "RUF002", # ambiguous character in docstring (used for math notation like σ, ∈)
+    "RUF003", # ambiguous character in comment
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["B018", "RUF059"]
+"scripts/*" = ["E402", "T201", "B007", "B905", "RUF059", "RUF046", "F841", "RUF005"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"

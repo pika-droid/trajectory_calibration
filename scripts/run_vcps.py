@@ -16,7 +16,7 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 import numpy as np
-import pandas as pd
+
 from trajectory_calibration.calibrators.residual import evaluate_full_metric_panel
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
 from trajectory_calibration.features.trajectory import (
@@ -30,10 +30,18 @@ from trajectory_calibration.utils.helpers import set_seed
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run focused VCPS analysis.")
-    parser.add_argument("--features_dir", type=str, required=True, help="Path to features dir or .pt file.")
-    parser.add_argument("--arch", type=str, default="m3", choices=["m3", "mqt"], help="Model architecture.")
-    parser.add_argument("--feature_set", type=str, default="5d", choices=["5d", "17d"], help="Feature space.")
-    parser.add_argument("--output_dir", type=str, default="results/experiments/vcps_analysis", help="Output dir.")
+    parser.add_argument(
+        "--features_dir", type=str, required=True, help="Path to features dir or .pt file."
+    )
+    parser.add_argument(
+        "--arch", type=str, default="m3", choices=["m3", "mqt"], help="Model architecture."
+    )
+    parser.add_argument(
+        "--feature_set", type=str, default="5d", choices=["5d", "17d"], help="Feature space."
+    )
+    parser.add_argument(
+        "--output_dir", type=str, default="results/experiments/vcps_analysis", help="Output dir."
+    )
     parser.add_argument("--seed", type=int, default=42, help="Random seed.")
     args = parser.parse_args()
 
@@ -96,10 +104,18 @@ def main() -> None:
     print("-" * 60)
     print(" DYNAMIC SLOPE & TEMPERATURE INTERPRETABILITY")
     print("-" * 60)
-    print(f"  Slope a(z) [Correct]:   {np.mean(slopes[correct_mask]):.3f} +/- {np.std(slopes[correct_mask]):.3f}")
-    print(f"  Slope a(z) [Incorrect]: {np.mean(slopes[incorrect_mask]):.3f} +/- {np.std(slopes[incorrect_mask]):.3f}")
-    print(f"  T_eff(z)   [Correct]:   {np.mean(t_eff[correct_mask]):.3f} +/- {np.std(t_eff[correct_mask]):.3f}")
-    print(f"  T_eff(z)   [Incorrect]: {np.mean(t_eff[incorrect_mask]):.3f} +/- {np.std(t_eff[incorrect_mask]):.3f}")
+    print(
+        f"  Slope a(z) [Correct]:   {np.mean(slopes[correct_mask]):.3f} +/- {np.std(slopes[correct_mask]):.3f}"
+    )
+    print(
+        f"  Slope a(z) [Incorrect]: {np.mean(slopes[incorrect_mask]):.3f} +/- {np.std(slopes[incorrect_mask]):.3f}"
+    )
+    print(
+        f"  T_eff(z)   [Correct]:   {np.mean(t_eff[correct_mask]):.3f} +/- {np.std(t_eff[correct_mask]):.3f}"
+    )
+    print(
+        f"  T_eff(z)   [Incorrect]: {np.mean(t_eff[incorrect_mask]):.3f} +/- {np.std(t_eff[incorrect_mask]):.3f}"
+    )
     print("=" * 60)
 
 

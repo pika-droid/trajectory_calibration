@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+
 from trajectory_calibration.features.trajectory import (
     FEATURE_KEYS,
     compute_features_from_sample,
@@ -26,7 +27,7 @@ def test_compute_features_sample():
     feats = compute_features_from_sample(sample, fine_scale=576)
 
     # 1. Verify FEATURE_KEYS is contiguous x1 through x17
-    assert FEATURE_KEYS == [f"x{i}" for i in range(1, 18)]
+    assert [f"x{i}" for i in range(1, 18)] == FEATURE_KEYS
     assert len(FEATURE_KEYS) == 17
 
     # 2. Verify all 17 contiguous feature keys are present in extracted dict
@@ -42,8 +43,12 @@ def test_compute_features_sample():
     # 4. Verify specific mathematical values in new importance ranking
     assert feats["is_correct"] == 1
     assert feats["vqa_accuracy"] == 1.0
-    assert feats["x2"] == 4.0  # Monotonicity count: all 4 transitions increase (0.5 < 0.6 < 0.7 < 0.8 < 0.9)
-    assert feats["x3"] == pytest.approx(0.5, abs=1e-5)  # Discrete Answer Stability: 2 unique answers ("cat", "dog") -> 1/2
+    assert (
+        feats["x2"] == 4.0
+    )  # Monotonicity count: all 4 transitions increase (0.5 < 0.6 < 0.7 < 0.8 < 0.9)
+    assert feats["x3"] == pytest.approx(
+        0.5, abs=1e-5
+    )  # Discrete Answer Stability: 2 unique answers ("cat", "dog") -> 1/2
     assert feats["x10"] == pytest.approx(0.9 - 0.6, abs=1e-5)  # Conf gain: 576 - 9 (now x10)
 
 
@@ -66,24 +71,28 @@ def test_select_best_5d_subset():
 
 
 def test_stratified_split_fallback_small_sample():
-    from trajectory_calibration.features.loader import get_stratified_split
     import pandas as pd
 
+    from trajectory_calibration.features.loader import get_stratified_split
+
     # Single-class dataset should not crash train_test_split
-    df_single = pd.DataFrame({
-        "x1": [1.0, 2.0, 3.0, 4.0, 5.0],
-        "is_correct": [1, 1, 1, 1, 1],
-        "answer_type": ["open"] * 5,
-    })
+    df_single = pd.DataFrame(
+        {
+            "x1": [1.0, 2.0, 3.0, 4.0, 5.0],
+            "is_correct": [1, 1, 1, 1, 1],
+            "answer_type": ["open"] * 5,
+        }
+    )
     tr_idx, te_idx = get_stratified_split(df_single, test_size=0.2, random_state=42)
     assert len(tr_idx) + len(te_idx) == 5
 
     # Dataset with minority class count = 1 should fall back gracefully
-    df_rare = pd.DataFrame({
-        "x1": [1.0, 2.0, 3.0, 4.0, 5.0],
-        "is_correct": [1, 1, 1, 1, 0],
-        "answer_type": ["open"] * 5,
-    })
+    df_rare = pd.DataFrame(
+        {
+            "x1": [1.0, 2.0, 3.0, 4.0, 5.0],
+            "is_correct": [1, 1, 1, 1, 0],
+            "answer_type": ["open"] * 5,
+        }
+    )
     tr_idx, te_idx = get_stratified_split(df_rare, test_size=0.2, random_state=42)
     assert len(tr_idx) + len(te_idx) == 5
-

@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+
 from trajectory_calibration.calibrators.baselines import (
     AdaptiveTemperatureScaling,
     BetaCalibrator,
@@ -75,10 +76,11 @@ def test_quadratic_platt_properties():
 
 def test_proxy_calibrators_validation():
     from trajectory_calibration.calibrators.proxies import (
-        MultiScaleSemanticConsistency,
         MultiScaleEigenVariance,
+        MultiScaleSemanticConsistency,
         ProbabilityMarginEstimator,
     )
+
     df = generate_mock_df("test_mock", n_samples=40, seed=42)
     X_17d = df[FEATURE_KEYS].values
     y = df["is_correct"].values
@@ -155,6 +157,7 @@ def test_word_boundary_accuracy_evaluation():
 
 def test_load_image_from_filepath(tmp_path):
     from PIL import Image
+
     from trajectory_calibration.vlm.formatting import load_image_from_sample
 
     img_file = tmp_path / "test_img.png"
@@ -188,5 +191,3 @@ def test_trajectory_lr_zero_bias_properties():
     assert len(probs) == len(y)
     assert np.all(probs >= 0.0) and np.all(probs <= 1.0)
     assert not np.isnan(probs).any()
-
-

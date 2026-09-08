@@ -116,10 +116,14 @@ def load_hf_dataset(dataset_key: str, subset_size: int | None = None) -> Any:
 
     if dataset_key == "mmmu":
         try:
-            ds = load_dataset(repo, config_name, split=target_split) if config_name else load_dataset(repo, split=target_split)
+            ds = (
+                load_dataset(repo, config_name, split=target_split)
+                if config_name
+                else load_dataset(repo, split=target_split)
+            )
         except Exception:
             ds_dict = load_dataset(repo)
-            ds = ds_dict[target_split if target_split in ds_dict else list(ds_dict.keys())[0]]
+            ds = ds_dict[target_split if target_split in ds_dict else next(iter(ds_dict.keys()))]
 
         if "image_2" in ds.column_names:
             ds = ds.filter(lambda img2: img2 is None, input_columns=["image_2"])

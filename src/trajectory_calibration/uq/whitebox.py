@@ -74,9 +74,7 @@ class WhiteBoxScorers:
         if len(token_distributions) == 0:
             return 0.5
 
-        entropies = [
-            WhiteBoxScorers.token_entropy(dist) for dist in token_distributions
-        ]
+        entropies = [WhiteBoxScorers.token_entropy(dist) for dist in token_distributions]
         mean_h = float(np.mean(entropies))
         max_h = np.log(max(num_classes, 2))
         negentropy = 1.0 - (mean_h / max_h)
@@ -92,9 +90,7 @@ class WhiteBoxScorers:
         if len(token_distributions) == 0:
             return 0.5
 
-        entropies = [
-            WhiteBoxScorers.token_entropy(dist) for dist in token_distributions
-        ]
+        entropies = [WhiteBoxScorers.token_entropy(dist) for dist in token_distributions]
         max_h = np.log(max(num_classes, 2))
         min_negentropy = 1.0 - (max(entropies) / max_h)
         return float(np.clip(min_negentropy, 0.0, 1.0))

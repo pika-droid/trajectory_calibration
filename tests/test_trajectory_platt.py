@@ -6,9 +6,9 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+import torch
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
-import torch
 
 from trajectory_calibration.calibrators.baselines import TrajectoryPlattScaler
 from trajectory_calibration.metrics.scoring import compute_nll
@@ -241,4 +241,3 @@ def test_homogeneous_labels_robustness():
     p_neg = scaler_neg.predict_proba(X)
     assert not np.isnan(p_neg).any()
     assert np.all(p_neg < 0.01)
-

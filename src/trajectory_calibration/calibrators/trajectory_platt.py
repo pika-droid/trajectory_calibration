@@ -8,10 +8,10 @@ a ∈ R^K and b ∈ R are explicit torch.nn.Parameter objects optimized via L-BF
 from __future__ import annotations
 
 import numpy as np
-from sklearn.preprocessing import StandardScaler
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from sklearn.preprocessing import StandardScaler
 
 
 class TrajectoryPlattScaler(nn.Module):
@@ -50,7 +50,9 @@ class TrajectoryPlattScaler(nn.Module):
 
         y = np.asarray(y_train, dtype=np.float32).ravel()
         if len(X) != len(y):
-            raise ValueError(f"X and y must have the same number of samples, got len(X)={len(X)} and len(y)={len(y)}")
+            raise ValueError(
+                f"X and y must have the same number of samples, got len(X)={len(X)} and len(y)={len(y)}"
+            )
 
         # Reset parameters to zeros for idempotent fitting
         with torch.no_grad():
@@ -76,7 +78,7 @@ class TrajectoryPlattScaler(nn.Module):
             logits = z_t @ self.a + self.b
             loss = F.binary_cross_entropy_with_logits(logits, y_t)
             if self.C is not None and self.C > 0:
-                loss = loss + 0.5 * (1.0 / (self.C * n_samples)) * torch.sum(self.a ** 2)
+                loss = loss + 0.5 * (1.0 / (self.C * n_samples)) * torch.sum(self.a**2)
             loss.backward()
             return loss
 

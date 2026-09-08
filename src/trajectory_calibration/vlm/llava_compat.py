@@ -56,14 +56,28 @@ def load_llava_modules(
             Path("/workspace/mqt-llava"),
             project_root / "mqt-llava",
         ]
-        mqt_dir = Path("/workspace/MQT-LLaVA") if Path("/workspace").exists() else (project_root / "MQT-LLaVA")
+        mqt_dir = (
+            Path("/workspace/MQT-LLaVA")
+            if Path("/workspace").exists()
+            else (project_root / "MQT-LLaVA")
+        )
         found = any(c.exists() for c in mqt_candidates)
         if not found:
             import subprocess
-            logger.info(f"Cloning official MQT-LLaVA repository (gordonhu608/MQT-LLaVA) to {mqt_dir}...")
+
+            logger.info(
+                f"Cloning official MQT-LLaVA repository (gordonhu608/MQT-LLaVA) to {mqt_dir}..."
+            )
             try:
                 subprocess.run(
-                    ["git", "clone", "--depth", "1", "https://github.com/gordonhu608/MQT-LLaVA.git", str(mqt_dir)],
+                    [
+                        "git",
+                        "clone",
+                        "--depth",
+                        "1",
+                        "https://github.com/gordonhu608/MQT-LLaVA.git",
+                        str(mqt_dir),
+                    ],
                     check=True,
                     capture_output=True,
                     text=True,
@@ -99,23 +113,24 @@ def load_llava_modules(
             resolved_path = p
 
     try:
-        from llava.constants import (
+        import llava  # pyright: ignore[reportMissingImports]
+        from llava.constants import (  # pyright: ignore[reportMissingImports]
             DEFAULT_IM_END_TOKEN,
             DEFAULT_IM_START_TOKEN,
             DEFAULT_IMAGE_TOKEN,
             IMAGE_PLACEHOLDER,
             IMAGE_TOKEN_INDEX,
         )
-        from llava.conversation import conv_templates
-        from llava.mm_utils import (
+        from llava.conversation import conv_templates  # pyright: ignore[reportMissingImports]
+        from llava.mm_utils import (  # pyright: ignore[reportMissingImports]
             get_model_name_from_path,
             process_images,
             tokenizer_image_token,
         )
-        from llava.model.builder import load_pretrained_model
-        from llava.utils import disable_torch_init
-
-        import llava
+        from llava.model.builder import (  # pyright: ignore[reportMissingImports]
+            load_pretrained_model,
+        )
+        from llava.utils import disable_torch_init  # pyright: ignore[reportMissingImports]
 
         loaded_from = getattr(llava, "__file__", "unknown")
         logger.info(f"LLaVA ({arch.upper()}) loaded successfully from: {loaded_from}")

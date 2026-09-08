@@ -46,7 +46,7 @@ def compute_aurc(probs: np.ndarray | list[float], y: np.ndarray | list[float]) -
     p_sorted = p[order]
 
     # Risk = 1 - accuracy at each coverage level
-    cum_correct = np.cumsum((y_sorted == (p_sorted >= 0.5).astype(float)))
+    cum_correct = np.cumsum(y_sorted == (p_sorted >= 0.5).astype(float))
     coverage = np.arange(1, n + 1)
     risk = 1.0 - cum_correct / coverage
 
@@ -86,7 +86,7 @@ class ResidualTrajectoryCalibrator:
             logits = l1 + np.dot(Z_norm, w)
             p = sigmoid(logits)
             nll = compute_nll(p, y)
-            reg = (0.5 / self.C) * np.sum(w ** 2)
+            reg = (0.5 / self.C) * np.sum(w**2)
             total_loss = nll + reg
 
             r = (p - y) / n
@@ -103,7 +103,7 @@ class ResidualTrajectoryCalibrator:
         l1 = self.stage1_lr.decision_function(x1)
 
         Z = X[:, 1:] if X.shape[1] > 1 else X
-        Z_norm = self.scaler.transform(Z)
+        Z_norm = np.asarray(self.scaler.transform(Z), dtype=np.float64)
         res_logits = np.dot(Z_norm, self.weights) if self.weights is not None else 0.0
         return sigmoid(l1 + res_logits)
 

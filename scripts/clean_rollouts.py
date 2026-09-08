@@ -18,6 +18,7 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 import torch
+
 from trajectory_calibration.utils.helpers import safe_torch_load
 
 
@@ -35,7 +36,9 @@ def audit_and_clean(
         print(f"No .pt files found in {features_dir}")
         return
 
-    print(f"\n{'Dataset':<20} | {'Total':<8} | {'10-Rollout':<11} | {'5-Rollout':<10} | {'Status / Action'}")
+    print(
+        f"\n{'Dataset':<20} | {'Total':<8} | {'10-Rollout':<11} | {'5-Rollout':<10} | {'Status / Action'}"
+    )
     print("-" * 75)
 
     for pt_path in pt_files:
@@ -86,23 +89,38 @@ def audit_and_clean(
                     tmp_path.unlink(missing_ok=True)
                 status += f" -> FIXED (retained {len(valid_samples)} valid 10-rollout samples)"
 
-        print(f"{dataset_name:<20} | {total:<8} | {count_target:<11} | {count_other:<10} | {status}")
+        print(
+            f"{dataset_name:<20} | {total:<8} | {count_target:<11} | {count_other:<10} | {status}"
+        )
 
     print("-" * 75)
     if not fix:
-        print("\n[NOTE] Audit mode only. Run with --fix to repair files & delete 5-rollout checkpoints.\n")
+        print(
+            "\n[NOTE] Audit mode only. Run with --fix to repair files & delete 5-rollout checkpoints.\n"
+        )
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Audit and Repair Rollout Counts in Multi-Pass Feature Checkpoints.")
+    parser = argparse.ArgumentParser(
+        description="Audit and Repair Rollout Counts in Multi-Pass Feature Checkpoints."
+    )
     parser.add_argument(
         "--features_dir",
         type=str,
         default="data/features_multipass/m3_llava/temp_0.5",
         help="Path to feature directory containing .pt files",
     )
-    parser.add_argument("--target_rollouts", type=int, default=10, help="Expected rollout count per sample (default: 10)")
-    parser.add_argument("--fix", action="store_true", help="Apply cleanup: delete 5-rollout files & strip 5-rollout samples")
+    parser.add_argument(
+        "--target_rollouts",
+        type=int,
+        default=10,
+        help="Expected rollout count per sample (default: 10)",
+    )
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        help="Apply cleanup: delete 5-rollout files & strip 5-rollout samples",
+    )
     args = parser.parse_args()
 
     audit_and_clean(Path(args.features_dir), target_rollouts=args.target_rollouts, fix=args.fix)

@@ -35,25 +35,33 @@ def find_feature_file(
         return path
 
     arch_folder = "mqt_llava" if "mqt" in arch.lower() else "m3_llava"
-    temp_folder = f"temp_{gen_temperature:.1f}" if gen_temperature == int(gen_temperature) else f"temp_{gen_temperature}"
+    temp_folder = (
+        f"temp_{gen_temperature:.1f}"
+        if gen_temperature == int(gen_temperature)
+        else f"temp_{gen_temperature}"
+    )
 
     candidates = []
     if ds_name:
-        candidates.extend([
-            path / arch_folder / temp_folder / f"{ds_name}.pt",
-            path / arch_folder / temp_folder / f"{ds_name}_5scale.pt",
-            path / arch_folder / "temp_0.0" / f"{ds_name}.pt",
-            path / arch_folder / "temp_0.0" / f"{ds_name}_5scale.pt",
-            path / arch_folder / f"{ds_name}.pt",
-            path / arch_folder / f"{ds_name}_5scale.pt",
-            path / ds_name / "full_extracted_features.pt",
-            path / f"{ds_name}.pt",
-            path / f"{ds_name}_5scale.pt",
-        ])
+        candidates.extend(
+            [
+                path / arch_folder / temp_folder / f"{ds_name}.pt",
+                path / arch_folder / temp_folder / f"{ds_name}_5scale.pt",
+                path / arch_folder / "temp_0.0" / f"{ds_name}.pt",
+                path / arch_folder / "temp_0.0" / f"{ds_name}_5scale.pt",
+                path / arch_folder / f"{ds_name}.pt",
+                path / arch_folder / f"{ds_name}_5scale.pt",
+                path / ds_name / "full_extracted_features.pt",
+                path / f"{ds_name}.pt",
+                path / f"{ds_name}_5scale.pt",
+            ]
+        )
     else:
-        candidates.extend([
-            path / "full_extracted_features.pt",
-        ])
+        candidates.extend(
+            [
+                path / "full_extracted_features.pt",
+            ]
+        )
 
     for cand in candidates:
         if cand.exists():
@@ -72,7 +80,9 @@ def load_dataset_features(
     """
     Loads dataset features from .pt file and builds a Pandas DataFrame.
     """
-    pt_path = find_feature_file(features_dir_or_file, ds_name=ds_name, arch=arch, gen_temperature=gen_temperature)
+    pt_path = find_feature_file(
+        features_dir_or_file, ds_name=ds_name, arch=arch, gen_temperature=gen_temperature
+    )
     if not pt_path.exists():
         raise FileNotFoundError(f"Feature file could not be located at: {pt_path.resolve()}")
 
@@ -94,7 +104,9 @@ def load_dataset_features(
         if 1 < n_unique < initial_len:
             df = df.drop_duplicates(subset=["question_id"]).reset_index(drop=True)
             if len(df) < initial_len:
-                logger.info(f"Deduplicated dataset: {initial_len} -> {len(df)} unique question_ids.")
+                logger.info(
+                    f"Deduplicated dataset: {initial_len} -> {len(df)} unique question_ids."
+                )
         elif n_unique == 1 and initial_len > 1:
             logger.warning(
                 f"Skipping deduplication: all {initial_len} samples share the same question_id ({df['question_id'].iloc[0]})."
@@ -123,4 +135,4 @@ def get_stratified_split(
     train_idx, test_idx = train_test_split(
         indices, test_size=test_size, random_state=random_state, stratify=stratify_param
     )
-    return train_idx, test_idx
+    return np.asarray(train_idx), np.asarray(test_idx)

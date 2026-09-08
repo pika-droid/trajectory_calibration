@@ -22,17 +22,17 @@ from trajectory_calibration.features.synthetic import generate_mock_df
 from trajectory_calibration.utils.math import get_logits, sigmoid
 
 __all__ = [
-    "FEATURE_NAMES",
     "FEATURE_KEYS",
-    "get_logits",
-    "sigmoid",
-    "compute_features_from_sample",
-    "find_feature_file",
-    "load_dataset_features",
-    "get_stratified_split",
-    "select_best_5d_subset",
-    "variance_inflation_factor",
+    "FEATURE_NAMES",
     "calculate_vif",
+    "compute_features_from_sample",
     "evaluate_model_diagnostics",
+    "find_feature_file",
     "generate_mock_df",
+    "get_logits",
+    "get_stratified_split",
+    "load_dataset_features",
+    "select_best_5d_subset",
+    "sigmoid",
+    "variance_inflation_factor",
 ]

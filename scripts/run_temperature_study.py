@@ -11,6 +11,7 @@ import argparse
 import sys
 from pathlib import Path
 from typing import Any
+
 import numpy as np
 import pandas as pd
 
@@ -41,9 +42,15 @@ from trajectory_calibration.utils.helpers import set_seed
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Multi-Dataset Decoding Temperature Robustness Study.")
-    parser.add_argument("--features_dir", type=str, default="data/features", help="Path to features dir.")
-    parser.add_argument("--arch", type=str, default="m3", choices=["m3", "mqt"], help="Model architecture.")
+    parser = argparse.ArgumentParser(
+        description="Multi-Dataset Decoding Temperature Robustness Study."
+    )
+    parser.add_argument(
+        "--features_dir", type=str, default="data/features", help="Path to features dir."
+    )
+    parser.add_argument(
+        "--arch", type=str, default="m3", choices=["m3", "mqt"], help="Model architecture."
+    )
     parser.add_argument(
         "--datasets",
         nargs="+",
@@ -57,7 +64,12 @@ def parse_args() -> argparse.Namespace:
         default=[0.0, 0.3, 0.6, 1.0, 1.5],
         help="Decoding temperatures to evaluate.",
     )
-    parser.add_argument("--output_dir", type=str, default="results/experiments/temperature_study", help="Output directory.")
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        default="results/experiments/temperature_study",
+        help="Output directory.",
+    )
     parser.add_argument("--seed", type=int, default=42, help="Random seed.")
     return parser.parse_args()
 
@@ -79,7 +91,13 @@ def main() -> None:
 
     for ds in args.datasets:
         try:
-            df_0 = load_dataset_features(args.features_dir, ds_name=ds, arch=args.arch, gen_temperature=0.0, fine_scale=fine_scale)
+            df_0 = load_dataset_features(
+                args.features_dir,
+                ds_name=ds,
+                arch=args.arch,
+                gen_temperature=0.0,
+                fine_scale=fine_scale,
+            )
             tr_idx, te_idx = get_stratified_split(df_0, test_size=0.2, random_state=args.seed)
             test_qids = set(df_0.iloc[te_idx]["question_id"].values)
             tr_df = df_0.iloc[tr_idx].reset_index(drop=True)
@@ -94,16 +112,26 @@ def main() -> None:
                 "Temperature Scaling (TS)": TemperatureScalingEstimator().fit(X_tr_17d, y_tr),
                 "Platt Scaling (1D)": PlattScalingEstimator().fit(X_tr_17d, y_tr),
                 "Trajectory LR": TrajectoryLREstimator(fit_intercept=True).fit(X_tr_5d, y_tr),
-                "Trajectory LR (No Bias)": TrajectoryLREstimator(fit_intercept=False).fit(X_tr_5d, y_tr),
-                "Trajectory Platt (5D)": TrajectoryPlattScaler(n_features=len(best_5d)).fit(X_tr_5d, y_tr),
-                "Trajectory Platt (17D)": TrajectoryPlattScaler(n_features=len(FEATURE_KEYS)).fit(X_tr_17d, y_tr),
+                "Trajectory LR (No Bias)": TrajectoryLREstimator(fit_intercept=False).fit(
+                    X_tr_5d, y_tr
+                ),
+                "Trajectory Platt (5D)": TrajectoryPlattScaler(n_features=len(best_5d)).fit(
+                    X_tr_5d, y_tr
+                ),
+                "Trajectory Platt (17D)": TrajectoryPlattScaler(n_features=len(FEATURE_KEYS)).fit(
+                    X_tr_17d, y_tr
+                ),
                 "Quadratic Platt (Logit-Only)": QuadraticPlattScaler().fit(X_tr_17d, y_tr),
                 "Spline Calibration (PCHIP)": SplineCalibrator().fit(X_tr_17d, y_tr),
                 "Adaptive TS (ATS)": AdaptiveTemperatureScaling().fit(X_tr_5d, y_tr),
                 "MSSC (Multi-Scale Proxy)": MultiScaleSemanticConsistency().fit(X_tr_17d, y_tr),
                 "Residual Calibrator": ResidualTrajectoryCalibrator().fit(X_tr_5d, y_tr),
-                "VCPS-5D (Our Method)": VaryingCoefficientPlattScaler(feature_set="5d").fit(X_tr_5d, y_tr, feature_names=best_5d),
-                "VCPS-17D (Our Method)": VaryingCoefficientPlattScaler(feature_set="17d").fit(X_tr_17d, y_tr, feature_names=FEATURE_KEYS),
+                "VCPS-5D (Our Method)": VaryingCoefficientPlattScaler(feature_set="5d").fit(
+                    X_tr_5d, y_tr, feature_names=best_5d
+                ),
+                "VCPS-17D (Our Method)": VaryingCoefficientPlattScaler(feature_set="17d").fit(
+                    X_tr_17d, y_tr, feature_names=FEATURE_KEYS
+                ),
             }
             train_models[ds] = models
             train_splits[ds] = (y_tr, best_5d, test_qids)
@@ -121,7 +149,13 @@ def main() -> None:
             if ds not in train_models:
                 continue
             try:
-                df_T = load_dataset_features(args.features_dir, ds_name=ds, arch=args.arch, gen_temperature=T, fine_scale=fine_scale)
+                df_T = load_dataset_features(
+                    args.features_dir,
+                    ds_name=ds,
+                    arch=args.arch,
+                    gen_temperature=T,
+                    fine_scale=fine_scale,
+                )
                 y_tr, best_5d, test_qids = train_splits[ds]
 
                 te_mask = df_T["question_id"].isin(test_qids)
@@ -136,7 +170,16 @@ def main() -> None:
 
                 # Evaluate Greedy Transfer
                 for m_name, model in train_models[ds].items():
-                    X_input = X_te_5d if ("5D" in m_name or "ATS" in m_name or "Residual" in m_name or "Trajectory LR" in m_name) else X_te_17d
+                    X_input = (
+                        X_te_5d
+                        if (
+                            "5D" in m_name
+                            or "ATS" in m_name
+                            or "Residual" in m_name
+                            or "Trajectory LR" in m_name
+                        )
+                        else X_te_17d
+                    )
                     probs = model.predict_proba(X_input)
                     panel = evaluate_full_metric_panel(probs, y_te, c_te, y_train=y_tr)
                     panel["dataset"] = ds
@@ -180,22 +223,38 @@ def main() -> None:
     df_transfer.to_csv(out_dir / f"temperature_transfer_{args.arch}_summary.csv", index=False)
     df_tracking.to_csv(out_dir / f"temperature_tracking_{args.arch}_summary.csv", index=False)
     if out_dir.name in ["m3", "mqt"]:
-        df_transfer.to_csv(out_dir.parent / f"temperature_transfer_{args.arch}_summary.csv", index=False)
-        df_tracking.to_csv(out_dir.parent / f"temperature_tracking_{args.arch}_summary.csv", index=False)
+        df_transfer.to_csv(
+            out_dir.parent / f"temperature_transfer_{args.arch}_summary.csv", index=False
+        )
+        df_tracking.to_csv(
+            out_dir.parent / f"temperature_tracking_{args.arch}_summary.csv", index=False
+        )
     elif (out_dir / args.arch).exists():
-        df_transfer.to_csv(out_dir / args.arch / f"temperature_transfer_{args.arch}_summary.csv", index=False)
-        df_tracking.to_csv(out_dir / args.arch / f"temperature_tracking_{args.arch}_summary.csv", index=False)
+        df_transfer.to_csv(
+            out_dir / args.arch / f"temperature_transfer_{args.arch}_summary.csv", index=False
+        )
+        df_tracking.to_csv(
+            out_dir / args.arch / f"temperature_tracking_{args.arch}_summary.csv", index=False
+        )
 
     print("\n" + "=" * 85)
-    print(f" GREEDY TRANSFER MACRO-MEAN ECE (%) ACROSS TEMPERATURES")
+    print(" GREEDY TRANSFER MACRO-MEAN ECE (%) ACROSS TEMPERATURES")
     print("=" * 85)
-    pivot_transfer = df_transfer.pivot_table(index="method", columns="temperature", values="adaptive_ece_percent", aggfunc="mean")
+    pivot_transfer = df_transfer.pivot_table(
+        index="method", columns="temperature", values="adaptive_ece_percent", aggfunc="mean"
+    )
     print(pivot_transfer.round(2).to_string())
 
     print("\n" + "=" * 85)
-    print(f" VCPS PARAMETER TRACKING ACROSS TEMPERATURES")
+    print(" VCPS PARAMETER TRACKING ACROSS TEMPERATURES")
     print("=" * 85)
-    tracking = df_tracking.groupby("temperature")[["adaptive_ece_percent", "base_slope_a0", "mean_dynamic_slope", "mean_effective_temp"]].mean().reset_index()
+    tracking = (
+        df_tracking.groupby("temperature")[
+            ["adaptive_ece_percent", "base_slope_a0", "mean_dynamic_slope", "mean_effective_temp"]
+        ]
+        .mean()
+        .reset_index()
+    )
     print(tracking.round(3).to_string(index=False))
     print("=" * 85)
 

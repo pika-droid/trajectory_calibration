@@ -92,7 +92,9 @@ class VaryingCoefficientPlattScaler:
             matched_slope = [f for f in self.slope_features if f in self.feature_names]
             if len(matched_slope) < len(self.slope_features):
                 missing = set(self.slope_features) - set(self.feature_names)
-                logger.warning(f"VCPS slope features {missing} not in feature_names {self.feature_names}")
+                logger.warning(
+                    f"VCPS slope features {missing} not in feature_names {self.feature_names}"
+                )
             if matched_slope:
                 slope_features = matched_slope
                 slope_idx = [self.feature_names.index(f) for f in slope_features]
@@ -114,7 +116,9 @@ class VaryingCoefficientPlattScaler:
             matched_int = [f for f in self.intercept_features if f in self.feature_names]
             if len(matched_int) < len(self.intercept_features):
                 missing = set(self.intercept_features) - set(self.feature_names)
-                logger.warning(f"VCPS intercept features {missing} not in feature_names {self.feature_names}")
+                logger.warning(
+                    f"VCPS intercept features {missing} not in feature_names {self.feature_names}"
+                )
             if matched_int:
                 int_features = matched_int
                 int_idx = [self.feature_names.index(f) for f in int_features]
@@ -163,17 +167,31 @@ class VaryingCoefficientPlattScaler:
                 active_mask = np.ones(n, dtype=bool)
                 a_x = np.full(n, np.exp(alpha0))
 
-            b_x = b0 + np.dot(X_norm[:, int_idx], w) if self.mode in ["full", "intercept_only"] else np.full(n, b0)
+            b_x = (
+                b0 + np.dot(X_norm[:, int_idx], w)
+                if self.mode in ["full", "intercept_only"]
+                else np.full(n, b0)
+            )
             logits = a_x * x1 + b_x
             p = sigmoid(logits)
 
             nll = compute_nll(p, y)
-            reg_gamma = (0.5 / self.C_slope) * np.sum(gamma ** 2) if self.mode in ["full", "slope_only"] else 0.0
-            reg_w = (0.5 / self.C_intercept) * np.sum(w ** 2) if self.mode in ["full", "intercept_only"] else 0.0
+            reg_gamma = (
+                (0.5 / self.C_slope) * np.sum(gamma**2)
+                if self.mode in ["full", "slope_only"]
+                else 0.0
+            )
+            reg_w = (
+                (0.5 / self.C_intercept) * np.sum(w**2)
+                if self.mode in ["full", "intercept_only"]
+                else 0.0
+            )
             total_loss = nll + reg_gamma + reg_w
 
             r = (p - y) / n
-            r_slope = r * x1 * a_x * active_mask if self.mode in ["full", "slope_only"] else r * x1 * a_x
+            r_slope = (
+                r * x1 * a_x * active_mask if self.mode in ["full", "slope_only"] else r * x1 * a_x
+            )
             grad_alpha0 = float(np.sum(r_slope))
             grad_gamma = np.dot(X_norm[:, slope_idx].T, r_slope) + (gamma / self.C_slope)
             grad_b0 = float(np.sum(r))
@@ -214,9 +232,17 @@ class VaryingCoefficientPlattScaler:
         self.alpha0 = float(p_opt[0])
         self.a0 = float(np.exp(self.alpha0))
         if self.mode == "full":
-            self.gamma, self.b0, self.w = p_opt[1 : 1 + k_slope], float(p_opt[1 + k_slope]), p_opt[2 + k_slope :]
+            self.gamma, self.b0, self.w = (
+                p_opt[1 : 1 + k_slope],
+                float(p_opt[1 + k_slope]),
+                p_opt[2 + k_slope :],
+            )
         elif self.mode == "slope_only":
-            self.gamma, self.b0, self.w = p_opt[1 : 1 + k_slope], float(p_opt[1 + k_slope]), np.zeros(k_int)
+            self.gamma, self.b0, self.w = (
+                p_opt[1 : 1 + k_slope],
+                float(p_opt[1 + k_slope]),
+                np.zeros(k_int),
+            )
         elif self.mode == "intercept_only":
             self.gamma, self.b0, self.w = np.zeros(k_slope), float(p_opt[1]), p_opt[2:]
         else:
@@ -225,17 +251,19 @@ class VaryingCoefficientPlattScaler:
 
     def compute_dynamic_slope(self, X: np.ndarray) -> np.ndarray:
         """Calculates dynamic slope a(z) for each sample."""
-        X_norm = self.scaler.transform(X)
+        X_norm = np.asarray(self.scaler.transform(X), dtype=np.float64)
         if self.mode in ["full", "slope_only"] and self.gamma is not None:
-            slope_log = np.clip(self.alpha0 + np.dot(X_norm[:, self._slope_idx], self.gamma), -3.0, 3.0)
-            return np.exp(slope_log)
+            slope_log = np.clip(
+                self.alpha0 + np.dot(X_norm[:, self._slope_idx], self.gamma), -3.0, 3.0
+            )
+            return np.asarray(np.exp(slope_log))
         return np.full(len(X), np.exp(self.alpha0))
 
     def compute_dynamic_intercept(self, X: np.ndarray) -> np.ndarray:
         """Calculates dynamic intercept b(z) for each sample."""
-        X_norm = self.scaler.transform(X)
+        X_norm = np.asarray(self.scaler.transform(X), dtype=np.float64)
         if self.mode in ["full", "intercept_only"] and self.w is not None:
-            return self.b0 + np.dot(X_norm[:, self._int_idx], self.w)
+            return np.asarray(self.b0 + np.dot(X_norm[:, self._int_idx], self.w))
         return np.full(len(X), self.b0)
 
     def _predict_logits(self, X: np.ndarray) -> np.ndarray:

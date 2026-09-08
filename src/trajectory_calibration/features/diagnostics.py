@@ -5,6 +5,7 @@ Model health and diagnostic status evaluators.
 from __future__ import annotations
 
 from typing import Any
+
 import numpy as np
 import scipy.stats as stats
 
@@ -36,13 +37,19 @@ def evaluate_model_diagnostics(
     nll = compute_nll(probs_arr, y_arr)
     prob_std = compute_prediction_std(probs_arr)
 
-    base_rate = float(np.mean(y_train)) if y_train is not None and len(y_train) > 0 else float(np.mean(y_arr))
+    base_rate = (
+        float(np.mean(y_train))
+        if y_train is not None and len(y_train) > 0
+        else float(np.mean(y_arr))
+    )
     base_brier = float(np.mean((base_rate - y_arr) ** 2))
     brier_gain = float(base_brier - brier)
 
     if len(probs_arr) > 5 and np.std(probs_arr) > 1e-6 and np.std(c_arr) > 1e-6:
-        rho, _ = stats.spearmanr(probs_arr, c_arr)
-        rho = float(rho) if not np.isnan(rho) else 1.0
+        res = stats.spearmanr(probs_arr, c_arr)
+        stat = getattr(res, "statistic", res)
+        stat_val = float(np.asarray(stat).item())
+        rho = stat_val if not np.isnan(stat_val) else 1.0
     else:
         rho = 1.0
 

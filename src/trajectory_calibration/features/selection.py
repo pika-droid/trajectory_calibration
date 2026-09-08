@@ -5,6 +5,7 @@ Forward stepwise feature selection and Variance Inflation Factor (VIF) collinear
 from __future__ import annotations
 
 import logging
+
 import numpy as np
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.preprocessing import StandardScaler
@@ -62,7 +63,7 @@ def select_best_5d_subset(
         min_vif_val = float("inf")
 
         for candidate in remaining:
-            trial = selected + [candidate]
+            trial = [*selected, candidate]
             trial_indices = [feature_keys.index(k) for k in trial]
             X_trial = X_train[:, trial_indices]
 

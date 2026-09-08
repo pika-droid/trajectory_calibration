@@ -49,7 +49,9 @@ class TemperatureScalingEstimator:
         def nll_obj(T_val: np.ndarray) -> float:
             return compute_nll(sigmoid(x1 / float(T_val[0])), y)
 
-        res = minimize(nll_obj, x0=np.array([1.0]), bounds=[(self.t_min, self.t_max)], method="L-BFGS-B")
+        res = minimize(
+            nll_obj, x0=np.array([1.0]), bounds=[(self.t_min, self.t_max)], method="L-BFGS-B"
+        )
         self.T_opt = float(res.x[0]) if res.success else 1.0
         return self
 
@@ -63,7 +65,9 @@ class PlattScalingEstimator:
 
     def __init__(self, C: float = 1.0, random_state: int = 42) -> None:
         self.C, self.random_state = C, random_state
-        self.lr = LogisticRegression(C=self.C, solver="lbfgs", max_iter=1000, random_state=self.random_state)
+        self.lr = LogisticRegression(
+            C=self.C, solver="lbfgs", max_iter=1000, random_state=self.random_state
+        )
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray) -> PlattScalingEstimator:
         x1 = X_train[:, [0]] if X_train.ndim == 2 else X_train.reshape(-1, 1)
@@ -73,7 +77,6 @@ class PlattScalingEstimator:
     def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
         x1 = X_test[:, [0]] if X_test.ndim == 2 else X_test.reshape(-1, 1)
         return self.lr.predict_proba(x1)[:, 1]
-
 
 
 class SplineCalibrator:
@@ -191,7 +194,7 @@ class AdaptiveTemperatureScaling:
             r = (p - y) / len(y)
             grad_w = np.dot(Z_norm.T, r * (-x1 / T)) + (w / self.C)
             grad_b = np.sum(r * (-x1 / T))
-            total_loss = compute_nll(p, y) + (0.5 / self.C) * np.sum(w ** 2)
+            total_loss = compute_nll(p, y) + (0.5 / self.C) * np.sum(w**2)
             return float(total_loss), np.concatenate([grad_w, [grad_b]])
 
         x0 = np.concatenate([np.zeros(d), [init_b]])
@@ -207,8 +210,9 @@ class AdaptiveTemperatureScaling:
         if X.ndim == 1 or X.shape[1] <= 1:
             return sigmoid(x1 / np.exp(self.bias))
         Z = X[:, 1:]
-        Z_norm = self.scaler.transform(Z)
-        log_T = np.clip(np.dot(Z_norm, self.weights) + self.bias, -3.0, 3.0)
+        Z_norm = np.asarray(self.scaler.transform(Z), dtype=np.float64)
+        weights = self.weights if self.weights is not None else np.zeros(Z.shape[1])
+        log_T = np.clip(np.dot(Z_norm, weights) + self.bias, -3.0, 3.0)
         return sigmoid(x1 / np.exp(log_T))
 
 
@@ -219,14 +223,16 @@ class QuadraticPlattScaler:
         self.degree = degree
         self.C, self.random_state = C, random_state
         self.poly = PolynomialFeatures(degree=self.degree, include_bias=False)
-        self.lr = LogisticRegression(C=self.C, solver="lbfgs", max_iter=1000, random_state=self.random_state)
+        self.lr = LogisticRegression(
+            C=self.C, solver="lbfgs", max_iter=1000, random_state=self.random_state
+        )
 
     def _extract_x1(self, X: np.ndarray) -> np.ndarray:
         arr = np.asarray(X, dtype=np.float64)
         return (arr[:, 0] if arr.ndim == 2 else arr).reshape(-1, 1)
 
     def _transform(self, X: np.ndarray) -> np.ndarray:
-        return self.poly.transform(self._extract_x1(X))
+        return np.asarray(self.poly.transform(self._extract_x1(X)))
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray) -> QuadraticPlattScaler:
         x1 = self._extract_x1(X_train)
@@ -237,7 +243,7 @@ class QuadraticPlattScaler:
     def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
         x1 = self._extract_x1(X_test)
         X_poly = self.poly.transform(x1)
-        return self.lr.predict_proba(X_poly)[:, 1]
+        return np.asarray(self.lr.predict_proba(X_poly)[:, 1])
 
     def compute_dynamic_slope(self, X: np.ndarray) -> np.ndarray:
         arr = np.asarray(X, dtype=np.float64)
@@ -248,14 +254,14 @@ class QuadraticPlattScaler:
 
     def compute_dynamic_intercept(self, X: np.ndarray) -> np.ndarray:
         arr = np.asarray(X, dtype=np.float64)
-        return np.full(len(arr) if arr.ndim == 2 else 1, float(self.lr.intercept_[0]))
+        intercept_val = float(np.asarray(self.lr.intercept_).ravel()[0])
+        return np.full(len(arr) if arr.ndim == 2 else 1, intercept_val)
 
     def get_effective_temperature(self, X: np.ndarray) -> np.ndarray:
         return 1.0 / np.maximum(np.abs(self.compute_dynamic_slope(X)), 1e-4)
 
 
 PolynomialCalibrator = QuadraticPlattScaler
-
 
 
 class TrajectoryLREstimator:

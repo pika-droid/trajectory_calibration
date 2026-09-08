@@ -8,6 +8,7 @@ import ast
 import json
 from pathlib import Path
 from typing import Any
+
 from PIL import Image
 
 
@@ -40,7 +41,9 @@ def format_question(sample: dict[str, Any], dataset_key: str) -> str:
         "question",
         sample.get(
             "problem",
-            sample.get("query", sample.get("text", sample.get("prompt", sample.get("user_query", "")))),
+            sample.get(
+                "query", sample.get("text", sample.get("prompt", sample.get("user_query", "")))
+            ),
         ),
     )
     if isinstance(question, (list, tuple)) and len(question) > 0:

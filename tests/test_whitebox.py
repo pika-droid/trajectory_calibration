@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+
 from trajectory_calibration.uq.whitebox import WhiteBoxScorers
 
 

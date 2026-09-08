@@ -67,4 +67,4 @@ def clean_text(text: Any) -> str:
     return " ".join(text.split())
 
 
-__all__ = ["Config", "ARCH_SCALES", "safe_torch_load", "set_seed", "clean_text"]
+__all__ = ["ARCH_SCALES", "Config", "clean_text", "safe_torch_load", "set_seed"]

@@ -30,5 +30,4 @@ FEATURE_NAMES: dict[str, str] = {
 
 FEATURE_KEYS: list[str] = list(FEATURE_NAMES.keys())
 
-__all__ = ["FEATURE_NAMES", "FEATURE_KEYS"]
-
+__all__ = ["FEATURE_KEYS", "FEATURE_NAMES"]

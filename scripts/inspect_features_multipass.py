@@ -9,6 +9,7 @@ and embedding tensor integrity.
 
 import argparse
 from pathlib import Path
+
 import numpy as np
 import torch
 
@@ -75,8 +76,12 @@ def inspect_directory(features_dir: str, num_samples_to_show: int = 2) -> None:
                 lp = r_seq_lps[r_i] if r_i < len(r_seq_lps) else 0.0
                 print(f"      Rollout [{r_i + 1}]: '{r_text}'  (Seq LogProb: {lp:.3f})")
 
-            print(f"    Logits Shape  : {logits.shape}  | Min: {logits.min():.2f}, Max: {logits.max():.2f}, Has NaN: {np.isnan(logits).any()}")
-            print(f"    Embeddings    : Shape {embs.shape} | Norms: {[round(float(np.linalg.norm(v)), 2) for v in embs]}")
+            print(
+                f"    Logits Shape  : {logits.shape}  | Min: {logits.min():.2f}, Max: {logits.max():.2f}, Has NaN: {np.isnan(logits).any()}"
+            )
+            print(
+                f"    Embeddings    : Shape {embs.shape} | Norms: {[round(float(np.linalg.norm(v)), 2) for v in embs]}"
+            )
 
         # Compute aggregate metrics across all samples in this dataset
         for sample in data:
@@ -104,31 +109,49 @@ def inspect_directory(features_dir: str, num_samples_to_show: int = 2) -> None:
         avg_logit_max = float(np.mean(logit_maxes)) if logit_maxes else 0.0
         avg_emb_norm = float(np.mean(emb_norms)) if emb_norms else 0.0
 
-        summary_rows.append({
-            "dataset": dataset_key,
-            "samples": len(data),
-            "non_blank": f"{pct_non_blank:.0f}%",
-            "unique_rollouts": f"{avg_unique:.1f}/{int(round(avg_rollouts))}",
-            "avg_logit_max": f"{avg_logit_max:.2f}",
-            "avg_emb_norm": f"{avg_emb_norm:.2f}",
-            "status": "[VALID]" if (pct_non_blank > 80 and not np.isnan(avg_emb_norm)) else "[CHECK]",
-        })
+        summary_rows.append(
+            {
+                "dataset": dataset_key,
+                "samples": len(data),
+                "non_blank": f"{pct_non_blank:.0f}%",
+                "unique_rollouts": f"{avg_unique:.1f}/{int(round(avg_rollouts))}",
+                "avg_logit_max": f"{avg_logit_max:.2f}",
+                "avg_emb_norm": f"{avg_emb_norm:.2f}",
+                "status": "[VALID]"
+                if (pct_non_blank > 80 and not np.isnan(avg_emb_norm))
+                else "[CHECK]",
+            }
+        )
 
     # Summary Table
     print("\n" + "=" * 100)
     print(" AGGREGATE PAYLOAD INTEGRITY SUMMARY TABLE")
     print("=" * 100)
-    print(f"{'Dataset':<18} | {'Samples':<8} | {'Non-Blank':<10} | {'Unique Rollouts':<16} | {'Avg Max Logit':<14} | {'Avg Emb Norm':<13} | {'Status':<8}")
+    print(
+        f"{'Dataset':<18} | {'Samples':<8} | {'Non-Blank':<10} | {'Unique Rollouts':<16} | {'Avg Max Logit':<14} | {'Avg Emb Norm':<13} | {'Status':<8}"
+    )
     print("-" * 100)
     for r in summary_rows:
-        print(f"{r['dataset']:<18} | {r['samples']:<8} | {r['non_blank']:<10} | {r['unique_rollouts']:<16} | {r['avg_logit_max']:<14} | {r['avg_emb_norm']:<13} | {r['status']:<8}")
+        print(
+            f"{r['dataset']:<18} | {r['samples']:<8} | {r['non_blank']:<10} | {r['unique_rollouts']:<16} | {r['avg_logit_max']:<14} | {r['avg_emb_norm']:<13} | {r['status']:<8}"
+        )
     print("=" * 100)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Deep Inspector for Multi-Pass Feature Payloads.")
-    parser.add_argument("--features_dir", type=str, required=True, help="Path to features directory (e.g. data/features_multipass/m3_llava/temp_0.5).")
-    parser.add_argument("--show", type=int, default=2, help="Number of detailed sample records to print per dataset.")
+    parser.add_argument(
+        "--features_dir",
+        type=str,
+        required=True,
+        help="Path to features directory (e.g. data/features_multipass/m3_llava/temp_0.5).",
+    )
+    parser.add_argument(
+        "--show",
+        type=int,
+        default=2,
+        help="Number of detailed sample records to print per dataset.",
+    )
     args = parser.parse_args()
 
     inspect_directory(args.features_dir, num_samples_to_show=args.show)

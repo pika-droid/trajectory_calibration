@@ -15,8 +15,9 @@ Formats:
 Updates README.md cleanly and safely.
 """
 
-from pathlib import Path
 import re
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
@@ -24,9 +25,20 @@ ROOT = Path("c:/Users/ashmi/OneDrive/Documents/trajectory_calibration")
 README_PATH = ROOT / "README.md"
 
 ALL_14_DATASETS = [
-    "ai2d", "chartqa", "docvqa", "gqa", "infographicvqa", "lego-puzzles",
-    "mmbench", "mmmu", "pope", "scienceqa", "seedbench", "textvqa",
-    "vizwiz-vqa", "vqav2",
+    "ai2d",
+    "chartqa",
+    "docvqa",
+    "gqa",
+    "infographicvqa",
+    "lego-puzzles",
+    "mmbench",
+    "mmmu",
+    "pope",
+    "scienceqa",
+    "seedbench",
+    "textvqa",
+    "vizwiz-vqa",
+    "vqav2",
 ]
 
 ADA_ECE_DISPLAY_METHODS = [
@@ -84,14 +96,18 @@ def generate_ada_ece_table_and_bullets(arch: str, arch_label: str) -> str:
     vcps17_vals = sub_pivot.loc["VCPS-17D (Our Method)"]
     platt_vals = sub_pivot.loc["Platt Scaling (1D)"]
 
-    family_ts_wins = [ds for ds in ALL_14_DATASETS if min(vcps5_vals[ds], vcps17_vals[ds]) < ts_vals[ds]]
+    family_ts_wins = [
+        ds for ds in ALL_14_DATASETS if min(vcps5_vals[ds], vcps17_vals[ds]) < ts_vals[ds]
+    ]
     family_ts_losses = [ds for ds in ALL_14_DATASETS if ds not in family_ts_wins]
     vcps17_ts_wins = [ds for ds in ALL_14_DATASETS if vcps17_vals[ds] < ts_vals[ds]]
     vcps5_ts_wins = [ds for ds in ALL_14_DATASETS if vcps5_vals[ds] < ts_vals[ds]]
     loss_formatted = ", ".join([f"`{d}`" for d in family_ts_losses])
     ts_loss_str = f" (all except {loss_formatted})" if family_ts_losses else ""
 
-    family_platt_wins = [ds for ds in ALL_14_DATASETS if min(vcps5_vals[ds], vcps17_vals[ds]) < platt_vals[ds]]
+    family_platt_wins = [
+        ds for ds in ALL_14_DATASETS if min(vcps5_vals[ds], vcps17_vals[ds]) < platt_vals[ds]
+    ]
     vcps17_platt_wins = [ds for ds in ALL_14_DATASETS if vcps17_vals[ds] < platt_vals[ds]]
     vcps5_platt_wins = [ds for ds in ALL_14_DATASETS if vcps5_vals[ds] < platt_vals[ds]]
     platt_formatted = ", ".join([f"`{d}`" for d in family_platt_wins])
@@ -107,14 +123,24 @@ def generate_ada_ece_table_and_bullets(arch: str, arch_label: str) -> str:
                 break
 
     lines.append("")
-    lines.append(f"- **VCPS vs. Global Temperature Scaling (TS)**:")
-    lines.append(f"  - **Family Win**: VCPS beats TS on **{len(family_ts_wins)} / 14 datasets**{ts_loss_str}.")
-    lines.append(f"  - **Separate Counts**: VCPS-17D alone beats TS on **{len(vcps17_ts_wins)} / 14 datasets**; VCPS-5D alone beats TS on **{len(vcps5_ts_wins)} / 14 datasets**.")
-    lines.append(f"- **VCPS vs. 1D Platt Scaling**:")
-    lines.append(f"  - **Family Win**: VCPS beats 1D Platt Scaling on **{len(family_platt_wins)} / 14 datasets**:")
+    lines.append("- **VCPS vs. Global Temperature Scaling (TS)**:")
+    lines.append(
+        f"  - **Family Win**: VCPS beats TS on **{len(family_ts_wins)} / 14 datasets**{ts_loss_str}."
+    )
+    lines.append(
+        f"  - **Separate Counts**: VCPS-17D alone beats TS on **{len(vcps17_ts_wins)} / 14 datasets**; VCPS-5D alone beats TS on **{len(vcps5_ts_wins)} / 14 datasets**."
+    )
+    lines.append("- **VCPS vs. 1D Platt Scaling**:")
+    lines.append(
+        f"  - **Family Win**: VCPS beats 1D Platt Scaling on **{len(family_platt_wins)} / 14 datasets**:"
+    )
     lines.append(f"    {platt_formatted}.")
-    lines.append(f"  - **Separate Counts**: VCPS-17D alone beats 1D Platt on **{len(vcps17_platt_wins)} / 14 datasets**; VCPS-5D alone beats 1D Platt on **{len(vcps5_platt_wins)} / 14 datasets**.")
-    lines.append(f"- **Our Trajectory Methods (VCPS-5D, VCPS-17D, Residual Calibrator)** win the #1 lowest Adaptive ECE on **{len(num_1_wins)} / 14 benchmarks**:")
+    lines.append(
+        f"  - **Separate Counts**: VCPS-17D alone beats 1D Platt on **{len(vcps17_platt_wins)} / 14 datasets**; VCPS-5D alone beats 1D Platt on **{len(vcps5_platt_wins)} / 14 datasets**."
+    )
+    lines.append(
+        f"- **Our Trajectory Methods (VCPS-5D, VCPS-17D, Residual Calibrator)** win the #1 lowest Adaptive ECE on **{len(num_1_wins)} / 14 benchmarks**:"
+    )
     lines.append(f"  {', '.join(num_1_wins)}.")
 
     return "\n".join(lines)
@@ -167,14 +193,16 @@ def generate_macro_table() -> str:
                 ece = float(sub["ece_percent"].mean())
                 ada_ece = float(sub["adaptive_ece_percent"].mean())
                 auroc = float(sub["auroc"].mean())
-            rows.append({
-                "method": m,
-                "paradigm": paradigm,
-                "sampling": sampling,
-                "ece": ece,
-                "ada_ece": ada_ece,
-                "auroc": auroc,
-            })
+            rows.append(
+                {
+                    "method": m,
+                    "paradigm": paradigm,
+                    "sampling": sampling,
+                    "ece": ece,
+                    "ada_ece": ada_ece,
+                    "auroc": auroc,
+                }
+            )
 
         m_df = pd.DataFrame(rows)
         ece_sorted = sorted(m_df["ece"].dropna().unique())
@@ -214,9 +242,15 @@ def generate_macro_table() -> str:
                 auc_f = auc_s
 
             is_ump = r["method"] in ["umpire", "eigen_score", "ln_entropy", "semantic_entropy"]
-            m_name = f"`{r['method']}`" if is_ump else (f"**{r['method']}**" if "VCPS" in r["method"] else r["method"])
+            m_name = (
+                f"`{r['method']}`"
+                if is_ump
+                else (f"**{r['method']}**" if "VCPS" in r["method"] else r["method"])
+            )
             model_col = f"**{arch_label}**" if idx == 0 else ""
-            lines.append(f"| {model_col} | {m_name} | {r['paradigm']} | {r['sampling']} | {ece_f} | {ada_f} | {auc_f} |")
+            lines.append(
+                f"| {model_col} | {m_name} | {r['paradigm']} | {r['sampling']} | {ece_f} | {ada_f} | {auc_f} |"
+            )
 
     return "\n".join(lines)
 
@@ -245,7 +279,9 @@ def generate_temp_table() -> str:
     ]
 
     for arch, arch_label in [("m3", "M3-LLaVA"), ("mqt", "MQT-LLaVA")]:
-        t_df = pd.read_csv(ROOT / f"results/experiments/temperature_study/temperature_transfer_{arch}_summary.csv")
+        t_df = pd.read_csv(
+            ROOT / f"results/experiments/temperature_study/temperature_transfer_{arch}_summary.csv"
+        )
         t_mean = t_df.groupby(["method", "temperature"])["ece_percent"].mean().unstack()
         t_sub = t_mean.loc[[m for m in methods if m in t_mean.index], [0.0, 0.3, 0.6, 1.0, 1.5]]
         t_sub["mean_ece"] = t_sub.mean(axis=1)
@@ -282,7 +318,9 @@ def main():
 
     # 1. Update M3 Table & Bullets
     m3_section = generate_ada_ece_table_and_bullets("m3", "M3-LLaVA")
-    m3_pattern = re.compile(r"###### M3-LLaVA: Adaptive ECE \(%\).*?(?=\n---\n\n### MQT-LLaVA)", re.DOTALL)
+    m3_pattern = re.compile(
+        r"###### M3-LLaVA: Adaptive ECE \(%\).*?(?=\n---\n\n### MQT-LLaVA)", re.DOTALL
+    )
     if not m3_pattern.search(readme_text):
         raise RuntimeError("Could not find M3-LLaVA Adaptive ECE section in README.md")
     readme_text = m3_pattern.sub(lambda m: m3_section, readme_text)
@@ -291,7 +329,9 @@ def main():
     # 2. Update MQT Table & Bullets
     mqt_section = generate_ada_ece_table_and_bullets("mqt", "MQT-LLaVA")
     mqt_section = mqt_section.replace("###### MQT-LLaVA:", "### MQT-LLaVA:")
-    mqt_pattern = re.compile(r"### MQT-LLaVA: Adaptive ECE \(%\).*?(?=\n---\n\n## Benchmark Logs)", re.DOTALL)
+    mqt_pattern = re.compile(
+        r"### MQT-LLaVA: Adaptive ECE \(%\).*?(?=\n---\n\n## Benchmark Logs)", re.DOTALL
+    )
     if not mqt_pattern.search(readme_text):
         raise RuntimeError("Could not find MQT-LLaVA Adaptive ECE section in README.md")
     readme_text = mqt_pattern.sub(lambda m: mqt_section, readme_text)
@@ -299,7 +339,9 @@ def main():
 
     # 3. Update Macro-Average Comparison Table
     macro_section = generate_macro_table()
-    macro_pattern = re.compile(r"### Macro-Average Comparison.*?(?=\n---\n\n### Decoding Temperature)", re.DOTALL)
+    macro_pattern = re.compile(
+        r"### Macro-Average Comparison.*?(?=\n---\n\n### Decoding Temperature)", re.DOTALL
+    )
     if not macro_pattern.search(readme_text):
         raise RuntimeError("Could not find Macro-Average Comparison section in README.md")
     readme_text = macro_pattern.sub(lambda m: macro_section, readme_text)
@@ -307,7 +349,10 @@ def main():
 
     # 4. Update Temperature Transfer Table
     temp_section = generate_temp_table()
-    temp_pattern = re.compile(r"#### Macro Transfer ECE \(%\) Across Temperatures.*?(?=\n---\n\n### Leave-One-Dataset-Out)", re.DOTALL)
+    temp_pattern = re.compile(
+        r"#### Macro Transfer ECE \(%\) Across Temperatures.*?(?=\n---\n\n### Leave-One-Dataset-Out)",
+        re.DOTALL,
+    )
     if not temp_pattern.search(readme_text):
         raise RuntimeError("Could not find Temperature Transfer section in README.md")
     readme_text = temp_pattern.sub(lambda m: temp_section, readme_text)

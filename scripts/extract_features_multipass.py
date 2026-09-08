@@ -26,6 +26,7 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 import torch
+
 from trajectory_calibration.utils.helpers import safe_torch_load, set_seed
 from trajectory_calibration.vlm.datasets import ALL_DATASET_KEYS, load_hf_dataset
 from trajectory_calibration.vlm.multipass import (
@@ -38,9 +39,15 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("extract_features_multipass")
 
 
-def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: argparse.Namespace) -> None:
+def process_dataset(
+    dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: argparse.Namespace
+) -> None:
     arch_folder = "mqt_llava" if "mqt" in args.arch.lower() else "m3_llava"
-    temp_folder = f"temp_{args.gen_temperature:.1f}" if args.gen_temperature == int(args.gen_temperature) else f"temp_{args.gen_temperature}"
+    temp_folder = (
+        f"temp_{args.gen_temperature:.1f}"
+        if args.gen_temperature == int(args.gen_temperature)
+        else f"temp_{args.gen_temperature}"
+    )
     out_dir = Path(args.output_dir) / arch_folder / temp_folder
     out_dir.mkdir(parents=True, exist_ok=True)
     pt_path = out_dir / f"{dataset_key}.pt"
@@ -71,10 +78,14 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
 
     limit = args.limit or args.subset_size
     if args.mock:
-        logger.info(f"Mock mode enabled: generating synthetic multi-pass samples for '{dataset_key}'...")
+        logger.info(
+            f"Mock mode enabled: generating synthetic multi-pass samples for '{dataset_key}'..."
+        )
         n_samples = limit or 50
         mock_records = [
-            generate_mock_multipass_sample(i, dataset_key=dataset_key, num_rollouts=args.num_rollouts)
+            generate_mock_multipass_sample(
+                i, dataset_key=dataset_key, num_rollouts=args.num_rollouts
+            )
             for i in range(n_samples)
         ]
         torch.save(mock_records, tmp_path)
@@ -84,7 +95,9 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
 
     ds = load_hf_dataset(dataset_key, subset_size=limit)
     if not args.clean and len(existing_data) >= len(ds):
-        logger.info(f"Dataset '{dataset_key}' is already fully extracted ({len(existing_data)}/{len(ds)} samples). Skipping.")
+        logger.info(
+            f"Dataset '{dataset_key}' is already fully extracted ({len(existing_data)}/{len(ds)} samples). Skipping."
+        )
         return
 
     extracted = list(existing_data)
@@ -92,11 +105,21 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
         extracted = extracted[:limit]
         torch.save(extracted, tmp_path)
         tmp_path.replace(pt_path)
-        logger.info(f"Target limit of {limit} samples already met for '{dataset_key}'. Saved exactly {len(extracted)}.")
+        logger.info(
+            f"Target limit of {limit} samples already met for '{dataset_key}'. Saved exactly {len(extracted)}."
+        )
         return
 
     for idx, sample in enumerate(tqdm(ds, desc=f"Multi-Pass {dataset_key}")):
-        q_id = str(sample.get("question_id", sample.get("questionId", sample.get("id", sample.get("sample_idx", sample.get("image_id", idx))))))
+        q_id = str(
+            sample.get(
+                "question_id",
+                sample.get(
+                    "questionId",
+                    sample.get("id", sample.get("sample_idx", sample.get("image_id", idx))),
+                ),
+            )
+        )
         if q_id in processed_qids:
             continue
 
@@ -141,7 +164,9 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
         os.path.expanduser("~/.cache/huggingface/datasets"),
         "/workspace/.cache/huggingface/datasets",
         "/workspace/.cache/huggingface/downloads/extracted",
-        os.path.join(os.environ.get("HF_HOME", ""), "datasets") if os.environ.get("HF_HOME") else None,
+        os.path.join(os.environ.get("HF_HOME", ""), "datasets")
+        if os.environ.get("HF_HOME")
+        else None,
         "/tmp/huggingface",
     ]:
         if cache_path and os.path.exists(cache_path):
@@ -149,18 +174,37 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Multi-Pass & Multi-Rollout VLM Feature Extraction.")
-    parser.add_argument("--model_path", type=str, default=None, help="VLM checkpoint / HF path (defaults to arch standard).")
-    parser.add_argument("--arch", type=str, default="m3", choices=["m3", "mqt"], help="Architecture.")
-    parser.add_argument("--datasets", nargs="+", default=["pope"], help="Datasets to extract (or 'all').")
+    parser = argparse.ArgumentParser(
+        description="Multi-Pass & Multi-Rollout VLM Feature Extraction."
+    )
+    parser.add_argument(
+        "--model_path",
+        type=str,
+        default=None,
+        help="VLM checkpoint / HF path (defaults to arch standard).",
+    )
+    parser.add_argument(
+        "--arch", type=str, default="m3", choices=["m3", "mqt"], help="Architecture."
+    )
+    parser.add_argument(
+        "--datasets", nargs="+", default=["pope"], help="Datasets to extract (or 'all')."
+    )
     parser.add_argument("--num_rollouts", type=int, default=5, help="Number of sampling rollouts.")
     parser.add_argument("--gen_temperature", type=float, default=0.5, help="Sampling temperature.")
-    parser.add_argument("--top_p", type=float, default=0.9, help="Top-p nucleus sampling threshold.")
-    parser.add_argument("--output_dir", type=str, default="data/features_multipass", help="Output directory.")
+    parser.add_argument(
+        "--top_p", type=float, default=0.9, help="Top-p nucleus sampling threshold."
+    )
+    parser.add_argument(
+        "--output_dir", type=str, default="data/features_multipass", help="Output directory."
+    )
     parser.add_argument("--limit", type=int, default=None, help="Sample cap for smoke testing.")
     parser.add_argument("--subset_size", type=int, default=None, help="Alias for --limit.")
-    parser.add_argument("--precision", type=str, default="fp16", choices=["fp16", "bf16", "fp32"], help="Precision.")
-    parser.add_argument("--clean", action="store_true", help="Purge existing checkpoint and start fresh.")
+    parser.add_argument(
+        "--precision", type=str, default="fp16", choices=["fp16", "bf16", "fp32"], help="Precision."
+    )
+    parser.add_argument(
+        "--clean", action="store_true", help="Purge existing checkpoint and start fresh."
+    )
     parser.add_argument("--mock", action="store_true", help="Run synthetic mock extraction on CPU.")
     parser.add_argument("--seed", type=int, default=42, help="Random seed.")
     args = parser.parse_args()
@@ -168,14 +212,22 @@ def main() -> None:
     set_seed(args.seed)
 
     if args.model_path is None:
-        args.model_path = "gordonhu/MQT-LLaVA-7b" if args.arch == "mqt" else "mucai/llava-v1.5-7b-m3"
+        args.model_path = (
+            "gordonhu/MQT-LLaVA-7b" if args.arch == "mqt" else "mucai/llava-v1.5-7b-m3"
+        )
 
-    dataset_keys = ALL_DATASET_KEYS if (args.datasets == ["all"] or "all" in args.datasets) else args.datasets
+    dataset_keys = (
+        ALL_DATASET_KEYS if (args.datasets == ["all"] or "all" in args.datasets) else args.datasets
+    )
 
     wrapper = None
     if not args.mock:
-        logger.info(f"Initializing UnifiedVLMWrapper for {args.arch.upper()} from '{args.model_path}'...")
-        wrapper = UnifiedVLMWrapper(model_path=args.model_path, precision=args.precision, arch=args.arch)
+        logger.info(
+            f"Initializing UnifiedVLMWrapper for {args.arch.upper()} from '{args.model_path}'..."
+        )
+        wrapper = UnifiedVLMWrapper(
+            model_path=args.model_path, precision=args.precision, arch=args.arch
+        )
 
     for ds in dataset_keys:
         process_dataset(ds, wrapper, args)

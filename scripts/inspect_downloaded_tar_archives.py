@@ -13,6 +13,7 @@ import io
 import sys
 import tarfile
 from pathlib import Path
+
 import numpy as np
 
 SRC_PATH = Path(__file__).resolve().parent.parent / "src"
@@ -23,7 +24,11 @@ import torch
 from sklearn.utils.extmath import fast_logdet
 
 from trajectory_calibration.uq.eigenscore import compute_eigenscore, normalize_embedding
-from trajectory_calibration.uq.semantic_entropy import FastStringEntailment, compute_semantic_entropy, get_semantic_ids
+from trajectory_calibration.uq.semantic_entropy import (
+    FastStringEntailment,
+    compute_semantic_entropy,
+    get_semantic_ids,
+)
 from trajectory_calibration.uq.whitebox import WhiteBoxScorers
 
 
@@ -70,11 +75,18 @@ def validate_archive(tar_path: Path) -> dict[str, any]:
     results = {}
 
     with tarfile.open(tar_path, "r:gz") as tar:
-        print(f"{'Dataset':<16} | {'Samples':<8} | {'Rollouts':<9} | {'UMPIRE':<9} | {'LogDet':<8} | {'EigenScore':<11} | {'Mean SE':<8} | {'Status'}", flush=True)
+        print(
+            f"{'Dataset':<16} | {'Samples':<8} | {'Rollouts':<9} | {'UMPIRE':<9} | {'LogDet':<8} | {'EigenScore':<11} | {'Mean SE':<8} | {'Status'}",
+            flush=True,
+        )
         print("-" * 105, flush=True)
 
         for member in tar:
-            if not member.name.endswith(".pt") or member.name.endswith(".pt.tmp") or member.name.startswith("._"):
+            if (
+                not member.name.endswith(".pt")
+                or member.name.endswith(".pt.tmp")
+                or member.name.startswith("._")
+            ):
                 continue
 
             ds_name = Path(member.name).stem
@@ -115,7 +127,12 @@ def validate_archive(tar_path: Path) -> dict[str, any]:
                 if len(r_texts) != 10 or len(tok_lps) != 10 or len(seq_lps) != 10:
                     all_rollouts_valid = False
 
-                if embs is None or embs.shape != (10, 4096) or np.isnan(embs).any() or np.isinf(embs).any():
+                if (
+                    embs is None
+                    or embs.shape != (10, 4096)
+                    or np.isnan(embs).any()
+                    or np.isinf(embs).any()
+                ):
                     all_embs_valid = False
 
                 if logits is None or logits.shape != (32000,) or np.isnan(logits).any():
@@ -125,7 +142,9 @@ def validate_archive(tar_path: Path) -> dict[str, any]:
                 if idx < 100:
                     try:
                         embs_arr = np.asarray(embs, dtype=np.float64)
-                        ref_umpire = compute_reference_umpire(embs_arr, tok_lps, length_normalize=False)
+                        ref_umpire = compute_reference_umpire(
+                            embs_arr, tok_lps, length_normalize=False
+                        )
                         umpire_scores.append(ref_umpire)
 
                         normed = normalize_embedding(embs_arr)
@@ -141,7 +160,7 @@ def validate_archive(tar_path: Path) -> dict[str, any]:
                         se_scores.append(se)
 
                         _ = WhiteBoxScorers.sequence_probability(tok_lps[0])
-                    except Exception as e:
+                    except Exception:
                         all_umpire_valid = False
 
             avg_ump = float(np.mean(umpire_scores)) if umpire_scores else float("nan")
@@ -149,7 +168,9 @@ def validate_archive(tar_path: Path) -> dict[str, any]:
             avg_es = float(np.mean(eigenscores)) if eigenscores else float("nan")
             avg_se = float(np.mean(se_scores)) if se_scores else float("nan")
 
-            is_valid = all_rollouts_valid and all_embs_valid and all_logits_valid and all_umpire_valid
+            is_valid = (
+                all_rollouts_valid and all_embs_valid and all_logits_valid and all_umpire_valid
+            )
             status = "[PASS]" if is_valid else "[FAIL]"
 
             results[ds_name] = {
@@ -161,7 +182,10 @@ def validate_archive(tar_path: Path) -> dict[str, any]:
                 "status": status,
             }
 
-            print(f"{ds_name:<16} | {total_samples:<8} | 10/10     | {avg_ump:<9.3f} | {avg_ld:<8.3f} | {avg_es:<11.3f} | {avg_se:<8.3f} | {status}", flush=True)
+            print(
+                f"{ds_name:<16} | {total_samples:<8} | 10/10     | {avg_ump:<9.3f} | {avg_ld:<8.3f} | {avg_es:<11.3f} | {avg_se:<8.3f} | {status}",
+                flush=True,
+            )
 
     print("-" * 105, flush=True)
     return results
@@ -172,23 +196,33 @@ def main():
     mqt_tar = Path(r"C:\Users\ashmi\Downloads\mqt_features_multipass.tar.gz")
 
     print("\n" + "#" * 105, flush=True)
-    print(" TRAJECTORY CALIBRATION: FEATURE ARCHIVE VALIDATION & UMPIRE COMPATIBILITY AUDIT", flush=True)
+    print(
+        " TRAJECTORY CALIBRATION: FEATURE ARCHIVE VALIDATION & UMPIRE COMPATIBILITY AUDIT",
+        flush=True,
+    )
     print("#" * 105, flush=True)
 
     m3_res = validate_archive(m3_tar)
     mqt_res = validate_archive(mqt_tar)
 
     all_passed = (
-        len(m3_res) > 0 and len(mqt_res) > 0 and
-        all(v["status"] == "[PASS]" for v in m3_res.values()) and
-        all(v["status"] == "[PASS]" for v in mqt_res.values())
+        len(m3_res) > 0
+        and len(mqt_res) > 0
+        and all(v["status"] == "[PASS]" for v in m3_res.values())
+        and all(v["status"] == "[PASS]" for v in mqt_res.values())
     )
 
     print("\n" + "=" * 105, flush=True)
     if all_passed:
         print(" [VERDICT: ALL CHECKS PASSED]", flush=True)
-        print(" Both M3 and MQT feature archives contain 100% complete, valid, and fully-compatible", flush=True)
-        print(" payloads for UMPIRE, EigenScore, Kuhn Semantic Entropy, and VCPS calibration!", flush=True)
+        print(
+            " Both M3 and MQT feature archives contain 100% complete, valid, and fully-compatible",
+            flush=True,
+        )
+        print(
+            " payloads for UMPIRE, EigenScore, Kuhn Semantic Entropy, and VCPS calibration!",
+            flush=True,
+        )
     else:
         print(" [VERDICT: SOME CHECKS FAILED] - Inspect output logs above.", flush=True)
     print("=" * 105 + "\n", flush=True)

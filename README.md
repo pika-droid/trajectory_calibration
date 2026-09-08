@@ -2,7 +2,10 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 17 Passed](https://img.shields.io/badge/tests-17%20passed-brightgreen.svg)]()
+[![Tests: 74 Passed](https://img.shields.io/badge/tests-74%20passed-brightgreen.svg)]()
+[![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+[![Type Checker: Pyright](https://img.shields.io/badge/type%20checker-pyright-2b5797.svg)](https://github.com/microsoft/pyright)
+[![Tested with: Hypothesis](https://img.shields.io/badge/property%20testing-hypothesis-0a9edc.svg)](https://hypothesis.readthedocs.io/)
 [![Code Quality: Modularity <= 200 LOC](https://img.shields.io/badge/modularity-%E2%89%A4200%20LOC-success.svg)]()
 [![Platform: Windows | Linux](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey.svg)]()
 
@@ -345,3 +348,29 @@ The [`baseline_repo/`](baseline_repo/) directory contains adapted baseline frame
 3. **Protected Monkeypatches**: Never remove the `transformers >= 4.38` monkeypatches in `vlm/patches.py` (`cache_position`, `num_logits_to_keep`, `matryoshka_vis_token_scale`).
 4. **Temperature Bounds**: Standardized to $T \in [0.01, 20.0]$ globally.
 5. **Numerical Stability**: Logits bounded to $[-35.0, 35.0]$, probabilities clipped to $[10^{-7}, 1 - 10^{-7}]$.
+
+---
+
+## Development & Quality Toolchain
+
+The project enforces strict code hygiene, fast Rust-based linting/formatting, static typing, and property testing:
+
+```powershell
+# 1. Install / sync dependencies
+uv sync --extra dev
+
+# 2. Install pre-commit git hooks
+uv run pre-commit install
+
+# 3. Format and lint code (Astral Ruff)
+uv run ruff format .
+uv run ruff check --fix .
+
+# 4. Static type checking (Pyright)
+uv run pyright
+
+# 5. Run unit & Hypothesis property-based tests
+uv run pytest
+```
+
+See [`AGENTS.md`](AGENTS.md) for detailed engineering guardrails and architectural conventions.

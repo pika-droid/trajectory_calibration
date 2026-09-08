@@ -11,6 +11,7 @@ import logging
 import random
 import sys
 from pathlib import Path
+
 from tqdm import tqdm
 
 SRC_PATH = Path(__file__).resolve().parent.parent / "src"
@@ -18,6 +19,7 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 import torch
+
 from trajectory_calibration.utils.helpers import safe_torch_load, set_seed
 from trajectory_calibration.vlm.datasets import (
     evaluate_accuracy,
@@ -31,7 +33,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("extract_features")
 
 
-def generate_mock_extraction(dataset_key: str, num_samples: int = 10, arch: str = "m3") -> list[dict]:
+def generate_mock_extraction(
+    dataset_key: str, num_samples: int = 10, arch: str = "m3"
+) -> list[dict]:
     scales = [1, 9, 36, 144, 576] if arch == "m3" else [1, 9, 36, 144, 256]
     fine_scale = scales[-1]
     mock_data = []
@@ -44,19 +48,28 @@ def generate_mock_extraction(dataset_key: str, num_samples: int = 10, arch: str 
             m = random.uniform(0.1, 0.5)
             ans = "dog" if is_corr else "cat"
             acc = 1.0 if (is_corr and s == fine_scale) else (1.0 if random.random() > 0.5 else 0.0)
-            feats[s] = {"conf_softmax": float(c), "margin": float(m), "answer": ans, "vqa_accuracy": float(acc)}
-        mock_data.append({
-            "question_id": 200000 + i,
-            "question": f"Mock question {i}?",
-            "ground_truth": "dog",
-            "dataset": dataset_key,
-            "sample_idx": i,
-            "features": feats,
-        })
+            feats[s] = {
+                "conf_softmax": float(c),
+                "margin": float(m),
+                "answer": ans,
+                "vqa_accuracy": float(acc),
+            }
+        mock_data.append(
+            {
+                "question_id": 200000 + i,
+                "question": f"Mock question {i}?",
+                "ground_truth": "dog",
+                "dataset": dataset_key,
+                "sample_idx": i,
+                "features": feats,
+            }
+        )
     return mock_data
 
 
-def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: argparse.Namespace) -> None:
+def process_dataset(
+    dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: argparse.Namespace
+) -> None:
     out_dir = Path(args.output_dir) / dataset_key
     out_dir.mkdir(parents=True, exist_ok=True)
     pt_path = out_dir / "full_extracted_features.pt"
@@ -78,7 +91,9 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
 
     if args.mock:
         logger.info("Mock flag enabled: Generating synthetic mock extraction data.")
-        mock_data = generate_mock_extraction(dataset_key, num_samples=args.subset_size or 50, arch=args.arch)
+        mock_data = generate_mock_extraction(
+            dataset_key, num_samples=args.subset_size or 50, arch=args.arch
+        )
         torch.save(mock_data, pt_path)
         logger.info(f"Saved {len(mock_data)} mock samples to {pt_path}")
         return
@@ -108,30 +123,42 @@ def process_dataset(dataset_key: str, wrapper: UnifiedVLMWrapper | None, args: a
                 "vqa_accuracy": acc,
             }
 
-        extracted.append({
-            "question_id": q_id,
-            "question": question,
-            "dataset": dataset_key,
-            "sample_idx": idx,
-            "features": feats,
-        })
+        extracted.append(
+            {
+                "question_id": q_id,
+                "question": question,
+                "dataset": dataset_key,
+                "sample_idx": idx,
+                "features": feats,
+            }
+        )
         processed_qids.add(q_id)
 
         if len(extracted) % 100 == 0:
             torch.save(extracted, pt_path)
 
     torch.save(extracted, pt_path)
-    logger.info(f"Extraction complete for '{dataset_key}'. Saved {len(extracted)} samples to {pt_path}")
+    logger.info(
+        f"Extraction complete for '{dataset_key}'. Saved {len(extracted)} samples to {pt_path}"
+    )
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Multi-scale VLM feature extraction.")
-    parser.add_argument("--model_path", type=str, default="mucai/llava-v1.5-7b-m3", help="VLM checkpoint path.")
-    parser.add_argument("--arch", type=str, default="m3", choices=["m3", "mqt"], help="Architecture.")
+    parser.add_argument(
+        "--model_path", type=str, default="mucai/llava-v1.5-7b-m3", help="VLM checkpoint path."
+    )
+    parser.add_argument(
+        "--arch", type=str, default="m3", choices=["m3", "mqt"], help="Architecture."
+    )
     parser.add_argument("--datasets", nargs="+", default=["vqav2"], help="Datasets to extract.")
-    parser.add_argument("--output_dir", type=str, default="results/features", help="Output directory.")
+    parser.add_argument(
+        "--output_dir", type=str, default="results/features", help="Output directory."
+    )
     parser.add_argument("--subset_size", type=int, default=None, help="Subset size limit.")
-    parser.add_argument("--precision", type=str, default="fp16", choices=["fp16", "bf16", "fp32"], help="Precision.")
+    parser.add_argument(
+        "--precision", type=str, default="fp16", choices=["fp16", "bf16", "fp32"], help="Precision."
+    )
     parser.add_argument("--gen_temperature", type=float, default=0.0, help="Decoding temperature.")
     parser.add_argument("--clean", action="store_true", help="Purge existing checkpoint.")
     parser.add_argument("--mock", action="store_true", help="CPU mock extraction.")

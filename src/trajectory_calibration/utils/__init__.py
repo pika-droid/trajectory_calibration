@@ -10,9 +10,9 @@ __all__ = [
     "ARCH_SCALES",
     "Config",
     "clean_text",
-    "safe_torch_load",
-    "set_seed",
     "get_logits",
     "safe_clip_probs",
+    "safe_torch_load",
+    "set_seed",
     "sigmoid",
 ]

@@ -17,7 +17,6 @@ import numpy as np
 import pandas as pd
 import pytest
 from scipy.optimize import check_grad
-from scipy.special import logit
 from scipy.stats import entropy
 
 from trajectory_calibration.calibrators.adaptation import fit_beta_calibration
@@ -61,7 +60,9 @@ def test_vcps_small_slope_optimization():
     x_small = np.array([-4.605, 0.0])
     loss, grad = objective(x_small)
     assert not np.isnan(loss) and not np.isnan(grad).any()
-    assert abs(grad[0]) > 0.0, "Gradient wrt alpha0 should not be zero (no vanishing gradient clamp)"
+    assert abs(grad[0]) > 0.0, (
+        "Gradient wrt alpha0 should not be zero (no vanishing gradient clamp)"
+    )
 
     # Check analytical gradient matches finite differences
     cg_err = check_grad(lambda p: objective(p)[0], lambda p: objective(p)[1], x_small)
@@ -126,7 +127,9 @@ def test_dataset_sample_count_preservation_no_qid():
         n_unique = df["question_id"].nunique()
         if 1 < n_unique < initial_len:
             df = df.drop_duplicates(subset=["question_id"]).reset_index(drop=True)
-        assert len(df) == initial_len == n_samples, "Dataset should not collapse when question_id is missing"
+        assert len(df) == initial_len == n_samples, (
+            "Dataset should not collapse when question_id is missing"
+        )
 
     # Also verify that a dataset where all items have constant question_id=0 does not collapse to 1 row
     df_const = df.copy()
@@ -135,7 +138,9 @@ def test_dataset_sample_count_preservation_no_qid():
     n_unique_const = df_const["question_id"].nunique()
     if 1 < n_unique_const < initial_len_const:
         df_const = df_const.drop_duplicates(subset=["question_id"]).reset_index(drop=True)
-    assert len(df_const) == initial_len_const == n_samples, "Dataset with constant question_id should not collapse to 1 row"
+    assert len(df_const) == initial_len_const == n_samples, (
+        "Dataset with constant question_id should not collapse to 1 row"
+    )
 
 
 def test_adaptive_ece_preserves_bins_uniform_confidences():
@@ -245,7 +250,9 @@ def test_all_functions_under_200_loc() -> None:
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 length = node.end_lineno - node.lineno
                 if length >= 200:
-                    violations.append(f"{f.relative_to(repo_root)}:{node.lineno} {node.name} ({length} LOC)")
+                    violations.append(
+                        f"{f.relative_to(repo_root)}:{node.lineno} {node.name} ({length} LOC)"
+                    )
 
     assert not violations, f"Functions exceeding 200 LOC: {violations}"
 
@@ -374,7 +381,7 @@ def test_17d_feature_extraction_completeness_and_ablation() -> None:
     extracted_x = [k for k in feats if k.startswith("x")]
     assert len(extracted_x) == 17
     assert sorted(extracted_x, key=lambda s: int(s[1:])) == [f"x{i}" for i in range(1, 18)]
-    assert FEATURE_KEYS == [f"x{i}" for i in range(1, 18)]
+    assert [f"x{i}" for i in range(1, 18)] == FEATURE_KEYS
 
     # Assert ablated feature x21 is completely absent
     assert "x21" not in feats
@@ -382,4 +389,3 @@ def test_17d_feature_extraction_completeness_and_ablation() -> None:
     # Assert legacy non-contiguous keys are absent
     for legacy_key in ["x18", "x19", "x20", "x22"]:
         assert legacy_key not in feats
-

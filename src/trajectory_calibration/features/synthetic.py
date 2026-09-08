@@ -35,11 +35,13 @@ def generate_mock_df(
                 "vqa_accuracy": acc,
             }
 
-        raw_items.append({
-            "question_id": 100000 + i,
-            "features": feats,
-            "answer_type": "open",
-        })
+        raw_items.append(
+            {
+                "question_id": 100000 + i,
+                "features": feats,
+                "answer_type": "open",
+            }
+        )
 
     rows = [compute_features_from_sample(item, fine_scale=fine_scale) for item in raw_items]
     return pd.DataFrame(rows)

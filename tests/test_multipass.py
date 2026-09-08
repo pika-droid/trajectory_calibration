@@ -4,11 +4,7 @@ Unit and Integration Tests for Multi-Pass & Multi-Rollout GPU Feature Extraction
 
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
 import numpy as np
-import pytest
-import torch
 
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
 from trajectory_calibration.uq.eigenscore import compute_eigenscore, compute_umpire_metric
@@ -19,7 +15,6 @@ from trajectory_calibration.uq.semantic_entropy import (
     get_semantic_ids,
 )
 from trajectory_calibration.uq.whitebox import WhiteBoxScorers
-from trajectory_calibration.utils.helpers import safe_torch_load
 from trajectory_calibration.vlm.multipass import generate_mock_multipass_sample
 
 
@@ -27,16 +22,32 @@ def test_multipass_record_schema():
     rec = generate_mock_multipass_sample(idx=1, dataset_key="pope", num_rollouts=5, hidden_dim=64)
 
     required_keys = [
-        "question_id", "dataset", "question", "ground_truth", "answer_type",
-        "greedy_answer", "is_correct", "vqa_accuracy", "conf_softmax", "first_token_logits",
-        "rollout_texts", "rollout_token_logprobs", "rollout_sequence_logprobs", "rollout_embeddings",
+        "question_id",
+        "dataset",
+        "question",
+        "ground_truth",
+        "answer_type",
+        "greedy_answer",
+        "is_correct",
+        "vqa_accuracy",
+        "conf_softmax",
+        "first_token_logits",
+        "rollout_texts",
+        "rollout_token_logprobs",
+        "rollout_sequence_logprobs",
+        "rollout_embeddings",
     ]
     for k in required_keys:
         assert k in rec, f"Missing key: {k}"
 
     assert isinstance(rec["rollout_texts"], list) and len(rec["rollout_texts"]) == 5
-    assert isinstance(rec["rollout_token_logprobs"], list) and len(rec["rollout_token_logprobs"]) == 5
-    assert isinstance(rec["rollout_sequence_logprobs"], list) and len(rec["rollout_sequence_logprobs"]) == 5
+    assert (
+        isinstance(rec["rollout_token_logprobs"], list) and len(rec["rollout_token_logprobs"]) == 5
+    )
+    assert (
+        isinstance(rec["rollout_sequence_logprobs"], list)
+        and len(rec["rollout_sequence_logprobs"]) == 5
+    )
     assert isinstance(rec["rollout_embeddings"], np.ndarray)
     assert rec["rollout_embeddings"].shape == (5, 64)
     assert isinstance(rec["first_token_logits"], np.ndarray)
@@ -57,7 +68,9 @@ def test_multipass_semantic_entropy_integration():
 
 
 def test_multipass_eigenscore_integration():
-    rec = generate_mock_multipass_sample(idx=3, dataset_key="textvqa", num_rollouts=5, hidden_dim=128)
+    rec = generate_mock_multipass_sample(
+        idx=3, dataset_key="textvqa", num_rollouts=5, hidden_dim=128
+    )
     eigenscore = compute_eigenscore(rec["rollout_embeddings"])
     umpire = compute_umpire_metric(rec["rollout_embeddings"], rec["rollout_sequence_logprobs"])
 
@@ -75,7 +88,9 @@ def test_multipass_whitebox_integration():
 
 
 def test_multipass_vcps_calibration_integration():
-    records = [generate_mock_multipass_sample(idx=i, dataset_key="pope", num_rollouts=5) for i in range(40)]
+    records = [
+        generate_mock_multipass_sample(idx=i, dataset_key="pope", num_rollouts=5) for i in range(40)
+    ]
 
     X_rows, y_rows = [], []
     for r in records:

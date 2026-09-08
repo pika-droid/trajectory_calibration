@@ -14,10 +14,10 @@ from trajectory_calibration.vlm.registry import (
 )
 
 __all__ = [
-    "DATASET_REGISTRY",
     "ALL_DATASET_KEYS",
-    "load_hf_dataset",
+    "DATASET_REGISTRY",
     "evaluate_accuracy",
     "format_question",
+    "load_hf_dataset",
     "load_image_from_sample",
 ]

@@ -24,17 +24,17 @@ from trajectory_calibration.calibrators.proxies import (
 from trajectory_calibration.calibrators.trajectory_platt import TrajectoryPlattScaler
 
 __all__ = [
-    "NaiveConfidenceEstimator",
-    "TemperatureScalingEstimator",
-    "PlattScalingEstimator",
-    "QuadraticPlattScaler",
-    "PolynomialCalibrator",
-    "SplineCalibrator",
     "AdaptiveTemperatureScaling",
+    "BetaCalibrator",
+    "MultiScaleEigenVariance",
+    "MultiScaleSemanticConsistency",
+    "NaiveConfidenceEstimator",
+    "PlattScalingEstimator",
+    "PolynomialCalibrator",
+    "ProbabilityMarginEstimator",
+    "QuadraticPlattScaler",
+    "SplineCalibrator",
+    "TemperatureScalingEstimator",
     "TrajectoryLREstimator",
     "TrajectoryPlattScaler",
-    "BetaCalibrator",
-    "ProbabilityMarginEstimator",
-    "MultiScaleSemanticConsistency",
-    "MultiScaleEigenVariance",
 ]

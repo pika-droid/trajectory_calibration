@@ -18,8 +18,8 @@ SRC_PATH = Path(__file__).resolve().parent.parent / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-import numpy as np
 import pandas as pd
+
 from trajectory_calibration.calibrators.baselines import (
     AdaptiveTemperatureScaling,
     BetaCalibrator,
@@ -47,7 +47,6 @@ from trajectory_calibration.features.trajectory import (
 )
 from trajectory_calibration.utils.helpers import set_seed
 
-
 ALL_14_DATASETS = [
     "ai2d",
     "chartqa",
@@ -67,14 +66,30 @@ ALL_14_DATASETS = [
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Multi-Seed Cross-Validation Calibration Benchmark Runner.")
-    parser.add_argument("--features_dir", type=str, default="data/features", help="Base directory of extracted features.")
-    parser.add_argument("--arch", type=str, default="m3", choices=["m3", "mqt"], help="Model architecture.")
+    parser = argparse.ArgumentParser(
+        description="Multi-Seed Cross-Validation Calibration Benchmark Runner."
+    )
+    parser.add_argument(
+        "--features_dir",
+        type=str,
+        default="data/features",
+        help="Base directory of extracted features.",
+    )
+    parser.add_argument(
+        "--arch", type=str, default="m3", choices=["m3", "mqt"], help="Model architecture."
+    )
     parser.add_argument("--gen_temperature", type=float, default=0.0, help="Decoding temperature.")
-    parser.add_argument("--datasets", nargs="+", default=ALL_14_DATASETS, help="Datasets to evaluate.")
+    parser.add_argument(
+        "--datasets", nargs="+", default=ALL_14_DATASETS, help="Datasets to evaluate."
+    )
     parser.add_argument("--n_seeds", type=int, default=10, help="Number of random seeds / splits.")
     parser.add_argument("--base_seed", type=int, default=42, help="Starting random seed.")
-    parser.add_argument("--output_dir", type=str, default="results/experiments/benchmark_cv", help="Output directory.")
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        default="results/experiments/benchmark_cv",
+        help="Output directory.",
+    )
     return parser.parse_args()
 
 
@@ -88,7 +103,9 @@ def main() -> None:
     raw_results = []
 
     print("=" * 80)
-    print(f" MULTI-SEED CV BENCHMARK: {args.arch.upper()} across {len(args.datasets)} datasets ({args.n_seeds} seeds)")
+    print(
+        f" MULTI-SEED CV BENCHMARK: {args.arch.upper()} across {len(args.datasets)} datasets ({args.n_seeds} seeds)"
+    )
     print("=" * 80)
 
     for ds in args.datasets:
@@ -124,20 +141,44 @@ def main() -> None:
 
             methods = {
                 "Naive Confidence (NC)": (NaiveConfidenceEstimator(), X_train_17d, X_test_17d),
-                "Temperature Scaling (TS)": (TemperatureScalingEstimator(), X_train_17d, X_test_17d),
+                "Temperature Scaling (TS)": (
+                    TemperatureScalingEstimator(),
+                    X_train_17d,
+                    X_test_17d,
+                ),
                 "Platt Scaling (1D)": (PlattScalingEstimator(), X_train_17d, X_test_17d),
                 "Quadratic Platt (Logit-Only)": (QuadraticPlattScaler(), X_train_17d, X_test_17d),
                 "Beta Calibration": (BetaCalibrator(), X_train_17d, X_test_17d),
                 "Spline Calibration": (SplineCalibrator(), X_train_17d, X_test_17d),
                 "Adaptive TS (ATS)": (AdaptiveTemperatureScaling(), X_train_5d, X_test_5d),
                 "Probability Margin (1D)": (ProbabilityMarginEstimator(), X_train_17d, X_test_17d),
-                "MSSC (Multi-Scale Proxy)": (MultiScaleSemanticConsistency(), X_train_17d, X_test_17d),
+                "MSSC (Multi-Scale Proxy)": (
+                    MultiScaleSemanticConsistency(),
+                    X_train_17d,
+                    X_test_17d,
+                ),
                 "MSE-EIGEN (Multi-Scale)": (MultiScaleEigenVariance(), X_train_17d, X_test_17d),
                 "Residual Calibrator": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
-                "Trajectory LR": (TrajectoryLREstimator(fit_intercept=True, random_state=seed), X_train_5d, X_test_5d),
-                "Trajectory LR (No Bias)": (TrajectoryLREstimator(fit_intercept=False, random_state=seed), X_train_5d, X_test_5d),
-                "Trajectory Platt (5D)": (TrajectoryPlattScaler(n_features=len(best_5d_keys)), X_train_5d, X_test_5d),
-                "Trajectory Platt (17D)": (TrajectoryPlattScaler(n_features=len(FEATURE_KEYS)), X_train_17d, X_test_17d),
+                "Trajectory LR": (
+                    TrajectoryLREstimator(fit_intercept=True, random_state=seed),
+                    X_train_5d,
+                    X_test_5d,
+                ),
+                "Trajectory LR (No Bias)": (
+                    TrajectoryLREstimator(fit_intercept=False, random_state=seed),
+                    X_train_5d,
+                    X_test_5d,
+                ),
+                "Trajectory Platt (5D)": (
+                    TrajectoryPlattScaler(n_features=len(best_5d_keys)),
+                    X_train_5d,
+                    X_test_5d,
+                ),
+                "Trajectory Platt (17D)": (
+                    TrajectoryPlattScaler(n_features=len(FEATURE_KEYS)),
+                    X_train_17d,
+                    X_test_17d,
+                ),
                 "VCPS-5D (Our Method)": (
                     VaryingCoefficientPlattScaler(feature_set="5d", random_state=seed),
                     X_train_5d,
@@ -179,20 +220,19 @@ def main() -> None:
 
     summary_df = raw_df.groupby(["dataset", "method"]).agg(agg_funcs).reset_index()
     # Flatten MultiIndex column names
-    summary_df.columns = [
-        f"{col[0]}_{col[1]}" if col[1] else col[0]
-        for col in summary_df.columns
-    ]
+    summary_df.columns = [f"{col[0]}_{col[1]}" if col[1] else col[0] for col in summary_df.columns]
 
     summary_csv = out_dir / f"benchmark_cv_{args.arch}_summary.csv"
     summary_df.to_csv(summary_csv, index=False)
     print(f"Saved aggregated summary to: {summary_csv}")
 
     # Create formatted mean +/- std table for Adaptive ECE (%)
-    raw_df["ada_ece_str"] = raw_df.apply(
-        lambda r: f"{r['adaptive_ece_percent']:.2f}", axis=1
+    raw_df["ada_ece_str"] = raw_df.apply(lambda r: f"{r['adaptive_ece_percent']:.2f}", axis=1)
+    mean_std = (
+        raw_df.groupby(["method", "dataset"])["adaptive_ece_percent"]
+        .agg(["mean", "std"])
+        .reset_index()
     )
-    mean_std = raw_df.groupby(["method", "dataset"])["adaptive_ece_percent"].agg(["mean", "std"]).reset_index()
     mean_std["mean_std_str"] = mean_std.apply(
         lambda r: f"{r['mean']:.2f} +/- {r['std']:.2f}", axis=1
     )

@@ -14,8 +14,8 @@ SRC_PATH = Path(__file__).resolve().parent.parent / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-import numpy as np
 import pandas as pd
+
 from trajectory_calibration.calibrators.baselines import (
     AdaptiveTemperatureScaling,
     BetaCalibrator,
@@ -43,21 +43,44 @@ from trajectory_calibration.features.trajectory import (
 )
 from trajectory_calibration.utils.helpers import set_seed
 
-
 ALL_14_DATASETS = [
-    "ai2d", "chartqa", "docvqa", "gqa", "infographicvqa", "lego-puzzles",
-    "mmbench", "mmmu", "pope", "scienceqa", "seedbench", "textvqa",
-    "vizwiz-vqa", "vqav2",
+    "ai2d",
+    "chartqa",
+    "docvqa",
+    "gqa",
+    "infographicvqa",
+    "lego-puzzles",
+    "mmbench",
+    "mmmu",
+    "pope",
+    "scienceqa",
+    "seedbench",
+    "textvqa",
+    "vizwiz-vqa",
+    "vqav2",
 ]
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run comprehensive multi-dataset calibration benchmark.")
-    parser.add_argument("--features_dir", type=str, default="data/features", help="Base directory of extracted features.")
-    parser.add_argument("--arch", type=str, default="m3", choices=["m3", "mqt"], help="Model architecture.")
+    parser = argparse.ArgumentParser(
+        description="Run comprehensive multi-dataset calibration benchmark."
+    )
+    parser.add_argument(
+        "--features_dir",
+        type=str,
+        default="data/features",
+        help="Base directory of extracted features.",
+    )
+    parser.add_argument(
+        "--arch", type=str, default="m3", choices=["m3", "mqt"], help="Model architecture."
+    )
     parser.add_argument("--gen_temperature", type=float, default=0.0, help="Decoding temperature.")
-    parser.add_argument("--datasets", nargs="+", default=ALL_14_DATASETS, help="Datasets to evaluate.")
-    parser.add_argument("--output_dir", type=str, default="results/experiments/benchmark", help="Output directory.")
+    parser.add_argument(
+        "--datasets", nargs="+", default=ALL_14_DATASETS, help="Datasets to evaluate."
+    )
+    parser.add_argument(
+        "--output_dir", type=str, default="results/experiments/benchmark", help="Output directory."
+    )
     parser.add_argument("--seed", type=int, default=42, help="Random seed.")
     args = parser.parse_args()
 
@@ -109,11 +132,31 @@ def main() -> None:
             "MSE-EIGEN (Multi-Scale)": (MultiScaleEigenVariance(), X_train_17d, X_test_17d),
             "Residual Calibrator": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
             "Trajectory LR": (TrajectoryLREstimator(fit_intercept=True), X_train_5d, X_test_5d),
-            "Trajectory LR (No Bias)": (TrajectoryLREstimator(fit_intercept=False), X_train_5d, X_test_5d),
-            "Trajectory Platt (5D)": (TrajectoryPlattScaler(n_features=len(best_5d_keys)), X_train_5d, X_test_5d),
-            "Trajectory Platt (17D)": (TrajectoryPlattScaler(n_features=len(FEATURE_KEYS)), X_train_17d, X_test_17d),
-            "VCPS-5D (Our Method)": (VaryingCoefficientPlattScaler(feature_set="5d"), X_train_5d, X_test_5d),
-            "VCPS-17D (Our Method)": (VaryingCoefficientPlattScaler(feature_set="17d"), X_train_17d, X_test_17d),
+            "Trajectory LR (No Bias)": (
+                TrajectoryLREstimator(fit_intercept=False),
+                X_train_5d,
+                X_test_5d,
+            ),
+            "Trajectory Platt (5D)": (
+                TrajectoryPlattScaler(n_features=len(best_5d_keys)),
+                X_train_5d,
+                X_test_5d,
+            ),
+            "Trajectory Platt (17D)": (
+                TrajectoryPlattScaler(n_features=len(FEATURE_KEYS)),
+                X_train_17d,
+                X_test_17d,
+            ),
+            "VCPS-5D (Our Method)": (
+                VaryingCoefficientPlattScaler(feature_set="5d"),
+                X_train_5d,
+                X_test_5d,
+            ),
+            "VCPS-17D (Our Method)": (
+                VaryingCoefficientPlattScaler(feature_set="17d"),
+                X_train_17d,
+                X_test_17d,
+            ),
         }
 
         for m_name, (model, X_tr, X_te) in methods.items():
@@ -143,7 +186,9 @@ def main() -> None:
 
     pivot_ece = results_df.pivot(index="method", columns="dataset", values="adaptive_ece_percent")
     print("\n" + "=" * 75)
-    print(f" BENCHMARK SUMMARY: Adaptive ECE (%) [{args.arch.upper()} T_gen={args.gen_temperature}]")
+    print(
+        f" BENCHMARK SUMMARY: Adaptive ECE (%) [{args.arch.upper()} T_gen={args.gen_temperature}]"
+    )
     print("=" * 75)
     print(pivot_ece.round(2).to_string())
     print("=" * 75)

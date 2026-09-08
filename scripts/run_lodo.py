@@ -11,6 +11,7 @@ on the held-out 14th benchmark, comparing:
 import argparse
 import sys
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
@@ -40,21 +41,40 @@ from trajectory_calibration.utils.helpers import set_seed
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run Leave-One-Dataset-Out (LODO) Cross-Domain Transfer Benchmark.")
-    parser.add_argument("--features_dir", type=str, default="data/features", help="Base directory of features.")
-    parser.add_argument("--arch", type=str, default="m3", choices=["m3", "mqt"], help="Model architecture.")
+    parser = argparse.ArgumentParser(
+        description="Run Leave-One-Dataset-Out (LODO) Cross-Domain Transfer Benchmark."
+    )
+    parser.add_argument(
+        "--features_dir", type=str, default="data/features", help="Base directory of features."
+    )
+    parser.add_argument(
+        "--arch", type=str, default="m3", choices=["m3", "mqt"], help="Model architecture."
+    )
     parser.add_argument("--gen_temperature", type=float, default=0.0, help="Decoding temperature.")
     parser.add_argument(
         "--datasets",
         nargs="+",
         default=[
-            "ai2d", "chartqa", "docvqa", "gqa", "infographicvqa", "lego-puzzles",
-            "mmbench", "mmmu", "pope", "scienceqa", "seedbench", "textvqa",
-            "vizwiz-vqa", "vqav2_5scale"
+            "ai2d",
+            "chartqa",
+            "docvqa",
+            "gqa",
+            "infographicvqa",
+            "lego-puzzles",
+            "mmbench",
+            "mmmu",
+            "pope",
+            "scienceqa",
+            "seedbench",
+            "textvqa",
+            "vizwiz-vqa",
+            "vqav2_5scale",
         ],
-        help="Datasets to include in LODO evaluation."
+        help="Datasets to include in LODO evaluation.",
     )
-    parser.add_argument("--output_dir", type=str, default="results/experiments/lodo", help="Output directory.")
+    parser.add_argument(
+        "--output_dir", type=str, default="results/experiments/lodo", help="Output directory."
+    )
     parser.add_argument("--seed", type=int, default=42, help="Random seed.")
     args = parser.parse_args()
 
@@ -111,13 +131,33 @@ def main() -> None:
         base_models = {
             "Platt Scaling (1D)": (PlattScalingEstimator(), X_train_17d, X_test_17d),
             "Trajectory LR": (TrajectoryLREstimator(fit_intercept=True), X_train_5d, X_test_5d),
-            "Trajectory LR (No Bias)": (TrajectoryLREstimator(fit_intercept=False), X_train_5d, X_test_5d),
-            "Trajectory Platt (5D)": (TrajectoryPlattScaler(n_features=len(best_5d_keys)), X_train_5d, X_test_5d),
-            "Trajectory Platt (17D)": (TrajectoryPlattScaler(n_features=len(FEATURE_KEYS)), X_train_17d, X_test_17d),
+            "Trajectory LR (No Bias)": (
+                TrajectoryLREstimator(fit_intercept=False),
+                X_train_5d,
+                X_test_5d,
+            ),
+            "Trajectory Platt (5D)": (
+                TrajectoryPlattScaler(n_features=len(best_5d_keys)),
+                X_train_5d,
+                X_test_5d,
+            ),
+            "Trajectory Platt (17D)": (
+                TrajectoryPlattScaler(n_features=len(FEATURE_KEYS)),
+                X_train_17d,
+                X_test_17d,
+            ),
             "Best 5D Trajectory": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
             "Two-Stage Residual": (ResidualTrajectoryCalibrator(), X_train_5d, X_test_5d),
-            "VCPS-5D (Our Method)": (VaryingCoefficientPlattScaler(feature_set="5d"), X_train_5d, X_test_5d),
-            "VCPS-17D (Our Method)": (VaryingCoefficientPlattScaler(feature_set="17d"), X_train_17d, X_test_17d),
+            "VCPS-5D (Our Method)": (
+                VaryingCoefficientPlattScaler(feature_set="5d"),
+                X_train_5d,
+                X_test_5d,
+            ),
+            "VCPS-17D (Our Method)": (
+                VaryingCoefficientPlattScaler(feature_set="17d"),
+                X_train_17d,
+                X_test_17d,
+            ),
         }
 
         for m_name, (model, X_tr, X_te) in base_models.items():
@@ -136,7 +176,9 @@ def main() -> None:
             all_lodo_results.append(panel_base)
 
             # Mode 2: Unsupervised Target Adapted (Saerens-EM prior shift)
-            em_probs, _ = run_saerens_em_binary(base_probs, pi_source=float(np.mean(y_train)), max_iter=100)
+            em_probs, _ = run_saerens_em_binary(
+                base_probs, pi_source=float(np.mean(y_train)), max_iter=100
+            )
             panel_em = evaluate_full_metric_panel(em_probs, y_test, c_test, y_train=y_train)
             panel_em["test_dataset"] = test_name
             panel_em["method"] = m_name
@@ -153,9 +195,17 @@ def main() -> None:
     print(f"\nSaved full LODO transfer results to {csv_path}")
 
     # Print Macro-Mean Summary
-    macro = df_lodo.groupby(["method", "transfer_mode"])[["adaptive_ece_percent", "ece_percent", "auroc", "brier"]].mean().reset_index()
+    macro = (
+        df_lodo.groupby(["method", "transfer_mode"])[
+            ["adaptive_ece_percent", "ece_percent", "auroc", "brier"]
+        ]
+        .mean()
+        .reset_index()
+    )
     print("\n" + "=" * 85)
-    print(f" LODO CROSS-DOMAIN TRANSFER: MACRO-MEAN SUMMARY [{args.arch.upper()} T_gen={args.gen_temperature}]")
+    print(
+        f" LODO CROSS-DOMAIN TRANSFER: MACRO-MEAN SUMMARY [{args.arch.upper()} T_gen={args.gen_temperature}]"
+    )
     print("=" * 85)
     print(macro.to_string(index=False))
     print("=" * 85)

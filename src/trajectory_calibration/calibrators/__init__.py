@@ -23,20 +23,6 @@ from trajectory_calibration.calibrators.baselines import (
     TrajectoryLREstimator,
     TrajectoryPlattScaler,
 )
-from trajectory_calibration.calibrators.classic import (
-    AdaptiveTemperatureScaling,
-    NaiveConfidenceEstimator,
-    PlattScalingEstimator,
-    QuadraticPlattScaler,
-    SplineCalibrator,
-    TemperatureScalingEstimator,
-    TrajectoryLREstimator,
-)
-from trajectory_calibration.calibrators.proxies import (
-    MultiScaleEigenVariance,
-    MultiScaleSemanticConsistency,
-    ProbabilityMarginEstimator,
-)
 from trajectory_calibration.calibrators.residual import (
     ResidualTrajectoryCalibrator,
     compute_aurc,
@@ -45,25 +31,25 @@ from trajectory_calibration.calibrators.residual import (
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
 
 __all__ = [
-    "NaiveConfidenceEstimator",
-    "TemperatureScalingEstimator",
-    "PlattScalingEstimator",
-    "QuadraticPlattScaler",
-    "SplineCalibrator",
     "AdaptiveTemperatureScaling",
+    "BetaCalibrator",
+    "MultiScaleEigenVariance",
+    "MultiScaleSemanticConsistency",
+    "NaiveConfidenceEstimator",
+    "PlattScalingEstimator",
+    "ProbabilityMarginEstimator",
+    "QuadraticPlattScaler",
+    "ResidualTrajectoryCalibrator",
+    "SplineCalibrator",
+    "TemperatureScalingEstimator",
     "TrajectoryLREstimator",
     "TrajectoryPlattScaler",
-    "ProbabilityMarginEstimator",
-    "MultiScaleSemanticConsistency",
-    "MultiScaleEigenVariance",
     "VaryingCoefficientPlattScaler",
-    "ResidualTrajectoryCalibrator",
+    "apply_beta_calibration",
     "compute_aurc",
     "evaluate_full_metric_panel",
-    "BetaCalibrator",
-    "run_saerens_em_binary",
-    "fit_target_intercept_adaptation",
     "fit_beta_calibration",
-    "apply_beta_calibration",
+    "fit_target_intercept_adaptation",
+    "run_saerens_em_binary",
     "safe_clip_probs",
 ]

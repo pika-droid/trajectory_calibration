@@ -10,7 +10,9 @@ from __future__ import annotations
 import numpy as np
 
 
-def compute_ece(confidences: np.ndarray | list[float], accuracies: np.ndarray | list[float], n_bins: int = 15) -> float:
+def compute_ece(
+    confidences: np.ndarray | list[float], accuracies: np.ndarray | list[float], n_bins: int = 15
+) -> float:
     """
     Expected Calibration Error (ECE) with equal-width binning.
 
@@ -24,7 +26,6 @@ def compute_ece(confidences: np.ndarray | list[float], accuracies: np.ndarray | 
 
     bin_boundaries = np.linspace(0.0, 1.0, n_bins + 1)
     ece = 0.0
-    n = len(confs)
 
     for i in range(n_bins):
         bin_lower, bin_upper = bin_boundaries[i], bin_boundaries[i + 1]
@@ -42,7 +43,9 @@ def compute_ece(confidences: np.ndarray | list[float], accuracies: np.ndarray | 
     return float(ece)
 
 
-def compute_mce(confidences: np.ndarray | list[float], accuracies: np.ndarray | list[float], n_bins: int = 15) -> float:
+def compute_mce(
+    confidences: np.ndarray | list[float], accuracies: np.ndarray | list[float], n_bins: int = 15
+) -> float:
     """
     Maximum Calibration Error (MCE) across equal-width bins.
 
@@ -73,7 +76,9 @@ def compute_mce(confidences: np.ndarray | list[float], accuracies: np.ndarray | 
     return float(mce)
 
 
-def compute_adaptive_ece(probs: np.ndarray | list[float], y: np.ndarray | list[float], n_bins: int = 15) -> float:
+def compute_adaptive_ece(
+    probs: np.ndarray | list[float], y: np.ndarray | list[float], n_bins: int = 15
+) -> float:
     """
     Adaptive ECE with equal-mass (quantile) binning.
 
@@ -98,7 +103,9 @@ def compute_adaptive_ece(probs: np.ndarray | list[float], y: np.ndarray | list[f
     return float(ece)
 
 
-def compute_kde_ece(probs: np.ndarray | list[float], y: np.ndarray | list[float], n_grid: int = 100) -> float:
+def compute_kde_ece(
+    probs: np.ndarray | list[float], y: np.ndarray | list[float], n_grid: int = 100
+) -> float:
     """
     Continuous Kernel Density ECE using Gaussian kernel density estimation.
 

@@ -1,7 +1,9 @@
 from unittest.mock import MagicMock, patch
+
 import numpy as np
 import pytest
 import torch
+
 from trajectory_calibration.uq.eigenscore import (
     compute_eigenscore,
     compute_eigenscore_gram,
@@ -14,19 +16,18 @@ from trajectory_calibration.uq.semantic_entropy import (
     FastStringEntailment,
     cluster_assignment_entropy,
     compute_cluster_assignment_entropy,
-    compute_predictive_entropy,
     compute_semantic_entropy,
     get_semantic_ids,
-    logsumexp_by_id,
     predictive_entropy,
 )
 
 
 def test_entailment_deberta_mocked() -> None:
     """Verify EntailmentDeberta forward pass and logit class decoding (0=Contradiction, 1=Neutral, 2=Entailment)."""
-    with patch("transformers.AutoTokenizer.from_pretrained") as mock_tok_cls, \
-         patch("transformers.AutoModelForSequenceClassification.from_pretrained") as mock_model_cls:
-        
+    with (
+        patch("transformers.AutoTokenizer.from_pretrained") as mock_tok_cls,
+        patch("transformers.AutoModelForSequenceClassification.from_pretrained") as mock_model_cls,
+    ):
         mock_tokenizer = MagicMock()
         mock_tokenizer.return_value = {"input_ids": torch.tensor([[1, 2, 3]])}
         mock_tok_cls.return_value = mock_tokenizer

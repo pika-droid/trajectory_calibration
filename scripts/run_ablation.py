@@ -11,6 +11,7 @@ Implements:
 import argparse
 import sys
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
@@ -32,17 +33,25 @@ from trajectory_calibration.utils.helpers import set_seed
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run Trajectory Feature Sensitivity and Ablation Study.")
-    parser.add_argument("--features_dir", type=str, default="data/features", help="Base directory of features.")
-    parser.add_argument("--arch", type=str, default="m3", choices=["m3", "mqt"], help="Model architecture.")
+    parser = argparse.ArgumentParser(
+        description="Run Trajectory Feature Sensitivity and Ablation Study."
+    )
+    parser.add_argument(
+        "--features_dir", type=str, default="data/features", help="Base directory of features."
+    )
+    parser.add_argument(
+        "--arch", type=str, default="m3", choices=["m3", "mqt"], help="Model architecture."
+    )
     parser.add_argument("--gen_temperature", type=float, default=0.0, help="Decoding temperature.")
     parser.add_argument(
         "--datasets",
         nargs="+",
         default=["pope", "scienceqa", "textvqa", "vizwiz-vqa"],
-        help="Datasets to evaluate."
+        help="Datasets to evaluate.",
     )
-    parser.add_argument("--output_dir", type=str, default="results/experiments/ablation", help="Output directory.")
+    parser.add_argument(
+        "--output_dir", type=str, default="results/experiments/ablation", help="Output directory."
+    )
     parser.add_argument("--seed", type=int, default=42, help="Random seed.")
     args = parser.parse_args()
 
@@ -55,7 +64,13 @@ def main() -> None:
     dfs = []
     for ds in args.datasets:
         try:
-            df = load_dataset_features(args.features_dir, ds_name=ds, arch=args.arch, gen_temperature=args.gen_temperature, fine_scale=fine_scale)
+            df = load_dataset_features(
+                args.features_dir,
+                ds_name=ds,
+                arch=args.arch,
+                gen_temperature=args.gen_temperature,
+                fine_scale=fine_scale,
+            )
             df["dataset_source"] = ds
             dfs.append(df)
         except Exception as e:
@@ -66,7 +81,9 @@ def main() -> None:
         return
 
     pooled_df = pd.concat(dfs, ignore_index=True)
-    print(f"Loaded {len(dfs)} datasets for ablation study ({args.arch.upper()}). Total samples: {len(pooled_df)}")
+    print(
+        f"Loaded {len(dfs)} datasets for ablation study ({args.arch.upper()}). Total samples: {len(pooled_df)}"
+    )
 
     tr_idx, te_idx = get_stratified_split(pooled_df, test_size=0.2, random_state=args.seed)
     train_df = pooled_df.iloc[tr_idx].reset_index(drop=True)
@@ -92,12 +109,14 @@ def main() -> None:
         preds = lr.predict_proba(X_test_full[:, [j]])[:, 1]
         ada_ece = compute_adaptive_ece(preds, y_test, n_bins=15) * 100.0
         auroc = compute_auroc(preds, y_test)
-        univariate_results.append({
-            "feature": f_key,
-            "adaptive_ece_percent": ada_ece,
-            "auroc": auroc,
-            "weight": float(lr.coef_[0][0]),
-        })
+        univariate_results.append(
+            {
+                "feature": f_key,
+                "adaptive_ece_percent": ada_ece,
+                "auroc": auroc,
+                "weight": float(lr.coef_[0][0]),
+            }
+        )
 
     df_uni = pd.DataFrame(univariate_results).sort_values("adaptive_ece_percent")
     df_uni.to_csv(out_dir / f"ablation_{args.arch}_univariate_ranking.csv", index=False)
@@ -121,12 +140,14 @@ def main() -> None:
         loo_preds = lr_loo.predict_proba(X_test_full[:, subset_cols])[:, 1]
         loo_ece = compute_adaptive_ece(loo_preds, y_test, n_bins=15) * 100.0
         delta_ece = loo_ece - base_ece
-        loo_results.append({
-            "feature_dropped": f_key,
-            "baseline_ece": base_ece,
-            "loo_ece": loo_ece,
-            "delta_ece": delta_ece,
-        })
+        loo_results.append(
+            {
+                "feature_dropped": f_key,
+                "baseline_ece": base_ece,
+                "loo_ece": loo_ece,
+                "delta_ece": delta_ece,
+            }
+        )
 
     df_loo = pd.DataFrame(loo_results).sort_values("delta_ece", ascending=False)
     df_loo.to_csv(out_dir / f"ablation_{args.arch}_loo_sensitivity.csv", index=False)
@@ -180,14 +201,16 @@ def main() -> None:
         k_panel = evaluate_full_metric_panel(k_preds, y_test, c_test, y_train=y_train)
 
         vif = calculate_vif(X_train_full[:, cols]) if len(cols) > 1 else 1.0
-        pareto_results.append({
-            "K_features": k,
-            "subset": ", ".join(current_subset),
-            "adaptive_ece_percent": k_panel["adaptive_ece_percent"],
-            "auroc": k_panel["auroc"],
-            "brier_score": k_panel.get("brier", k_panel.get("brier_score", 0.0)),
-            "max_vif": vif,
-        })
+        pareto_results.append(
+            {
+                "K_features": k,
+                "subset": ", ".join(current_subset),
+                "adaptive_ece_percent": k_panel["adaptive_ece_percent"],
+                "auroc": k_panel["auroc"],
+                "brier_score": k_panel.get("brier", k_panel.get("brier_score", 0.0)),
+                "max_vif": vif,
+            }
+        )
 
     df_pareto = pd.DataFrame(pareto_results)
     df_pareto.to_csv(out_dir / f"ablation_{args.arch}_pareto_progression.csv", index=False)

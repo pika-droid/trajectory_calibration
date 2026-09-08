@@ -1,8 +1,8 @@
 """Tests for verifying VCPS analytical gradients against finite differences."""
 
 import numpy as np
-import pytest
 from scipy.optimize import check_grad
+
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
 
 
@@ -29,12 +29,12 @@ def test_vcps_gradient_consistency():
 
         objective, x0 = vcps._build_objective(X, y, feature_names=feature_names)
 
-        def func(params):
-            val, _ = objective(params)
+        def func(params, obj=objective):
+            val, _ = obj(params)
             return val
 
-        def grad(params):
-            _, g = objective(params)
+        def grad(params, obj=objective):
+            _, g = obj(params)
             return g
 
         # 1. Check with scipy.optimize.check_grad at initial point
@@ -46,13 +46,17 @@ def test_vcps_gradient_consistency():
         x_perturbed = x0 + 0.1 * np.random.randn(len(x0))
 
         cg_err_perturbed = check_grad(func, grad, x_perturbed)
-        assert cg_err_perturbed < 1e-5, f"check_grad error {cg_err_perturbed} >= 1e-5 for mode={mode} at x_perturbed"
+        assert cg_err_perturbed < 1e-5, (
+            f"check_grad error {cg_err_perturbed} >= 1e-5 for mode={mode} at x_perturbed"
+        )
 
         # Check specifically when base slope a0 < 0.1 (alpha0 = -2.5 -> a0 ~ 0.082)
         x_small = x_perturbed.copy()
         x_small[0] = -2.5
         cg_err_small = check_grad(func, grad, x_small)
-        assert cg_err_small < 1e-5, f"check_grad error {cg_err_small} >= 1e-5 for mode={mode} at small a0 < 0.1"
+        assert cg_err_small < 1e-5, (
+            f"check_grad error {cg_err_small} >= 1e-5 for mode={mode} at small a0 < 0.1"
+        )
 
         # 3. Explicit finite-difference relative error check
         analytical_val, analytical_grad = objective(x_perturbed)

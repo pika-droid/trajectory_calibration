@@ -5,11 +5,11 @@ Multi-scale trajectory signature feature extraction logic.
 from __future__ import annotations
 
 from typing import Any
+
 import numpy as np
 from scipy.special import logit
 
 from trajectory_calibration.utils.helpers import clean_text
-
 
 SCALE_LOG_576 = np.log(np.array([1, 9, 36, 144, 576], dtype=np.float64))
 DENOM_576 = float(np.sum((SCALE_LOG_576 - np.mean(SCALE_LOG_576)) ** 2))
@@ -68,8 +68,17 @@ def compute_features_from_sample(
     x3 = float(1.0 / max(1, len(unique_answers)))
 
     # x4: Scale Entropy Slope (old x18)
-    bin_entropy = -(c_arr * np.log(np.clip(c_arr, eps, 1.0)) + (1.0 - c_arr) * np.log(np.clip(1.0 - c_arr, eps, 1.0)))
-    x4 = float(np.sum((scale_log - np.mean(scale_log)) * (bin_entropy - np.mean(bin_entropy))) / denom) if denom > 0 else 0.0
+    bin_entropy = -(
+        c_arr * np.log(np.clip(c_arr, eps, 1.0))
+        + (1.0 - c_arr) * np.log(np.clip(1.0 - c_arr, eps, 1.0))
+    )
+    x4 = (
+        float(
+            np.sum((scale_log - np.mean(scale_log)) * (bin_entropy - np.mean(bin_entropy))) / denom
+        )
+        if denom > 0
+        else 0.0
+    )
 
     # x5: Logprob Variance (old x11)
     x5 = float(np.var(lp_arr))
@@ -87,7 +96,11 @@ def compute_features_from_sample(
     x8 = float((c_arr[-1] - c_arr[3]) - (c_arr[3] - c_arr[1]))
 
     # x9: Log-Scale Slope (old x9)
-    x9 = float(np.sum((scale_log - np.mean(scale_log)) * (c_arr - np.mean(c_arr))) / denom) if denom > 0 else 0.0
+    x9 = (
+        float(np.sum((scale_log - np.mean(scale_log)) * (c_arr - np.mean(c_arr))) / denom)
+        if denom > 0
+        else 0.0
+    )
 
     # x10: Confidence Gain (c_fine - c_9) (old x3)
     x10 = float(c_arr[-1] - c_arr[1])
@@ -119,7 +132,12 @@ def compute_features_from_sample(
     else:
         is_correct = 1 if acc_final >= 0.5 else 0
 
-    qid = item.get("question_id") or item.get("id") or item.get("questionId") or item.get("sample_idx")
+    qid = (
+        item.get("question_id")
+        or item.get("id")
+        or item.get("questionId")
+        or item.get("sample_idx")
+    )
 
     return {
         "x1": x1,

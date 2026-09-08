@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import random
 from typing import Any
+
 import numpy as np
 import torch
 
@@ -30,7 +31,11 @@ def generate_mock_multipass_sample(
     """Generates synthetic multi-pass / multi-rollout record for smoke testing."""
     cfg = DATASET_REGISTRY.get(dataset_key, {"answer_type": "open"})
     ans_type = cfg.get("answer_type", "open")
-    qid = str(sample.get("question_id", sample.get("id", 100000 + idx))) if sample else str(100000 + idx)
+    qid = (
+        str(sample.get("question_id", sample.get("id", 100000 + idx)))
+        if sample
+        else str(100000 + idx)
+    )
     question = format_question(sample, dataset_key) if sample else f"Mock question {idx}?"
     gt = sample.get("answer", sample.get("label", "yes")) if sample else "yes"
 
@@ -43,7 +48,9 @@ def generate_mock_multipass_sample(
     first_logits[top_tok] = float(np.log(c_fine / (1.0 - c_fine + 1e-7)) + 5.0)
 
     base_ans = str(gt) if is_corr else "unrelated answer"
-    roll_texts = [base_ans if random.random() > 0.3 else f"maybe {base_ans}" for _ in range(num_rollouts)]
+    roll_texts = [
+        base_ans if random.random() > 0.3 else f"maybe {base_ans}" for _ in range(num_rollouts)
+    ]
 
     roll_token_lps = []
     roll_seq_lps = []
@@ -54,7 +61,10 @@ def generate_mock_multipass_sample(
 
     base_emb = np.random.randn(hidden_dim).astype(np.float32)
     roll_embs = np.stack(
-        [base_emb + np.random.randn(hidden_dim).astype(np.float32) * 0.05 for _ in range(num_rollouts)],
+        [
+            base_emb + np.random.randn(hidden_dim).astype(np.float32) * 0.05
+            for _ in range(num_rollouts)
+        ],
         axis=0,
     )
 
@@ -90,6 +100,7 @@ def _extract_single_rollout(
     n_hs = len(hidden_states) if hidden_states is not None else 0
     eos_id = getattr(wrapper.tokenizer, "eos_token_id", None)
     h_dim = getattr(wrapper.model.config, "hidden_size", 4096)
+    full_seq = sequences[k_idx] if sequences.ndim > 1 else sequences
 
     if n_sc > 0:
         gen_tokens = full_seq[-n_sc:].tolist()
@@ -106,17 +117,21 @@ def _extract_single_rollout(
     text = wrapper.tokenizer.decode(tok_ids, skip_special_tokens=True).strip()
 
     t_lps = []
-    for t in range(min(act_len, n_sc)):
-        logits_t = scores[t][k_idx].detach().float()
-        if tok_ids[t] < logits_t.shape[-1]:
-            t_lps.append(float(torch.log_softmax(logits_t, dim=-1)[tok_ids[t]].item()))
+    if scores is not None:
+        for t in range(min(act_len, n_sc)):
+            logits_t = scores[t][k_idx].detach().float()
+            if tok_ids[t] < logits_t.shape[-1]:
+                t_lps.append(float(torch.log_softmax(logits_t, dim=-1)[tok_ids[t]].item()))
     t_lps = t_lps if t_lps else [0.0]
     seq_lp = float(sum(t_lps))
 
     t_vecs = []
-    for t in range(min(act_len, n_hs)):
-        t_vecs.append(hidden_states[t][-1][k_idx, -1, :].detach().float().cpu().numpy())
-    emb = np.mean(t_vecs, axis=0).astype(np.float32) if t_vecs else np.zeros(h_dim, dtype=np.float32)
+    if hidden_states is not None:
+        for t in range(min(act_len, n_hs)):
+            t_vecs.append(hidden_states[t][-1][k_idx, -1, :].detach().float().cpu().numpy())
+    emb = (
+        np.mean(t_vecs, axis=0).astype(np.float32) if t_vecs else np.zeros(h_dim, dtype=np.float32)
+    )
 
     return text, t_lps, seq_lp, emb
 
@@ -154,7 +169,9 @@ def _generate_rollouts_with_oom_defense(
     except (torch.cuda.OutOfMemoryError, RuntimeError) as e:
         err_msg = str(e).lower()
         if "out of memory" in err_msg or isinstance(e, torch.cuda.OutOfMemoryError):
-            logger.warning("CUDA OOM encountered during parallel rollouts. Falling back to sequential execution...")
+            logger.warning(
+                "CUDA OOM encountered during parallel rollouts. Falling back to sequential execution..."
+            )
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
 
@@ -206,9 +223,17 @@ def extract_multipass_record(
     try:
         cfg = DATASET_REGISTRY.get(dataset_key, {"answer_type": "open"})
         ans_type = cfg.get("answer_type", "open")
-        qid = str(sample.get("question_id", sample.get("questionId", sample.get("id", sample.get("sample_idx", sample.get("image_id", 0))))))
+        qid = str(
+            sample.get(
+                "question_id",
+                sample.get(
+                    "questionId",
+                    sample.get("id", sample.get("sample_idx", sample.get("image_id", 0))),
+                ),
+            )
+        )
         # Extract ground truth cleanly across all benchmark formats
-        raw_gt = sample.get("answer", sample.get("label", sample.get("ground_truth", None)))
+        raw_gt = sample.get("answer", sample.get("label", sample.get("ground_truth")))
         if raw_gt is None or raw_gt == "":
             raw_answers = sample.get("answers", sample.get("annotations", []))
             if isinstance(raw_answers, list) and len(raw_answers) > 0:
@@ -221,25 +246,34 @@ def extract_multipass_record(
         gt = raw_gt
         question = format_question(sample, dataset_key)
         prompt = wrapper.format_prompt(question)
-        input_ids = wrapper._llava["tokenizer_image_token"](
-            prompt, wrapper.tokenizer, wrapper._llava["IMAGE_TOKEN_INDEX"], return_tensors="pt"
-        ).unsqueeze(0).to(wrapper.device)
+        input_ids = (
+            wrapper._llava["tokenizer_image_token"](
+                prompt, wrapper.tokenizer, wrapper._llava["IMAGE_TOKEN_INDEX"], return_tensors="pt"
+            )
+            .unsqueeze(0)
+            .to(wrapper.device)
+        )
         image_tensor, image_sizes = wrapper.preprocess_image(image)
         input_len = input_ids.shape[1]
-        autocast_dev = wrapper.device.type if hasattr(wrapper.device, "type") else "cuda"
 
         vt = 256 if getattr(wrapper, "arch", "m3") == "mqt" else None
         if hasattr(wrapper.model, "config"):
-            setattr(wrapper.model.config, "num_visual_tokens", vt)
+            wrapper.model.config.num_visual_tokens = vt
         if hasattr(wrapper.model, "model") and hasattr(wrapper.model.model, "config"):
-            setattr(wrapper.model.model.config, "num_visual_tokens", vt)
+            wrapper.model.model.config.num_visual_tokens = vt
 
         # 1. Primary Greedy / Argmax Pass
         g_kwargs: dict[str, Any] = {
-            "inputs": input_ids, "images": image_tensor, "image_sizes": image_sizes,
-            "do_sample": False, "max_new_tokens": max_new_tokens, "use_cache": True,
-            "output_attentions": False, "output_hidden_states": False,
-            "output_scores": True, "return_dict_in_generate": True,
+            "inputs": input_ids,
+            "images": image_tensor,
+            "image_sizes": image_sizes,
+            "do_sample": False,
+            "max_new_tokens": max_new_tokens,
+            "use_cache": True,
+            "output_attentions": False,
+            "output_hidden_states": False,
+            "output_scores": True,
+            "return_dict_in_generate": True,
         }
         if vt is not None:
             g_kwargs["matryoshka_vis_token_scale"] = vt
@@ -247,12 +281,23 @@ def extract_multipass_record(
         g_out = wrapper.model.generate(**g_kwargs)
 
         g_seq = g_out.sequences[0]
-        n_gen = len(g_out.scores) if (g_out.scores is not None and len(g_out.scores) > 0) else (len(g_seq) - input_len)
-        greedy_ans = wrapper.tokenizer.decode(g_seq[-n_gen:].tolist(), skip_special_tokens=True).strip()
+        n_gen = (
+            len(g_out.scores)
+            if (g_out.scores is not None and len(g_out.scores) > 0)
+            else (len(g_seq) - input_len)
+        )
+        greedy_ans = wrapper.tokenizer.decode(
+            g_seq[-n_gen:].tolist(), skip_special_tokens=True
+        ).strip()
 
         if g_out.scores is not None and len(g_out.scores) > 0:
             first_logits_t = g_out.scores[0][0].detach().float()
-            first_logits_np = torch.nan_to_num(first_logits_t, nan=-1e4, posinf=1e4, neginf=-1e4).cpu().numpy().astype(np.float32)
+            first_logits_np = (
+                torch.nan_to_num(first_logits_t, nan=-1e4, posinf=1e4, neginf=-1e4)
+                .cpu()
+                .numpy()
+                .astype(np.float32)
+            )
             conf_softmax = float(torch.max(torch.softmax(first_logits_t, dim=-1)).item())
         else:
             h_vocab = getattr(wrapper.model.config, "vocab_size", 32000)
@@ -262,12 +307,19 @@ def extract_multipass_record(
 
         # 2. Multi-Rollout Sampling Pass (Parallel Batched Generation with Sequential OOM Fallback)
         s_kwargs: dict[str, Any] = {
-            "inputs": input_ids, "images": image_tensor, "image_sizes": image_sizes,
-            "do_sample": True, "temperature": float(gen_temperature), "top_p": float(top_p),
+            "inputs": input_ids,
+            "images": image_tensor,
+            "image_sizes": image_sizes,
+            "do_sample": True,
+            "temperature": float(gen_temperature),
+            "top_p": float(top_p),
             "renormalize_logits": True,
-            "max_new_tokens": max_new_tokens, "use_cache": True,
-            "output_attentions": False, "output_hidden_states": True,
-            "output_scores": True, "return_dict_in_generate": True,
+            "max_new_tokens": max_new_tokens,
+            "use_cache": True,
+            "output_attentions": False,
+            "output_hidden_states": True,
+            "output_scores": True,
+            "return_dict_in_generate": True,
         }
         if vt is not None:
             s_kwargs["matryoshka_vis_token_scale"] = vt
@@ -280,14 +332,23 @@ def extract_multipass_record(
         )
 
         return {
-            "question_id": qid, "dataset": dataset_key, "question": question,
-            "ground_truth": gt, "answer_type": ans_type,
-            "greedy_answer": greedy_ans, "is_correct": bool(vqa_acc >= 0.5),
-            "vqa_accuracy": vqa_acc, "conf_softmax": conf_softmax,
-            "first_token_logits": first_logits_np, "rollout_texts": roll_texts,
-            "rollout_token_logprobs": roll_tok_lps, "rollout_sequence_logprobs": roll_seq_lps,
+            "question_id": qid,
+            "dataset": dataset_key,
+            "question": question,
+            "ground_truth": gt,
+            "answer_type": ans_type,
+            "greedy_answer": greedy_ans,
+            "is_correct": bool(vqa_acc >= 0.5),
+            "vqa_accuracy": vqa_acc,
+            "conf_softmax": conf_softmax,
+            "first_token_logits": first_logits_np,
+            "rollout_texts": roll_texts,
+            "rollout_token_logprobs": roll_tok_lps,
+            "rollout_sequence_logprobs": roll_seq_lps,
             "rollout_embeddings": np.stack(roll_embs, axis=0),
         }
     except Exception as e:
-        logger.warning(f"Error extracting record for sample {sample.get('question_id', 'unknown')}: {e}")
+        logger.warning(
+            f"Error extracting record for sample {sample.get('question_id', 'unknown')}: {e}"
+        )
         return None

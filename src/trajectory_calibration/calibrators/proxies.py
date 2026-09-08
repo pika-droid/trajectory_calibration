@@ -111,4 +111,3 @@ class ProbabilityMarginEstimator:
     def predict_proba(self, X_test: np.ndarray) -> np.ndarray:
         scores = _resolve_feature_col(X_test, "x17", self.feature_names, fallback_idx=16)
         return self.lr.predict_proba(scores)[:, 1]
-

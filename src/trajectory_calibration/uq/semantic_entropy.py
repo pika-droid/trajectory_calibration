@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 import re
 from typing import Any
+
 import numpy as np
 from scipy.special import logsumexp
 from scipy.stats import entropy
@@ -51,9 +52,11 @@ class FastStringEntailment:
             return 0
 
         # Word boundary matching for phrase containment
-        if len(t1.split()) > 1 or len(t2.split()) > 1:
-            if bool(re.search(r"\b" + re.escape(t1) + r"\b", t2)) or bool(re.search(r"\b" + re.escape(t2) + r"\b", t1)):
-                return 2
+        if (len(t1.split()) > 1 or len(t2.split()) > 1) and (
+            bool(re.search(r"\b" + re.escape(t1) + r"\b", t2))
+            or bool(re.search(r"\b" + re.escape(t2) + r"\b", t1))
+        ):
+            return 2
 
         return 1
 
@@ -61,7 +64,9 @@ class FastStringEntailment:
 class EntailmentDeberta:
     """DeBERTa-v2-xlarge-mnli bidirectional NLI entailment classifier."""
 
-    def __init__(self, model_name: str = "microsoft/deberta-v2-xlarge-mnli", device: str | None = None) -> None:
+    def __init__(
+        self, model_name: str = "microsoft/deberta-v2-xlarge-mnli", device: str | None = None
+    ) -> None:
         import torch
         from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
@@ -100,7 +105,7 @@ def get_semantic_ids(
         imp2 = model.check_implication(text2, text1, example=example)
         if strict_entailment:
             return (imp1 == 2) and (imp2 == 2)
-        return (0 not in [imp1, imp2]) and ([1, 1] != [imp1, imp2])
+        return (0 not in [imp1, imp2]) and ([imp1, imp2] != [1, 1])
 
     semantic_set_ids = [-1] * len(strings_list)
     next_id = 0
@@ -127,12 +132,12 @@ def logsumexp_by_id(
     unique_ids = sorted(list(set(semantic_ids)))
     cluster_log_probs = []
 
-    total_logsumexp = float(logsumexp(lps))
+    total_logsumexp = float(np.asarray(logsumexp(lps)).item())
 
     for uid in unique_ids:
         id_indices = [pos for pos, x in enumerate(semantic_ids) if x == uid]
         id_lps = lps[id_indices]
-        cluster_lse = float(logsumexp(id_lps))
+        cluster_lse = float(np.asarray(logsumexp(id_lps)).item())
         norm_cluster_lp = cluster_lse - total_logsumexp
         cluster_log_probs.append(float(norm_cluster_lp))
 

@@ -10,25 +10,26 @@ Generates:
 5. Adaptive ECE vs AUROC Pareto Frontier Scatter Plot
 """
 
-import os
 import sys
 from pathlib import Path
-import numpy as np
-import pandas as pd
+
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 from sklearn.calibration import calibration_curve
 
 # Set publication style
-plt.style.use('seaborn-v0_8-whitegrid' if 'seaborn-v0_8-whitegrid' in plt.style.available else 'default')
-plt.rcParams['font.family'] = 'DejaVu Sans'
-plt.rcParams['font.size'] = 11
-plt.rcParams['axes.titlesize'] = 13
-plt.rcParams['axes.labelsize'] = 12
-plt.rcParams['xtick.labelsize'] = 10
-plt.rcParams['ytick.labelsize'] = 10
-plt.rcParams['legend.fontsize'] = 10
-plt.rcParams['figure.titlesize'] = 14
+plt.style.use(
+    "seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default"
+)
+plt.rcParams["font.family"] = "DejaVu Sans"
+plt.rcParams["font.size"] = 11
+plt.rcParams["axes.titlesize"] = 13
+plt.rcParams["axes.labelsize"] = 12
+plt.rcParams["xtick.labelsize"] = 10
+plt.rcParams["ytick.labelsize"] = 10
+plt.rcParams["legend.fontsize"] = 10
+plt.rcParams["figure.titlesize"] = 14
 
 SRC_PATH = Path(__file__).resolve().parent.parent / "src"
 if str(SRC_PATH) not in sys.path:
@@ -55,7 +56,9 @@ def plot_calibration_curves(out_dir: Path, arch: str = "m3", seed: int = 42):
 
     for ax, ds, d_name in zip(axes, datasets, display_names):
         try:
-            df = load_dataset_features("data/features", ds_name=ds, arch=arch, gen_temperature=0.0, fine_scale=fine_scale)
+            df = load_dataset_features(
+                "data/features", ds_name=ds, arch=arch, gen_temperature=0.0, fine_scale=fine_scale
+            )
             tr_idx, te_idx = get_stratified_split(df, test_size=0.2, random_state=seed)
             tr_df = df.iloc[tr_idx].reset_index(drop=True)
             te_df = df.iloc[te_idx].reset_index(drop=True)
@@ -73,7 +76,9 @@ def plot_calibration_curves(out_dir: Path, arch: str = "m3", seed: int = 42):
             nc_probs = NaiveConfidenceEstimator().fit(X_tr_17d, y_tr).predict_proba(X_te_17d)
             platt_probs = PlattScalingEstimator().fit(X_tr_17d, y_tr).predict_proba(X_te_17d)
             quad_probs = QuadraticPlattScaler().fit(X_tr_17d, y_tr).predict_proba(X_te_17d)
-            vcps = VaryingCoefficientPlattScaler(feature_set="5d").fit(X_tr_5d, y_tr, feature_names=best_5d)
+            vcps = VaryingCoefficientPlattScaler(feature_set="5d").fit(
+                X_tr_5d, y_tr, feature_names=best_5d
+            )
             vcps_probs = vcps.predict_proba(X_te_5d)
 
             models_dict = {
@@ -84,12 +89,27 @@ def plot_calibration_curves(out_dir: Path, arch: str = "m3", seed: int = 42):
             }
 
             # Ideal diagonal
-            ax.plot([0, 1], [0, 1], "k--", alpha=0.5, label="Perfect Calibration" if ds == datasets[0] else "")
+            ax.plot(
+                [0, 1],
+                [0, 1],
+                "k--",
+                alpha=0.5,
+                label="Perfect Calibration" if ds == datasets[0] else "",
+            )
 
             n_bins = 10
             for m_label, (probs, color, ls) in models_dict.items():
                 bin_accs, bin_confs = calibration_curve(y_te, probs, n_bins=n_bins)
-                ax.plot(bin_confs, bin_accs, marker="o", markersize=5, label=m_label if ds == datasets[0] else "", color=color, linestyle=ls, linewidth=2)
+                ax.plot(
+                    bin_confs,
+                    bin_accs,
+                    marker="o",
+                    markersize=5,
+                    label=m_label if ds == datasets[0] else "",
+                    color=color,
+                    linestyle=ls,
+                    linewidth=2,
+                )
 
             ax.set_title(f"{d_name} ({arch.upper()})", fontweight="bold")
             ax.set_xlabel(r"Confidence $\hat{p}$")
@@ -131,13 +151,27 @@ def plot_temperature_transfer(out_dir: Path):
         "Residual Calibrator",
         "VCPS-5D (Our Method)",
     ]
-    colors = ["#94a3b8", "#a855f7", "#f59e0b", "#06b6d4", "#8b5cf6", "#3b82f6", "#ec4899", "#6366f1", "#10b981"]
+    colors = [
+        "#94a3b8",
+        "#a855f7",
+        "#f59e0b",
+        "#06b6d4",
+        "#8b5cf6",
+        "#3b82f6",
+        "#ec4899",
+        "#6366f1",
+        "#10b981",
+    ]
 
-    for ax, csv_file, model_label in zip(axes, [m3_csv, mqt_csv], ["M3-LLaVA (7B)", "MQT-LLaVA (7B)"]):
+    for ax, csv_file, model_label in zip(
+        axes, [m3_csv, mqt_csv], ["M3-LLaVA (7B)", "MQT-LLaVA (7B)"]
+    ):
         if not csv_file.exists():
             continue
         df = pd.read_csv(csv_file)
-        pivot = df.pivot_table(index="method", columns="temperature", values="adaptive_ece_percent", aggfunc="mean")
+        pivot = df.pivot_table(
+            index="method", columns="temperature", values="adaptive_ece_percent", aggfunc="mean"
+        )
 
         temps = sorted(pivot.columns)
         for m, color in zip(target_methods, colors):
@@ -145,7 +179,15 @@ def plot_temperature_transfer(out_dir: Path):
                 vals = pivot.loc[m, temps]
                 lw = 2.5 if "VCPS" in m or "Quadratic" in m else 1.8
                 ls = "-" if "VCPS" in m else ("-." if "Quadratic" in m else "--")
-                ax.plot(temps, vals, marker="s" if "VCPS" in m else "o", label=m, color=color, linewidth=lw, linestyle=ls)
+                ax.plot(
+                    temps,
+                    vals,
+                    marker="s" if "VCPS" in m else "o",
+                    label=m,
+                    color=color,
+                    linewidth=lw,
+                    linestyle=ls,
+                )
 
         ax.set_title(f"Temperature Transfer: {model_label}", fontweight="bold")
         ax.set_xlabel("Evaluation Decoding Temperature $T_{\\text{gen}}$")
@@ -182,9 +224,19 @@ def plot_pareto_ece_auroc(out_dir: Path):
 
         plt.scatter(ece, auc, color=color, s=size, marker=marker, zorder=5)
         offset = (5, 5) if not is_vcps else (5, -10)
-        plt.annotate(m, (ece, auc), textcoords="offset points", xytext=offset, fontsize=9, fontweight="bold" if is_vcps or is_quad else "normal")
+        plt.annotate(
+            m,
+            (ece, auc),
+            textcoords="offset points",
+            xytext=offset,
+            fontsize=9,
+            fontweight="bold" if is_vcps or is_quad else "normal",
+        )
 
-    plt.title("Macro-Average Calibration (Adaptive ECE) vs Discrimination (AUROC) [M3-LLaVA 7B]", fontweight="bold")
+    plt.title(
+        "Macro-Average Calibration (Adaptive ECE) vs Discrimination (AUROC) [M3-LLaVA 7B]",
+        fontweight="bold",
+    )
     plt.xlabel("Macro Adaptive ECE (%) $\\downarrow$ (Lower is Better)")
     plt.ylabel("Macro AUROC $\\uparrow$ (Higher is Better)")
     plt.grid(True, alpha=0.3)
@@ -200,7 +252,13 @@ def plot_dynamic_slope_distributions(out_dir: Path, arch: str = "m3", seed: int 
     """Plots dynamic slope distributions for correct vs incorrect predictions."""
     fine_scale = 576 if arch == "m3" else 256
     try:
-        df = load_dataset_features("data/features", ds_name="scienceqa", arch=arch, gen_temperature=0.0, fine_scale=fine_scale)
+        df = load_dataset_features(
+            "data/features",
+            ds_name="scienceqa",
+            arch=arch,
+            gen_temperature=0.0,
+            fine_scale=fine_scale,
+        )
         tr_idx, te_idx = get_stratified_split(df, test_size=0.2, random_state=seed)
         tr_df = df.iloc[tr_idx].reset_index(drop=True)
         te_df = df.iloc[te_idx].reset_index(drop=True)
@@ -215,7 +273,9 @@ def plot_dynamic_slope_distributions(out_dir: Path, arch: str = "m3", seed: int 
         X_te_5d = te_df[best_5d].values
 
         quad = QuadraticPlattScaler().fit(X_tr_17d, y_tr)
-        vcps = VaryingCoefficientPlattScaler(feature_set="5d").fit(X_tr_5d, y_tr, feature_names=best_5d)
+        vcps = VaryingCoefficientPlattScaler(feature_set="5d").fit(
+            X_tr_5d, y_tr, feature_names=best_5d
+        )
 
         slopes_quad = quad.compute_dynamic_slope(X_te_17d)
         slopes_vcps = vcps.compute_dynamic_slope(X_te_5d)
@@ -226,8 +286,22 @@ def plot_dynamic_slope_distributions(out_dir: Path, arch: str = "m3", seed: int 
         incorrect_mask = y_te == 0
 
         # Plot Quadratic Logit-Only dynamic slope
-        sns.kdeplot(slopes_quad[correct_mask], ax=ax1, label="Correct (y=1)", color="#10b981", fill=True, alpha=0.3)
-        sns.kdeplot(slopes_quad[incorrect_mask], ax=ax1, label="Incorrect (y=0)", color="#ef4444", fill=True, alpha=0.3)
+        sns.kdeplot(
+            slopes_quad[correct_mask],
+            ax=ax1,
+            label="Correct (y=1)",
+            color="#10b981",
+            fill=True,
+            alpha=0.3,
+        )
+        sns.kdeplot(
+            slopes_quad[incorrect_mask],
+            ax=ax1,
+            label="Incorrect (y=0)",
+            color="#ef4444",
+            fill=True,
+            alpha=0.3,
+        )
         ax1.set_title("Quadratic Platt $a(x_1)$ (Logit-Only)", fontweight="bold")
         ax1.set_xlabel("Dynamic Slope $a(x_1)$")
         ax1.set_ylabel("Density")
@@ -235,8 +309,22 @@ def plot_dynamic_slope_distributions(out_dir: Path, arch: str = "m3", seed: int 
         ax1.grid(True, alpha=0.3)
 
         # Plot VCPS-5D trajectory dynamic slope
-        sns.kdeplot(slopes_vcps[correct_mask], ax=ax2, label="Correct (y=1)", color="#10b981", fill=True, alpha=0.3)
-        sns.kdeplot(slopes_vcps[incorrect_mask], ax=ax2, label="Incorrect (y=0)", color="#ef4444", fill=True, alpha=0.3)
+        sns.kdeplot(
+            slopes_vcps[correct_mask],
+            ax=ax2,
+            label="Correct (y=1)",
+            color="#10b981",
+            fill=True,
+            alpha=0.3,
+        )
+        sns.kdeplot(
+            slopes_vcps[incorrect_mask],
+            ax=ax2,
+            label="Incorrect (y=0)",
+            color="#ef4444",
+            fill=True,
+            alpha=0.3,
+        )
         ax2.set_title("VCPS-5D $a(z)$ (Trajectory Features)", fontweight="bold")
         ax2.set_xlabel("Dynamic Slope $a(z)$")
         ax2.legend()

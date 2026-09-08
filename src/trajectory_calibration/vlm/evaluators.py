@@ -32,7 +32,9 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
     ans_type = cfg.get("answer_type", "open")
 
     if ans_type == "open":
-        gt_ans = str(sample.get("answer", sample.get("label", sample.get("ground_truth", "")))).strip()
+        gt_ans = str(
+            sample.get("answer", sample.get("label", sample.get("ground_truth", "")))
+        ).strip()
         if not gt_ans:
             return 0.0
         gt_clean = clean_text(gt_ans)
@@ -54,9 +56,11 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
         for gt in gt_answers:
             gt_text = gt.get("answer", "") if isinstance(gt, dict) else str(gt)
             gt_clean = clean_text(gt_text)
-            if gt_clean == pred_norm or pred_clean == str(gt_text).strip().lower():
-                match_count += 1
-            elif len(gt_clean) >= 3 and _is_word_match(gt_clean, pred_norm):
+            if (
+                gt_clean == pred_norm
+                or pred_clean == str(gt_text).strip().lower()
+                or (len(gt_clean) >= 3 and _is_word_match(gt_clean, pred_norm))
+            ):
                 match_count += 1
         return min(1.0, match_count / 3.0) if match_count > 0 else 0.0
 
@@ -68,7 +72,11 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
             if 0 <= idx_int < len(options):
                 correct_letter = chr(65 + idx_int).lower()
                 correct_option_text = clean_text(str(options[idx_int]))
-                if pred_clean.startswith(correct_letter) or pred_clean == correct_letter or pred_norm == correct_option_text:
+                if (
+                    pred_clean.startswith(correct_letter)
+                    or pred_clean == correct_letter
+                    or pred_norm == correct_option_text
+                ):
                     return 1.0
         return 0.0
 
@@ -91,10 +99,11 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
         letter_idx_map = {"A": "choice_a", "B": "choice_b", "C": "choice_c", "D": "choice_d"}
         if gt_ans in letter_idx_map:
             target_col = letter_idx_map[gt_ans]
-            if target_col in sample and sample[target_col]:
-                if pred_norm == clean_text(str(sample[target_col])):
-                    return 1.0
+            if sample.get(target_col) and pred_norm == clean_text(str(sample[target_col])):
+                return 1.0
 
         return 0.0
 
-    return 1.0 if pred_norm == clean_text(str(sample.get("answer", sample.get("label", "")))) else 0.0
+    return (
+        1.0 if pred_norm == clean_text(str(sample.get("answer", sample.get("label", "")))) else 0.0
+    )

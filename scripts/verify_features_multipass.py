@@ -9,6 +9,7 @@ numerical invariants (no NaNs/Infs), and tests downstream UQ / VCPS integration.
 import argparse
 import sys
 from pathlib import Path
+
 import numpy as np
 
 SRC_PATH = Path(__file__).resolve().parent.parent / "src"
@@ -27,7 +28,9 @@ from trajectory_calibration.uq.whitebox import WhiteBoxScorers
 from trajectory_calibration.utils.helpers import safe_torch_load
 
 
-def verify_feature_file(pt_path: Path, expected_rollouts: int = 5, entailment_model_type: str = "fast") -> dict[str, any]:
+def verify_feature_file(
+    pt_path: Path, expected_rollouts: int = 5, entailment_model_type: str = "fast"
+) -> dict[str, any]:
     if not pt_path.exists():
         return {"status": "FAIL", "reason": f"File not found: {pt_path}"}
 
@@ -40,13 +43,26 @@ def verify_feature_file(pt_path: Path, expected_rollouts: int = 5, entailment_mo
         return {"status": "FAIL", "reason": "Empty or invalid dataset payload"}
 
     req_keys = [
-        "question_id", "dataset", "question", "ground_truth", "answer_type",
-        "greedy_answer", "is_correct", "vqa_accuracy", "conf_softmax", "first_token_logits",
-        "rollout_texts", "rollout_token_logprobs", "rollout_sequence_logprobs", "rollout_embeddings",
+        "question_id",
+        "dataset",
+        "question",
+        "ground_truth",
+        "answer_type",
+        "greedy_answer",
+        "is_correct",
+        "vqa_accuracy",
+        "conf_softmax",
+        "first_token_logits",
+        "rollout_texts",
+        "rollout_token_logprobs",
+        "rollout_sequence_logprobs",
+        "rollout_embeddings",
     ]
 
     confs, accs, ses, ess, X_rows, y_rows = [], [], [], [], [], []
-    entail_model = EntailmentDeberta() if entailment_model_type == "deberta" else FastStringEntailment()
+    entail_model = (
+        EntailmentDeberta() if entailment_model_type == "deberta" else FastStringEntailment()
+    )
 
     for idx, sample in enumerate(data):
         for k in req_keys:
@@ -70,11 +86,18 @@ def verify_feature_file(pt_path: Path, expected_rollouts: int = 5, entailment_mo
         seq_lps = sample["rollout_sequence_logprobs"]
         embs = np.asarray(sample["rollout_embeddings"])
 
-        if len(texts) != expected_rollouts or len(tok_lps) != expected_rollouts or len(seq_lps) != expected_rollouts:
+        if (
+            len(texts) != expected_rollouts
+            or len(tok_lps) != expected_rollouts
+            or len(seq_lps) != expected_rollouts
+        ):
             return {"status": "FAIL", "reason": f"Sample {idx} rollout count mismatch"}
 
         if embs.ndim != 2 or embs.shape[0] != expected_rollouts or np.isnan(embs).any():
-            return {"status": "FAIL", "reason": f"Sample {idx} invalid rollout_embeddings shape {embs.shape}"}
+            return {
+                "status": "FAIL",
+                "reason": f"Sample {idx} invalid rollout_embeddings shape {embs.shape}",
+            }
 
         # UQ Baseline Computation Check
         sem_ids = get_semantic_ids(texts, model=entail_model)
@@ -110,7 +133,9 @@ def verify_feature_file(pt_path: Path, expected_rollouts: int = 5, entailment_mo
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Verify extracted multi-pass features.")
-    parser.add_argument("--features_dir", type=str, default="data/features_multipass/m3_llava/temp_0.5")
+    parser.add_argument(
+        "--features_dir", type=str, default="data/features_multipass/m3_llava/temp_0.5"
+    )
     parser.add_argument("--expected_rollouts", type=int, default=5)
     parser.add_argument(
         "--entailment_model",
@@ -131,22 +156,34 @@ def main() -> None:
         print(f"[ERROR] No .pt files found in {dir_path}")
         sys.exit(1)
 
-    print(f"\n{'Dataset':<16} | {'Samples':<7} | {'MeanConf':<8} | {'VQA Acc':<8} | {'Mean SE':<8} | {'EigenScore':<10} | {'Status'}")
+    print(
+        f"\n{'Dataset':<16} | {'Samples':<7} | {'MeanConf':<8} | {'VQA Acc':<8} | {'Mean SE':<8} | {'EigenScore':<10} | {'Status'}"
+    )
     print("-" * 80)
 
     all_passed = True
     for pt in pt_files:
         ds_name = pt.stem
-        res = verify_feature_file(pt, expected_rollouts=args.expected_rollouts, entailment_model_type=args.entailment_model)
+        res = verify_feature_file(
+            pt,
+            expected_rollouts=args.expected_rollouts,
+            entailment_model_type=args.entailment_model,
+        )
         if res["status"] == "PASS":
-            print(f"{ds_name:<16} | {res['num_samples']:<7} | {res['mean_conf']:<8.3f} | {res['mean_acc']:<8.3f} | {res['mean_se']:<8.3f} | {res['mean_eigenscore']:<10.3f} | [PASS]")
+            print(
+                f"{ds_name:<16} | {res['num_samples']:<7} | {res['mean_conf']:<8.3f} | {res['mean_acc']:<8.3f} | {res['mean_se']:<8.3f} | {res['mean_eigenscore']:<10.3f} | [PASS]"
+            )
         else:
-            print(f"{ds_name:<16} | {'N/A':<7} | {'N/A':<8} | {'N/A':<8} | {'N/A':<8} | {'N/A':<10} | [FAIL: {res.get('reason')}]")
+            print(
+                f"{ds_name:<16} | {'N/A':<7} | {'N/A':<8} | {'N/A':<8} | {'N/A':<8} | {'N/A':<10} | [FAIL: {res.get('reason')}]"
+            )
             all_passed = False
 
     print("-" * 80)
     if all_passed:
-        print("[SUCCESS] All dataset feature payloads are complete, intact, and ready for calibration!")
+        print(
+            "[SUCCESS] All dataset feature payloads are complete, intact, and ready for calibration!"
+        )
         sys.exit(0)
     else:
         print("[FAILED] One or more datasets failed integrity checks.")

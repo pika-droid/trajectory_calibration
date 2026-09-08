@@ -11,7 +11,9 @@ import numpy as np
 from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
 
 
-def compute_brier(confidences: np.ndarray | list[float], accuracies: np.ndarray | list[float]) -> float:
+def compute_brier(
+    confidences: np.ndarray | list[float], accuracies: np.ndarray | list[float]
+) -> float:
     """
     Brier Score (Mean Squared Error between probabilities and binary outcomes).
 
@@ -24,7 +26,9 @@ def compute_brier(confidences: np.ndarray | list[float], accuracies: np.ndarray 
     return float(brier_score_loss(accs, confs))
 
 
-def compute_nll(confidences: np.ndarray | list[float], accuracies: np.ndarray | list[float], eps: float = 1e-12) -> float:
+def compute_nll(
+    confidences: np.ndarray | list[float], accuracies: np.ndarray | list[float], eps: float = 1e-12
+) -> float:
     """
     Binary Negative Log-Likelihood (Log Loss / Cross Entropy).
 

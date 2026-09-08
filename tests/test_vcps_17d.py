@@ -5,7 +5,6 @@ Unit test suite for VCPS-17D Dynamic Signature Binding and Full 34-Parameter Opt
 from __future__ import annotations
 
 import numpy as np
-import pytest
 from scipy.optimize import check_grad
 
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
@@ -71,12 +70,12 @@ def test_vcps_17d_gradient_finite_difference() -> None:
             assert len(x0) == 2
             assert vcps.n_params == 2
 
-        def func(params: np.ndarray) -> float:
-            val, _ = objective(params)
+        def func(params: np.ndarray, obj=objective) -> float:
+            val, _ = obj(params)
             return val
 
-        def grad(params: np.ndarray) -> np.ndarray:
-            _, g = objective(params)
+        def grad(params: np.ndarray, obj=objective) -> np.ndarray:
+            _, g = obj(params)
             return g
 
         # 1. Scipy check_grad at initial point
@@ -88,7 +87,9 @@ def test_vcps_17d_gradient_finite_difference() -> None:
         x_perturbed = x0 + 0.05 * np.random.randn(len(x0))
 
         cg_err_perturbed = check_grad(func, grad, x_perturbed)
-        assert cg_err_perturbed < 1e-5, f"check_grad error {cg_err_perturbed} >= 1e-5 for mode={mode} at perturbed"
+        assert cg_err_perturbed < 1e-5, (
+            f"check_grad error {cg_err_perturbed} >= 1e-5 for mode={mode} at perturbed"
+        )
 
         # 3. Explicit finite-difference check across all dimensions
         analytical_val, analytical_grad = objective(x_perturbed)
@@ -210,6 +211,3 @@ def test_vcps_custom_features_fallback_and_no_feature_names() -> None:
     assert len(vcps_auto.intercept_features_) == 16
     probs_auto = vcps_auto.predict_proba(X_17)
     assert len(probs_auto) == len(y_17)
-
-
-
