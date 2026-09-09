@@ -158,6 +158,8 @@ def compute_features_from_sample(
         "x16": x16,
         "x17": x17,
         "c_576": float(c_arr[-1]),
+        f"c_{fine_scale}": float(c_arr[-1]),
+        "c_fine": float(c_arr[-1]),
         "is_correct": is_correct,
         "vqa_accuracy": float(acc_final),
         "question_id": qid if qid is not None else f"sample_{idx}",
