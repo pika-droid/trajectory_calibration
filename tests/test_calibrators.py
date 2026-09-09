@@ -16,12 +16,16 @@ from trajectory_calibration.calibrators.baselines import (
 )
 from trajectory_calibration.calibrators.residual import ResidualTrajectoryCalibrator
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
-from trajectory_calibration.features.trajectory import FEATURE_KEYS, generate_mock_df
+from trajectory_calibration.features.trajectory import (
+    CANONICAL_5D_KEYS,
+    FEATURE_KEYS,
+    generate_mock_df,
+)
 
 
 def test_all_calibrators_fit_predict():
     df = generate_mock_df("test_mock", n_samples=80, seed=42)
-    X = df[["x1", "x2", "x3", "x4", "x5"]].values
+    X = df[CANONICAL_5D_KEYS].values
     y = df["is_correct"].values
 
     models = [
@@ -51,7 +55,7 @@ def test_all_calibrators_fit_predict():
 
 def test_quadratic_platt_properties():
     df = generate_mock_df("test_mock", n_samples=100, seed=42)
-    X = df[["x1", "x2", "x3", "x4", "x5"]].values
+    X = df[CANONICAL_5D_KEYS].values
     y = df["is_correct"].values
 
     quad = QuadraticPlattScaler()

@@ -29,5 +29,6 @@ FEATURE_NAMES: dict[str, str] = {
 }
 
 FEATURE_KEYS: list[str] = list(FEATURE_NAMES.keys())
+CANONICAL_5D_KEYS: list[str] = FEATURE_KEYS[:5]
 
-__all__ = ["FEATURE_KEYS", "FEATURE_NAMES"]
+__all__ = ["CANONICAL_5D_KEYS", "FEATURE_KEYS", "FEATURE_NAMES"]

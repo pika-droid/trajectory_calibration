@@ -10,19 +10,19 @@
 Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 28.62 & 28.58 & 0.629 \\
 Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 6.68 & 7.88 & 0.629 \\
 Platt Scaling (1D) & Single-Pass ($T = 0.0$) & 3.07 & 5.50 & 0.629 \\
-Trajectory LR & Single-Pass ($T = 0.0$) & 4.46 & 6.61 & 0.689 \\
-Trajectory LR (No Bias) & Single-Pass ($T = 0.0$) & 4.88 & 5.87 & 0.677 \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & 4.46 & 6.61 & 0.689 \\
+Trajectory LR & Single-Pass ($T = 0.0$) & 4.09 & 5.28 & 0.691 \\
+Trajectory LR (No Bias) & Single-Pass ($T = 0.0$) & 2.58 & 7.02 & 0.628 \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & 4.09 & 5.29 & 0.691 \\
 Trajectory Platt (17D) & Single-Pass ($T = 0.0$) & 4.83 & 5.20 & \textit{0.693} \\
-Quadratic Platt (Logit-Only) & Single-Pass ($T = 0.0$) & \textit{1.61} & \textit{4.69} & 0.634 \\
-Spline Calibration & Single-Pass ($T = 0.0$) & \textbf{1.46} & 4.81 & 0.500 \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 8.78 & 9.81 & 0.689 \\
+Quadratic Platt (Logit-Only) & Single-Pass ($T = 0.0$) & \textit{1.61} & \textbf{4.69} & 0.634 \\
+Spline Calibration & Single-Pass ($T = 0.0$) & \textbf{1.46} & \textit{4.81} & 0.500 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 7.65 & 9.95 & 0.680 \\
 LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & 20.50 & - & 0.660 \\
 Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & 22.00 & - & 0.646 \\
 EigenScore & Multi-Pass ($T = 0.5, K = 10$) & 18.20 & - & 0.681 \\
 UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & 19.30 & - & 0.658 \\
-Residual Calibrator & Single-Pass ($T = 0.0$) & 5.54 & 7.56 & 0.678 \\
-\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & 5.18 & \textbf{4.55} & 0.691 \\
+Residual Calibrator & Single-Pass ($T = 0.0$) & 4.52 & 7.76 & 0.666 \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & 5.79 & 5.38 & 0.691 \\
 \rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Single-Pass ($T = 0.0$) & 4.49 & 4.99 & \textbf{0.693} \\
 \bottomrule
 \end{tabular}%
@@ -41,20 +41,20 @@ Residual Calibrator & Single-Pass ($T = 0.0$) & 5.54 & 7.56 & 0.678 \\
 Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 15.38 & 15.27 & 0.828 \\
 Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 9.81 & 10.24 & 0.828 \\
 Platt Scaling (1D) & Single-Pass ($T = 0.0$) & 8.11 & 8.38 & 0.828 \\
-Trajectory LR & Single-Pass ($T = 0.0$) & 6.86 & 5.25 & 0.843 \\
-Trajectory LR (No Bias) & Single-Pass ($T = 0.0$) & 7.08 & \textbf{5.24} & \textit{0.843} \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & 7.55 & \textit{5.24} & 0.843 \\
-Trajectory Platt (17D) & Single-Pass ($T = 0.0$) & 5.40 & 5.82 & \textbf{0.848} \\
+Trajectory LR & Single-Pass ($T = 0.0$) & 9.07 & 10.04 & 0.827 \\
+Trajectory LR (No Bias) & Single-Pass ($T = 0.0$) & 8.19 & 9.46 & 0.828 \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & 9.88 & 10.11 & 0.827 \\
+Trajectory Platt (17D) & Single-Pass ($T = 0.0$) & 5.40 & \textbf{5.82} & \textbf{0.848} \\
 Quadratic Platt (Logit-Only) & Single-Pass ($T = 0.0$) & \textbf{3.87} & 7.38 & 0.828 \\
 Spline Calibration & Single-Pass ($T = 0.0$) & \textit{5.37} & 7.75 & 0.828 \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 9.97 & 10.12 & 0.830 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 9.69 & 10.13 & 0.830 \\
 LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & 22.20 & - & 0.613 \\
 Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & 23.30 & - & 0.596 \\
 EigenScore & Multi-Pass ($T = 0.5, K = 10$) & 20.90 & - & 0.675 \\
 UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & 22.10 & - & 0.618 \\
-Residual Calibrator & Single-Pass ($T = 0.0$) & 7.80 & 5.95 & 0.830 \\
-\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & 7.44 & 6.58 & 0.831 \\
-\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Single-Pass ($T = 0.0$) & 5.91 & 6.68 & 0.838 \\
+Residual Calibrator & Single-Pass ($T = 0.0$) & 7.56 & 8.13 & 0.828 \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & 6.46 & 7.66 & 0.829 \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Single-Pass ($T = 0.0$) & 5.91 & \textit{6.68} & \textit{0.838} \\
 \bottomrule
 \end{tabular}%
 }

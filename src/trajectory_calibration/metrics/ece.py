@@ -100,7 +100,7 @@ def compute_adaptive_ece(
         bin_p, bin_y = p[group], labels[group]
         ece += (len(group) / n) * abs(float(np.mean(bin_p) - np.mean(bin_y)))
 
-    return float(ece)
+    return float(np.clip(ece, 0.0, 1.0))
 
 
 def compute_kde_ece(

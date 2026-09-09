@@ -25,7 +25,7 @@ from trajectory_calibration.calibrators.classic import (
     SplineCalibrator,
 )
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
-from trajectory_calibration.features.definitions import FEATURE_KEYS
+from trajectory_calibration.features.definitions import CANONICAL_5D_KEYS, FEATURE_KEYS
 from trajectory_calibration.features.extractor import compute_features_from_sample
 from trajectory_calibration.metrics.ece import compute_adaptive_ece
 from trajectory_calibration.metrics.statistical import fit_calibration_slope_intercept
@@ -51,7 +51,7 @@ def test_vcps_small_slope_optimization():
     probs = 1.0 / (1.0 + np.exp(-logits))
     y = (np.random.rand(n) < probs).astype(float)
     X = np.column_stack([x1, np.random.randn(n, 4)])
-    feature_names = ["x1", "x2", "x3", "x4", "x5"]
+    feature_names = CANONICAL_5D_KEYS
 
     vcps = VaryingCoefficientPlattScaler(mode="1d_platt", random_state=42)
     objective, x0 = vcps._build_objective(X, y, feature_names=feature_names)

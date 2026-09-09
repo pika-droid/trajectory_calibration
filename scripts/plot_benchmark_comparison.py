@@ -41,9 +41,8 @@ from trajectory_calibration.calibrators.baselines import (
     QuadraticPlattScaler,
 )
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
-from trajectory_calibration.features.definitions import FEATURE_KEYS
+from trajectory_calibration.features.definitions import CANONICAL_5D_KEYS, FEATURE_KEYS
 from trajectory_calibration.features.loader import get_stratified_split, load_dataset_features
-from trajectory_calibration.features.selection import select_best_5d_subset
 
 
 def plot_calibration_curves(out_dir: Path, arch: str = "m3", seed: int = 42):
@@ -68,9 +67,9 @@ def plot_calibration_curves(out_dir: Path, arch: str = "m3", seed: int = 42):
             X_te_17d = te_df[FEATURE_KEYS].values
             y_te = te_df["is_correct"].values
 
-            best_5d = select_best_5d_subset(X_tr_17d, y_tr, FEATURE_KEYS)
-            X_tr_5d = tr_df[best_5d].values
-            X_te_5d = te_df[best_5d].values
+            best_5d = CANONICAL_5D_KEYS
+            X_tr_5d = tr_df[CANONICAL_5D_KEYS].values
+            X_te_5d = te_df[CANONICAL_5D_KEYS].values
 
             # Fit models
             nc_probs = NaiveConfidenceEstimator().fit(X_tr_17d, y_tr).predict_proba(X_te_17d)
@@ -268,9 +267,9 @@ def plot_dynamic_slope_distributions(out_dir: Path, arch: str = "m3", seed: int 
         X_te_17d = te_df[FEATURE_KEYS].values
         y_te = te_df["is_correct"].values
 
-        best_5d = select_best_5d_subset(X_tr_17d, y_tr, FEATURE_KEYS)
-        X_tr_5d = tr_df[best_5d].values
-        X_te_5d = te_df[best_5d].values
+        best_5d = CANONICAL_5D_KEYS
+        X_tr_5d = tr_df[CANONICAL_5D_KEYS].values
+        X_te_5d = te_df[CANONICAL_5D_KEYS].values
 
         quad = QuadraticPlattScaler().fit(X_tr_17d, y_tr)
         vcps = VaryingCoefficientPlattScaler(feature_set="5d").fit(

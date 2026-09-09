@@ -35,9 +35,8 @@ from trajectory_calibration.calibrators.residual import (
     evaluate_full_metric_panel,
 )
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
-from trajectory_calibration.features.definitions import FEATURE_KEYS
+from trajectory_calibration.features.definitions import CANONICAL_5D_KEYS, FEATURE_KEYS
 from trajectory_calibration.features.loader import get_stratified_split, load_dataset_features
-from trajectory_calibration.features.selection import select_best_5d_subset
 from trajectory_calibration.utils.helpers import set_seed
 
 
@@ -104,8 +103,8 @@ def main() -> None:
 
             X_tr_17d = tr_df[FEATURE_KEYS].values
             y_tr = tr_df["is_correct"].values
-            best_5d = select_best_5d_subset(X_tr_17d, y_tr, FEATURE_KEYS)
-            X_tr_5d = tr_df[best_5d].values
+            best_5d = CANONICAL_5D_KEYS
+            X_tr_5d = tr_df[CANONICAL_5D_KEYS].values
 
             models = {
                 "Naive Confidence (NC)": NaiveConfidenceEstimator().fit(X_tr_17d, y_tr),
@@ -191,9 +190,9 @@ def main() -> None:
                 # Dynamic Slope & Parameter Tracking: Independent Refit at Temperature T
                 X_tr_T_17d = tr_df_T[FEATURE_KEYS].values
                 y_tr_T = tr_df_T["is_correct"].values
-                best_5d_T = select_best_5d_subset(X_tr_T_17d, y_tr_T, FEATURE_KEYS)
-                X_tr_T_5d = tr_df_T[best_5d_T].values
-                X_te_T_5d = te_df[best_5d_T].values
+                best_5d_T = CANONICAL_5D_KEYS
+                X_tr_T_5d = tr_df_T[CANONICAL_5D_KEYS].values
+                X_te_T_5d = te_df[CANONICAL_5D_KEYS].values
 
                 vcps_refit = VaryingCoefficientPlattScaler(
                     feature_set="5d",

@@ -33,10 +33,10 @@ from trajectory_calibration.calibrators.residual import (
 )
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
 from trajectory_calibration.features.trajectory import (
+    CANONICAL_5D_KEYS,
     FEATURE_KEYS,
     get_stratified_split,
     load_dataset_features,
-    select_best_5d_subset,
 )
 from trajectory_calibration.utils.helpers import set_seed
 
@@ -70,11 +70,11 @@ def main() -> None:
     y_test = test_df["is_correct"].values
     c_test_576 = test_df["c_576"].values
 
-    # Stepwise 5-D selection
-    best_5d_keys = select_best_5d_subset(X_train_17d, y_train, FEATURE_KEYS)
-    print(f"Selected 5-D Subset: {best_5d_keys}")
-    X_train_5d = train_df[best_5d_keys].values
-    X_test_5d = test_df[best_5d_keys].values
+    # Universal Canonical 5-D Feature Set
+    best_5d_keys = CANONICAL_5D_KEYS
+    print(f"Selected Canonical 5-D Subset: {best_5d_keys}")
+    X_train_5d = train_df[CANONICAL_5D_KEYS].values
+    X_test_5d = test_df[CANONICAL_5D_KEYS].values
 
     calibrators = {
         "Naive Confidence (NC)": (NaiveConfidenceEstimator(), X_train_17d, X_test_17d),

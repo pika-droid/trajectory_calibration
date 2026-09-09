@@ -2,7 +2,11 @@
 Trajectory Calibration Features Module.
 """
 
-from trajectory_calibration.features.definitions import FEATURE_KEYS, FEATURE_NAMES
+from trajectory_calibration.features.definitions import (
+    CANONICAL_5D_KEYS,
+    FEATURE_KEYS,
+    FEATURE_NAMES,
+)
 from trajectory_calibration.features.diagnostics import evaluate_model_diagnostics
 from trajectory_calibration.features.extractor import compute_features_from_sample
 from trajectory_calibration.features.loader import (
@@ -19,6 +23,7 @@ from trajectory_calibration.features.synthetic import generate_mock_df
 from trajectory_calibration.features.trajectory import get_logits, sigmoid
 
 __all__ = [
+    "CANONICAL_5D_KEYS",
     "FEATURE_KEYS",
     "FEATURE_NAMES",
     "calculate_vif",

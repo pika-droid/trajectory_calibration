@@ -52,6 +52,12 @@ def select_best_5d_subset(
 
     Strictly anchors to 'x1' (Final Logit) to prevent prediction collapse, selecting
     4 trajectory signatures (total 5 features: x1 + 4 signatures).
+
+    Note:
+        Retained for legacy experiments, ablations, and baseline comparisons. Default
+        evaluation and benchmark pipelines across the repository use the universal static
+        `CANONICAL_5D_KEYS` (["x1", "x2", "x3", "x4", "x5"]) to eliminate selection variance
+        and avoid overfitting on smaller benchmarks.
     """
     selected = ["x1"] if "x1" in feature_keys else [feature_keys[0]]
     remaining = [k for k in feature_keys if k not in selected]

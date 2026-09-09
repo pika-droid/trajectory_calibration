@@ -8,7 +8,7 @@ import numpy as np
 from scipy.optimize import check_grad
 
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
-from trajectory_calibration.features.definitions import FEATURE_KEYS
+from trajectory_calibration.features.definitions import CANONICAL_5D_KEYS, FEATURE_KEYS
 from trajectory_calibration.features.trajectory import generate_mock_df
 
 
@@ -184,8 +184,8 @@ def test_vcps_5d_binding_and_explicit_override() -> None:
 def test_vcps_5d_parameter_count_and_signatures() -> None:
     """Verify VCPS-5D parameter count (10 params in full mode) and 4-signature binding."""
     df = generate_mock_df("test_5d_params", n_samples=100, seed=42)
-    five_keys = ["x1", "x2", "x3", "x4", "x5"]  # 1 anchor + 4 signatures
-    X = df[five_keys].values
+    five_keys = CANONICAL_5D_KEYS  # 1 anchor + 4 signatures
+    X = df[CANONICAL_5D_KEYS].values
     y = df["is_correct"].values
 
     # Full mode: 1 + 4 + 1 + 4 = 10 params

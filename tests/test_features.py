@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from trajectory_calibration.features.trajectory import (
+    CANONICAL_5D_KEYS,
     FEATURE_KEYS,
     compute_features_from_sample,
     generate_mock_df,
@@ -57,6 +58,28 @@ def test_sigmoid_get_logits_roundtrip():
     logits = get_logits(confs)
     recov = sigmoid(logits)
     np.testing.assert_allclose(confs, recov, atol=1e-5)
+
+
+def test_canonical_5d_keys():
+    """Verify universal static canonical 5D feature set invariants and exports."""
+    import trajectory_calibration.features as feats
+    import trajectory_calibration.features.definitions as defs
+    import trajectory_calibration.features.trajectory as traj
+
+    # 1. Structural invariants
+    assert CANONICAL_5D_KEYS == ["x1", "x2", "x3", "x4", "x5"]
+    assert len(CANONICAL_5D_KEYS) == 5
+    assert CANONICAL_5D_KEYS[0] == "x1"
+    assert CANONICAL_5D_KEYS[1:] == ["x2", "x3", "x4", "x5"]
+    assert FEATURE_KEYS[:5] == CANONICAL_5D_KEYS
+
+    # 2. Cross-module export invariants
+    assert defs.CANONICAL_5D_KEYS == CANONICAL_5D_KEYS
+    assert "CANONICAL_5D_KEYS" in defs.__all__
+    assert feats.CANONICAL_5D_KEYS == CANONICAL_5D_KEYS
+    assert "CANONICAL_5D_KEYS" in feats.__all__
+    assert traj.CANONICAL_5D_KEYS == CANONICAL_5D_KEYS
+    assert "CANONICAL_5D_KEYS" in traj.__all__
 
 
 def test_select_best_5d_subset():

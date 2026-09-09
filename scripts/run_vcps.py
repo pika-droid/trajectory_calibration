@@ -20,10 +20,10 @@ import numpy as np
 from trajectory_calibration.calibrators.residual import evaluate_full_metric_panel
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
 from trajectory_calibration.features.trajectory import (
+    CANONICAL_5D_KEYS,
     FEATURE_KEYS,
     get_stratified_split,
     load_dataset_features,
-    select_best_5d_subset,
 )
 from trajectory_calibration.utils.helpers import set_seed
 
@@ -65,8 +65,8 @@ def main() -> None:
     c_test_576 = test_df["c_576"].values
 
     if args.feature_set == "5d":
-        feature_keys = select_best_5d_subset(X_train_17d, y_train, FEATURE_KEYS)
-        print(f"Selected 5-D Features: {feature_keys}")
+        feature_keys = CANONICAL_5D_KEYS
+        print(f"Selected Canonical 5-D Features: {feature_keys}")
         X_train = train_df[feature_keys].values
         X_test = test_df[feature_keys].values
         vcps = VaryingCoefficientPlattScaler(

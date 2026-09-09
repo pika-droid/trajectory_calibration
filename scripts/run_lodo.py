@@ -33,9 +33,9 @@ from trajectory_calibration.calibrators.residual import (
 )
 from trajectory_calibration.calibrators.vcps import VaryingCoefficientPlattScaler
 from trajectory_calibration.features.trajectory import (
+    CANONICAL_5D_KEYS,
     FEATURE_KEYS,
     load_dataset_features,
-    select_best_5d_subset,
 )
 from trajectory_calibration.utils.helpers import set_seed
 
@@ -122,10 +122,10 @@ def main() -> None:
         y_test = target_test_df["is_correct"].values
         c_test = target_test_df["c_576"].values
 
-        # Select pooled best 5D subset
-        best_5d_keys = select_best_5d_subset(X_train_17d, y_train, FEATURE_KEYS)
-        X_train_5d = pooled_train_df[best_5d_keys].values
-        X_test_5d = target_test_df[best_5d_keys].values
+        # Bind canonical 5D subset
+        best_5d_keys = CANONICAL_5D_KEYS
+        X_train_5d = pooled_train_df[CANONICAL_5D_KEYS].values
+        X_test_5d = target_test_df[CANONICAL_5D_KEYS].values
 
         # Models to evaluate
         base_models = {
