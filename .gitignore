@@ -18,6 +18,7 @@ env/
 .vscode/
 .idea/
 *.swp
+~$*
 
 # Experiment & data directories (ignore heavy weights, track CSV summary results)
 results/features/

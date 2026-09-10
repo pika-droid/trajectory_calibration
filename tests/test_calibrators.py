@@ -89,40 +89,40 @@ def test_proxy_calibrators_validation():
     X_17d = df[FEATURE_KEYS].values
     y = df["is_correct"].values
 
-    # 1. MultiScaleSemanticConsistency: targets x3 (idx 2)
+    # 1. MultiScaleSemanticConsistency: targets x2 (idx 1)
     mssc = MultiScaleSemanticConsistency(feature_names=FEATURE_KEYS)
     mssc.fit(X_17d, y)
     preds_mssc = mssc.predict_proba(X_17d)
     assert len(preds_mssc) == len(y)
     assert np.all(preds_mssc >= 0.0) and np.all(preds_mssc <= 1.0)
 
-    # MSSC fallback without feature_names (uses fallback_idx=2)
+    # MSSC fallback without feature_names (uses fallback_idx=1)
     mssc_fallback = MultiScaleSemanticConsistency()
     mssc_fallback.fit(X_17d, y)
     preds_mssc_fb = mssc_fallback.predict_proba(X_17d)
     assert np.allclose(preds_mssc, preds_mssc_fb)
 
-    # 2. MultiScaleEigenVariance: targets x13 (idx 12)
+    # 2. MultiScaleEigenVariance: targets x8 (idx 7)
     msev = MultiScaleEigenVariance(feature_names=FEATURE_KEYS)
     msev.fit(X_17d, y)
     preds_msev = msev.predict_proba(X_17d)
     assert len(preds_msev) == len(y)
     assert np.all(preds_msev >= 0.0) and np.all(preds_msev <= 1.0)
 
-    # MSE-EIGEN fallback without feature_names (uses fallback_idx=12)
+    # MSE-EIGEN fallback without feature_names (uses fallback_idx=7)
     msev_fallback = MultiScaleEigenVariance()
     msev_fallback.fit(X_17d, y)
     preds_msev_fb = msev_fallback.predict_proba(X_17d)
     assert np.allclose(preds_msev, preds_msev_fb)
 
-    # 3. ProbabilityMarginEstimator: targets x17 (idx 16)
+    # 3. ProbabilityMarginEstimator: targets x16 (idx 15)
     pme = ProbabilityMarginEstimator(feature_names=FEATURE_KEYS)
     pme.fit(X_17d, y)
     preds_pme = pme.predict_proba(X_17d)
     assert len(preds_pme) == len(y)
     assert np.all(preds_pme >= 0.0) and np.all(preds_pme <= 1.0)
 
-    # ProbabilityMargin fallback without feature_names (uses fallback_idx=16)
+    # ProbabilityMargin fallback without feature_names (uses fallback_idx=15)
     pme_fallback = ProbabilityMarginEstimator()
     pme_fallback.fit(X_17d, y)
     preds_pme_fb = pme_fallback.predict_proba(X_17d)
@@ -130,11 +130,23 @@ def test_proxy_calibrators_validation():
 
     # 4. Error cases: missing feature name raises ValueError
     with pytest.raises(ValueError, match="not found in provided feature_names"):
-        mssc_bad = MultiScaleSemanticConsistency(feature_names=["x1", "x4", "x5"])
+        mssc_bad = MultiScaleSemanticConsistency(feature_names=["x1", "x3", "x4"])
         mssc_bad.fit(X_17d[:, :3], y)
 
+    with pytest.raises(ValueError, match="not found in provided feature_names"):
+        msev_bad = MultiScaleEigenVariance(feature_names=["x1", "x2", "x3"])
+        msev_bad.fit(X_17d[:, :3], y)
+
+    with pytest.raises(ValueError, match="not found in provided feature_names"):
+        pme_bad = ProbabilityMarginEstimator(feature_names=["x1", "x2", "x3"])
+        pme_bad.fit(X_17d[:, :3], y)
+
     # Fallback exceeds column count raises ValueError
-    with pytest.raises(ValueError, match="fallback index 16 exceeds column count"):
+    with pytest.raises(ValueError, match="fallback index 7 exceeds column count"):
+        msev_short = MultiScaleEigenVariance()
+        msev_short.fit(X_17d[:, :5], y)
+
+    with pytest.raises(ValueError, match="fallback index 15 exceeds column count"):
         pme_short = ProbabilityMarginEstimator()
         pme_short.fit(X_17d[:, :5], y)
 

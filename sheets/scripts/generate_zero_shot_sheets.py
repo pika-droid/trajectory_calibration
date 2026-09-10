@@ -52,6 +52,7 @@ PLATT_5D_QUALIFYING = [
 ]
 
 VCPS_5D_QUALIFYING = [
+    "ai2d",
     "chartqa",
     "docvqa",
     "infographicvqa",
@@ -265,7 +266,7 @@ def write_all_sheets(
             {
                 "Note": (
                     f"Note: Grand Macro Transfer Mean across {len(VCPS_5D_QUALIFYING)} source datasets "
-                    f"trained individually and evaluated zero-shot on the other 10 qualifying datasets: "
+                    f"trained individually and evaluated zero-shot on the other {len(VCPS_5D_QUALIFYING) - 1} qualifying datasets: "
                     f"{', '.join(VCPS_5D_QUALIFYING)}."
                 )
             }
@@ -290,14 +291,14 @@ def write_all_sheets(
         notes = []
         if src_ds in PLATT_5D_QUALIFYING:
             notes.append(
-                f"Platt 5D Macro Mean evaluated across 10 qualifying targets: {', '.join(p5_targets)}."
+                f"Platt 5D Macro Mean evaluated across {len(p5_targets)} qualifying targets: {', '.join(p5_targets)}."
             )
         else:
             notes.append("Platt 5D did not qualify on this source dataset.")
 
         if src_ds in VCPS_5D_QUALIFYING:
             notes.append(
-                f"VCPS Platt 5D Macro Mean evaluated across 10 qualifying targets: {', '.join(vcps_targets)}."
+                f"VCPS Platt 5D Macro Mean evaluated across {len(vcps_targets)} qualifying targets: {', '.join(vcps_targets)}."
             )
         else:
             notes.append("VCPS Platt 5D did not qualify on this source dataset.")

@@ -9,17 +9,17 @@
 \midrule
 Naive Confidence (NC) & 8.32 & 25.60 & 15.71 & 7.40 & \textit{7.83} & 12.97 \\
 Temperature Scaling (TS) & 8.70 & 24.77 & 14.74 & 7.62 & 8.07 & 12.78 \\
-Platt Scaling (1D) & 5.01 & 22.86 & 12.64 & \textit{4.14} & 9.70 & 10.87 \\
-Trajectory LR & 6.38 & 22.51 & 14.68 & 13.41 & 10.74 & 13.55 \\
-Trajectory LR (No Bias) & 5.49 & 24.19 & 16.25 & 12.49 & 9.86 & 13.66 \\
-Trajectory Platt (5D) & 6.02 & 22.46 & 14.72 & 13.50 & 10.89 & 13.52 \\
-Trajectory Platt (17D) & 6.65 & \textbf{21.36} & 11.30 & 7.74 & 7.90 & 10.99 \\
+Platt Scaling (1D) & 5.01 & 22.86 & 12.64 & \textbf{4.14} & 9.70 & 10.87 \\
+Trajectory LR & 4.54 & 20.56 & \textbf{9.16} & 6.12 & 13.60 & 10.80 \\
+Trajectory LR (No Bias) & 5.38 & \textbf{20.38} & 11.17 & 5.50 & 13.04 & 11.09 \\
+Trajectory Platt (5D) & \textit{4.35} & \textit{20.49} & \textit{9.30} & 5.81 & 13.60 & \textit{10.71} \\
+Trajectory Platt (17D) & 6.65 & 21.60 & 11.30 & 7.74 & 7.95 & 11.05 \\
 Quadratic Platt (Logit-Only) & 4.77 & 23.73 & 11.83 & 6.13 & \textbf{7.61} & 10.81 \\
-Spline Calibration (PCHIP) & \textbf{3.70} & \textit{21.57} & \textbf{10.23} & 7.77 & 14.31 & 11.52 \\
-Adaptive TS (ATS) & 7.86 & 25.12 & 14.92 & 7.16 & 8.24 & 12.66 \\
-Residual Calibrator & \textit{4.50} & 23.15 & 12.73 & \textbf{3.77} & 8.76 & \textit{10.58} \\
-\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & 5.03 & 23.15 & 12.49 & 4.18 & 8.87 & 10.75 \\
-\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & 5.78 & 21.70 & \textit{10.83} & 4.47 & 9.45 & \textbf{10.45} \\
+Spline Calibration (PCHIP) & \textbf{3.70} & 21.57 & 10.23 & 7.77 & 14.31 & 11.52 \\
+Adaptive TS (ATS) & 8.12 & 24.77 & 14.53 & 7.70 & 9.17 & 12.86 \\
+Residual Calibrator & 4.80 & 22.71 & 12.50 & 4.78 & 10.16 & 10.99 \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & 5.45 & 22.37 & 11.87 & \textit{4.38} & 9.85 & 10.78 \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & 5.78 & 21.70 & 10.83 & 4.47 & 9.45 & \textbf{10.45} \\
 \bottomrule
 \end{tabular}%
 }
@@ -37,15 +37,15 @@ Residual Calibrator & \textit{4.50} & 23.15 & 12.73 & \textbf{3.77} & 8.76 & \te
 Naive Confidence (NC) & 31.24 & 54.81 & 47.84 & 40.67 & 33.47 & 41.61 \\
 Temperature Scaling (TS) & 17.62 & 28.32 & 24.97 & 26.22 & 31.34 & 25.69 \\
 Platt Scaling (1D) & 9.78 & 28.11 & 15.58 & 9.87 & 8.30 & 14.33 \\
-Trajectory LR & 6.30 & 16.41 & 8.63 & 5.91 & \textbf{3.43} & \textit{8.13} \\
-Trajectory LR (No Bias) & 7.30 & 26.96 & 18.93 & 14.05 & 12.96 & 16.04 \\
-Trajectory Platt (5D) & \textit{6.29} & \textit{16.26} & \textit{8.50} & \textit{5.88} & \textit{3.48} & \textbf{8.08} \\
-Trajectory Platt (17D) & 6.79 & 23.09 & 11.09 & \textbf{4.95} & 5.76 & 10.34 \\
+Trajectory LR & 5.88 & 16.53 & 8.42 & 5.45 & \textbf{2.88} & 7.83 \\
+Trajectory LR (No Bias) & \textit{5.38} & \textit{16.03} & \textit{7.54} & \textbf{4.53} & 4.02 & \textbf{7.50} \\
+Trajectory Platt (5D) & 5.87 & 16.48 & 8.37 & 5.45 & \textit{2.92} & \textit{7.82} \\
+Trajectory Platt (17D) & 6.79 & 23.09 & 11.09 & \textit{4.95} & 5.71 & 10.32 \\
 Quadratic Platt (Logit-Only) & 7.55 & 25.41 & \textbf{7.31} & 8.87 & 7.30 & 11.29 \\
 Spline Calibration (PCHIP) & \textbf{3.29} & \textbf{12.69} & 9.83 & 8.60 & 9.29 & 8.74 \\
-Adaptive TS (ATS) & 17.86 & 28.95 & 25.37 & 26.42 & 31.25 & 25.97 \\
-Residual Calibrator & 8.24 & 27.58 & 15.12 & 8.73 & 8.17 & 13.57 \\
-\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & 8.68 & 26.79 & 15.07 & 8.15 & 6.42 & 13.02 \\
+Adaptive TS (ATS) & 17.81 & 29.06 & 25.23 & 26.34 & 31.24 & 25.94 \\
+Residual Calibrator & 9.01 & 27.64 & 14.94 & 7.84 & 6.19 & 13.12 \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & 10.23 & 26.36 & 14.83 & 7.43 & 6.10 & 12.99 \\
 \rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & 8.28 & 24.90 & 12.82 & 7.19 & 5.12 & 11.66 \\
 \bottomrule
 \end{tabular}%

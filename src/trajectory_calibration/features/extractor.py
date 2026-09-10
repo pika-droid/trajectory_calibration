@@ -59,20 +59,17 @@ def compute_features_from_sample(
     c_final_clipped = np.clip(c_arr[-1], eps, 1.0 - eps)
     x1 = float(logit(c_final_clipped))
 
-    # x2: Monotonicity Count (old x4)
-    x2 = float(np.sum(c_arr[1:] > c_arr[:-1]))
-
-    # x3: Discrete Answer Stability (old x13)
+    # x2: Discrete Answer Stability (clean text unique answers)
     norm_answers = [clean_text(a) for a in answers]
     unique_answers = set(norm_answers)
-    x3 = float(1.0 / max(1, len(unique_answers)))
+    x2 = float(1.0 / max(1, len(unique_answers)))
 
-    # x4: Scale Entropy Slope (old x18)
+    # x3: Scale Entropy Slope (binary entropy slope)
     bin_entropy = -(
         c_arr * np.log(np.clip(c_arr, eps, 1.0))
         + (1.0 - c_arr) * np.log(np.clip(1.0 - c_arr, eps, 1.0))
     )
-    x4 = (
+    x3 = (
         float(
             np.sum((scale_log - np.mean(scale_log)) * (bin_entropy - np.mean(bin_entropy))) / denom
         )
@@ -80,51 +77,54 @@ def compute_features_from_sample(
         else 0.0
     )
 
-    # x5: Logprob Variance (old x11)
-    x5 = float(np.var(lp_arr))
+    # x4: Answer Flip Frequency
+    flips = sum(1 for i in range(len(norm_answers) - 1) if norm_answers[i] != norm_answers[i + 1])
+    x4 = float(flips / (len(norm_answers) - 1)) if len(norm_answers) > 1 else 0.0
 
-    # x6: Scale Dip Depth (old x8)
+    # x5: Monotonicity Count
+    x5 = float(np.sum(c_arr[1:] > c_arr[:-1]))
+
+    # x6: Logprob Variance
+    x6 = float(np.var(lp_arr))
+
+    # x7: Mid-Fine Gain Contrast
+    x7 = float((c_arr[-1] - c_arr[3]) - (c_arr[3] - c_arr[1]))
+
+    # x8: Confidence Variance
+    x8 = float(np.var(c_arr))
+
+    # x9: End-Scale Spike Ratio
+    x9 = float(c_arr[-1] - np.mean(c_arr[:-1]))
+
+    # x10: Scale Dip Depth
     coarse_max = max(c_arr[0], c_arr[1])
     mid_min = min(c_arr[2], c_arr[3])
-    x6 = float(max(0.0, coarse_max - mid_min))
+    x10 = float(max(0.0, coarse_max - mid_min))
 
-    # x7: Answer Flip Frequency (old x20)
-    flips = sum(1 for i in range(len(norm_answers) - 1) if norm_answers[i] != norm_answers[i + 1])
-    x7 = float(flips / (len(norm_answers) - 1)) if len(norm_answers) > 1 else 0.0
+    # x11: First-to-Final Jump Ratio (clipped to [0.0, 50.0])
+    x11 = float(np.clip((c_arr[-1] - c_arr[0]) / (c_arr[-1] + eps), 0.0, 50.0))
 
-    # x8: Mid-Fine Gain Contrast (old x15)
-    x8 = float((c_arr[-1] - c_arr[3]) - (c_arr[3] - c_arr[1]))
-
-    # x9: Log-Scale Slope (old x9)
-    x9 = (
+    # x12: Log-Scale Slope
+    x12 = (
         float(np.sum((scale_log - np.mean(scale_log)) * (c_arr - np.mean(c_arr))) / denom)
         if denom > 0
         else 0.0
     )
 
-    # x10: Confidence Gain (c_fine - c_9) (old x3)
-    x10 = float(c_arr[-1] - c_arr[1])
+    # x13: Relative Gain Ratio (clipped to [0.0, 50.0])
+    x13 = float(np.clip(c_arr[-1] / (c_arr[1] + eps), 0.0, 50.0))
 
-    # x11: Logprob Acceleration (old x12)
-    x11 = float((lp_arr[-1] - lp_arr[3]) - (lp_arr[3] - lp_arr[2]))
+    # x14: Logprob Acceleration
+    x14 = float((lp_arr[-1] - lp_arr[3]) - (lp_arr[3] - lp_arr[2]))
 
-    # x12: First-to-Final Jump Ratio (clipped to [0.0, 50.0]) (old x22)
-    x12 = float(np.clip((c_arr[-1] - c_arr[0]) / (c_arr[-1] + eps), 0.0, 50.0))
+    # x15: Confidence Gain (c_fine - c_9)
+    x15 = float(c_arr[-1] - c_arr[1])
 
-    # x13: Confidence Variance (old x6)
-    x13 = float(np.var(c_arr))
+    # x16: Relative Margin Growth (clipped to [0.0, 50.0])
+    x16 = float(np.clip(m_arr[-1] / (m_arr[1] + eps), 0.0, 50.0))
 
-    # x14: Relative Gain Ratio (clipped to [0.0, 50.0]) (old x14)
-    x14 = float(np.clip(c_arr[-1] / (c_arr[1] + eps), 0.0, 50.0))
-
-    # x15: End-Scale Spike Ratio (old x17)
-    x15 = float(c_arr[-1] - np.mean(c_arr[:-1]))
-
-    # x16: Logprob Gain (old x10)
-    x16 = float(lp_arr[-1] - lp_arr[1])
-
-    # x17: Relative Margin Growth (clipped to [0.0, 50.0]) (old x19)
-    x17 = float(np.clip(m_arr[-1] / (m_arr[1] + eps), 0.0, 50.0))
+    # x17: Logprob Gain
+    x17 = float(lp_arr[-1] - lp_arr[1])
 
     acc_final = accuracies[-1]
     if "is_correct" in item:

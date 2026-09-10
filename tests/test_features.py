@@ -44,13 +44,35 @@ def test_compute_features_sample():
     # 4. Verify specific mathematical values in new importance ranking
     assert feats["is_correct"] == 1
     assert feats["vqa_accuracy"] == 1.0
-    assert (
-        feats["x2"] == 4.0
-    )  # Monotonicity count: all 4 transitions increase (0.5 < 0.6 < 0.7 < 0.8 < 0.9)
-    assert feats["x3"] == pytest.approx(
+    assert feats["x1"] == pytest.approx(np.log(9.0), abs=1e-5)  # Final Logit: logit(0.9)
+    assert feats["x2"] == pytest.approx(
         0.5, abs=1e-5
     )  # Discrete Answer Stability: 2 unique answers ("cat", "dog") -> 1/2
-    assert feats["x10"] == pytest.approx(0.9 - 0.6, abs=1e-5)  # Conf gain: 576 - 9 (now x10)
+    assert feats["x4"] == pytest.approx(
+        0.25, abs=1e-5
+    )  # Answer Flip Frequency: 1 flip / 4 transitions
+    assert (
+        feats["x5"] == 4.0
+    )  # Monotonicity count: all 4 transitions increase (0.5 < 0.6 < 0.7 < 0.8 < 0.9)
+    assert feats["x7"] == pytest.approx(
+        -0.1, abs=1e-5
+    )  # Mid-Fine Gain Contrast: (0.9-0.8) - (0.8-0.6)
+    assert feats["x8"] == pytest.approx(
+        0.02, abs=1e-5
+    )  # Confidence Variance: Var([0.5,0.6,0.7,0.8,0.9])
+    assert feats["x9"] == pytest.approx(0.25, abs=1e-5)  # End-Scale Spike Ratio: 0.9 - 0.65
+    assert feats["x10"] == pytest.approx(0.0, abs=1e-5)  # Scale Dip Depth: max(0, 0.6 - 0.7) = 0
+    assert feats["x11"] == pytest.approx(
+        4.0 / 9.0, abs=1e-5
+    )  # First-to-Final Jump Ratio: (0.9 - 0.5) / 0.9
+    assert feats["x13"] == pytest.approx(1.5, abs=1e-5)  # Relative Gain Ratio: 0.9 / 0.6
+    assert feats["x15"] == pytest.approx(0.9 - 0.6, abs=1e-5)  # Conf gain: 576 - 9 (now x15)
+    assert feats["x16"] == pytest.approx(
+        2.5, abs=1e-5
+    )  # Relative Margin Growth: 0.5 / 0.2 (now x16)
+    assert feats["x17"] == pytest.approx(
+        np.log(1.5), abs=1e-5
+    )  # Logprob Gain: ln(0.9) - ln(0.6) (now x17)
 
 
 def test_sigmoid_get_logits_roundtrip():

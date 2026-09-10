@@ -10,19 +10,19 @@
 Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 8.51 & 8.06 & 0.756 \\
 Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 10.48 & 10.51 & 0.756 \\
 Platt Scaling (1D) & Single-Pass ($T = 0.0$) & 7.13 & 9.71 & 0.756 \\
-Trajectory LR & Single-Pass ($T = 0.0$) & 6.83 & 7.87 & 0.782 \\
-Trajectory LR (No Bias) & Single-Pass ($T = 0.0$) & 6.76 & 6.48 & 0.791 \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & 6.84 & 7.87 & 0.782 \\
+Trajectory LR & Single-Pass ($T = 0.0$) & 6.30 & 7.19 & 0.787 \\
+Trajectory LR (No Bias) & Single-Pass ($T = 0.0$) & 5.87 & 6.24 & 0.791 \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & 6.30 & 7.19 & 0.787 \\
 Trajectory Platt (17D) & Single-Pass ($T = 0.0$) & 4.86 & \textbf{4.69} & 0.791 \\
 Quadratic Platt (Logit-Only) & Single-Pass ($T = 0.0$) & \textbf{3.69} & 5.45 & 0.769 \\
 Spline Calibration & Single-Pass ($T = 0.0$) & 5.11 & 8.21 & 0.762 \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 8.72 & 9.07 & 0.768 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 8.54 & 8.63 & 0.774 \\
 LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & 12.40 & - & 0.787 \\
 Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & 11.40 & - & 0.690 \\
 EigenScore & Multi-Pass ($T = 0.5, K = 10$) & 6.20 & - & \textit{0.816} \\
 UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & 5.80 & - & \textbf{0.819} \\
-Residual Calibrator & Single-Pass ($T = 0.0$) & 5.97 & 7.77 & 0.764 \\
-\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & 4.57 & 6.98 & 0.771 \\
+Residual Calibrator & Single-Pass ($T = 0.0$) & 5.76 & 6.76 & 0.766 \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & 4.89 & 5.58 & 0.778 \\
 \rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Single-Pass ($T = 0.0$) & \textit{4.56} & \textit{4.82} & 0.783 \\
 \bottomrule
 \end{tabular}%
@@ -41,20 +41,20 @@ Residual Calibrator & Single-Pass ($T = 0.0$) & 5.97 & 7.77 & 0.764 \\
 Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 12.14 & 10.93 & 0.746 \\
 Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 15.10 & 16.04 & 0.746 \\
 Platt Scaling (1D) & Single-Pass ($T = 0.0$) & 14.26 & 14.95 & 0.746 \\
-Trajectory LR & Single-Pass ($T = 0.0$) & 8.69 & \textbf{6.67} & 0.786 \\
-Trajectory LR (No Bias) & Single-Pass ($T = 0.0$) & 8.84 & 9.44 & 0.786 \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & 7.96 & \textit{6.68} & 0.786 \\
-Trajectory Platt (17D) & Single-Pass ($T = 0.0$) & \textit{7.03} & 7.94 & \textbf{0.805} \\
+Trajectory LR & Single-Pass ($T = 0.0$) & 8.47 & 8.52 & 0.791 \\
+Trajectory LR (No Bias) & Single-Pass ($T = 0.0$) & 9.12 & 8.50 & \textit{0.791} \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & 8.48 & 8.52 & 0.791 \\
+Trajectory Platt (17D) & Single-Pass ($T = 0.0$) & \textit{7.03} & \textit{7.94} & \textbf{0.805} \\
 Quadratic Platt (Logit-Only) & Single-Pass ($T = 0.0$) & \textbf{6.25} & 8.39 & 0.765 \\
 Spline Calibration & Single-Pass ($T = 0.0$) & 7.18 & 10.70 & 0.747 \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 11.60 & 12.47 & 0.762 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 12.21 & 13.66 & 0.763 \\
 LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & 12.30 & - & 0.767 \\
 Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & 13.70 & - & 0.699 \\
 EigenScore & Multi-Pass ($T = 0.5, K = 10$) & 10.20 & - & 0.773 \\
-UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & 7.80 & - & \textit{0.790} \\
-Residual Calibrator & Single-Pass ($T = 0.0$) & 12.03 & 11.73 & 0.748 \\
-\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & 10.30 & 11.79 & 0.758 \\
-\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Single-Pass ($T = 0.0$) & 7.79 & 7.74 & 0.773 \\
+UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & 7.80 & - & 0.790 \\
+Residual Calibrator & Single-Pass ($T = 0.0$) & 10.62 & 11.36 & 0.743 \\
+\rowcolor{gray!10} \textbf{VCPS-5D (Our Method)} & Single-Pass ($T = 0.0$) & 8.57 & 9.80 & 0.755 \\
+\rowcolor{gray!10} \textbf{VCPS-17D (Our Method)} & Single-Pass ($T = 0.0$) & 7.79 & \textbf{7.74} & 0.773 \\
 \bottomrule
 \end{tabular}%
 }
