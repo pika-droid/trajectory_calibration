@@ -26,7 +26,7 @@ $$\text{logit}(p(\mathbf{x})) = a(\mathbf{z}) \cdot x_1 + b(\mathbf{z})$$
 $$a(\mathbf{z}) = \exp(a_0 + \boldsymbol{\gamma}^T \mathbf{z}_{\text{slope}}), \quad b(\mathbf{z}) = b_0 + \mathbf{w}^T \mathbf{z}_{\text{intercept}}$$
 
 - **VCPS-17D (Full Signature Binding)**: Dynamically binds all 16 non-anchor trajectory signatures ($x_2, x_3, \dots, x_{17}$) for both dynamic slope $\boldsymbol{\gamma}$ and dynamic intercept $\mathbf{w}$, optimizing **34 parameters** ($1 + 16 + 1 + 16 = 2K + 2$): scalar log-slope base $a_0$, 16 slope weights $\boldsymbol{\gamma}$, scalar intercept base $b_0$, and 16 intercept weights $\mathbf{w}$ across a 17-D input ($x_1 + \mathbf{z}_{16}$).
-- **VCPS-5D (Stepwise Subset)**: Binds 4 forward-stepwise selected trajectory signatures for both dynamic slope $\boldsymbol{\gamma}$ and dynamic intercept $\mathbf{w}$, optimizing **10 parameters** ($1 + 4 + 1 + 4 = 2K + 2$): scalar log-slope base $a_0$, 4 slope weights $\boldsymbol{\gamma}$, scalar intercept base $b_0$, and 4 intercept weights $\mathbf{w}$ across a 5-D input ($x_1 + \mathbf{z}_4$).
+- **VCPS-5D (Canonical 5D Subset)**: Binds the top 4 canonical trajectory signatures ($x_2, x_3, x_4, x_5$) for both dynamic slope $\boldsymbol{\gamma}$ and dynamic intercept $\mathbf{w}$, optimizing **10 parameters** ($1 + 4 + 1 + 4 = 2K + 2$): scalar log-slope base $a_0$, 4 slope weights $\boldsymbol{\gamma}$, scalar intercept base $b_0$, and 4 intercept weights $\mathbf{w}$ across a 5-D input ($x_1 + \mathbf{z}_4$).
 
 3. **Pareto Dominance**: Outperforms standard post-hoc temperature scaling while maintaining **1x inference cost**.
 
@@ -35,7 +35,7 @@ $$a(\mathbf{z}) = \exp(a_0 + \boldsymbol{\gamma}^T \mathbf{z}_{\text{slope}}), \
 ## Key Features
 
 - **Strict Modularity**: Every source file in `src/trajectory_calibration/` is structured as a clean, single-responsibility module.
-- **Primary Calibration Method**: Varying-Coefficient Platt Scaling (**VCPS-17D** with full 34-parameter dynamic binding across all 16 trajectory signatures, and **VCPS-5D** with stepwise subset binding) with exact analytical gradients and L-BFGS-B optimization.
+- **Primary Calibration Method**: Varying-Coefficient Platt Scaling (**VCPS-17D** with full 34-parameter dynamic binding across all 16 trajectory signatures, and **VCPS-5D** with canonical 10-parameter 5D binding) with exact analytical gradients and L-BFGS-B optimization.
 - **Canonical UQ Baseline Suite**:
   - **UQLM White-Box Scorers** ([CVS Health UQLM](https://github.com/cvs-health/uqlm)): Sequence Probability (Joint / Length-Normalized), Min Token Probability, Mean Token Negentropy, and Top-1/Top-2 Probability Margin.
   - **Semantic Entropy & NLI Clustering** ([Kuhn et al., 2023 / UMPIRE OpenReview](https://openreview.net/forum?id=c9TWeKZQR4)): DeBERTa-v2-xlarge bidirectional NLI entailment clustering, LogSumExp cluster aggregation, and Cluster Assignment Entropy.
