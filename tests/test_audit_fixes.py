@@ -237,9 +237,13 @@ def test_spline_calibrator_edge_cases() -> None:
 
 
 def test_all_functions_under_200_loc() -> None:
-    """Verify all functions and methods across src/ and scripts/ are under 200 LOC."""
+    """Verify all functions and methods across src/, scripts/, and sheets/ are under 200 LOC."""
     repo_root = Path(__file__).resolve().parent.parent
-    py_files = list((repo_root / "src").rglob("*.py")) + list((repo_root / "scripts").rglob("*.py"))
+    py_files = (
+        list((repo_root / "src").rglob("*.py"))
+        + list((repo_root / "scripts").rglob("*.py"))
+        + list((repo_root / "sheets").rglob("*.py"))
+    )
     assert len(py_files) > 0, "No python files discovered"
 
     violations = []

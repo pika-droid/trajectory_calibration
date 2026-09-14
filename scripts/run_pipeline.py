@@ -227,6 +227,12 @@ def build_reporting_steps(py_exec: str) -> list[PipelineStep]:
             category="reporting",
         ),
         PipelineStep(
+            name="generate_paper_table2",
+            description="Generate Paper Cross-Domain Transfer Tables (Table 2 M3 & Table 3 MQT)",
+            command=[py_exec, str(SCRIPTS_DIR / "generate_paper_table2.py")],
+            category="reporting",
+        ),
+        PipelineStep(
             name="plot_benchmark_comparison",
             description="Generate Benchmark Figures, Calibration Curves & Pareto Frontiers",
             command=[py_exec, str(SCRIPTS_DIR / "plot_benchmark_comparison.py")],

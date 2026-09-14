@@ -23,7 +23,9 @@ from trajectory_calibration.calibrators.adaptation import (
     run_saerens_em_binary,
 )
 from trajectory_calibration.calibrators.baselines import (
+    NaiveConfidenceEstimator,
     PlattScalingEstimator,
+    TemperatureScalingEstimator,
     TrajectoryLREstimator,
     TrajectoryPlattScaler,
 )
@@ -120,7 +122,8 @@ def main() -> None:
         y_train = pooled_train_df["is_correct"].values
         X_test_17d = target_test_df[FEATURE_KEYS].values
         y_test = target_test_df["is_correct"].values
-        c_test = target_test_df["c_576"].values
+        c_col = "c_fine" if "c_fine" in target_test_df.columns else f"c_{fine_scale}"
+        c_test = target_test_df[c_col].values
 
         # Bind canonical 5D subset
         best_5d_keys = CANONICAL_5D_KEYS
@@ -129,6 +132,12 @@ def main() -> None:
 
         # Models to evaluate
         base_models = {
+            "Naive Confidence (NC)": (NaiveConfidenceEstimator(), X_train_17d, X_test_17d),
+            "Temperature Scaling (TS)": (
+                TemperatureScalingEstimator(),
+                X_train_17d,
+                X_test_17d,
+            ),
             "Platt Scaling (1D)": (PlattScalingEstimator(), X_train_17d, X_test_17d),
             "Trajectory LR": (TrajectoryLREstimator(fit_intercept=True), X_train_5d, X_test_5d),
             "Trajectory LR (No Bias)": (

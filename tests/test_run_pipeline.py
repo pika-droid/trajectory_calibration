@@ -37,7 +37,7 @@ def test_build_calibration_steps() -> None:
 
 
 def test_build_full_pipeline_combinations() -> None:
-    # Default: 1 smoke + 2 * (calibration steps) + 4 reporting
+    # Default: 1 smoke + 2 * (calibration steps) + 5 reporting
     full = build_full_pipeline(architectures=["m3", "mqt"], temperatures=[0.0, 1.0])
     assert len(full) >= 15
     assert full[0].name == "smoke_test"
@@ -50,7 +50,7 @@ def test_build_full_pipeline_combinations() -> None:
     reporting_only = build_full_pipeline(
         architectures=["m3", "mqt"], temperatures=[0.0], skip_calibration=True
     )
-    assert len(reporting_only) == 4
+    assert len(reporting_only) == 5
     assert all(s.category == "reporting" for s in reporting_only)
 
     # Skip tables (calibration only)
@@ -72,6 +72,7 @@ def test_pipeline_dry_run() -> None:
     assert "DRY RUN MODE" in res.stdout
     assert "benchmark_m3" in res.stdout
     assert "benchmark_mqt" in res.stdout
+    assert "generate_paper_table2" in res.stdout
     assert "update_readme_tables" in res.stdout
 
 

@@ -1,0 +1,47 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{Zero-Shot Cross-Domain Calibration Transfer (MQT-LLaVA 7B).} Pairwise zero-shot calibration transfer from source datasets across held-out target vision-language benchmarks without target domain supervision. Evaluated across Expected Calibration Error (\textbf{ECE} $\downarrow$), Adaptive ECE (\textbf{Ada-ECE} $\downarrow$), AUROC ($\uparrow$), and Brier score ($\downarrow$). \textbf{Bold}: Rank 1; \textit{italic}: Rank 2 among transfer methods.}
+\label{tab:table3_mqt_transfer}
+\tablestyle{3pt}{1.05}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l cccc cccc cccc}
+\toprule
+\multicolumn{13}{l}{\textbf{Source: VQAv2} (General Scene VQA)} \\
+\midrule
+ & \multicolumn{4}{c}{\textbf{DocVQA} (Document Text)} & \multicolumn{4}{c}{\textbf{ChartQA} (Diagrams)} & \multicolumn{4}{c}{\textbf{TextVQA} (Scene Text)} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
+\textbf{Method} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ \\
+\midrule
+\textsc{In-Domain Calibration (Platt 5D)} & 0.0105 & 0.0386 & 0.585 & 0.0381 & 0.0236 & 0.0627 & 0.713 & 0.0920 & 0.0587 & 0.0783 & 0.714 & 0.1985 \\
+Uncalibrated (NC) & 0.5219 & 0.5219 & \textit{0.616} & 0.4003 & 0.6416 & 0.6416 & \textit{0.428} & 0.5916 & 0.3157 & 0.3157 & \textit{0.718} & 0.3118 \\
+Temperature Scaling (TS) & \textit{0.5083} & \textit{0.5083} & \textit{0.616} & \textit{0.3282} & \textit{0.5725} & \textit{0.5725} & \textit{0.428} & \textit{0.4706} & \textit{0.2773} & \textit{0.2773} & \textit{0.718} & \textit{0.2782} \\
+Platt Scaling (1D) & 0.6147 & 0.6147 & \textit{0.616} & 0.4294 & 0.6362 & 0.6362 & \textit{0.428} & 0.5236 & 0.3573 & 0.3573 & \textit{0.718} & 0.3284 \\
+\textbf{Platt 5D (Ours)} & \textbf{0.4418} & \textbf{0.4418} & \textbf{0.641} & \textbf{0.2676} & \textbf{0.5288} & \textbf{0.5280} & \textbf{0.573} & \textbf{0.4018} & \textbf{0.2292} & \textbf{0.2276} & \textbf{0.742} & \textbf{0.2485} \\
+\midrule
+\multicolumn{13}{l}{\textbf{Source: VizWiz-VQA} (Assistive / Blurry)} \\
+\midrule
+ & \multicolumn{4}{c}{\textbf{ChartQA} (Diagrams)} & \multicolumn{4}{c}{\textbf{DocVQA} (Document Text)} & \multicolumn{4}{c}{\textbf{TextVQA} (Scene Text)} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
+\textbf{Method} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ \\
+\midrule
+\textsc{In-Domain Calibration (Platt 5D)} & 0.0236 & 0.0627 & 0.713 & 0.0920 & 0.0105 & 0.0386 & 0.585 & 0.0381 & 0.0587 & 0.0783 & 0.714 & 0.1985 \\
+Uncalibrated (NC) & 0.6416 & 0.6416 & \textit{0.428} & 0.5916 & 0.5219 & 0.5219 & \textit{0.616} & 0.4003 & 0.3157 & 0.3157 & \textit{0.718} & 0.3118 \\
+Temperature Scaling (TS) & 0.5368 & 0.5368 & \textit{0.428} & 0.4167 & 0.4989 & 0.4989 & \textit{0.616} & 0.3051 & 0.2536 & 0.2536 & \textit{0.718} & 0.2655 \\
+Platt Scaling (1D) & \textit{0.3754} & \textit{0.3779} & \textit{0.428} & \textit{0.3353} & \textit{0.2343} & \textit{0.2343} & \textit{0.616} & \textit{0.1495} & \textit{0.1427} & \textit{0.1403} & \textit{0.718} & \textit{0.2342} \\
+\textbf{Platt 5D (Ours)} & \textbf{0.3214} & \textbf{0.3250} & \textbf{0.448} & \textbf{0.2845} & \textbf{0.1899} & \textbf{0.1899} & \textbf{0.637} & \textbf{0.1181} & \textbf{0.1273} & \textbf{0.1273} & \textbf{0.736} & \textbf{0.2180} \\
+\midrule
+\multicolumn{13}{l}{\textbf{Source: TextVQA} (Scene Text)} \\
+\midrule
+ & \multicolumn{4}{c}{\textbf{ChartQA} (Diagrams)} & \multicolumn{4}{c}{\textbf{DocVQA} (Document Text)} & \multicolumn{4}{c}{\textbf{VizWiz-VQA} (Assistive)} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
+\textbf{Method} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ \\
+\midrule
+\textsc{In-Domain Calibration (Platt 5D)} & 0.0236 & 0.0627 & 0.713 & 0.0920 & 0.0105 & 0.0386 & 0.585 & 0.0381 & 0.0541 & 0.0598 & 0.803 & 0.1454 \\
+Uncalibrated (NC) & 0.6416 & 0.6416 & \textit{0.428} & 0.5916 & 0.5219 & 0.5219 & \textit{0.616} & 0.4003 & 0.3166 & 0.3166 & \textbf{0.808} & 0.2486 \\
+Temperature Scaling (TS) & 0.4301 & 0.4301 & \textit{0.428} & 0.2857 & 0.4704 & 0.4704 & \textit{0.616} & 0.2601 & 0.2776 & 0.2837 & \textbf{0.808} & 0.2434 \\
+Platt Scaling (1D) & \textit{0.2724} & \textit{0.2776} & \textit{0.428} & \textit{0.1983} & \textit{0.2501} & \textit{0.2501} & \textit{0.616} & \textit{0.1115} & \textit{0.1046} & \textit{0.1152} & \textbf{0.808} & \textit{0.1555} \\
+\textbf{Platt 5D (Ours)} & \textbf{0.2359} & \textbf{0.2382} & \textbf{0.553} & \textbf{0.1738} & \textbf{0.1967} & \textbf{0.1967} & \textbf{0.645} & \textbf{0.0913} & \textbf{0.0855} & \textbf{0.0845} & \textit{0.761} & \textbf{0.1540} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
