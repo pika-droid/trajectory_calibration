@@ -14,6 +14,8 @@ import numpy as np
 from scipy.stats import bootstrap
 from sklearn.linear_model import LogisticRegression
 
+from trajectory_calibration.utils.math import get_logits
+
 
 def fit_calibration_slope_intercept(
     probs: np.ndarray | list[float], y: np.ndarray | list[int | float], eps: float = 1e-12
@@ -28,8 +30,7 @@ def fit_calibration_slope_intercept(
     if len(np.unique(labels)) < 2:
         return 1.0, 0.0
 
-    c = np.clip(p, eps, 1.0 - eps)
-    logits = np.log(c / (1.0 - c)).reshape(-1, 1)
+    logits = get_logits(p, eps=eps).reshape(-1, 1)
 
     try:
         lr = LogisticRegression(C=1000.0, solver="lbfgs", max_iter=1000)
