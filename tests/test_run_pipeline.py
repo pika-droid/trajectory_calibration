@@ -46,12 +46,19 @@ def test_build_full_pipeline_combinations() -> None:
     no_mock = build_full_pipeline(architectures=["m3", "mqt"], temperatures=[0.0], skip_mock=True)
     assert not any(s.name == "smoke_test" for s in no_mock)
 
-    # Skip calibration (reporting only)
+    # Skip calibration (reporting only, with ablation reporting by default)
     reporting_only = build_full_pipeline(
         architectures=["m3", "mqt"], temperatures=[0.0], skip_calibration=True
     )
-    assert len(reporting_only) == 5
+    assert len(reporting_only) == 7
     assert all(s.category == "reporting" for s in reporting_only)
+
+    # Skip calibration and ablation reporting
+    reporting_no_ablation = build_full_pipeline(
+        architectures=["m3", "mqt"], temperatures=[0.0], skip_calibration=True, skip_ablation=True
+    )
+    assert len(reporting_no_ablation) == 5
+    assert all(s.category == "reporting" for s in reporting_no_ablation)
 
     # Skip tables (calibration only)
     calibration_only = build_full_pipeline(
@@ -74,6 +81,9 @@ def test_pipeline_dry_run() -> None:
     assert "benchmark_mqt" in res.stdout
     assert "generate_paper_table2" in res.stdout
     assert "update_readme_tables" in res.stdout
+    assert "ablation_5d_m3" in res.stdout
+    assert "plot_ablation_5d" in res.stdout
+    assert "generate_ablation_latex_tables" in res.stdout
 
 
 def test_format_analytical_bullets_with_trajectory_platt() -> None:

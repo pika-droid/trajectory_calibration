@@ -85,6 +85,7 @@ def build_calibration_steps(
     py_exec: str,
     arch: str,
     temperatures: list[float],
+    skip_ablation: bool = False,
 ) -> list[PipelineStep]:
     """Assemble Section 2 calibration benchmark steps for a given architecture."""
     steps: list[PipelineStep] = []
@@ -208,12 +209,28 @@ def build_calibration_steps(
             )
         )
 
+    # 7. Combinatorial 5D Trajectory Feature Ablation Study
+    if not skip_ablation:
+        steps.append(
+            PipelineStep(
+                name=f"ablation_5d_{arch}",
+                description=f"{arch_upper} Exhaustive 14-Dataset Combinatorial 5D Trajectory Ablation",
+                command=[
+                    py_exec,
+                    str(SCRIPTS_DIR / "run_combinatorial_ablation_5d.py"),
+                    "--arch",
+                    arch,
+                ],
+                category="calibration",
+            )
+        )
+
     return steps
 
 
-def build_reporting_steps(py_exec: str) -> list[PipelineStep]:
+def build_reporting_steps(py_exec: str, skip_ablation: bool = False) -> list[PipelineStep]:
     """Assemble Section 3 table, log, figure, and README generation steps."""
-    return [
+    steps = [
         PipelineStep(
             name="generate_markdown_logs",
             description="Generate UMPIRE Baselines and VCPS vs Baselines Markdown Logs",
@@ -246,6 +263,26 @@ def build_reporting_steps(py_exec: str) -> list[PipelineStep]:
         ),
     ]
 
+    if not skip_ablation:
+        steps.extend(
+            [
+                PipelineStep(
+                    name="plot_ablation_5d",
+                    description="Generate 5D Combinatorial Ablation Figures",
+                    command=[py_exec, str(SCRIPTS_DIR / "plot_ablation_5d.py")],
+                    category="reporting",
+                ),
+                PipelineStep(
+                    name="generate_ablation_latex_tables",
+                    description="Generate 5D Combinatorial Ablation LaTeX Tables",
+                    command=[py_exec, str(SCRIPTS_DIR / "generate_ablation_latex_tables.py")],
+                    category="reporting",
+                ),
+            ]
+        )
+
+    return steps
+
 
 def build_full_pipeline(
     architectures: list[str],
@@ -253,6 +290,7 @@ def build_full_pipeline(
     skip_mock: bool = False,
     skip_calibration: bool = False,
     skip_tables: bool = False,
+    skip_ablation: bool = False,
 ) -> list[PipelineStep]:
     """Construct the complete sequence of pipeline steps according to configuration flags."""
     py_exec = sys.executable
@@ -272,11 +310,13 @@ def build_full_pipeline(
     # Stage 1-6: Section 2 Calibration
     if not skip_calibration:
         for arch in architectures:
-            steps.extend(build_calibration_steps(py_exec, arch, temperatures))
+            steps.extend(
+                build_calibration_steps(py_exec, arch, temperatures, skip_ablation=skip_ablation)
+            )
 
     # Stage 7-10: Section 3 Reporting, Figures & README Synchronization
     if not skip_tables:
-        steps.extend(build_reporting_steps(py_exec))
+        steps.extend(build_reporting_steps(py_exec, skip_ablation=skip_ablation))
 
     return steps
 
@@ -315,6 +355,11 @@ def parse_args() -> argparse.Namespace:
         "--skip-tables",
         action="store_true",
         help="Skip Section 3 table, log, and figure generation; run only Section 2 benchmarks.",
+    )
+    parser.add_argument(
+        "--skip-ablation",
+        action="store_true",
+        help="Skip combinatorial 5D trajectory feature ablation study.",
     )
     parser.add_argument(
         "--continue-on-error",
@@ -380,6 +425,7 @@ def main() -> None:
         skip_mock=args.skip_mock,
         skip_calibration=args.skip_calibration,
         skip_tables=args.skip_tables,
+        skip_ablation=args.skip_ablation,
     )
 
     if args.dry_run:

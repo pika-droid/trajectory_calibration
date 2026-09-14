@@ -1,0 +1,107 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=0.7in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,graphicx,multirow,colortbl,xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!70!black,citecolor=blue!70!black,urlcolor=blue!70!black]{hyperref}
+\newcommand{\tablestyle}[2]{\setlength{\tabcolsep}{#1}\renewcommand{\arraystretch}{#2}}
+\title{\textbf{Trajectory Uncertainty Calibration for Multimodal VLMs}\\[0.4em] \Large Complete Benchmark \& Transfer LaTeX Table Compendium}
+\author{M3-LLaVA (7B) \& MQT-LLaVA (7B) Evaluations}
+\date{\today}
+\begin{document}
+\maketitle
+\begin{abstract}
+This document compiles all 28 publication-ready LaTeX tables across Groups 1--8 for local inspection before Overleaf integration. All tables follow the standardized 4-metric schema: ECE (\%) $\downarrow$, Ada-ECE (\%) $\downarrow$, AUROC $\uparrow$, and Brier score $\downarrow$, featuring Option A ranking (\textbf{bold} Rank 1, \textit{italic} Rank 2) and Trajectory Platt (5D) evaluation.
+\end{abstract}
+\tableofcontents
+\clearpage
+\section{Main Manuscript Tables (Groups 5, 2, 6, 7, 4)}
+\subsection{Table 2: Zero-Shot Cross-Domain Calibration Transfer (M3-LLaVA 7B)}
+\input{dataset_tables/table2_m3_transfer}
+\clearpage
+\subsection{Table 3: Zero-Shot Cross-Domain Calibration Transfer (MQT-LLaVA 7B)}
+\input{dataset_tables/table3_mqt_transfer}
+\clearpage
+\subsection{Group 2: Macro-Averaged Calibration Benchmark Across All 14 Datasets}
+\input{dataset_tables/macro_mean}
+\clearpage
+\subsection{Group 6: Zero-Shot Source Anchor Leaderboard}
+\input{dataset_tables/pairwise_anchor_summary}
+\clearpage
+\subsection{Group 7: Sample Efficiency \& Low-Data Calibration Scaling}
+\input{dataset_tables/sample_efficiency_macro}
+\clearpage
+\subsection{Group 4: Leave-One-Dataset-Out (LODO) Cross-Domain Transfer}
+\input{dataset_tables/lodo_cross_dataset}
+\clearpage
+\section{Group 3: Temperature Transfer Robustness Ablation}
+Evaluating calibrators trained at $T = 0.0$ and tested across $T \in \{0.0, 0.3, 0.6, 1.0, 1.5\}$ and temperature Mean.
+\subsection{Temperature Transfer: Macro-Averaged Across 4 Benchmarks}
+\input{dataset_tables/temp_ablation/macro_mean}
+\clearpage
+\subsection{Temperature Transfer: POPE}
+\input{dataset_tables/temp_ablation/pope}
+\clearpage
+\subsection{Temperature Transfer: ScienceQA}
+\input{dataset_tables/temp_ablation/scienceqa}
+\clearpage
+\subsection{Temperature Transfer: TextVQA}
+\input{dataset_tables/temp_ablation/textvqa}
+\clearpage
+\subsection{Temperature Transfer: VizWiz-VQA}
+\input{dataset_tables/temp_ablation/vizwizvqa}
+\clearpage
+\section{Group 1: Per-Dataset In-Domain Calibration Benchmarks}
+Individual benchmark tables for all 14 vision-language datasets under the 8-method, 4-metric schema.
+\subsection{Benchmark: AI2D}
+\input{dataset_tables/dataset_wise_results/ai2d}
+\clearpage
+\subsection{Benchmark: CHARTQA}
+\input{dataset_tables/dataset_wise_results/chartqa}
+\clearpage
+\subsection{Benchmark: DOCVQA}
+\input{dataset_tables/dataset_wise_results/docvqa}
+\clearpage
+\subsection{Benchmark: GQA}
+\input{dataset_tables/dataset_wise_results/gqa}
+\clearpage
+\subsection{Benchmark: INFOGRAPHICVQA}
+\input{dataset_tables/dataset_wise_results/infographicvqa}
+\clearpage
+\subsection{Benchmark: LEGOPUZZLES}
+\input{dataset_tables/dataset_wise_results/legopuzzles}
+\clearpage
+\subsection{Benchmark: MMBENCH}
+\input{dataset_tables/dataset_wise_results/mmbench}
+\clearpage
+\subsection{Benchmark: MMMU}
+\input{dataset_tables/dataset_wise_results/mmmu}
+\clearpage
+\subsection{Benchmark: POPE}
+\input{dataset_tables/dataset_wise_results/pope}
+\clearpage
+\subsection{Benchmark: SCIENCEQA}
+\input{dataset_tables/dataset_wise_results/scienceqa}
+\clearpage
+\subsection{Benchmark: SEEDBENCH}
+\input{dataset_tables/dataset_wise_results/seedbench}
+\clearpage
+\subsection{Benchmark: TEXTVQA}
+\input{dataset_tables/dataset_wise_results/textvqa}
+\clearpage
+\subsection{Benchmark: VIZWIZVQA}
+\input{dataset_tables/dataset_wise_results/vizwizvqa}
+\clearpage
+\subsection{Benchmark: VQAV2}
+\input{dataset_tables/dataset_wise_results/vqav2}
+\clearpage
+\section{Group 8: Combinatorial 5D Trajectory Feature Ablation Study}
+Exhaustive 5-fold cross-validation combinatorial ablation across all $\sum_{k=1}^5 \binom{5}{k} = 31$ feature subsets of canonical 5D trajectory features across all 14 vision-language benchmarks on M3-LLaVA (7B) and MQT-LLaVA (7B).
+\subsection{Table 4: Macro Cardinality Progression ($k \in \{1 \dots 5\}$)}
+\input{dataset_tables/table_ablation_5d_macro_progression}
+\clearpage
+\subsection{Table 5: Leave-One-Out (LOO) Feature Degradation Sensitivity}
+\input{dataset_tables/table_ablation_5d_loo}
+\clearpage
+\subsection{Table 6: Exhaustive 14-Benchmark Adaptive ECE Progression Grid}
+\input{dataset_tables/table_ablation_5d_14ds_grid}
+\clearpage
+\end{document}

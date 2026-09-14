@@ -1,0 +1,20 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{\textbf{Leave-One-Out (LOO) Feature Degradation Sensitivity across 14 Benchmarks}. Marginal change in calibration error ($\Delta \text{Ada-ECE} = \text{Ada-ECE}_{-j} - \text{Ada-ECE}_{\text{Full 5D}}$) and discrimination ($\Delta \text{AUROC} = \text{AUROC}_{-j} - \text{AUROC}_{\text{Full 5D}}$) when dropping individual feature $x_j$ from Trajectory Platt (5D). Positive $\Delta \text{Ada-ECE}$ and negative $\Delta \text{AUROC}$ indicate feature necessity. \textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 degradation impact.}
+\label{tab:ablation_5d_loo}
+\vspace{2mm}
+\begin{tabular}{clccccl}
+\toprule
+\multirow{2}{*}{\textbf{Dropped Feature}} & \multirow{2}{*}{\textbf{Functional Role}} & \multicolumn{2}{c}{\textbf{M3-LLaVA (7B)}} & \multicolumn{2}{c}{\textbf{MQT-LLaVA (7B)}} & \multirow{2}{*}{\textbf{Macro Impact}} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+& & \textbf{$\Delta$ Ada-ECE} & \textbf{$\Delta$ AUROC} & \textbf{$\Delta$ Ada-ECE} & \textbf{$\Delta$ AUROC} & \\
+\midrule
+$x_{1}$ (Final Logit) & Base Fine-Scale Log-Odds Anchor ($\ell_{576/256}$) & -0.0009 & \textbf{-0.075} & \textbf{+0.0037} & \textbf{-0.053} & \textbf{Catastrophic AUROC Collapse (Anchor Loss)} \\
+$x_{2}$ (Discrete Answer Stability) & Categorical Scale Consistency & -0.0004 & +0.003 & -0.0030 & +0.003 & Scale Invariance Shift \\
+$x_{3}$ (Scale Entropy Slope) & Predictive Entropy Decay Dynamics & \textit{+0.0006} & \textit{-0.004} & -0.0012 & \textit{-0.012} & Entropy Dynamics Degradation \\
+$x_{4}$ (Answer Flip Frequency) & Argmax Scale Transition Rate & -0.0009 & +0.000 & -0.0033 & -0.001 & Argmax Flipping Instability \\
+$x_{5}$ (Monotonicity Count) & Directional Monotonicity Trend & \textbf{+0.0031} & \textit{-0.004} & \textit{-0.0010} & -0.008 & Monotonic Decay Disruption \\
+\bottomrule
+\end{tabular}
+\end{table*}

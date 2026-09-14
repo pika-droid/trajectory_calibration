@@ -1,0 +1,50 @@
+\begin{table*}[t]
+\centering
+\scriptsize
+\caption{\textbf{Exhaustive 14-Benchmark Progression Grid: Adaptive ECE ($\downarrow$)}. Per-dataset comparison across 1D Platt ($\{x_1\}$), Optimal 2D, Optimal 3D, Optimal 4D, and Full Trajectory Platt 5D. Option A ranking: \textbf{Bold} Rank 1, \textit{Italic} Rank 2 across each benchmark row.}
+\label{tab:ablation_5d_14ds_grid}
+\vspace{2mm}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Benchmark Dataset} & \textbf{1D Platt ($\{x_1\}$)} & \textbf{Best-2D} & \textbf{Best-3D} & \textbf{Best-4D} & \textbf{Full 5D (Ours)} \\
+\midrule
+\multicolumn{6}{l}{\textsc{\textbf{M3-LLaVA (7B)}}} \\
+\midrule
+AI2D & 0.0387 & \textbf{0.0280} & \textit{0.0322} & 0.0381 & 0.0547 \\
+ChartQA & 0.0169 & \textit{0.0153} & \textbf{0.0132} & 0.0165 & 0.0230 \\
+DocVQA & 0.0127 & 0.0091 & \textbf{0.0074} & \textit{0.0083} & 0.0094 \\
+GQA & 0.0396 & \textbf{0.0167} & \textit{0.0178} & 0.0205 & 0.0319 \\
+InfoVQA & 0.0076 & \textbf{0.0045} & \textit{0.0056} & 0.0059 & 0.0064 \\
+LegoPuzzles & 0.0949 & 0.0459 & \textit{0.0357} & 0.0413 & \textbf{0.0345} \\
+MMBench & 0.0404 & \textbf{0.0273} & \textit{0.0281} & 0.0338 & 0.0379 \\
+MMMU & 0.0131 & \textbf{0.0092} & \textit{0.0098} & 0.0122 & 0.0155 \\
+POPE & 0.0192 & \textbf{0.0075} & \textit{0.0107} & 0.0114 & 0.0165 \\
+ScienceQA & 0.0419 & \textit{0.0226} & \textbf{0.0160} & 0.0326 & 0.0446 \\
+SEED-Bench & 0.0303 & \textbf{0.0121} & \textit{0.0209} & 0.0231 & 0.0234 \\
+TextVQA & 0.0468 & \textit{0.0243} & \textbf{0.0217} & 0.0345 & 0.0382 \\
+VizWiz-VQA & 0.0213 & \textit{0.0207} & 0.0209 & \textbf{0.0192} & 0.0263 \\
+VQAv2 & 0.0862 & \textit{0.0233} & \textbf{0.0199} & 0.0247 & 0.0356 \\
+\midrule
+\textbf{Macro Mean} & 0.0364 & \textit{0.0190} & \textbf{0.0186} & 0.0230 & 0.0284 \\
+\midrule
+\multicolumn{6}{l}{\textsc{\textbf{MQT-LLaVA (7B)}}} \\
+\midrule
+AI2D & 0.0563 & \textbf{0.0386} & \textit{0.0410} & 0.0482 & 0.0547 \\
+ChartQA & 0.0611 & \textbf{0.0222} & \textit{0.0253} & 0.0286 & 0.0346 \\
+DocVQA & 0.0214 & \textit{0.0111} & 0.0135 & \textbf{0.0105} & 0.0186 \\
+GQA & 0.0525 & \textbf{0.0287} & \textit{0.0335} & 0.0353 & 0.0544 \\
+InfoVQA & 0.0065 & 0.0063 & 0.0054 & \textbf{0.0046} & \textit{0.0051} \\
+LegoPuzzles & 0.0899 & 0.0395 & \textbf{0.0303} & \textit{0.0383} & 0.0520 \\
+MMBench & 0.0407 & \textbf{0.0321} & \textit{0.0391} & 0.0453 & 0.0490 \\
+MMMU & 0.0128 & 0.0098 & \textbf{0.0079} & \textit{0.0090} & 0.0116 \\
+POPE & 0.0176 & 0.0174 & \textit{0.0162} & \textbf{0.0157} & \textit{0.0162} \\
+ScienceQA & 0.0530 & \textbf{0.0325} & \textit{0.0341} & 0.0384 & 0.0357 \\
+SEED-Bench & 0.0303 & \textbf{0.0227} & \textit{0.0299} & 0.0338 & 0.0530 \\
+TextVQA & 0.0956 & \textit{0.0215} & \textbf{0.0209} & 0.0269 & 0.0339 \\
+VizWiz-VQA & 0.0447 & \textbf{0.0175} & \textit{0.0192} & 0.0293 & 0.0302 \\
+VQAv2 & 0.0979 & 0.0314 & \textbf{0.0241} & \textit{0.0275} & 0.0558 \\
+\midrule
+\textbf{Macro Mean} & 0.0486 & \textbf{0.0237} & \textit{0.0243} & 0.0280 & 0.0361 \\
+\bottomrule
+\end{tabular}
+\end{table*}
