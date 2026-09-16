@@ -113,7 +113,9 @@ def main() -> None:
         y_train = train_df["is_correct"].values
         X_test_17d = test_df[FEATURE_KEYS].values
         y_test = test_df["is_correct"].values
-        c_test_576 = test_df["c_576"].values
+        c_test_fine = (
+            test_df["c_fine"].values if "c_fine" in test_df.columns else test_df["c_576"].values
+        )
 
         best_5d_keys = CANONICAL_5D_KEYS
         X_train_5d = train_df[CANONICAL_5D_KEYS].values
@@ -166,7 +168,7 @@ def main() -> None:
             else:
                 model.fit(X_tr, y_train)
             probs = model.predict_proba(X_te)
-            panel = evaluate_full_metric_panel(probs, y_test, c_test_576, y_train=y_train)
+            panel = evaluate_full_metric_panel(probs, y_test, c_test_fine, y_train=y_train)
             panel["dataset"] = ds
             panel["method"] = m_name
             all_results.append(panel)
