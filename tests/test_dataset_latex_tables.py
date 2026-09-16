@@ -128,11 +128,21 @@ def test_group9_vqav2_multirollout_table() -> None:
 def test_group3_temp_ablation_tables() -> None:
     """Verify Group 3 temp_ablation tables exist with stacked temperature blocks."""
     expected_files = ["macro_mean.tex", "pope.tex", "scienceqa.tex", "textvqa.tex", "vizwizvqa.tex"]
+    target_methods = [
+        "Naive Confidence (NC)",
+        "Temperature Scaling (TS)",
+        "Platt Scaling (1D)",
+        "Trajectory Platt (5D)",
+    ]
+    excluded_methods = ["VCPS", "MSSC", "Quadratic Platt", "Spline Calibration"]
+
     for fname in expected_files:
         p = TEMP_DIR / fname
         assert p.exists(), f"Missing temp ablation table: {p}"
         content = p.read_text(encoding="utf-8")
 
+        assert "M3-LLaVA 7B" in content
+        assert "MQT-LLaVA 7B" in content
         assert "Sampling Temperature $T = 0.0$" in content
         assert "Sampling Temperature $T = 0.3$" in content
         assert "Sampling Temperature $T = 0.6$" in content
@@ -140,7 +150,15 @@ def test_group3_temp_ablation_tables() -> None:
         assert "Sampling Temperature $T = 1.5$" in content
         assert "Mean (Averaged Across Temperatures)" in content
         assert "\\begin{tabular}{lcccc}" in content
-        assert "Trajectory Platt (5D)" in content
+        assert "ECE (\\%)" in content
+        assert "Ada-ECE (\\%)" in content
+        assert "Brier" in content
+        assert "AUROC" in content
+
+        for m in target_methods:
+            assert m in content, f"Missing method {m} in {fname}"
+        for em in excluded_methods:
+            assert em not in content, f"Unexpected method {em} found in {fname}"
 
 
 def test_group4_lodo_cross_dataset_table() -> None:

@@ -24,6 +24,7 @@ env/
 results/features/
 data/features/*
 !data/features/.gitkeep
+data/raw_datasets/
 checkpoints/
 *.pt
 *.pth
