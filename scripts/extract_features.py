@@ -187,8 +187,14 @@ def main() -> None:
     set_seed(args.seed)
 
     if not args.mock:
-        logger.info(f"Initializing VLM wrapper from '{args.model_path}'...")
-        wrapper = UnifiedVLMWrapper(model_path=args.model_path, precision=args.precision)
+        default_m3 = "mucai/llava-v1.5-7b-m3"
+        model_path = (
+            "gordonhu/MQT-LLaVA-7b"
+            if args.arch == "mqt" and args.model_path == default_m3
+            else args.model_path
+        )
+        logger.info(f"Initializing VLM wrapper from '{model_path}' ({args.arch.upper()})...")
+        wrapper = UnifiedVLMWrapper(model_path=model_path, precision=args.precision, arch=args.arch)
     else:
         wrapper = None
 
