@@ -142,12 +142,21 @@ def process_dataset(
                 "vqa_accuracy": acc,
             }
 
+        gt_val = (
+            sample.get("answers")
+            or sample.get("labels")
+            or sample.get("answer")
+            or sample.get("text_answer")
+            or sample.get("ground_truth")
+            or ""
+        )
         extracted.append(
             {
                 "question_id": q_id,
                 "question": question,
                 "dataset": dataset_key,
                 "sample_idx": idx,
+                "ground_truth": gt_val,
                 "features": feats,
             }
         )
