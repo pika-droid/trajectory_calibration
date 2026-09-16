@@ -222,18 +222,26 @@ def _load_local_avqa(
                 q.get("image", q.get("image_id", q.get("picture", ""))),
             ),
         )
-        if isinstance(img_name, int):
-            img_name = f"COCO_val2017_{img_name:012d}.jpg"
+        if isinstance(img_name, int) or (isinstance(img_name, str) and img_name.isdigit()):
+            coco_id = int(img_name)
+            coco_name = f"COCO_val2017_{coco_id:012d}.jpg"
+            coco_url = f"http://images.cocodataset.org/val2017/{coco_id:012d}.jpg"
+        else:
+            coco_name = str(img_name)
+            coco_url = None
+
         img_path = None
         if img_name:
-            cand_p = avqa_dir / str(img_name)
-            cand_p_img = images_dir / str(img_name)
+            cand_p = avqa_dir / coco_name
+            cand_p_img = images_dir / coco_name
             if cand_p.is_file():
                 img_path = str(cand_p)
             elif images_dir.is_dir() and cand_p_img.is_file():
                 img_path = str(cand_p_img)
             elif Path(str(img_name)).is_file():
                 img_path = str(img_name)
+            elif coco_url:
+                img_path = coco_url
             else:
                 img_path = str(img_name)
 
@@ -244,6 +252,8 @@ def _load_local_avqa(
         }
         if img_path is not None:
             item["image"] = img_path
+        if coco_url:
+            item["coco_url"] = coco_url
         samples.append(item)
     return samples
 

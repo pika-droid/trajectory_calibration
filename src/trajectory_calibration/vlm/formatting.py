@@ -118,58 +118,81 @@ def format_question(sample: dict[str, Any], dataset_key: str) -> str:
 
 
 def _to_pil_image(val: Any) -> Image.Image | None:
-    """Converts a raw value (Image, Path/str, bytes, dict, base64) to RGB PIL Image."""
-    if val is None:
-        return None
-    if isinstance(val, Image.Image):
-        return val.convert("RGB")
-    if isinstance(val, (bytes, bytearray)):
-        try:
-            return Image.open(io.BytesIO(val)).convert("RGB")
-        except Exception:
+    """Converts a raw value (Image, Path/str, bytes, dict, base64, URL) to RGB PIL Image."""
+    try:
+        if val is None:
             return None
-    if isinstance(val, io.BytesIO):
-        try:
-            return Image.open(val).convert("RGB")
-        except Exception:
-            return None
-    if isinstance(val, (str, Path)):
-        p = Path(val)
-        if p.is_file():
+        if isinstance(val, Image.Image):
+            return val.convert("RGB")
+        if isinstance(val, (bytes, bytearray)):
             try:
-                return Image.open(p).convert("RGB")
+                return Image.open(io.BytesIO(val)).convert("RGB")
             except Exception:
                 return None
-        if isinstance(val, str) and (val.startswith("data:image") or len(val) > 100):
+        if isinstance(val, io.BytesIO):
             try:
-                import base64
+                return Image.open(val).convert("RGB")
+            except Exception:
+                return None
+        if isinstance(val, (str, Path)):
+            val_str = str(val)
+            if val_str.startswith(("http://", "https://")):
+                try:
+                    import urllib.request
 
-                b64_str = val.split(",", 1)[1] if "," in val else val
-                img_bytes = base64.b64decode(b64_str)
-                return Image.open(io.BytesIO(img_bytes)).convert("RGB")
-            except Exception:
-                pass
-    if isinstance(val, dict):
-        if "bytes" in val and val["bytes"] is not None:
-            try:
-                return Image.open(io.BytesIO(val["bytes"])).convert("RGB")
-            except Exception:
-                return None
-        if val.get("path"):
-            p = Path(val["path"])
+                    req = urllib.request.Request(val_str, headers={"User-Agent": "Mozilla/5.0"})
+                    with urllib.request.urlopen(req, timeout=15) as resp:
+                        img_bytes = resp.read()
+                    # Cache locally if in avqa directory
+                    if "images.cocodataset.org" in val_str:
+                        fname = val_str.split("/")[-1]
+                        cache_dir = Path("data/raw_datasets/avqa/images")
+                        cache_dir.mkdir(parents=True, exist_ok=True)
+                        cache_file = cache_dir / fname
+                        if not cache_file.exists():
+                            with open(cache_file, "wb") as f:
+                                f.write(img_bytes)
+                    return Image.open(io.BytesIO(img_bytes)).convert("RGB")
+                except Exception:
+                    return None
+            p = Path(val)
             if p.is_file():
                 try:
                     return Image.open(p).convert("RGB")
                 except Exception:
                     return None
-        if "image" in val and val["image"] is not None:
-            return _to_pil_image(val["image"])
-    if isinstance(val, (list, tuple)):
-        for item in val:
-            img = _to_pil_image(item)
-            if img is not None:
-                return img
-    return None
+            if isinstance(val, str) and (val.startswith("data:image") or len(val) > 100):
+                try:
+                    import base64
+
+                    b64_str = val.split(",", 1)[1] if "," in val else val
+                    img_bytes = base64.b64decode(b64_str)
+                    return Image.open(io.BytesIO(img_bytes)).convert("RGB")
+                except Exception:
+                    pass
+        if isinstance(val, dict):
+            if "bytes" in val and val["bytes"] is not None:
+                try:
+                    return Image.open(io.BytesIO(val["bytes"])).convert("RGB")
+                except Exception:
+                    return None
+            if val.get("path"):
+                p = Path(val["path"])
+                if p.is_file():
+                    try:
+                        return Image.open(p).convert("RGB")
+                    except Exception:
+                        return None
+            if "image" in val and val["image"] is not None:
+                return _to_pil_image(val["image"])
+        if isinstance(val, (list, tuple)):
+            for item in val:
+                img = _to_pil_image(item)
+                if img is not None:
+                    return img
+        return None
+    except Exception:
+        return None
 
 
 def load_image_from_sample(sample: dict[str, Any]) -> Image.Image | None:
@@ -182,6 +205,9 @@ def load_image_from_sample(sample: dict[str, Any]) -> Image.Image | None:
         "image_path",
         "img_path",
         "image_name",
+        "image_url",
+        "coco_url",
+        "url",
         "picture",
         "file_name",
         "filename",
@@ -192,6 +218,15 @@ def load_image_from_sample(sample: dict[str, Any]) -> Image.Image | None:
             img = _to_pil_image(sample[k])
             if img is not None:
                 return img
+
+    img_id = sample.get("image_id")
+    if img_id is not None and (
+        isinstance(img_id, int) or (isinstance(img_id, str) and img_id.isdigit())
+    ):
+        coco_url = f"http://images.cocodataset.org/val2017/{int(img_id):012d}.jpg"
+        img = _to_pil_image(coco_url)
+        if img is not None:
+            return img
 
     return None
 
