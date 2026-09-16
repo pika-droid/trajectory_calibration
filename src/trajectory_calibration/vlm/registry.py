@@ -114,16 +114,45 @@ DATASET_REGISTRY: dict[str, dict[str, Any]] = {
 ALL_DATASET_KEYS = list(DATASET_REGISTRY.keys())
 
 
-def _load_local_avqa(base_path: Path | str = "data/raw_datasets/avqa") -> list[dict[str, Any]]:
+def _download_avqa_files(avqa_dir: Path) -> None:
+    """Auto-downloads official AdVQA validation questions and annotations if not present."""
+    import urllib.request
+
+    avqa_dir.mkdir(parents=True, exist_ok=True)
+    urls = {
+        "v1_OpenEnded_mscoco_val2017_advqa_questions.json": (
+            "https://dl.fbaipublicfiles.com/advqa/v1_OpenEnded_mscoco_val2017_advqa_questions.json"
+        ),
+        "v1_mscoco_val2017_advqa_annotations.json": (
+            "https://dl.fbaipublicfiles.com/advqa/v1_mscoco_val2017_advqa_annotations.json"
+        ),
+    }
+    for fname, url in urls.items():
+        out_p = avqa_dir / fname
+        if not out_p.exists():
+            try:
+                logger.info(f"Downloading {fname} from {url}...")
+                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req, timeout=30) as resp, open(out_p, "wb") as f:
+                    f.write(resp.read())
+            except Exception as e:
+                logger.warning(f"Failed to auto-download {fname}: {e}")
+
+
+def _load_local_avqa(
+    base_path: Path | str = "data/raw_datasets/avqa", auto_download: bool = True
+) -> list[dict[str, Any]]:
     """Loads AVQA questions and annotations from local raw dataset directory if present."""
     avqa_dir = Path(base_path)
     q_candidates = [
+        avqa_dir / "v1_OpenEnded_mscoco_val2017_advqa_questions.json",
         avqa_dir / "v1_avqa_r1+r2+r3_val_questions.json",
         avqa_dir / "avqa_val_questions.json",
         avqa_dir / "questions.json",
         avqa_dir / "val_questions.json",
     ]
     ann_candidates = [
+        avqa_dir / "v1_mscoco_val2017_advqa_annotations.json",
         avqa_dir / "v1_avqa_r1+r2+r3_val_annotations.json",
         avqa_dir / "avqa_val_annotations.json",
         avqa_dir / "annotations.json",
@@ -131,6 +160,10 @@ def _load_local_avqa(base_path: Path | str = "data/raw_datasets/avqa") -> list[d
     ]
     q_file = next((f for f in q_candidates if f.is_file()), None)
     ann_file = next((f for f in ann_candidates if f.is_file()), None)
+    if (q_file is None or ann_file is None) and auto_download:
+        _download_avqa_files(avqa_dir)
+        q_file = next((f for f in q_candidates if f.is_file()), None)
+        ann_file = next((f for f in ann_candidates if f.is_file()), None)
     if q_file is None or ann_file is None:
         return []
 
@@ -182,7 +215,15 @@ def _load_local_avqa(base_path: Path | str = "data/raw_datasets/avqa") -> list[d
         if not answers and "answer" in q:
             answers = [q["answer"]]
 
-        img_name = q.get("image_name", q.get("image_path", q.get("image", q.get("picture", ""))))
+        img_name = q.get(
+            "image_name",
+            q.get(
+                "image_path",
+                q.get("image", q.get("image_id", q.get("picture", ""))),
+            ),
+        )
+        if isinstance(img_name, int):
+            img_name = f"COCO_val2017_{img_name:012d}.jpg"
         img_path = None
         if img_name:
             cand_p = avqa_dir / str(img_name)
@@ -207,12 +248,42 @@ def _load_local_avqa(base_path: Path | str = "data/raw_datasets/avqa") -> list[d
     return samples
 
 
+def _download_vllm_safety_files(vllm_dir: Path) -> None:
+    """Auto-downloads VLLM safety benchmark dataset archive from Hugging Face if not present."""
+    import zipfile
+
+    from huggingface_hub import hf_hub_download
+
+    vllm_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        logger.info("Downloading safety_evaluation_benchmark_datasets.zip from Hugging Face...")
+        zip_path = hf_hub_download(
+            "PahaII/vllm_safety_evaluation",
+            "safety_evaluation_benchmark_datasets.zip",
+            repo_type="dataset",
+        )
+        logger.info(f"Extracting safety archive to {vllm_dir}...")
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            zf.extractall(vllm_dir)
+    except Exception as e:
+        logger.warning(f"Could not auto-download VLLM safety benchmark: {e}")
+
+
 def _load_local_vllm_safety(
-    base_path: Path | str = "data/raw_datasets/vllm_safety",
+    base_path: Path | str = "data/raw_datasets/vllm_safety", auto_download: bool = True
 ) -> list[dict[str, Any]]:
     """Loads VLLM Safety Benchmark annotations from local raw dataset directory if present."""
     vllm_dir = Path(base_path)
     candidates = [
+        vllm_dir
+        / "safety_evaluation_benchmark_datasets"
+        / "gpt4v_challenging_set"
+        / "misleading-attack.json",
+        vllm_dir
+        / "safety_evaluation_benchmark_datasets"
+        / "redteaming"
+        / "misleading_attack"
+        / "annotation.json",
         vllm_dir / "redteaming" / "misleading_attack" / "annotation.json",
         vllm_dir / "gpt4v_challenging_set" / "misleading-attack.json",
         vllm_dir / "misleading_attack" / "annotation.json",
@@ -221,11 +292,10 @@ def _load_local_vllm_safety(
         vllm_dir / "annotation.json",
         vllm_dir / "annotations.json",
     ]
-    target_file = None
-    for cand in candidates:
-        if cand.is_file():
-            target_file = cand
-            break
+    target_file = next((f for f in candidates if f.is_file()), None)
+    if target_file is None and auto_download:
+        _download_vllm_safety_files(vllm_dir)
+        target_file = next((f for f in candidates if f.is_file()), None)
     if target_file is None:
         return []
 

@@ -500,8 +500,8 @@ def test_local_fallback_loaders(tmp_path: Path) -> None:
     assert safety_samples[1]["id"] == 502
 
     # 4. Graceful handling of non-existent or malformed files
-    assert _load_local_avqa(tmp_path / "non_existent") == []
-    assert _load_local_vllm_safety(tmp_path / "non_existent") == []
+    assert _load_local_avqa(tmp_path / "non_existent", auto_download=False) == []
+    assert _load_local_vllm_safety(tmp_path / "non_existent", auto_download=False) == []
 
     bad_dir = tmp_path / "bad_json"
     bad_dir.mkdir(parents=True, exist_ok=True)
