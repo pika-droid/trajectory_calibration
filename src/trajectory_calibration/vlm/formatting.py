@@ -5,6 +5,7 @@ Question prompt formatting and image extraction helpers.
 from __future__ import annotations
 
 import ast
+import io
 import json
 from pathlib import Path
 from typing import Any
@@ -36,19 +37,46 @@ def _parse_options_list(options_raw: Any) -> list[str]:
 
 
 def format_question(sample: dict[str, Any], dataset_key: str) -> str:
-    """Formats question text and options consistently for multiple-choice tasks."""
+    """Formats question text and options consistently across benchmarks."""
     question = sample.get(
         "question",
         sample.get(
             "problem",
             sample.get(
-                "query", sample.get("text", sample.get("prompt", sample.get("user_query", "")))
+                "query",
+                sample.get(
+                    "text",
+                    sample.get(
+                        "prompt",
+                        sample.get(
+                            "user_query",
+                            sample.get(
+                                "instruction",
+                                sample.get("input", ""),
+                            ),
+                        ),
+                    ),
+                ),
             ),
         ),
     )
-    if isinstance(question, (list, tuple)) and len(question) > 0:
+    if not question:
+        conv = sample.get("conversations", sample.get("messages", []))
+        if isinstance(conv, list) and len(conv) > 0:
+            for turn in conv:
+                if isinstance(turn, dict) and (
+                    turn.get("from") in ["human", "user"] or turn.get("role") in ["human", "user"]
+                ):
+                    question = turn.get("value", turn.get("content", ""))
+                    break
+
+    if isinstance(question, dict):
+        question = question.get(
+            "text", question.get("question", question.get("prompt", str(question)))
+        )
+    elif isinstance(question, (list, tuple)) and len(question) > 0:
         question = question[0]
-    question = str(question).strip()
+    question = str(question or "").replace("<image>", "").replace("<IMAGE>", "").strip()
 
     if dataset_key == "ai2d":
         options = _parse_options_list(sample.get("options", []))
@@ -89,36 +117,88 @@ def format_question(sample: dict[str, Any], dataset_key: str) -> str:
     return question
 
 
-def load_image_from_sample(sample: dict[str, Any]) -> Image.Image | None:
-    """Extracts and normalizes PIL Image from heterogeneous sample keys."""
-    img_raw = None
-    for k in ["images", "image", "image_1", "img", "image_path", "img_path", "picture"]:
-        if k in sample and sample[k] is not None:
-            img_raw = sample[k]
-            break
-
-    if img_raw is None:
+def _to_pil_image(val: Any) -> Image.Image | None:
+    """Converts a raw value (Image, Path/str, bytes, dict, base64) to RGB PIL Image."""
+    if val is None:
         return None
-
-    if isinstance(img_raw, Image.Image):
-        return img_raw.convert("RGB")
-    elif isinstance(img_raw, (str, Path)):
-        p = Path(img_raw)
-        if p.exists() and p.is_file():
+    if isinstance(val, Image.Image):
+        return val.convert("RGB")
+    if isinstance(val, (bytes, bytearray)):
+        try:
+            return Image.open(io.BytesIO(val)).convert("RGB")
+        except Exception:
+            return None
+    if isinstance(val, io.BytesIO):
+        try:
+            return Image.open(val).convert("RGB")
+        except Exception:
+            return None
+    if isinstance(val, (str, Path)):
+        p = Path(val)
+        if p.is_file():
             try:
                 return Image.open(p).convert("RGB")
             except Exception:
                 return None
-    elif isinstance(img_raw, (list, tuple)) and len(img_raw) > 0:
-        first = img_raw[0]
-        if isinstance(first, Image.Image):
-            return first.convert("RGB")
-        elif isinstance(first, (str, Path)):
-            p = Path(first)
-            if p.exists() and p.is_file():
+        if isinstance(val, str) and (val.startswith("data:image") or len(val) > 100):
+            try:
+                import base64
+
+                b64_str = val.split(",", 1)[1] if "," in val else val
+                img_bytes = base64.b64decode(b64_str)
+                return Image.open(io.BytesIO(img_bytes)).convert("RGB")
+            except Exception:
+                pass
+    if isinstance(val, dict):
+        if "bytes" in val and val["bytes"] is not None:
+            try:
+                return Image.open(io.BytesIO(val["bytes"])).convert("RGB")
+            except Exception:
+                return None
+        if val.get("path"):
+            p = Path(val["path"])
+            if p.is_file():
                 try:
                     return Image.open(p).convert("RGB")
                 except Exception:
                     return None
+        if "image" in val and val["image"] is not None:
+            return _to_pil_image(val["image"])
+    if isinstance(val, (list, tuple)):
+        for item in val:
+            img = _to_pil_image(item)
+            if img is not None:
+                return img
+    return None
+
+
+def load_image_from_sample(sample: dict[str, Any]) -> Image.Image | None:
+    """Extracts and normalizes PIL Image from heterogeneous sample keys."""
+    for k in [
+        "images",
+        "image",
+        "image_1",
+        "img",
+        "image_path",
+        "img_path",
+        "image_name",
+        "picture",
+        "file_name",
+        "filename",
+        "image_file",
+        "image_bytes",
+    ]:
+        if k in sample and sample[k] is not None:
+            img = _to_pil_image(sample[k])
+            if img is not None:
+                return img
 
     return None
+
+
+__all__ = [
+    "_parse_options_list",
+    "_to_pil_image",
+    "format_question",
+    "load_image_from_sample",
+]

@@ -33,7 +33,16 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
 
     if ans_type == "open":
         gt_ans = str(
-            sample.get("answer", sample.get("label", sample.get("ground_truth", "")))
+            sample.get(
+                "answer",
+                sample.get(
+                    "label",
+                    sample.get(
+                        "ground_truth",
+                        sample.get("gt_answer", sample.get("target", "")),
+                    ),
+                ),
+            )
         ).strip()
         if not gt_ans:
             return 0.0
@@ -42,24 +51,37 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
             return 1.0
 
         # Require ground-truth containment inside the prediction
-        if len(gt_clean) >= 3 and _is_word_match(gt_clean, pred_norm):
+        if (len(gt_clean) >= 2 or gt_clean.isdigit()) and _is_word_match(gt_clean, pred_norm):
             return 1.0
         return 0.0
 
     elif ans_type == "list_soft":
-        gt_answers = sample.get("answers", sample.get("annotations", []))
+        gt_answers = sample.get(
+            "answers", sample.get("annotations", sample.get("answers_list", []))
+        )
+        if isinstance(gt_answers, (str, int, float)):
+            gt_answers = [gt_answers]
         if not gt_answers:
-            gt_ans = sample.get("answer", sample.get("label"))
+            gt_ans = sample.get("answer", sample.get("label", sample.get("multiple_choice_answer")))
             gt_answers = [gt_ans] if gt_ans is not None else []
 
         match_count = 0
         for gt in gt_answers:
-            gt_text = gt.get("answer", "") if isinstance(gt, dict) else str(gt)
+            gt_text = (
+                gt.get("answer", gt.get("text", gt.get("raw_answer", "")))
+                if isinstance(gt, dict)
+                else str(gt)
+            )
             gt_clean = clean_text(gt_text)
+            if not gt_clean:
+                continue
             if (
                 gt_clean == pred_norm
                 or pred_clean == str(gt_text).strip().lower()
-                or (len(gt_clean) >= 3 and _is_word_match(gt_clean, pred_norm))
+                or (
+                    (len(gt_clean) >= 2 or gt_clean.isdigit())
+                    and _is_word_match(gt_clean, pred_norm)
+                )
             ):
                 match_count += 1
         return min(1.0, match_count / 3.0) if match_count > 0 else 0.0
@@ -107,3 +129,9 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
     return (
         1.0 if pred_norm == clean_text(str(sample.get("answer", sample.get("label", "")))) else 0.0
     )
+
+
+__all__ = [
+    "_is_word_match",
+    "evaluate_accuracy",
+]

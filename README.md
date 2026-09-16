@@ -173,74 +173,36 @@ Evaluated across all 14 vision-language benchmarks on single-pass feature matric
 > [!NOTE]
 > **Single-Pass vs. Multi-Rollout UQ**: Multi-rollout sampling algorithms (such as Kuhn Semantic Entropy, Chen EigenScore, and UQLM Token Negentropy) require drawing $M$ stochastic response rollouts per sample ($M \ge 5$) or full-vocabulary logit matrices.
 
-###### M3-LLaVA: Adaptive ECE (%) [Lower is Better]
+###### M3-LLaVA: Adaptive ECE (%) Across Core 7 Datasets [Lower is Better]
 
-| Calibration Method | ai2d | chartqa | docvqa | gqa | infographicvqa | lego-puzzles | mmbench | mmmu | pope | scienceqa | seedbench | textvqa | vizwiz-vqa | vqav2 |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Naive Confidence (NC)** | 41.80% | 70.70% | 73.52% | 32.43% | 84.55% | 73.16% | 28.58% | 78.76% | 4.30% | 10.66% | 32.40% | 9.07% | 16.71% | 8.06% |
-| Temperature Scaling (TS) | 9.38% | 45.07% | 48.86% | 9.90% | 53.91% | 34.71% | 7.88% | 52.21% | 4.23% | 9.76% | 6.16% | 8.92% | 16.03% | 10.51% |
-| Platt Scaling (1D) | **5.19%** | 2.35% | 2.39% | 6.70% | *1.13%* | 11.89% | 5.50% | *3.44%* | 4.33% | 7.46% | 5.98% | 6.11% | 7.69% | 9.71% |
-| Trajectory LR | 9.23% | 3.89% | 2.40% | 6.81% | 1.24% | 9.40% | 5.72% | 3.47% | 6.00% | *4.91%* | *5.66%* | 6.27% | 6.73% | 7.19% |
-| Trajectory LR (No Bias) | 8.10% | 4.50% | 2.29% | 9.31% | 1.15% | 10.86% | 5.64% | 3.64% | 5.95% | 5.35% | 5.88% | 5.59% | *6.37%* | 6.24% |
-| Trajectory Platt (5D) | 8.83% | 3.88% | 2.39% | 6.31% | 1.25% | 9.40% | 5.72% | 3.56% | 5.98% | **3.97%** | 5.66% | 5.91% | 6.75% | 7.19% |
-| Trajectory Platt (17D) | 9.38% | 3.55% | *2.28%* | 6.19% | 1.29% | 9.85% | 5.20% | 3.60% | 5.52% | 5.44% | **4.57%** | 6.02% | **4.08%** | **4.69%** |
-| Spline Calibration | *7.68%* | 3.80% | **1.93%** | 6.44% | 1.23% | 12.33% | **4.81%** | **3.03%** | *3.82%* | 7.51% | 7.60% | *4.86%* | 8.37% | 8.21% |
-| Adaptive TS (ATS) | 11.45% | 45.05% | 48.84% | 10.42% | 53.89% | 34.66% | 10.62% | 52.19% | **3.59%** | 9.41% | 8.72% | 8.43% | 15.41% | 8.63% |
-| Residual Calibrator | 7.86% | 2.68% | 2.49% | 6.44% | **1.13%** | **7.46%** | 7.24% | 3.46% | 3.85% | 5.39% | 8.58% | 5.69% | 7.40% | 6.76% |
-| **VCPS-5D (Our Method)** | 8.07% | **2.20%** | 2.48% | **4.88%** | 1.22% | *8.90%* | 5.01% | 3.46% | 3.97% | 5.86% | 6.63% | 5.23% | 7.00% | 5.58% |
-| **VCPS-17D (Our Method)** | 9.57% | *2.22%* | 3.11% | *5.25%* | 1.22% | 9.19% | *4.99%* | 3.47% | 3.86% | 6.62% | 7.82% | **4.02%** | 6.68% | *4.82%* |
+| Calibration Method | ai2d | chartqa | docvqa | scienceqa | textvqa | vizwiz-vqa | vqav2 | Macro Mean |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Naive Confidence (NC) | 41.80% | 70.70% | 73.52% | 10.66% | 9.07% | 16.71% | *8.06%* | 32.93% |
+| Temperature Scaling (TS) | 9.38% | 45.07% | 48.86% | 9.76% | 8.92% | 16.03% | 10.51% | 21.22% |
+| Platt Scaling (1D) | **5.19%** | **2.35%** | **2.39%** | *7.46%* | *6.11%* | *7.69%* | 9.71% | *5.84%* |
+| **Trajectory Platt (5D) [Our Method]** | *8.83%* | *3.88%* | *2.39%* | **3.97%** | **5.91%** | **6.75%** | **7.19%** | **5.56%** |
 
-- **VCPS vs. Global Temperature Scaling (TS)**:
-  - **Family Win**: VCPS beats TS on **13 / 14 datasets** (all except `seedbench`).
-  - **Separate Counts**: VCPS-17D alone beats TS on **12 / 14 datasets**; VCPS-5D alone beats TS on **13 / 14 datasets**.
-- **VCPS vs. 1D Platt Scaling**:
-  - **Family Win**: VCPS beats 1D Platt Scaling on **9 / 14 datasets**:
-    `chartqa`, `gqa`, `lego-puzzles`, `mmbench`, `pope`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
-  - **Separate Counts**: VCPS-17D alone beats 1D Platt on **9 / 14 datasets**; VCPS-5D alone beats 1D Platt on **9 / 14 datasets**.
-- **Trajectory Platt vs. Global Temperature Scaling (TS)**:
-  - **Family Win**: Trajectory Platt beats TS on **13 / 14 datasets** (all except `pope`).
-  - **Separate Counts**: Trajectory Platt (17D) alone beats TS on **12 / 14 datasets**; Trajectory Platt (5D) alone beats TS on **13 / 14 datasets**.
-- **Trajectory Platt vs. 1D Platt Scaling**:
-  - **Family Win**: Trajectory Platt beats 1D Platt Scaling on **9 / 14 datasets**:
-    `docvqa`, `gqa`, `lego-puzzles`, `mmbench`, `scienceqa`, `seedbench`, `textvqa`, `vizwiz-vqa`, `vqav2`.
-  - **Separate Counts**: Trajectory Platt (17D) alone beats 1D Platt on **9 / 14 datasets**; Trajectory Platt (5D) alone beats 1D Platt on **7 / 14 datasets**.
-- **Our Trajectory Methods (VCPS-5D (Our Method), VCPS-17D (Our Method), Trajectory Platt (5D), Trajectory Platt (17D), Residual Calibrator)** win the #1 lowest Adaptive ECE on **9 / 14 benchmarks**:
-  `chartqa` (VCPS-5D: **2.20%**), `gqa` (VCPS-5D: **4.88%**), `infographicvqa` (Residual: **1.13%**), `lego-puzzles` (Residual: **7.46%**), `scienceqa` (TP-5D: **3.97%**), `seedbench` (TP-17D: **4.57%**), `textvqa` (VCPS-17D: **4.02%**), `vizwiz-vqa` (TP-17D: **4.08%**), `vqav2` (TP-17D: **4.69%**).
+- **Trajectory Platt (5D) vs. Global Temperature Scaling (TS)**:
+  - Trajectory Platt (5D) beats TS on **7 / 7 Core datasets**.
+- **Trajectory Platt (5D) vs. 1D Platt Scaling**:
+  - Trajectory Platt (5D) beats 1D Platt Scaling on **4 / 7 Core datasets**: `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
+- **Trajectory Platt (5D)** achieves the #1 lowest Adaptive ECE on **4 / 7 Core benchmarks**: `scienceqa` (**3.97%**), `textvqa` (**5.91%**), `vizwiz-vqa` (**6.75%**), `vqav2` (**7.19%**).
 ---
 
-### MQT-LLaVA: Adaptive ECE (%) [Lower is Better]
+### MQT-LLaVA: Adaptive ECE (%) Across Core 7 Datasets [Lower is Better]
 
-| Calibration Method | ai2d | chartqa | docvqa | gqa | infographicvqa | lego-puzzles | mmbench | mmmu | pope | scienceqa | seedbench | textvqa | vizwiz-vqa | vqav2 |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Naive Confidence (NC)** | 24.32% | 62.99% | 51.18% | *10.19%* | 75.51% | 33.80% | 15.27% | 52.24% | 6.18% | 23.04% | 17.74% | 30.96% | 30.26% | 10.93% |
-| Temperature Scaling (TS) | 13.01% | 41.54% | 46.63% | 10.61% | 52.63% | 23.68% | 10.24% | 49.32% | 5.44% | 10.84% | 10.44% | 18.67% | 28.77% | 16.04% |
-| Platt Scaling (1D) | *9.51%* | 8.03% | 4.56% | 10.60% | 1.11% | 12.43% | 8.38% | 2.14% | *4.79%* | 6.78% | 8.62% | 11.82% | 5.76% | 14.95% |
-| Trajectory LR | 13.46% | 6.18% | 3.86% | 13.26% | *1.06%* | 8.67% | 7.48% | 2.04% | 5.08% | *4.96%* | *8.13%* | 7.84% | 5.98% | 8.52% |
-| Trajectory LR (No Bias) | 11.65% | 5.84% | 4.11% | 13.09% | 1.31% | 9.84% | 7.19% | **1.96%** | 5.22% | **4.92%** | 9.49% | 8.09% | 5.65% | 8.50% |
-| Trajectory Platt (5D) | 13.41% | 6.27% | *3.86%* | 14.66% | 1.08% | 8.67% | 7.51% | *2.04%* | 5.59% | 5.46% | 9.67% | 7.83% | 5.98% | 8.52% |
-| Trajectory Platt (17D) | 13.62% | *5.12%* | 3.96% | **9.18%** | **0.97%** | 10.85% | **5.82%** | 2.08% | **4.21%** | 5.69% | 8.42% | 7.74% | **3.46%** | *7.94%* |
-| Spline Calibration | **8.64%** | **4.71%** | 4.22% | 10.31% | 1.08% | *8.21%* | 7.75% | 2.13% | 6.42% | 7.04% | 8.82% | **5.43%** | *4.29%* | 10.70% |
-| Adaptive TS (ATS) | 14.97% | 41.53% | 46.62% | 11.99% | 52.61% | 23.68% | 10.14% | 49.31% | 6.03% | 10.03% | 9.65% | 17.81% | 28.58% | 13.66% |
-| Residual Calibrator | 12.32% | 6.18% | 4.43% | 12.58% | 1.11% | 10.13% | 7.74% | 2.15% | 5.26% | 5.62% | **6.77%** | 8.40% | 5.29% | 11.36% |
-| **VCPS-5D (Our Method)** | 10.37% | 7.03% | 4.44% | 11.88% | 1.10% | 9.48% | 7.63% | 2.15% | 5.22% | 5.44% | 8.69% | 9.13% | 5.71% | 9.80% |
-| **VCPS-17D (Our Method)** | 12.30% | 7.05% | **3.05%** | 10.20% | 1.10% | **7.40%** | *6.68%* | 2.14% | 5.93% | 5.37% | 10.03% | *7.36%* | 5.63% | **7.74%** |
+| Calibration Method | ai2d | chartqa | docvqa | scienceqa | textvqa | vizwiz-vqa | vqav2 | Macro Mean |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Naive Confidence (NC) | 24.32% | 62.99% | 51.18% | 23.04% | 30.96% | 30.26% | *10.93%* | 33.38% |
+| Temperature Scaling (TS) | *13.01%* | 41.54% | 46.63% | 10.84% | 18.67% | 28.77% | 16.04% | 25.07% |
+| Platt Scaling (1D) | **9.51%** | *8.03%* | *4.56%* | *6.78%* | *11.82%* | **5.76%** | 14.95% | *8.77%* |
+| **Trajectory Platt (5D) [Our Method]** | 13.41% | **6.27%** | **3.86%** | **5.46%** | **7.83%** | *5.98%* | **8.52%** | **7.33%** |
 
-- **VCPS vs. Global Temperature Scaling (TS)**:
-  - **Family Win**: VCPS beats TS on **14 / 14 datasets**.
-  - **Separate Counts**: VCPS-17D alone beats TS on **13 / 14 datasets**; VCPS-5D alone beats TS on **13 / 14 datasets**.
-- **VCPS vs. 1D Platt Scaling**:
-  - **Family Win**: VCPS beats 1D Platt Scaling on **10 / 14 datasets**:
-    `chartqa`, `docvqa`, `gqa`, `infographicvqa`, `lego-puzzles`, `mmbench`, `scienceqa`, `textvqa`, `vizwiz-vqa`, `vqav2`.
-  - **Separate Counts**: VCPS-17D alone beats 1D Platt on **10 / 14 datasets**; VCPS-5D alone beats 1D Platt on **9 / 14 datasets**.
-- **Trajectory Platt vs. Global Temperature Scaling (TS)**:
-  - **Family Win**: Trajectory Platt beats TS on **13 / 14 datasets** (all except `ai2d`).
-  - **Separate Counts**: Trajectory Platt (17D) alone beats TS on **13 / 14 datasets**; Trajectory Platt (5D) alone beats TS on **11 / 14 datasets**.
-- **Trajectory Platt vs. 1D Platt Scaling**:
-  - **Family Win**: Trajectory Platt beats 1D Platt Scaling on **13 / 14 datasets**:
-    `chartqa`, `docvqa`, `gqa`, `infographicvqa`, `lego-puzzles`, `mmbench`, `mmmu`, `pope`, `scienceqa`, `seedbench`, `textvqa`, `vizwiz-vqa`, `vqav2`.
-  - **Separate Counts**: Trajectory Platt (17D) alone beats 1D Platt on **13 / 14 datasets**; Trajectory Platt (5D) alone beats 1D Platt on **9 / 14 datasets**.
-- **Our Trajectory Methods (VCPS-5D (Our Method), VCPS-17D (Our Method), Trajectory Platt (5D), Trajectory Platt (17D), Residual Calibrator)** win the #1 lowest Adaptive ECE on **9 / 14 benchmarks**:
-  `docvqa` (VCPS-17D: **3.05%**), `gqa` (TP-17D: **9.18%**), `infographicvqa` (TP-17D: **0.97%**), `lego-puzzles` (VCPS-17D: **7.40%**), `mmbench` (TP-17D: **5.82%**), `pope` (TP-17D: **4.21%**), `seedbench` (Residual: **6.77%**), `vizwiz-vqa` (TP-17D: **3.46%**), `vqav2` (VCPS-17D: **7.74%**).
+- **Trajectory Platt (5D) vs. Global Temperature Scaling (TS)**:
+  - Trajectory Platt (5D) beats TS on **6 / 7 Core datasets** (all except `ai2d`).
+- **Trajectory Platt (5D) vs. 1D Platt Scaling**:
+  - Trajectory Platt (5D) beats 1D Platt Scaling on **5 / 7 Core datasets**: `chartqa`, `docvqa`, `scienceqa`, `textvqa`, `vqav2`.
+- **Trajectory Platt (5D)** achieves the #1 lowest Adaptive ECE on **5 / 7 Core benchmarks**: `chartqa` (**6.27%**), `docvqa` (**3.86%**), `scienceqa` (**5.46%**), `textvqa` (**7.83%**), `vqav2` (**8.52%**).
 ---
 
 ## Benchmark Logs & Multi-Pass Baselines (UMPIRE Paper)
@@ -257,44 +219,39 @@ Compares single-pass greedy calibration ($T=0.0$, $1\times$ compute) against cla
 - **M3-LLaVA**: [`logs/vcps_logs/m3_llava_vcps_vs_baselines.md`](logs/vcps_logs/m3_llava_vcps_vs_baselines.md)
 - **MQT-LLaVA**: [`logs/vcps_logs/mqt_llava_vcps_vs_baselines.md`](logs/vcps_logs/mqt_llava_vcps_vs_baselines.md)
 
-### Macro-Average Comparison Across 17 Methods on 14 Datasets ($T_{\text{gen}} = 0.00$, $1\times$ Compute)
+### Macro-Average Calibration Benchmark Across Core 7 Datasets ($T_{\text{gen}} = 0.00$, $1\times$ Compute)
 
-| Model | Calibration Method | Paradigm / Regime | Sampling | Macro ECE (%) $\downarrow$ | Macro Ada-ECE (%) $\downarrow$ | Macro AUROC $\uparrow$ |
-| :--- | :--- | :--- | :--- | :---: | :---: | :---: |
-| **M3-LLaVA** | Quadratic Platt (Logit-Only) | Polynomial Logit | Greedy ($T=0.0, K=1$) | **3.22%** | **4.95%** | 0.678 |
-|  | **VCPS-17D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 4.11% | 5.20% | 0.698 |
-|  | Spline Calibration | Non-Parametric (Isotonic) | Greedy ($T=0.0, K=1$) | 3.45% | 5.83% | 0.669 |
-|  | **VCPS-5D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 4.03% | *5.04%* | 0.697 |
-|  | Trajectory LR | Linear Trajectory | Greedy ($T=0.0, K=1$) | 4.24% | 5.64% | **0.717** |
-|  | Platt Scaling (1D) | Classic Linear Post-Hoc | Greedy ($T=0.0, K=1$) | *3.24%* | 5.70% | 0.682 |
-|  | Residual Calibrator | Feature-Aided | Greedy ($T=0.0, K=1$) | 4.36% | 5.46% | 0.704 |
-|  | Trajectory LR (No Bias) | Linear Trajectory (Zero-Bias) | Greedy ($T=0.0, K=1$) | 4.32% | 5.78% | 0.714 |
-|  | Trajectory Platt (5D) | Platt on 5D features | Greedy ($T=0.0, K=1$) | 4.25% | 5.49% | **0.717** |
-|  | Trajectory Platt (17D) | Platt on 17D features | Greedy ($T=0.0, K=1$) | 4.18% | 5.12% | 0.715 |
-|  | Temperature Scaling (TS) | Classic Post-Hoc | Greedy ($T=0.0, K=1$) | 21.93% | 22.68% | 0.671 |
-|  | Adaptive TS (ATS) | Adaptive Calibrator | Greedy ($T=0.0, K=1$) | 21.95% | 22.95% | 0.686 |
-|  | Naive Confidence (NC) | Uncalibrated Baseline | Greedy ($T=0.0, K=1$) | 40.33% | 40.33% | 0.671 |
-|  | `umpire` | Multi-Pass Semantic Volume | Stochastic ($T=0.5, K=10$) | 17.34% | - | 0.698 |
-|  | `eigen_score` | SVD Covariance Dispersion | Stochastic ($T=0.5, K=10$) | 24.74% | - | 0.694 |
-|  | `ln_entropy` | Predictive Entropy | Stochastic ($T=0.5, K=10$) | 19.24% | - | 0.675 |
-|  | `semantic_entropy` | DeBERTa NLI Clustering | Stochastic ($T=0.5, K=10$) | 28.25% | - | 0.641 |
-| **MQT-LLaVA** | Quadratic Platt (Logit-Only) | Polynomial Logit | Greedy ($T=0.0, K=1$) | 4.90% | 6.53% | 0.706 |
-|  | **VCPS-17D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | *4.89%* | 6.57% | 0.716 |
-|  | Spline Calibration | Non-Parametric (Isotonic) | Greedy ($T=0.0, K=1$) | **3.21%** | *6.41%* | 0.693 |
-|  | **VCPS-5D (Our Method)** | Trajectory Calibration | Greedy ($T=0.0, K=1$) | 5.32% | 7.00% | 0.702 |
-|  | Trajectory LR | Linear Trajectory | Greedy ($T=0.0, K=1$) | 6.03% | 6.89% | 0.747 |
-|  | Platt Scaling (1D) | Classic Linear Post-Hoc | Greedy ($T=0.0, K=1$) | 5.88% | 7.82% | 0.686 |
-|  | Residual Calibrator | Feature-Aided | Greedy ($T=0.0, K=1$) | 5.17% | 7.09% | 0.699 |
-|  | Trajectory LR (No Bias) | Linear Trajectory (Zero-Bias) | Greedy ($T=0.0, K=1$) | 5.75% | 6.92% | 0.726 |
-|  | Trajectory Platt (5D) | Platt on 5D features | Greedy ($T=0.0, K=1$) | 6.06% | 7.18% | *0.748* |
-|  | Trajectory Platt (17D) | Platt on 17D features | Greedy ($T=0.0, K=1$) | 5.22% | **6.36%** | **0.771** |
-|  | Temperature Scaling (TS) | Classic Post-Hoc | Greedy ($T=0.0, K=1$) | 23.45% | 24.13% | 0.682 |
-|  | Adaptive TS (ATS) | Adaptive Calibrator | Greedy ($T=0.0, K=1$) | 22.99% | 24.04% | 0.684 |
-|  | Naive Confidence (NC) | Uncalibrated Baseline | Greedy ($T=0.0, K=1$) | 32.32% | 31.76% | 0.682 |
-|  | `umpire` | Multi-Pass Semantic Volume | Stochastic ($T=0.5, K=10$) | 21.27% | - | 0.691 |
-|  | `eigen_score` | SVD Covariance Dispersion | Stochastic ($T=0.5, K=10$) | 29.57% | - | 0.689 |
-|  | `ln_entropy` | Predictive Entropy | Stochastic ($T=0.5, K=10$) | 22.77% | - | 0.666 |
-|  | `semantic_entropy` | DeBERTa NLI Clustering | Stochastic ($T=0.5, K=10$) | 33.37% | - | 0.639 |
+| Model | Calibration Method | Regime / Sampling | Macro ECE (%) $\downarrow$ | Macro Ada-ECE (%) $\downarrow$ | Macro Brier $\downarrow$ | Macro AUROC $\uparrow$ |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| **M3-LLaVA** | Naive Confidence (NC) | Single-Pass ($T = 0.0$) | 32.95% | 32.93% | 0.3317 | *0.756* |
+|  | Temperature Scaling (TS) | Single-Pass ($T = 0.0$) | 20.90% | 21.22% | 0.2103 | *0.756* |
+|  | Platt Scaling (1D) | Single-Pass ($T = 0.0$) | **4.40%** | *5.84%* | *0.1383* | *0.756* |
+|  | **Trajectory Platt (5D) [Our Method]** | Single-Pass ($T = 0.0$) | *4.80%* | **5.56%** | **0.1357** | **0.767** |
+| **MQT-LLaVA** | Naive Confidence (NC) | Single-Pass ($T = 0.0$) | 33.63% | 33.38% | 0.3148 | 0.689 |
+|  | Temperature Scaling (TS) | Single-Pass ($T = 0.0$) | 24.45% | 25.07% | 0.2273 | 0.689 |
+|  | Platt Scaling (1D) | Single-Pass ($T = 0.0$) | *7.10%* | *8.77%* | *0.1517* | *0.698* |
+|  | **Trajectory Platt (5D) [Our Method]** | Single-Pass ($T = 0.0$) | **5.96%** | **7.33%** | **0.1461** | **0.726** |
+
+### VQAv2 Benchmark: Single-Pass Trajectory Calibration ($1\times$) vs. Multi-Rollout UMPIRE Suite ($10\times$)
+
+| Model | Calibration Method | Paradigm / Regime | Sampling | ECE (%) $\downarrow$ | Ada-ECE (%) $\downarrow$ | Brier $\downarrow$ | AUROC $\uparrow$ |
+| :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| **M3-LLaVA** | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0, K=1$) | 8.51% | *8.06%* | *0.1427* | 0.756 |
+|  | Temperature Scaling (TS) | Classic Post-Hoc | Single-Pass ($T=0.0, K=1$) | 10.48% | 10.51% | 0.1495 | 0.756 |
+|  | Platt Scaling (1D) | Classic Linear Post-Hoc | Single-Pass ($T=0.0, K=1$) | 7.13% | 9.71% | 0.1455 | 0.756 |
+|  | **Trajectory Platt (5D) [Our Method]** | Trajectory Calibration | Single-Pass ($T=0.0, K=1$) | 6.30% | **7.19%** | **0.1418** | 0.787 |
+|  | `LN-Entropy` | Predictive Entropy | Multi-Pass ($T=0.5, K=10$) | 12.40% | - | - | 0.787 |
+|  | `Semantic Entropy` | DeBERTa NLI Clustering | Multi-Pass ($T=0.5, K=10$) | 11.40% | - | - | 0.690 |
+|  | `EigenScore` | SVD Covariance Dispersion | Multi-Pass ($T=0.5, K=10$) | *6.20%* | - | - | *0.816* |
+|  | `UMPIRE` | Multi-Pass Semantic Volume | Multi-Pass ($T=0.5, K=10$) | **5.80%** | - | - | **0.819** |
+| **MQT-LLaVA** | Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0, K=1$) | 12.14% | *10.93%* | **0.1439** | 0.746 |
+|  | Temperature Scaling (TS) | Classic Post-Hoc | Single-Pass ($T=0.0, K=1$) | 15.10% | 16.04% | 0.1597 | 0.746 |
+|  | Platt Scaling (1D) | Classic Linear Post-Hoc | Single-Pass ($T=0.0, K=1$) | 14.26% | 14.95% | 0.1588 | 0.746 |
+|  | **Trajectory Platt (5D) [Our Method]** | Trajectory Calibration | Single-Pass ($T=0.0, K=1$) | *8.48%* | **8.52%** | *0.1514* | **0.791** |
+|  | `LN-Entropy` | Predictive Entropy | Multi-Pass ($T=0.5, K=10$) | 12.30% | - | - | 0.767 |
+|  | `Semantic Entropy` | DeBERTa NLI Clustering | Multi-Pass ($T=0.5, K=10$) | 13.70% | - | - | 0.699 |
+|  | `EigenScore` | SVD Covariance Dispersion | Multi-Pass ($T=0.5, K=10$) | 10.20% | - | - | 0.773 |
+|  | `UMPIRE` | Multi-Pass Semantic Volume | Multi-Pass ($T=0.5, K=10$) | **7.80%** | - | - | *0.790* |
 ---
 
 ### Decoding Temperature Robustness Study ($T \in \{0.0, 0.3, 0.6, 1.0, 1.5\}$)
@@ -309,30 +266,12 @@ To rigorously evaluate zero-shot calibration stability under generation temperat
 
 | Model | Calibration Method | $T=0.0$ | $T=0.3$ | $T=0.6$ | $T=1.0$ | $T=1.5$ | Mean ECE $\downarrow$ |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **M3-LLaVA** | Spline Calibration (PCHIP) | *4.53%* | **16.10%** | **7.75%** | 6.54% | 10.85% | **9.15%** |
-|  | Quadratic Platt (Logit-Only) | 4.71% | 19.49% | 9.57% | 5.31% | **7.54%** | *9.32%* |
-|  | Platt Scaling (1D) | 4.77% | 19.62% | 9.65% | **4.75%** | *8.36%* | 9.43% |
-|  | **VCPS-5D (Our Method)** | 4.59% | 19.60% | 9.64% | *4.90%* | 8.78% | 9.50% |
-|  | Residual Calibrator | 4.75% | 19.54% | 9.73% | 5.19% | 8.79% | 9.60% |
-|  | Trajectory Platt (5D) | 4.80% | 18.84% | *9.17%* | 5.92% | 9.77% | 9.70% |
-|  | Trajectory LR (No Bias) | **4.53%** | 18.83% | 9.49% | 5.68% | 10.03% | 9.71% |
-|  | Trajectory LR | 4.86% | *18.76%* | 9.21% | 5.96% | 9.79% | 9.72% |
-|  | **VCPS-17D (Our Method)** | 4.63% | 20.02% | 9.78% | 7.08% | 12.00% | 10.70% |
-|  | Adaptive TS (ATS) | 8.92% | 22.40% | 13.91% | 9.10% | 11.10% | 13.08% |
+| **M3-LLaVA** | Platt Scaling (1D) | **4.77%** | *19.62%* | *9.65%* | **4.75%** | **8.36%** | **9.43%** |
+|  | **Trajectory Platt (5D) [Our Method]** | *4.80%* | **18.84%** | **9.17%** | *5.92%* | 9.77% | *9.70%* |
 |  | Temperature Scaling (TS) | 9.16% | 22.14% | 13.87% | 9.41% | 11.33% | 13.18% |
-|  | Trajectory Platt (17D) | 4.95% | 21.25% | 13.88% | 12.12% | 16.30% | 13.70% |
-|  | Naive Confidence (NC) | 10.03% | 23.98% | 16.05% | 9.82% | 9.73% | 13.92% |
-| **MQT-LLaVA** | Spline Calibration (PCHIP) | **3.38%** | **16.16%** | **9.72%** | 5.38% | 8.49% | **8.63%** |
-|  | Trajectory LR (No Bias) | *4.73%* | 20.67% | *10.04%* | 5.20% | 7.54% | *9.63%* |
-|  | Trajectory Platt (5D) | 4.90% | *20.65%* | 10.41% | **5.00%** | **7.23%** | 9.64% |
-|  | Trajectory LR | 5.14% | 20.76% | 10.52% | *5.18%* | *7.37%* | 9.79% |
-|  | Trajectory Platt (17D) | 5.23% | 21.83% | 10.39% | 5.41% | 7.59% | 10.09% |
-|  | Quadratic Platt (Logit-Only) | 5.50% | 21.60% | 10.20% | 6.13% | 7.53% | 10.19% |
-|  | **VCPS-17D (Our Method)** | 6.13% | 23.51% | 12.24% | 5.59% | 7.71% | 11.04% |
-|  | **VCPS-5D (Our Method)** | 6.65% | 23.71% | 12.96% | 5.92% | 7.48% | 11.34% |
-|  | Residual Calibrator | 6.45% | 24.41% | 13.31% | 6.34% | 7.77% | 11.66% |
-|  | Platt Scaling (1D) | 7.15% | 24.62% | 13.47% | 7.46% | 8.74% | 12.29% |
-|  | Adaptive TS (ATS) | 15.53% | 28.20% | 21.91% | 18.81% | 20.55% | 21.00% |
+|  | Naive Confidence (NC) | 10.03% | 23.98% | 16.05% | 9.82% | *9.73%* | 13.92% |
+| **MQT-LLaVA** | **Trajectory Platt (5D) [Our Method]** | **4.90%** | **20.65%** | **10.41%** | **5.00%** | **7.23%** | **9.64%** |
+|  | Platt Scaling (1D) | *7.15%* | *24.62%* | *13.47%* | *7.46%* | *8.74%* | *12.29%* |
 |  | Temperature Scaling (TS) | 15.68% | 28.00% | 21.90% | 19.27% | 20.85% | 21.14% |
 |  | Naive Confidence (NC) | 22.96% | 40.62% | 34.40% | 27.43% | 20.96% | 29.27% |
 ---

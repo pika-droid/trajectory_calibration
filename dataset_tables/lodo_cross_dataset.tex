@@ -5,16 +5,16 @@
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{llcccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Transfer Protocol} & \textbf{Macro ECE (\%)} $\downarrow$ & \textbf{Macro Ada-ECE (\%)} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ & \textbf{Macro Brier} $\downarrow$ \\
+\textbf{Calibration Method} & \textbf{Transfer Protocol} & \textbf{Macro ECE (\%)} $\downarrow$ & \textbf{Macro Ada-ECE (\%)} $\downarrow$ & \textbf{Macro Brier} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Zero-Shot Base & 40.26 & 40.26 & \textbf{0.677} & 0.3976 \\
-Naive Confidence (NC) & Target Adapted (Saerens-EM) & 51.89 & 51.89 & 0.599 & 0.5159 \\
-Temperature Scaling (TS) & Zero-Shot Base & \textit{26.38} & \textit{28.82} & \textbf{0.677} & \textit{0.2491} \\
-Temperature Scaling (TS) & Target Adapted (Saerens-EM) & 52.62 & 52.62 & \textbf{0.677} & 0.5211 \\
-Platt Scaling (1D) & Zero-Shot Base & 28.34 & 29.41 & \textbf{0.677} & 0.2536 \\
-Platt Scaling (1D) & Target Adapted (Saerens-EM) & 40.88 & 40.88 & \textbf{0.677} & 0.4088 \\
-\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Zero-Shot Base & \textbf{24.55} & \textbf{24.59} & \textit{0.672} & \textbf{0.2256} \\
-\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Target Adapted (Saerens-EM) & 29.58 & 29.59 & \textit{0.672} & 0.2835 \\
+Naive Confidence (NC) & Zero-Shot Base & 40.26 & 40.26 & 0.3976 & \textbf{0.677} \\
+Naive Confidence (NC) & Target Adapted (Saerens-EM) & 51.89 & 51.89 & 0.5159 & 0.599 \\
+Temperature Scaling (TS) & Zero-Shot Base & \textit{26.38} & \textit{28.82} & \textit{0.2491} & \textbf{0.677} \\
+Temperature Scaling (TS) & Target Adapted (Saerens-EM) & 52.62 & 52.62 & 0.5211 & \textbf{0.677} \\
+Platt Scaling (1D) & Zero-Shot Base & 28.34 & 29.41 & 0.2536 & \textbf{0.677} \\
+Platt Scaling (1D) & Target Adapted (Saerens-EM) & 40.88 & 40.88 & 0.4088 & \textbf{0.677} \\
+\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Zero-Shot Base & \textbf{24.55} & \textbf{24.59} & \textbf{0.2256} & \textit{0.672} \\
+\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Target Adapted (Saerens-EM) & 29.58 & 29.59 & 0.2835 & \textit{0.672} \\
 \bottomrule
 \end{tabular}%
 }
@@ -27,16 +27,16 @@ Platt Scaling (1D) & Target Adapted (Saerens-EM) & 40.88 & 40.88 & \textbf{0.677
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{llcccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Transfer Protocol} & \textbf{Macro ECE (\%)} $\downarrow$ & \textbf{Macro Ada-ECE (\%)} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ & \textbf{Macro Brier} $\downarrow$ \\
+\textbf{Calibration Method} & \textbf{Transfer Protocol} & \textbf{Macro ECE (\%)} $\downarrow$ & \textbf{Macro Ada-ECE (\%)} $\downarrow$ & \textbf{Macro Brier} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Zero-Shot Base & 31.55 & 31.54 & \textit{0.698} & 0.3070 \\
-Naive Confidence (NC) & Target Adapted (Saerens-EM) & 53.34 & 53.34 & 0.629 & 0.5075 \\
-Temperature Scaling (TS) & Zero-Shot Base & 28.15 & 28.44 & \textit{0.698} & 0.2454 \\
-Temperature Scaling (TS) & Target Adapted (Saerens-EM) & 58.44 & 58.44 & \textit{0.698} & 0.5844 \\
-Platt Scaling (1D) & Zero-Shot Base & 22.64 & 22.76 & \textit{0.698} & 0.2147 \\
-Platt Scaling (1D) & Target Adapted (Saerens-EM) & 26.15 & 26.16 & \textit{0.698} & 0.2597 \\
-\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Zero-Shot Base & \textit{19.27} & \textit{19.15} & \textbf{0.699} & \textbf{0.1950} \\
-\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Target Adapted (Saerens-EM) & \textbf{19.12} & \textbf{19.04} & \textbf{0.699} & \textit{0.1992} \\
+Naive Confidence (NC) & Zero-Shot Base & 31.55 & 31.54 & 0.3070 & \textit{0.698} \\
+Naive Confidence (NC) & Target Adapted (Saerens-EM) & 53.34 & 53.34 & 0.5075 & 0.629 \\
+Temperature Scaling (TS) & Zero-Shot Base & 28.15 & 28.44 & 0.2454 & \textit{0.698} \\
+Temperature Scaling (TS) & Target Adapted (Saerens-EM) & 58.44 & 58.44 & 0.5844 & \textit{0.698} \\
+Platt Scaling (1D) & Zero-Shot Base & 22.64 & 22.76 & 0.2147 & \textit{0.698} \\
+Platt Scaling (1D) & Target Adapted (Saerens-EM) & 26.15 & 26.16 & 0.2597 & \textit{0.698} \\
+\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Zero-Shot Base & \textit{19.27} & \textit{19.15} & \textbf{0.1950} & \textbf{0.699} \\
+\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Target Adapted (Saerens-EM) & \textbf{19.12} & \textbf{19.04} & \textit{0.1992} & \textbf{0.699} \\
 \bottomrule
 \end{tabular}%
 }

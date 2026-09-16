@@ -9,19 +9,22 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-This document compiles all 28 publication-ready LaTeX tables across Groups 1--8 for local inspection before Overleaf integration. All tables follow the standardized 4-metric schema: ECE (\%) $\downarrow$, Ada-ECE (\%) $\downarrow$, AUROC $\uparrow$, and Brier score $\downarrow$, featuring Option A ranking (\textbf{bold} Rank 1, \textit{italic} Rank 2) and Trajectory Platt (5D) evaluation.
+This document compiles all 29 publication-ready LaTeX tables across Groups 1--8 for local inspection before Overleaf integration. All tables follow the standardized 4-metric schema: ECE (\%) $\downarrow$, Ada-ECE (\%) $\downarrow$, Brier score $\downarrow$, and AUROC $\uparrow$, featuring Option A ranking (\textbf{bold} Rank 1, \textit{italic} Rank 2), Core 6 macro aggregation, Trajectory Platt (5D) evaluation, and dedicated VQAv2 single-pass vs. multi-rollout comparison.
 \end{abstract}
 \tableofcontents
 \clearpage
-\section{Main Manuscript Tables (Groups 5, 2, 6, 7, 4)}
+\section{Main Manuscript Tables (Groups 5, 2, 6, 7, 4, 9)}
 \subsection{Table 2: Zero-Shot Cross-Domain Calibration Transfer (M3-LLaVA 7B)}
 \input{dataset_tables/table2_m3_transfer}
 \clearpage
 \subsection{Table 3: Zero-Shot Cross-Domain Calibration Transfer (MQT-LLaVA 7B)}
 \input{dataset_tables/table3_mqt_transfer}
 \clearpage
-\subsection{Group 2: Macro-Averaged Calibration Benchmark Across All 14 Datasets}
+\subsection{Group 2: Macro-Averaged Calibration Benchmark Across Core 7 Datasets}
 \input{dataset_tables/macro_mean}
+\clearpage
+\subsection{Group 9: VQAv2 Single-Pass ($1\times$) vs. Multi-Rollout UMPIRE Suite ($10\times$)}
+\input{dataset_tables/vqav2_multirollout_comparison}
 \clearpage
 \subsection{Group 6: Zero-Shot Source Anchor Leaderboard}
 \input{dataset_tables/pairwise_anchor_summary}
@@ -50,7 +53,7 @@ Evaluating calibrators trained at $T = 0.0$ and tested across $T \in \{0.0, 0.3,
 \input{dataset_tables/temp_ablation/vizwizvqa}
 \clearpage
 \section{Group 1: Per-Dataset In-Domain Calibration Benchmarks}
-Individual benchmark tables for all 14 vision-language datasets under the 8-method, 4-metric schema.
+Individual benchmark tables for all vision-language datasets under the 4-method, 4-metric schema.
 \subsection{Benchmark: AI2D}
 \input{dataset_tables/dataset_wise_results/ai2d}
 \clearpage

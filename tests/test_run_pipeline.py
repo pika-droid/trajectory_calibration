@@ -19,7 +19,7 @@ from scripts.run_pipeline import (
     build_full_pipeline,
 )
 from scripts.update_readme_tables import (
-    ALL_14_DATASETS,
+    CORE_7_DATASETS,
     format_analytical_bullets,
 )
 
@@ -87,36 +87,20 @@ def test_pipeline_dry_run() -> None:
 
 
 def test_format_analytical_bullets_with_trajectory_platt() -> None:
-    methods = [
-        "Temperature Scaling (TS)",
-        "Platt Scaling (1D)",
-        "VCPS-5D (Our Method)",
-        "VCPS-17D (Our Method)",
-        "Trajectory Platt (5D)",
-        "Trajectory Platt (17D)",
-        "Residual Calibrator",
-    ]
-    # Synthetic data where Trajectory Platt (17D) beats TS and 1D Platt on all datasets
-    data = {}
-    for m in methods:
-        if "17D" in m:
-            data[m] = [2.0] * len(ALL_14_DATASETS)
-        elif "5D" in m:
-            data[m] = [3.0] * len(ALL_14_DATASETS)
-        elif "1D" in m:
-            data[m] = [5.0] * len(ALL_14_DATASETS)
-        elif "TS" in m:
-            data[m] = [10.0] * len(ALL_14_DATASETS)
-        else:
-            data[m] = [4.0] * len(ALL_14_DATASETS)
+    # Synthetic data where Trajectory Platt (5D) beats TS and 1D Platt on all Core 7 datasets
+    data = {
+        "Trajectory Platt (5D)": [3.0] * len(CORE_7_DATASETS),
+        "Platt Scaling (1D)": [5.0] * len(CORE_7_DATASETS),
+        "Temperature Scaling (TS)": [10.0] * len(CORE_7_DATASETS),
+    }
 
-    df = pd.DataFrame(data, index=ALL_14_DATASETS).T
-    ranks = {ds: (2.0, 3.0) for ds in ALL_14_DATASETS}
+    df = pd.DataFrame(data, index=CORE_7_DATASETS).T
+    ranks = {ds: (3.0, 5.0) for ds in CORE_7_DATASETS}
 
     bullets = format_analytical_bullets(df, ranks)
     joined = "\n".join(bullets)
 
-    assert "Trajectory Platt vs. Global Temperature Scaling (TS)" in joined
-    assert "Trajectory Platt vs. 1D Platt Scaling" in joined
-    assert "Trajectory Platt beats TS on **14 / 14 datasets**" in joined
-    assert "Trajectory Platt beats 1D Platt Scaling on **14 / 14 datasets**" in joined
+    assert "Trajectory Platt (5D) vs. Global Temperature Scaling (TS)" in joined
+    assert "Trajectory Platt (5D) vs. 1D Platt Scaling" in joined
+    assert "Trajectory Platt (5D) beats TS on **7 / 7 Core datasets**" in joined
+    assert "Trajectory Platt (5D) beats 1D Platt Scaling on **7 / 7 Core datasets**" in joined

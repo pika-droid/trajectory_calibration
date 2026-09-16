@@ -10,12 +10,16 @@ from trajectory_calibration.vlm.formatting import format_question, load_image_fr
 from trajectory_calibration.vlm.registry import (
     ALL_DATASET_KEYS,
     DATASET_REGISTRY,
+    _load_local_avqa,
+    _load_local_vllm_safety,
     load_hf_dataset,
 )
 
 __all__ = [
     "ALL_DATASET_KEYS",
     "DATASET_REGISTRY",
+    "_load_local_avqa",
+    "_load_local_vllm_safety",
     "evaluate_accuracy",
     "format_question",
     "load_hf_dataset",

@@ -4,7 +4,9 @@
 
 from __future__ import annotations
 
+import json
 import logging
+from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger("trajectory_calibration.vlm.registry")
@@ -95,14 +97,176 @@ DATASET_REGISTRY: dict[str, dict[str, Any]] = {
         "default_split": "test",
         "answer_type": "open",
     },
+    "avqa": {
+        "hf_repo": "lmms-lab/avqa",
+        "config": None,
+        "default_split": "val",
+        "answer_type": "list_soft",
+    },
+    "vllm-safety": {
+        "hf_repo": "PahaII/vllm_safety_evaluation",
+        "config": None,
+        "default_split": "test",
+        "answer_type": "open",
+    },
 }
 
 ALL_DATASET_KEYS = list(DATASET_REGISTRY.keys())
 
 
+def _load_local_avqa(base_path: Path | str = "data/raw_datasets/avqa") -> list[dict[str, Any]]:
+    """Loads AVQA questions and annotations from local raw dataset directory if present."""
+    avqa_dir = Path(base_path)
+    q_candidates = [
+        avqa_dir / "v1_avqa_r1+r2+r3_val_questions.json",
+        avqa_dir / "avqa_val_questions.json",
+        avqa_dir / "questions.json",
+        avqa_dir / "val_questions.json",
+    ]
+    ann_candidates = [
+        avqa_dir / "v1_avqa_r1+r2+r3_val_annotations.json",
+        avqa_dir / "avqa_val_annotations.json",
+        avqa_dir / "annotations.json",
+        avqa_dir / "val_annotations.json",
+    ]
+    q_file = next((f for f in q_candidates if f.is_file()), None)
+    ann_file = next((f for f in ann_candidates if f.is_file()), None)
+    if q_file is None or ann_file is None:
+        return []
+
+    try:
+        with open(q_file, encoding="utf-8") as f:
+            q_data = json.load(f)
+        with open(ann_file, encoding="utf-8") as f:
+            ann_data = json.load(f)
+    except Exception as exc:
+        logger.warning(f"Error reading local AVQA files: {exc}")
+        return []
+
+    q_list = q_data.get("questions", q_data) if isinstance(q_data, dict) else q_data
+    if isinstance(q_list, dict):
+        q_list = [
+            dict(v, question_id=k) if isinstance(v, dict) and "question_id" not in v else v
+            for k, v in q_list.items()
+        ]
+    ann_list = ann_data.get("annotations", ann_data) if isinstance(ann_data, dict) else ann_data
+
+    ann_map: dict[str, Any] = {}
+    if isinstance(ann_list, list):
+        for ann in ann_list:
+            if isinstance(ann, dict):
+                qid = ann.get("question_id", ann.get("id"))
+                if qid is not None:
+                    ann_map[str(qid)] = ann
+    elif isinstance(ann_list, dict):
+        ann_map = {str(k): v for k, v in ann_list.items()}
+
+    images_dir = avqa_dir / "images"
+    samples: list[dict[str, Any]] = []
+    for q in q_list:
+        if not isinstance(q, dict):
+            continue
+        qid = str(q.get("question_id", q.get("id", len(samples))))
+        ann = ann_map.get(qid, {})
+        answers = ann.get("answers", ann.get("annotations", []))
+        if isinstance(answers, (str, int, float)):
+            answers = [answers]
+        if not answers and "multiple_choice_answer" in ann:
+            answers = [ann["multiple_choice_answer"]]
+        elif not answers and "answer" in ann:
+            answers = [ann["answer"]]
+        if not answers:
+            answers = q.get("answers", q.get("annotations", []))
+            if isinstance(answers, (str, int, float)):
+                answers = [answers]
+        if not answers and "answer" in q:
+            answers = [q["answer"]]
+
+        img_name = q.get("image_name", q.get("image_path", q.get("image", q.get("picture", ""))))
+        img_path = None
+        if img_name:
+            cand_p = avqa_dir / str(img_name)
+            cand_p_img = images_dir / str(img_name)
+            if cand_p.is_file():
+                img_path = str(cand_p)
+            elif images_dir.is_dir() and cand_p_img.is_file():
+                img_path = str(cand_p_img)
+            elif Path(str(img_name)).is_file():
+                img_path = str(img_name)
+            else:
+                img_path = str(img_name)
+
+        item: dict[str, Any] = {
+            **q,
+            "question_id": qid,
+            "answers": answers,
+        }
+        if img_path is not None:
+            item["image"] = img_path
+        samples.append(item)
+    return samples
+
+
+def _load_local_vllm_safety(
+    base_path: Path | str = "data/raw_datasets/vllm_safety",
+) -> list[dict[str, Any]]:
+    """Loads VLLM Safety Benchmark annotations from local raw dataset directory if present."""
+    vllm_dir = Path(base_path)
+    candidates = [
+        vllm_dir / "redteaming" / "misleading_attack" / "annotation.json",
+        vllm_dir / "gpt4v_challenging_set" / "misleading-attack.json",
+        vllm_dir / "misleading_attack" / "annotation.json",
+        vllm_dir / "misleading_attack.json",
+        vllm_dir / "misleading-attack.json",
+        vllm_dir / "annotation.json",
+        vllm_dir / "annotations.json",
+    ]
+    target_file = None
+    for cand in candidates:
+        if cand.is_file():
+            target_file = cand
+            break
+    if target_file is None:
+        return []
+
+    try:
+        with open(target_file, encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as exc:
+        logger.warning(f"Error reading local VLLM safety file: {exc}")
+        return []
+
+    items = data.get("data", data.get("annotation", data)) if isinstance(data, dict) else data
+    if isinstance(items, dict):
+        items = list(items.values())
+
+    samples: list[dict[str, Any]] = []
+    for idx, item in enumerate(items):
+        if not isinstance(item, dict):
+            continue
+        sample = dict(item)
+        if "id" not in sample and "question_id" not in sample:
+            sample["id"] = idx
+        img = sample.get(
+            "image", sample.get("image_path", sample.get("img_path", sample.get("image_name")))
+        )
+        if img and isinstance(img, str):
+            rel1 = target_file.parent / img
+            rel2 = vllm_dir / img
+            rel3 = vllm_dir / "images" / img
+            if rel1.is_file():
+                sample["image"] = str(rel1)
+            elif rel2.is_file():
+                sample["image"] = str(rel2)
+            elif rel3.is_file():
+                sample["image"] = str(rel3)
+        samples.append(sample)
+    return samples
+
+
 def load_hf_dataset(dataset_key: str, subset_size: int | None = None) -> Any:
-    """Loads benchmark dataset from HuggingFace with custom filtering and merges."""
-    from datasets import load_dataset
+    """Loads benchmark dataset from HuggingFace with custom filtering, merges, and local disk fallback."""
+    from datasets import Dataset, load_dataset
 
     if dataset_key not in DATASET_REGISTRY:
         raise ValueError(f"Unknown dataset '{dataset_key}'. Valid keys: {ALL_DATASET_KEYS}")
@@ -112,9 +276,42 @@ def load_hf_dataset(dataset_key: str, subset_size: int | None = None) -> Any:
     config_name = cfg["config"]
     target_split = cfg["default_split"]
 
-    logger.info(f"Loading HF dataset '{repo}' (config={config_name}, split={target_split})...")
+    logger.info(f"Loading dataset '{repo}' (config={config_name}, split={target_split})...")
 
-    if dataset_key == "mmmu":
+    if dataset_key == "avqa":
+        local_samples = _load_local_avqa()
+        if local_samples:
+            logger.info(f"Loaded {len(local_samples)} AVQA samples from local disk fallback.")
+            ds = Dataset.from_list(local_samples)
+            return ds.select(range(min(subset_size, len(ds)))) if subset_size else ds
+        try:
+            ds = load_dataset(repo, split=target_split)
+        except Exception:
+            try:
+                ds = load_dataset(repo, split="validation")
+            except Exception:
+                ds_dict = load_dataset(repo)
+                ds = ds_dict[
+                    target_split if target_split in ds_dict else next(iter(ds_dict.keys()))
+                ]
+        return ds.select(range(min(subset_size, len(ds)))) if subset_size else ds
+
+    elif dataset_key == "vllm-safety":
+        local_samples = _load_local_vllm_safety()
+        if local_samples:
+            logger.info(
+                f"Loaded {len(local_samples)} VLLM safety samples from local disk fallback."
+            )
+            ds = Dataset.from_list(local_samples)
+            return ds.select(range(min(subset_size, len(ds)))) if subset_size else ds
+        try:
+            ds = load_dataset(repo, split=target_split)
+        except Exception:
+            ds_dict = load_dataset(repo)
+            ds = ds_dict[target_split if target_split in ds_dict else next(iter(ds_dict.keys()))]
+        return ds.select(range(min(subset_size, len(ds)))) if subset_size else ds
+
+    elif dataset_key == "mmmu":
         try:
             ds = (
                 load_dataset(repo, config_name, split=target_split)
@@ -150,3 +347,12 @@ def load_hf_dataset(dataset_key: str, subset_size: int | None = None) -> Any:
     if subset_size and len(ds) > subset_size:
         ds = ds.select(range(subset_size))
     return ds
+
+
+__all__ = [
+    "ALL_DATASET_KEYS",
+    "DATASET_REGISTRY",
+    "_load_local_avqa",
+    "_load_local_vllm_safety",
+    "load_hf_dataset",
+]

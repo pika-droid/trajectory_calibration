@@ -17,7 +17,8 @@ TABLES_DIR.mkdir(parents=True, exist_ok=True)
 DATASET_WISE_DIR.mkdir(parents=True, exist_ok=True)
 TEMP_DIR.mkdir(parents=True, exist_ok=True)
 
-# Dataset key mapping to filename
+CORE_DATASETS = ["ai2d", "chartqa", "docvqa", "scienceqa", "textvqa", "vizwiz-vqa", "vqav2"]
+
 DATASET_FILE_MAP = {
     "ai2d": "ai2d.tex",
     "chartqa": "chartqa.tex",
@@ -46,6 +47,13 @@ TARGET_METHODS_ORDER = [
     ("Temperature Scaling (TS)", "Single-Pass ($T = 0.0$)", False),
     ("Platt Scaling (1D)", "Single-Pass ($T = 0.0$)", False),
     ("Trajectory Platt (5D)", "Single-Pass ($T = 0.0$)", True),
+]
+
+VQAV2_METHODS_ORDER = [
+    ("Naive Confidence (NC)", "Single-Pass ($T = 0.0, K = 1$)", False),
+    ("Temperature Scaling (TS)", "Single-Pass ($T = 0.0, K = 1$)", False),
+    ("Platt Scaling (1D)", "Single-Pass ($T = 0.0, K = 1$)", False),
+    ("Trajectory Platt (5D)", "Single-Pass ($T = 0.0, K = 1$)", True),
     ("ln_entropy", "Multi-Pass ($T = 0.5, K = 10$)", False),
     ("semantic_entropy", "Multi-Pass ($T = 0.5, K = 10$)", False),
     ("eigen_score", "Multi-Pass ($T = 0.5, K = 10$)", False),
@@ -63,6 +71,7 @@ UMP_DISPLAY_NAMES = {
 def rank_and_format(
     vals: list[float | None], higher_is_better: bool = False, decimals: int = 2
 ) -> list[str]:
+    """Applies Option A ranking with bold Rank 1 and italic Rank 2."""
     valid_vals = [round(v, decimals) for v in vals if v is not None and not np.isnan(v)]
     if not valid_vals:
         return ["-" for _ in vals]
@@ -89,12 +98,12 @@ def rank_and_format(
 
 def generate_single_table(
     df_bench: pd.DataFrame,
-    df_ump: pd.DataFrame,
     ds: str,
     arch_label: str,
     arch_model: str,
     is_macro: bool = False,
 ) -> str:
+    """Generates a standardized 4-method, 4-metric LaTeX benchmark table."""
     tab_label = (
         f"tab:benchmark_{arch_label}_{DATASET_NAME_MAP.get(ds, ds)}"
         if not is_macro
@@ -103,63 +112,27 @@ def generate_single_table(
     macro_prefix = "Macro-Averaged " if is_macro else ""
     macro_col = "Macro " if is_macro else ""
 
+    sub_df = (
+        df_bench[df_bench["dataset"].isin(CORE_DATASETS)]
+        if is_macro
+        else df_bench[df_bench["dataset"] == ds]
+    )
+
     rows = []
     for m_key, regime, is_ours in TARGET_METHODS_ORDER:
-        disp_name = UMP_DISPLAY_NAMES.get(m_key, m_key)
-        if m_key in UMP_DISPLAY_NAMES:
-            if is_macro:
-                sub = df_ump[df_ump["method"] == m_key]
-                if not sub.empty:
-                    ece = float(sub["cece"].mean() * 100.0)
-                    ada_ece = None
-                    auroc = float(sub["auc"].mean())
-                    brier = None
-                    rows.append((disp_name, regime, is_ours, ece, ada_ece, auroc, brier))
-            else:
-                sub = df_ump[(df_ump["dataset"] == ds) & (df_ump["method"] == m_key)]
-                if not sub.empty:
-                    r = sub.iloc[0]
-                    rows.append(
-                        (
-                            disp_name,
-                            regime,
-                            is_ours,
-                            float(r["cece"] * 100.0),
-                            None,
-                            float(r["auc"]),
-                            None,
-                        )
-                    )
-        else:
-            if is_macro:
-                sub = df_bench[df_bench["method"] == m_key]
-                if not sub.empty:
-                    ece = float(sub["ece_percent"].mean())
-                    ada_ece = float(sub["adaptive_ece_percent"].mean())
-                    auroc = float(sub["auroc"].mean())
-                    brier = float(sub["brier"].mean())
-                    rows.append((disp_name, regime, is_ours, ece, ada_ece, auroc, brier))
-            else:
-                sub = df_bench[(df_bench["dataset"] == ds) & (df_bench["method"] == m_key)]
-                if not sub.empty:
-                    r = sub.iloc[0]
-                    rows.append(
-                        (
-                            disp_name,
-                            regime,
-                            is_ours,
-                            float(r["ece_percent"]),
-                            float(r["adaptive_ece_percent"]),
-                            float(r["auroc"]),
-                            float(r["brier"]),
-                        )
-                    )
+        sub = sub_df[sub_df["method"] == m_key]
+        if not sub.empty:
+            ece = float(sub["ece_percent"].mean())
+            ada_ece = float(sub["adaptive_ece_percent"].mean())
+            brier = float(sub["brier"].mean())
+            auroc = float(sub["auroc"].mean())
+            rows.append((m_key, regime, is_ours, ece, ada_ece, brier, auroc))
 
     if not rows:
         return ""
 
     caption_name = (
-        f"on \\texttt{{{ds}}}" if not is_macro else f"of {len(rows)} Methods Across All 14 Datasets"
+        f"on \\texttt{{{ds}}}" if not is_macro else f"Across Core {len(CORE_DATASETS)} Datasets"
     )
     lines = [
         "\\begin{table}[t]",
@@ -169,25 +142,112 @@ def generate_single_table(
         "\\resizebox{\\columnwidth}{!}{%",
         "\\begin{tabular}{lccccc}",
         "\\toprule",
-        f"\\textbf{{Calibration Method}} & \\textbf{{Regime / Sampling}} & \\textbf{{{macro_col}ECE (\\%)}} $\\downarrow$ & \\textbf{{{macro_col}Ada-ECE (\\%)}} $\\downarrow$ & \\textbf{{{macro_col}AUROC}} $\\uparrow$ & \\textbf{{{macro_col}Brier}} $\\downarrow$ \\\\",
+        f"\\textbf{{Calibration Method}} & \\textbf{{Regime / Sampling}} & \\textbf{{{macro_col}ECE (\\%)}} $\\downarrow$ & \\textbf{{{macro_col}Ada-ECE (\\%)}} $\\downarrow$ & \\textbf{{{macro_col}Brier}} $\\downarrow$ & \\textbf{{{macro_col}AUROC}} $\\uparrow$ \\\\",
         "\\midrule",
     ]
 
     ece_formatted = rank_and_format([r[3] for r in rows], higher_is_better=False, decimals=2)
     ada_ece_formatted = rank_and_format([r[4] for r in rows], higher_is_better=False, decimals=2)
-    auroc_formatted = rank_and_format([r[5] for r in rows], higher_is_better=True, decimals=3)
-    brier_formatted = rank_and_format([r[6] for r in rows], higher_is_better=False, decimals=4)
+    brier_formatted = rank_and_format([r[5] for r in rows], higher_is_better=False, decimals=4)
+    auroc_formatted = rank_and_format([r[6] for r in rows], higher_is_better=True, decimals=3)
 
     for i, (disp_name, regime, is_ours, _, _, _, _) in enumerate(rows):
         ece_str = ece_formatted[i]
         ada_str = ada_ece_formatted[i]
-        auc_str = auroc_formatted[i]
         brier_str = brier_formatted[i]
+        auc_str = auroc_formatted[i]
         if is_ours:
-            row_str = f"\\rowcolor{{gray!10}} \\textbf{{{disp_name}}} & {regime} & {ece_str} & {ada_str} & {auc_str} & {brier_str} \\\\"
+            row_str = f"\\rowcolor{{gray!10}} \\textbf{{{disp_name}}} & {regime} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\"
         else:
             row_str = (
-                f"{disp_name} & {regime} & {ece_str} & {ada_str} & {auc_str} & {brier_str} \\\\"
+                f"{disp_name} & {regime} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\"
+            )
+        lines.append(row_str)
+
+    lines.extend(
+        [
+            "\\bottomrule",
+            "\\end{tabular}%",
+            "}",
+            "\\end{table}",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def generate_vqav2_multirollout_latex_table(
+    df_bench: pd.DataFrame,
+    df_ump: pd.DataFrame,
+    arch_label: str,
+    arch_model: str,
+) -> str:
+    """Generates dedicated VQAv2 single-pass (1x) vs multi-rollout (10x) comparison table."""
+    tab_label = f"tab:vqav2_multirollout_{arch_label}"
+    rows = []
+
+    for m_key, regime, is_ours in VQAV2_METHODS_ORDER:
+        disp_name = UMP_DISPLAY_NAMES.get(m_key, m_key)
+        if m_key in UMP_DISPLAY_NAMES:
+            sub = df_ump[(df_ump["dataset"] == "vqav2") & (df_ump["method"] == m_key)]
+            if not sub.empty:
+                r = sub.iloc[0]
+                rows.append(
+                    (
+                        disp_name,
+                        regime,
+                        is_ours,
+                        float(r["cece"] * 100.0),
+                        None,
+                        None,
+                        float(r["auc"]),
+                    )
+                )
+        else:
+            sub = df_bench[(df_bench["dataset"] == "vqav2") & (df_bench["method"] == m_key)]
+            if not sub.empty:
+                r = sub.iloc[0]
+                rows.append(
+                    (
+                        disp_name,
+                        regime,
+                        is_ours,
+                        float(r["ece_percent"]),
+                        float(r["adaptive_ece_percent"]),
+                        float(r["brier"]),
+                        float(r["auroc"]),
+                    )
+                )
+
+    if not rows:
+        return ""
+
+    lines = [
+        "\\begin{table}[t]",
+        f"\\caption{{\\textbf{{VQAv2 Calibration: Single-Pass Trajectory Calibration ($1\\times$) vs. Multi-Rollout UMPIRE Suite ($10\\times$) ({arch_model} 7B).}} \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
+        f"\\label{{{tab_label}}}",
+        "\\tablestyle{4pt}{1.05}",
+        "\\resizebox{\\columnwidth}{!}{%",
+        "\\begin{tabular}{lccccc}",
+        "\\toprule",
+        "\\textbf{Calibration Method} & \\textbf{Regime / Sampling} & \\textbf{ECE (\\%)} $\\downarrow$ & \\textbf{Ada-ECE (\\%)} $\\downarrow$ & \\textbf{Brier} $\\downarrow$ & \\textbf{AUROC} $\\uparrow$ \\\\",
+        "\\midrule",
+    ]
+
+    ece_formatted = rank_and_format([r[3] for r in rows], higher_is_better=False, decimals=2)
+    ada_ece_formatted = rank_and_format([r[4] for r in rows], higher_is_better=False, decimals=2)
+    brier_formatted = rank_and_format([r[5] for r in rows], higher_is_better=False, decimals=4)
+    auroc_formatted = rank_and_format([r[6] for r in rows], higher_is_better=True, decimals=3)
+
+    for i, (disp_name, regime, is_ours, _, _, _, _) in enumerate(rows):
+        ece_str = ece_formatted[i]
+        ada_str = ada_ece_formatted[i]
+        brier_str = brier_formatted[i]
+        auc_str = auroc_formatted[i]
+        if is_ours:
+            row_str = f"\\rowcolor{{gray!10}} \\textbf{{{disp_name}}} & {regime} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\"
+        else:
+            row_str = (
+                f"{disp_name} & {regime} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\"
             )
         lines.append(row_str)
 
@@ -203,6 +263,7 @@ def generate_single_table(
 
 
 def generate_benchmark_tables():
+    """Generates individual dataset tables, macro mean table, and VQAv2 multi-rollout table."""
     df_m3 = pd.read_csv(ROOT / "results/experiments/benchmark/benchmark_m3_summary.csv")
     df_mqt = pd.read_csv(ROOT / "results/experiments/benchmark/benchmark_mqt_summary.csv")
     df_m3["dataset"] = df_m3["dataset"].replace({"vqav2_5scale": "vqav2"})
@@ -213,8 +274,8 @@ def generate_benchmark_tables():
 
     # 1. Per-dataset tables into dataset_wise_results/
     for ds_key, filename in DATASET_FILE_MAP.items():
-        t_m3 = generate_single_table(df_m3, ump_m3, ds_key, "m3", "M3-LLaVA", is_macro=False)
-        t_mqt = generate_single_table(df_mqt, ump_mqt, ds_key, "mqt", "MQT-LLaVA", is_macro=False)
+        t_m3 = generate_single_table(df_m3, ds_key, "m3", "M3-LLaVA", is_macro=False)
+        t_mqt = generate_single_table(df_mqt, ds_key, "mqt", "MQT-LLaVA", is_macro=False)
         content = t_m3 + "\n\n" + t_mqt + "\n"
         out_file = DATASET_WISE_DIR / filename
         out_file.write_text(content, encoding="utf-8")
@@ -225,26 +286,29 @@ def generate_benchmark_tables():
             old_file.unlink()
         print(f"Generated: {out_file}")
 
-    # 2. Macro mean table in dataset_tables/macro_mean.tex
-    macro_m3 = generate_single_table(
-        df_m3, ump_m3, "macro_mean", "macro_m3", "M3-LLaVA", is_macro=True
-    )
-    macro_mqt = generate_single_table(
-        df_mqt, ump_mqt, "macro_mean", "macro_mqt", "MQT-LLaVA", is_macro=True
-    )
+    # 2. Macro mean table in dataset_tables/macro_mean.tex across Core 6 datasets
+    macro_m3 = generate_single_table(df_m3, "macro_mean", "macro_m3", "M3-LLaVA", is_macro=True)
+    macro_mqt = generate_single_table(df_mqt, "macro_mean", "macro_mqt", "MQT-LLaVA", is_macro=True)
     (TABLES_DIR / "macro_mean.tex").write_text(
         macro_m3 + "\n\n" + macro_mqt + "\n", encoding="utf-8"
     )
     print(f"Generated: {TABLES_DIR / 'macro_mean.tex'}")
 
-    # 3. Calculate and display win statistics on Adaptive ECE against published baselines
+    # 3. Dedicated VQAv2 Multi-Rollout Comparison table
+    vqav2_m3 = generate_vqav2_multirollout_latex_table(df_m3, ump_m3, "m3", "M3-LLaVA")
+    vqav2_mqt = generate_vqav2_multirollout_latex_table(df_mqt, ump_mqt, "mqt", "MQT-LLaVA")
+    (TABLES_DIR / "vqav2_multirollout_comparison.tex").write_text(
+        vqav2_m3 + "\n\n" + vqav2_mqt + "\n", encoding="utf-8"
+    )
+    print(f"Generated: {TABLES_DIR / 'vqav2_multirollout_comparison.tex'}")
+
+    # 4. Calculate and display win statistics on Adaptive ECE across Core 6 datasets
     our_methods = {"Trajectory Platt (5D)"}
-    target_methods = [m[0] for m in TARGET_METHODS_ORDER if m[0] not in UMP_DISPLAY_NAMES]
+    target_methods = [m[0] for m in TARGET_METHODS_ORDER]
     for arch_name, df_arch in [("M3-LLaVA", df_m3), ("MQT-LLaVA", df_mqt)]:
         our_wins = 0
         total_ds = 0
-        datasets = df_arch["dataset"].unique()
-        for ds in datasets:
+        for ds in CORE_DATASETS:
             sub = df_arch[(df_arch["dataset"] == ds) & (df_arch["method"].isin(target_methods))]
             if sub.empty:
                 continue
@@ -253,7 +317,7 @@ def generate_benchmark_tables():
             if min_row["method"] in our_methods:
                 our_wins += 1
         print(
-            f"[Win Statistics - {arch_name}] Trajectory Platt (5D) won on {our_wins}/{total_ds} datasets on Adaptive ECE."
+            f"[Win Statistics - {arch_name}] Trajectory Platt (5D) won on {our_wins}/{total_ds} Core datasets on Adaptive ECE."
         )
 
 
@@ -268,17 +332,17 @@ def _render_temp_block(
     ]
     ece_strs = rank_and_format([r[1] for r in raw_rows], higher_is_better=False, decimals=2)
     ada_strs = rank_and_format([r[2] for r in raw_rows], higher_is_better=False, decimals=2)
-    auc_strs = rank_and_format([r[3] for r in raw_rows], higher_is_better=True, decimals=3)
-    brier_strs = rank_and_format([r[4] for r in raw_rows], higher_is_better=False, decimals=4)
+    brier_strs = rank_and_format([r[3] for r in raw_rows], higher_is_better=False, decimals=4)
+    auc_strs = rank_and_format([r[4] for r in raw_rows], higher_is_better=True, decimals=3)
 
     for i, (m, _, _, _, _) in enumerate(raw_rows):
-        ece_s, ada_s, auc_s, brier_s = ece_strs[i], ada_strs[i], auc_strs[i], brier_strs[i]
+        ece_s, ada_s, brier_s, auc_s = ece_strs[i], ada_strs[i], brier_strs[i], auc_strs[i]
         if "5D" in m:
             lines.append(
-                f"\\rowcolor{{gray!10}} \\textbf{{{m}}} & {ece_s} & {ada_s} & {auc_s} & {brier_s} \\\\"
+                f"\\rowcolor{{gray!10}} \\textbf{{{m}}} & {ece_s} & {ada_s} & {brier_s} & {auc_s} \\\\"
             )
         else:
-            lines.append(f"{m} & {ece_s} & {ada_s} & {auc_s} & {brier_s} \\\\")
+            lines.append(f"{m} & {ece_s} & {ada_s} & {brier_s} & {auc_s} \\\\")
     return lines
 
 
@@ -314,7 +378,7 @@ def build_temp_table(
         "\\resizebox{\\columnwidth}{!}{%",
         "\\begin{tabular}{lcccc}",
         "\\toprule",
-        "\\textbf{Calibration Method} & \\textbf{ECE (\\%)} $\\downarrow$ & \\textbf{Ada-ECE (\\%)} $\\downarrow$ & \\textbf{AUROC} $\\uparrow$ & \\textbf{Brier} $\\downarrow$ \\\\",
+        "\\textbf{Calibration Method} & \\textbf{ECE (\\%)} $\\downarrow$ & \\textbf{Ada-ECE (\\%)} $\\downarrow$ & \\textbf{Brier} $\\downarrow$ & \\textbf{AUROC} $\\uparrow$ \\\\",
         "\\midrule",
     ]
 
@@ -328,9 +392,9 @@ def build_temp_table(
             m_sub = sub[(sub["method"] == m) & (sub["temperature"] == t)]
             ece = float(m_sub["ece_percent"].mean()) if not m_sub.empty else np.nan
             ada = float(m_sub["adaptive_ece_percent"].mean()) if not m_sub.empty else np.nan
-            auc = float(m_sub["auroc"].mean()) if not m_sub.empty else np.nan
             brier = float(m_sub["brier"].mean()) if not m_sub.empty else np.nan
-            raw_rows.append((m, ece, ada, auc, brier))
+            auc = float(m_sub["auroc"].mean()) if not m_sub.empty else np.nan
+            raw_rows.append((m, ece, ada, brier, auc))
         lines.extend(_render_temp_block(f"Sampling Temperature $T = {t:.1f}$", raw_rows))
         lines.append(r"\midrule")
 
@@ -340,9 +404,9 @@ def build_temp_table(
         m_sub = sub[sub["method"] == m]
         ece = float(m_sub["ece_percent"].mean()) if not m_sub.empty else np.nan
         ada = float(m_sub["adaptive_ece_percent"].mean()) if not m_sub.empty else np.nan
-        auc = float(m_sub["auroc"].mean()) if not m_sub.empty else np.nan
         brier = float(m_sub["brier"].mean()) if not m_sub.empty else np.nan
-        mean_rows.append((m, ece, ada, auc, brier))
+        auc = float(m_sub["auroc"].mean()) if not m_sub.empty else np.nan
+        mean_rows.append((m, ece, ada, brier, auc))
     lines.extend(_render_temp_block("Mean (Averaged Across Temperatures)", mean_rows))
 
     lines.extend(
@@ -393,7 +457,7 @@ def build_lodo_table(df: pd.DataFrame, arch_label: str, arch_model: str) -> str:
         "\\resizebox{\\columnwidth}{!}{%",
         "\\begin{tabular}{llcccc}",
         "\\toprule",
-        "\\textbf{Calibration Method} & \\textbf{Transfer Protocol} & \\textbf{Macro ECE (\\%)} $\\downarrow$ & \\textbf{Macro Ada-ECE (\\%)} $\\downarrow$ & \\textbf{Macro AUROC} $\\uparrow$ & \\textbf{Macro Brier} $\\downarrow$ \\\\",
+        "\\textbf{Calibration Method} & \\textbf{Transfer Protocol} & \\textbf{Macro ECE (\\%)} $\\downarrow$ & \\textbf{Macro Ada-ECE (\\%)} $\\downarrow$ & \\textbf{Macro Brier} $\\downarrow$ & \\textbf{Macro AUROC} $\\uparrow$ \\\\",
         "\\midrule",
     ]
 
@@ -406,7 +470,7 @@ def build_lodo_table(df: pd.DataFrame, arch_label: str, arch_model: str) -> str:
 
     agg = (
         df.groupby(["method", "transfer_mode"])[
-            ["ece_percent", "adaptive_ece_percent", "auroc", "brier"]
+            ["ece_percent", "adaptive_ece_percent", "brier", "auroc"]
         ]
         .mean()
         .reset_index()
@@ -424,28 +488,28 @@ def build_lodo_table(df: pd.DataFrame, arch_label: str, arch_model: str) -> str:
                         mode,
                         float(r["ece_percent"]),
                         float(r["adaptive_ece_percent"]),
-                        float(r["auroc"]),
                         float(r["brier"]),
+                        float(r["auroc"]),
                         "5D" in m,
                     )
                 )
 
     ece_formatted = rank_and_format([r[2] for r in rows], higher_is_better=False, decimals=2)
     ada_formatted = rank_and_format([r[3] for r in rows], higher_is_better=False, decimals=2)
-    auc_formatted = rank_and_format([r[4] for r in rows], higher_is_better=True, decimals=3)
-    brier_formatted = rank_and_format([r[5] for r in rows], higher_is_better=False, decimals=4)
+    brier_formatted = rank_and_format([r[4] for r in rows], higher_is_better=False, decimals=4)
+    auc_formatted = rank_and_format([r[5] for r in rows], higher_is_better=True, decimals=3)
 
     for i, (m, mode, _, _, _, _, is_ours) in enumerate(rows):
         ece_str = ece_formatted[i]
         ada_str = ada_formatted[i]
-        auc_str = auc_formatted[i]
         brier_str = brier_formatted[i]
+        auc_str = auc_formatted[i]
         if is_ours:
             lines.append(
-                f"\\rowcolor{{gray!10}} \\textbf{{{m}}} & {mode} & {ece_str} & {ada_str} & {auc_str} & {brier_str} \\\\"
+                f"\\rowcolor{{gray!10}} \\textbf{{{m}}} & {mode} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\"
             )
         else:
-            lines.append(f"{m} & {mode} & {ece_str} & {ada_str} & {auc_str} & {brier_str} \\\\")
+            lines.append(f"{m} & {mode} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\")
 
     lines.extend(
         [

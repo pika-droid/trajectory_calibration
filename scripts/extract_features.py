@@ -46,7 +46,12 @@ def generate_mock_extraction(
         for s in scales:
             c = min(0.99, max(0.01, base_c + random.gauss(0.0, 0.04)))
             m = random.uniform(0.1, 0.5)
-            ans = "dog" if is_corr else "cat"
+            if dataset_key == "vllm-safety":
+                ans = "unicorn" if is_corr else "dragon"
+            elif dataset_key == "avqa":
+                ans = "dog" if is_corr else "elephant"
+            else:
+                ans = "dog" if is_corr else "cat"
             acc = 1.0 if (is_corr and s == fine_scale) else (1.0 if random.random() > 0.5 else 0.0)
             feats[s] = {
                 "conf_softmax": float(c),
@@ -54,16 +59,30 @@ def generate_mock_extraction(
                 "answer": ans,
                 "vqa_accuracy": float(acc),
             }
-        mock_data.append(
-            {
-                "question_id": 200000 + i,
-                "question": f"Mock question {i}?",
-                "ground_truth": "dog",
-                "dataset": dataset_key,
-                "sample_idx": i,
-                "features": feats,
-            }
-        )
+
+        sample_dict: dict = {
+            "question_id": 200000 + i,
+            "question": f"Mock question {i}?",
+            "ground_truth": "dog",
+            "answer": "dog",
+            "dataset": dataset_key,
+            "sample_idx": i,
+            "features": feats,
+        }
+        if dataset_key == "avqa":
+            sample_dict["question"] = f"Mock AVQA adversarial question {i}?"
+            sample_dict["answers"] = [{"answer": "dog"} for _ in range(8)] + [
+                {"answer": "cat"} for _ in range(2)
+            ]
+            sample_dict["answer"] = "dog"
+            sample_dict["answer_type"] = "list_soft"
+        elif dataset_key == "vllm-safety":
+            sample_dict["question"] = f"Mock VLLM safety question {i}?"
+            sample_dict["ground_truth"] = "unicorn"
+            sample_dict["answer"] = "unicorn"
+            sample_dict["answer_type"] = "open"
+
+        mock_data.append(sample_dict)
     return mock_data
 
 

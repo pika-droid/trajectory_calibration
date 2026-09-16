@@ -1,42 +1,34 @@
 \begin{table}[t]
-\caption{\textbf{Macro-Averaged Calibration Benchmark of 8 Methods Across All 14 Datasets (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\caption{\textbf{Macro-Averaged Calibration Benchmark Across Core 7 Datasets (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
 \label{tab:benchmark_macro_macro_m3}
 \tablestyle{4pt}{1.05}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{Macro ECE (\%)} $\downarrow$ & \textbf{Macro Ada-ECE (\%)} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ & \textbf{Macro Brier} $\downarrow$ \\
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{Macro ECE (\%)} $\downarrow$ & \textbf{Macro Ada-ECE (\%)} $\downarrow$ & \textbf{Macro Brier} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 40.33 & 40.33 & 0.671 & 0.3950 \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 21.93 & 22.68 & 0.671 & 0.2213 \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{3.24} & \textit{5.70} & 0.682 & \textit{0.1357} \\
-\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Single-Pass ($T = 0.0$) & \textit{4.25} & \textbf{5.49} & \textbf{0.717} & \textbf{0.1322} \\
-LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & 19.24 & - & 0.675 & - \\
-Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & 28.25 & - & 0.641 & - \\
-EigenScore & Multi-Pass ($T = 0.5, K = 10$) & 24.74 & - & 0.694 & - \\
-UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & 17.34 & - & \textit{0.698} & - \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 32.95 & 32.93 & 0.3317 & \textit{0.756} \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 20.90 & 21.22 & 0.2103 & \textit{0.756} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{4.40} & \textit{5.84} & \textit{0.1383} & \textit{0.756} \\
+\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Single-Pass ($T = 0.0$) & \textit{4.80} & \textbf{5.56} & \textbf{0.1357} & \textbf{0.767} \\
 \bottomrule
 \end{tabular}%
 }
 \end{table}
 
 \begin{table}[t]
-\caption{\textbf{Macro-Averaged Calibration Benchmark of 8 Methods Across All 14 Datasets (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\caption{\textbf{Macro-Averaged Calibration Benchmark Across Core 7 Datasets (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
 \label{tab:benchmark_macro_macro_mqt}
 \tablestyle{4pt}{1.05}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{Macro ECE (\%)} $\downarrow$ & \textbf{Macro Ada-ECE (\%)} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ & \textbf{Macro Brier} $\downarrow$ \\
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{Macro ECE (\%)} $\downarrow$ & \textbf{Macro Ada-ECE (\%)} $\downarrow$ & \textbf{Macro Brier} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 32.32 & 31.76 & 0.682 & 0.3055 \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 23.45 & 24.13 & 0.682 & 0.2163 \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{5.88} & \textit{7.82} & 0.686 & \textit{0.1365} \\
-\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Single-Pass ($T = 0.0$) & \textit{6.06} & \textbf{7.18} & \textbf{0.748} & \textbf{0.1334} \\
-LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & 22.77 & - & 0.666 & - \\
-Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & 33.37 & - & 0.639 & - \\
-EigenScore & Multi-Pass ($T = 0.5, K = 10$) & 29.57 & - & 0.689 & - \\
-UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & 21.27 & - & \textit{0.691} & - \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 33.63 & 33.38 & 0.3148 & 0.689 \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 24.45 & 25.07 & 0.2273 & 0.689 \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{7.10} & \textit{8.77} & \textit{0.1517} & \textit{0.698} \\
+\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Single-Pass ($T = 0.0$) & \textbf{5.96} & \textbf{7.33} & \textbf{0.1461} & \textbf{0.726} \\
 \bottomrule
 \end{tabular}%
 }
