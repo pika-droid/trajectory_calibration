@@ -32,27 +32,32 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
     ans_type = cfg.get("answer_type", "open")
 
     if ans_type == "open":
-        gt_ans = str(
-            sample.get(
-                "answer",
-                sample.get(
-                    "label",
-                    sample.get(
-                        "ground_truth",
-                        sample.get("gt_answer", sample.get("target", "")),
-                    ),
-                ),
-            )
-        ).strip()
-        if not gt_ans:
-            return 0.0
-        gt_clean = clean_text(gt_ans)
-        if pred_norm == gt_clean or pred_clean == gt_ans.lower():
-            return 1.0
+        candidates: list[str] = []
+        labels_val = sample.get("labels", sample.get("label", []))
+        if isinstance(labels_val, list):
+            candidates.extend([str(x) for x in labels_val if x is not None])
+        elif isinstance(labels_val, (str, int, float)) and str(labels_val).strip():
+            candidates.append(str(labels_val).strip())
 
-        # Require ground-truth containment inside the prediction
-        if (len(gt_clean) >= 2 or gt_clean.isdigit()) and _is_word_match(gt_clean, pred_norm):
-            return 1.0
+        for k in ["answer", "text_answer", "ground_truth", "gt_answer", "target", "reference"]:
+            v = sample.get(k)
+            if isinstance(v, list):
+                candidates.extend([str(x) for x in v if x is not None])
+            elif isinstance(v, (str, int, float)) and str(v).strip():
+                candidates.append(str(v).strip())
+
+        if not candidates:
+            return 0.0
+
+        for gt_ans in candidates:
+            gt_clean = clean_text(gt_ans)
+            if not gt_clean:
+                continue
+            if pred_norm == gt_clean or pred_clean == gt_ans.lower():
+                return 1.0
+            if (len(gt_clean) >= 2 or gt_clean.isdigit()) and _is_word_match(gt_clean, pred_norm):
+                return 1.0
+
         return 0.0
 
     elif ans_type == "list_soft":
