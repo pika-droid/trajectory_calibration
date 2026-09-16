@@ -282,65 +282,121 @@ def _download_vllm_safety_files(vllm_dir: Path) -> None:
 def _load_local_vllm_safety(
     base_path: Path | str = "data/raw_datasets/vllm_safety", auto_download: bool = True
 ) -> list[dict[str, Any]]:
-    """Loads VLLM Safety Benchmark annotations from local raw dataset directory if present."""
+    """Loads full VLLM Safety Benchmark suites (challenging set + redteaming attacks)."""
     vllm_dir = Path(base_path)
-    candidates = [
-        vllm_dir
-        / "safety_evaluation_benchmark_datasets"
-        / "gpt4v_challenging_set"
-        / "misleading-attack.json",
-        vllm_dir
-        / "safety_evaluation_benchmark_datasets"
-        / "redteaming"
-        / "misleading_attack"
-        / "annotation.json",
-        vllm_dir / "redteaming" / "misleading_attack" / "annotation.json",
-        vllm_dir / "gpt4v_challenging_set" / "misleading-attack.json",
-        vllm_dir / "misleading_attack" / "annotation.json",
-        vllm_dir / "misleading_attack.json",
-        vllm_dir / "misleading-attack.json",
-        vllm_dir / "annotation.json",
-        vllm_dir / "annotations.json",
-    ]
-    target_file = next((f for f in candidates if f.is_file()), None)
-    if target_file is None and auto_download:
+    root = (
+        vllm_dir / "safety_evaluation_benchmark_datasets"
+        if (vllm_dir / "safety_evaluation_benchmark_datasets").is_dir()
+        else vllm_dir
+    )
+
+    if not root.is_dir() and auto_download:
         _download_vllm_safety_files(vllm_dir)
-        target_file = next((f for f in candidates if f.is_file()), None)
-    if target_file is None:
-        return []
-
-    try:
-        with open(target_file, encoding="utf-8") as f:
-            data = json.load(f)
-    except Exception as exc:
-        logger.warning(f"Error reading local VLLM safety file: {exc}")
-        return []
-
-    items = data.get("data", data.get("annotation", data)) if isinstance(data, dict) else data
-    if isinstance(items, dict):
-        items = list(items.values())
+        root = (
+            vllm_dir / "safety_evaluation_benchmark_datasets"
+            if (vllm_dir / "safety_evaluation_benchmark_datasets").is_dir()
+            else vllm_dir
+        )
 
     samples: list[dict[str, Any]] = []
-    for idx, item in enumerate(items):
-        if not isinstance(item, dict):
-            continue
-        sample = dict(item)
-        if "id" not in sample and "question_id" not in sample:
-            sample["id"] = idx
-        img = sample.get(
-            "image", sample.get("image_path", sample.get("img_path", sample.get("image_name")))
-        )
-        if img and isinstance(img, str):
-            rel1 = target_file.parent / img
-            rel2 = vllm_dir / img
-            rel3 = vllm_dir / "images" / img
-            if rel1.is_file():
-                sample["image"] = str(rel1)
-            elif rel2.is_file():
-                sample["image"] = str(rel2)
-            elif rel3.is_file():
-                sample["image"] = str(rel3)
-        samples.append(sample)
+
+    # 1. GPT4V challenging set (misleading attack, oodcv counterfactual, sketchy challenging)
+    gpt4v_dir = root / "gpt4v_challenging_set"
+    if gpt4v_dir.is_dir():
+        for jf in sorted(gpt4v_dir.glob("*.json")):
+            try:
+                with open(jf, encoding="utf-8") as f:
+                    d = json.load(f)
+                items = d.get("data", d.get("annotation", d)) if isinstance(d, dict) else d
+                if isinstance(items, dict):
+                    items = list(items.values())
+                for idx, item in enumerate(items):
+                    if not isinstance(item, dict):
+                        continue
+                    s = dict(item)
+                    s["task"] = s.get("task", jf.stem)
+                    s["question_id"] = f"{jf.stem}_{idx}"
+                    img = s.get("image", s.get("image_path"))
+                    if img:
+                        img_p = gpt4v_dir / str(img)
+                        if img_p.is_file():
+                            s["image"] = str(img_p)
+                    samples.append(s)
+            except Exception as exc:
+                logger.warning(f"Error loading {jf}: {exc}")
+
+    # 2. Redteaming misleading attack (6 attack perturbation types or list/dict annotations)
+    redteam_dir = root / "redteaming" / "misleading_attack"
+    ann_file = redteam_dir / "annotation.json"
+    if ann_file.is_file():
+        try:
+            with open(ann_file, encoding="utf-8") as f:
+                ann_data = json.load(f)
+            if isinstance(ann_data, list):
+                for idx, item in enumerate(ann_data):
+                    if isinstance(item, dict):
+                        s = dict(item)
+                        s["question_id"] = str(s.get("id", idx))
+                        img = s.get("image", s.get("image_path"))
+                        if img:
+                            img_p = redteam_dir / str(img)
+                            if img_p.is_file():
+                                s["image"] = str(img_p)
+                        samples.append(s)
+            elif isinstance(ann_data, dict):
+                attack_dirs = [d for d in sorted(redteam_dir.glob("*")) if d.is_dir()]
+                if attack_dirs:
+                    for ad in attack_dirs:
+                        for img_name, labels in ann_data.items():
+                            img_p = ad / img_name
+                            if img_p.is_file():
+                                samples.append(
+                                    {
+                                        "question_id": f"{ad.name}_{img_name}",
+                                        "question": "Describe this image in detail.",
+                                        "labels": labels if isinstance(labels, list) else [labels],
+                                        "image": str(img_p),
+                                        "task": ad.name,
+                                    }
+                                )
+                else:
+                    for img_name, labels in ann_data.items():
+                        samples.append(
+                            {
+                                "question_id": f"misleading_{img_name}",
+                                "question": "Describe this image in detail.",
+                                "labels": labels if isinstance(labels, list) else [labels],
+                                "image": str(redteam_dir / img_name),
+                                "task": "misleading_attack",
+                            }
+                        )
+        except Exception as exc:
+            logger.warning(f"Error loading {ann_file}: {exc}")
+
+    # Fallback to single json file if directory structure is flat
+    if not samples:
+        single_candidates = [
+            root / "misleading-attack.json",
+            root / "misleading_attack.json",
+            root / "annotation.json",
+            root / "annotations.json",
+        ]
+        target_file = next((f for f in single_candidates if f.is_file()), None)
+        if target_file is not None:
+            try:
+                with open(target_file, encoding="utf-8") as f:
+                    d = json.load(f)
+                items = d.get("data", d.get("annotation", d)) if isinstance(d, dict) else d
+                if isinstance(items, dict):
+                    items = list(items.values())
+                for idx, item in enumerate(items):
+                    if isinstance(item, dict):
+                        s = dict(item)
+                        s["question_id"] = str(s.get("id", idx))
+                        samples.append(s)
+            except Exception as exc:
+                logger.warning(f"Error loading {target_file}: {exc}")
+
     return samples
 
 
