@@ -13,6 +13,7 @@ export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
 
 REPO_ROOT="/workspace/trajectory_calibration"
 cd "${REPO_ROOT}"
+export PYTHONPATH="${REPO_ROOT}/src:${REPO_ROOT}:${PYTHONPATH:-}"
 
 # Ensure canonical manifest exists
 if [ ! -f "data/canonical_manifest_all.json" ]; then

@@ -18,8 +18,14 @@ import json
 import logging
 import os
 import random
+import sys
 from pathlib import Path
 from typing import Any
+
+# Ensure src/ is in sys.path for direct python execution
+SRC_PATH = Path(__file__).resolve().parent.parent / "src"
+if str(SRC_PATH) not in sys.path:
+    sys.path.insert(0, str(SRC_PATH))
 
 # Configure PyTorch CUDA memory allocator
 if "PYTORCH_CUDA_ALLOC_CONF" not in os.environ:
