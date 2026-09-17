@@ -29,11 +29,12 @@ class UnifiedVLMWrapper:
         model_path: str = "mucai/llava-v1.5-7b-m3",
         precision: str = "fp16",
         arch: str | None = None,
+        fine_scale: int | None = None,
     ) -> None:
         self.arch = arch.lower() if arch else ("mqt" if "mqt" in model_path.lower() else "m3")
         self.model_path = model_path
         self.scales = ARCH_SCALES[self.arch]
-        self.fine_scale = self.scales[-1]
+        self.fine_scale = fine_scale if fine_scale is not None else self.scales[-1]
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.dtype = (
@@ -147,11 +148,14 @@ class UnifiedVLMWrapper:
         )
         image_tensor, image_sizes = self.preprocess_image(image)
 
-        vt = (
-            None
-            if (num_visual_tokens is not None and num_visual_tokens >= 576)
-            else num_visual_tokens
-        )
+        if self.arch == "mqt":
+            vt = num_visual_tokens if num_visual_tokens is not None else 256
+        else:
+            vt = (
+                None
+                if (num_visual_tokens is not None and num_visual_tokens >= 576)
+                else num_visual_tokens
+            )
         if hasattr(self.model, "config"):
             self.model.config.num_visual_tokens = vt
         if hasattr(self.model, "model") and hasattr(self.model.model, "config"):
