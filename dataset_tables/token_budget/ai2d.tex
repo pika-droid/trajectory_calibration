@@ -1,0 +1,75 @@
+\begin{table}[t]
+\caption{\textbf{Token Budget vs. Calibration Performance on \texttt{ai2d} (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:token_budget_ai2d_m3}
+\tablestyle{4pt}{1.05}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{cclcccc}
+\toprule
+\textbf{Depth ($k$)} & \textbf{Tokens ($T$)} & \textbf{Calibration Method} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\midrule
+\multirow{4}{*}{1} & 1 & Naive Confidence (NC) & 44.18 & 44.18 & 0.4419 & \textbf{0.656} \\
+ & 1 & Temperature Scaling (TS) & 11.68 & 13.86 & \textit{0.2528} & \textbf{0.656} \\
+ & 1 & Platt Scaling (1D) & \textbf{5.17} & \textbf{7.47} & \textbf{0.2314} & \textbf{0.656} \\
+\rowcolor{gray!10}  & 1 & \textbf{Trajectory Platt (5D)} & \textit{5.20} & \textit{7.48} & \textbf{0.2314} & \textbf{0.656} \\
+\midrule
+\multirow{4}{*}{2} & 9 & Naive Confidence (NC) & 43.40 & 43.39 & 0.4340 & \textit{0.620} \\
+ & 9 & Temperature Scaling (TS) & 10.00 & 12.86 & 0.2517 & \textit{0.620} \\
+ & 9 & Platt Scaling (1D) & \textbf{4.37} & \textit{7.20} & \textit{0.2361} & \textit{0.620} \\
+\rowcolor{gray!10}  & 10 & \textbf{Trajectory Platt (5D)} & \textit{4.40} & \textbf{5.95} & \textbf{0.2290} & \textbf{0.653} \\
+\midrule
+\multirow{4}{*}{3} & 36 & Naive Confidence (NC) & 42.79 & 42.79 & 0.4279 & \textit{0.631} \\
+ & 36 & Temperature Scaling (TS) & 9.51 & 12.13 & 0.2495 & \textit{0.631} \\
+ & 36 & Platt Scaling (1D) & \textbf{4.62} & \textbf{6.40} & \textit{0.2335} & \textit{0.631} \\
+\rowcolor{gray!10}  & 46 & \textbf{Trajectory Platt (5D)} & \textit{6.32} & \textit{7.43} & \textbf{0.2305} & \textbf{0.650} \\
+\midrule
+\multirow{4}{*}{4} & 144 & Naive Confidence (NC) & 43.01 & 42.99 & 0.4300 & \textit{0.666} \\
+ & 144 & Temperature Scaling (TS) & 10.75 & 14.03 & 0.2484 & \textit{0.666} \\
+ & 144 & Platt Scaling (1D) & \textbf{5.69} & \textbf{7.28} & \textit{0.2265} & \textit{0.666} \\
+\rowcolor{gray!10}  & 190 & \textbf{Trajectory Platt (5D)} & \textit{6.49} & \textit{7.43} & \textbf{0.2187} & \textbf{0.699} \\
+\midrule
+\multirow{4}{*}{5} & 576 & Naive Confidence (NC) & 41.82 & 41.78 & 0.4180 & \textit{0.621} \\
+ & 576 & Temperature Scaling (TS) & 8.54 & 11.20 & 0.2466 & \textit{0.621} \\
+ & 576 & Platt Scaling (1D) & \textbf{4.97} & \textbf{7.15} & \textit{0.2351} & \textit{0.621} \\
+\rowcolor{gray!10}  & 766 & \textbf{Trajectory Platt (5D)} & \textit{5.71} & \textit{8.23} & \textbf{0.2293} & \textbf{0.654} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[t]
+\caption{\textbf{Token Budget vs. Calibration Performance on \texttt{ai2d} (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:token_budget_ai2d_mqt}
+\tablestyle{4pt}{1.05}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{cclcccc}
+\toprule
+\textbf{Depth ($k$)} & \textbf{Tokens ($T$)} & \textbf{Calibration Method} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\midrule
+\multirow{4}{*}{1} & 1 & Naive Confidence (NC) & 27.80 & 27.58 & 0.2989 & \textbf{0.722} \\
+ & 1 & Temperature Scaling (TS) & 14.98 & 16.50 & 0.2278 & \textbf{0.722} \\
+ & 1 & Platt Scaling (1D) & \textbf{8.82} & \textit{10.86} & \textit{0.2074} & \textbf{0.722} \\
+\rowcolor{gray!10}  & 1 & \textbf{Trajectory Platt (5D)} & \textit{9.00} & \textbf{10.85} & \textbf{0.2073} & \textbf{0.722} \\
+\midrule
+\multirow{4}{*}{2} & 9 & Naive Confidence (NC) & 26.99 & 26.22 & 0.2871 & \textit{0.723} \\
+ & 9 & Temperature Scaling (TS) & 13.37 & 15.55 & 0.2232 & \textit{0.723} \\
+ & 9 & Platt Scaling (1D) & \textbf{6.97} & \textit{10.09} & \textit{0.2074} & \textit{0.723} \\
+\rowcolor{gray!10}  & 10 & \textbf{Trajectory Platt (5D)} & \textit{7.76} & \textbf{9.05} & \textbf{0.2067} & \textbf{0.725} \\
+\midrule
+\multirow{4}{*}{3} & 36 & Naive Confidence (NC) & 25.81 & 25.66 & 0.2825 & \textbf{0.745} \\
+ & 36 & Temperature Scaling (TS) & 13.87 & 14.93 & 0.2190 & \textbf{0.745} \\
+ & 36 & Platt Scaling (1D) & \textit{9.16} & \textit{10.47} & \textit{0.2005} & \textbf{0.745} \\
+\rowcolor{gray!10}  & 46 & \textbf{Trajectory Platt (5D)} & \textbf{7.04} & \textbf{9.10} & \textbf{0.2001} & \textbf{0.745} \\
+\midrule
+\multirow{4}{*}{4} & 144 & Naive Confidence (NC) & 24.54 & 24.44 & 0.2624 & \textbf{0.764} \\
+ & 144 & Temperature Scaling (TS) & 14.65 & 16.82 & 0.2165 & \textbf{0.764} \\
+ & 144 & Platt Scaling (1D) & \textbf{7.09} & \textit{10.23} & \textbf{0.1949} & \textbf{0.764} \\
+\rowcolor{gray!10}  & 190 & \textbf{Trajectory Platt (5D)} & \textit{9.60} & \textbf{9.92} & \textit{0.1965} & \textit{0.760} \\
+\midrule
+\multirow{4}{*}{5} & 256 & Naive Confidence (NC) & 25.03 & 24.69 & 0.2758 & \textbf{0.744} \\
+ & 256 & Temperature Scaling (TS) & 14.01 & 15.23 & 0.2193 & \textbf{0.744} \\
+ & 256 & Platt Scaling (1D) & \textbf{7.96} & \textbf{9.71} & \textbf{0.2007} & \textbf{0.744} \\
+\rowcolor{gray!10}  & 446 & \textbf{Trajectory Platt (5D)} & \textit{10.72} & \textit{10.47} & \textit{0.2025} & \textit{0.735} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}

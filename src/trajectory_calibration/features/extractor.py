@@ -19,21 +19,24 @@ DENOM_256 = float(np.sum((SCALE_LOG_256 - np.mean(SCALE_LOG_256)) ** 2))
 
 
 def compute_features_from_sample(
-    item: dict[str, Any], fine_scale: int = 576, idx: int = 0
+    item: dict[str, Any],
+    fine_scale: int = 576,
+    idx: int = 0,
+    scales: list[int] | None = None,
 ) -> dict[str, float | int | str]:
     """
     Extracts the 17-D trajectory feature vector (1 base anchor x1 + 16 multi-scale trajectory signatures)
-    from a multi-scale inference sample.
+    from a multi-scale inference sample across a full or prefix trajectory scale list.
     """
     feats = item.get("features", {})
-    scales = [1, 9, 36, 144, fine_scale]
+    scale_list = scales if scales is not None else [1, 9, 36, 144, fine_scale]
 
     confs = []
     margins = []
     answers = []
     accuracies = []
 
-    for s in scales:
+    for s in scale_list:
         s_data = feats.get(s, feats.get(str(s), {}))
         confs.append(float(s_data.get("conf_softmax", 0.5)))
         margins.append(float(s_data.get("margin", 0.0)))
@@ -45,15 +48,15 @@ def compute_features_from_sample(
     eps = 1e-7
 
     lp_arr = np.log(np.clip(c_arr, eps, 1.0))
-    if fine_scale == 576:
+    if scale_list == [1, 9, 36, 144, 576]:
         scale_log = SCALE_LOG_576
         denom = DENOM_576
-    elif fine_scale == 256:
+    elif scale_list == [1, 9, 36, 144, 256]:
         scale_log = SCALE_LOG_256
         denom = DENOM_256
     else:
-        scale_log = np.log(np.array(scales, dtype=np.float64))
-        denom = float(np.sum((scale_log - np.mean(scale_log)) ** 2))
+        scale_log = np.log(np.array(scale_list, dtype=np.float64))
+        denom = float(np.sum((scale_log - np.mean(scale_log)) ** 2)) if len(scale_list) > 1 else 0.0
 
     # x1: Final Logit (inverse sigmoid on c_final)
     c_final_clipped = np.clip(c_arr[-1], eps, 1.0 - eps)
@@ -82,24 +85,27 @@ def compute_features_from_sample(
     x4 = float(flips / (len(norm_answers) - 1)) if len(norm_answers) > 1 else 0.0
 
     # x5: Monotonicity Count
-    x5 = float(np.sum(c_arr[1:] > c_arr[:-1]))
+    x5 = float(np.sum(c_arr[1:] > c_arr[:-1])) if len(c_arr) > 1 else 0.0
 
     # x6: Logprob Variance
     x6 = float(np.var(lp_arr))
 
     # x7: Mid-Fine Gain Contrast
-    x7 = float((c_arr[-1] - c_arr[3]) - (c_arr[3] - c_arr[1]))
+    x7 = float((c_arr[-1] - c_arr[3]) - (c_arr[3] - c_arr[1])) if len(c_arr) >= 4 else 0.0
 
     # x8: Confidence Variance
     x8 = float(np.var(c_arr))
 
     # x9: End-Scale Spike Ratio
-    x9 = float(c_arr[-1] - np.mean(c_arr[:-1]))
+    x9 = float(c_arr[-1] - np.mean(c_arr[:-1])) if len(c_arr) > 1 else 0.0
 
     # x10: Scale Dip Depth
-    coarse_max = max(c_arr[0], c_arr[1])
-    mid_min = min(c_arr[2], c_arr[3])
-    x10 = float(max(0.0, coarse_max - mid_min))
+    if len(c_arr) >= 4:
+        coarse_max = max(c_arr[0], c_arr[1])
+        mid_min = min(c_arr[2], c_arr[3])
+        x10 = float(max(0.0, coarse_max - mid_min))
+    else:
+        x10 = 0.0
 
     # x11: First-to-Final Jump Ratio (clipped to [0.0, 50.0])
     x11 = float(np.clip((c_arr[-1] - c_arr[0]) / (c_arr[-1] + eps), 0.0, 50.0))
@@ -112,22 +118,22 @@ def compute_features_from_sample(
     )
 
     # x13: Relative Gain Ratio (clipped to [0.0, 50.0])
-    x13 = float(np.clip(c_arr[-1] / (c_arr[1] + eps), 0.0, 50.0))
+    x13 = float(np.clip(c_arr[-1] / (c_arr[1] + eps), 0.0, 50.0)) if len(c_arr) > 1 else 1.0
 
     # x14: Logprob Acceleration
-    x14 = float((lp_arr[-1] - lp_arr[3]) - (lp_arr[3] - lp_arr[2]))
+    x14 = float((lp_arr[-1] - lp_arr[3]) - (lp_arr[3] - lp_arr[2])) if len(lp_arr) >= 4 else 0.0
 
     # x15: Confidence Gain (c_fine - c_9)
-    x15 = float(c_arr[-1] - c_arr[1])
+    x15 = float(c_arr[-1] - c_arr[1]) if len(c_arr) > 1 else 0.0
 
     # x16: Relative Margin Growth (clipped to [0.0, 50.0])
-    x16 = float(np.clip(m_arr[-1] / (m_arr[1] + eps), 0.0, 50.0))
+    x16 = float(np.clip(m_arr[-1] / (m_arr[1] + eps), 0.0, 50.0)) if len(m_arr) > 1 else 1.0
 
     # x17: Logprob Gain
-    x17 = float(lp_arr[-1] - lp_arr[1])
+    x17 = float(lp_arr[-1] - lp_arr[1]) if len(lp_arr) > 1 else 0.0
 
     acc_final = accuracies[-1]
-    if "is_correct" in item:
+    if "is_correct" in item and (scales is None or (len(scales) == 5 and scales[-1] == fine_scale)):
         is_correct = int(item["is_correct"])
     else:
         is_correct = 1 if acc_final >= 0.5 else 0
@@ -159,6 +165,7 @@ def compute_features_from_sample(
         "x17": x17,
         "c_576": float(c_arr[-1]),
         f"c_{fine_scale}": float(c_arr[-1]),
+        f"c_{scale_list[-1]}": float(c_arr[-1]),
         "c_fine": float(c_arr[-1]),
         "is_correct": is_correct,
         "vqa_accuracy": float(acc_final),

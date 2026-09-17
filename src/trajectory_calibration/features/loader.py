@@ -41,36 +41,48 @@ def find_feature_file(
         else f"temp_{gen_temperature}"
     )
 
-    candidates = []
-    if ds_name:
-        candidates.extend(
-            [
-                path / arch_folder / temp_folder / f"{ds_name}.pt",
-                path / arch_folder / temp_folder / f"{ds_name}_5scale.pt",
-                path / arch_folder / temp_folder / ds_name / "full_extracted_features.pt",
-                path / arch_folder / "temp_0.0" / f"{ds_name}.pt",
-                path / arch_folder / "temp_0.0" / f"{ds_name}_5scale.pt",
-                path / arch_folder / "temp_0.0" / ds_name / "full_extracted_features.pt",
-                path / arch_folder / f"{ds_name}.pt",
-                path / arch_folder / f"{ds_name}_5scale.pt",
-                path / arch_folder / ds_name / "full_extracted_features.pt",
-                path / ds_name / "full_extracted_features.pt",
-                path / f"{ds_name}.pt",
-                path / f"{ds_name}_5scale.pt",
-            ]
-        )
-    else:
-        candidates.extend(
-            [
-                path / "full_extracted_features.pt",
-            ]
-        )
+    search_roots = [path]
+    for alt_root in [
+        Path("data/features"),
+        Path("results/features"),
+        Path("data"),
+        Path("results"),
+        Path("."),
+    ]:
+        if alt_root not in search_roots:
+            search_roots.append(alt_root)
 
-    for cand in candidates:
-        if cand.exists():
-            return cand
+    for root in search_roots:
+        candidates = []
+        if ds_name:
+            candidates.extend(
+                [
+                    root / arch_folder / temp_folder / f"{ds_name}.pt",
+                    root / arch_folder / temp_folder / f"{ds_name}_5scale.pt",
+                    root / arch_folder / temp_folder / ds_name / "full_extracted_features.pt",
+                    root / arch_folder / "temp_0.0" / f"{ds_name}.pt",
+                    root / arch_folder / "temp_0.0" / f"{ds_name}_5scale.pt",
+                    root / arch_folder / "temp_0.0" / ds_name / "full_extracted_features.pt",
+                    root / arch_folder / f"{ds_name}.pt",
+                    root / arch_folder / f"{ds_name}_5scale.pt",
+                    root / arch_folder / ds_name / "full_extracted_features.pt",
+                    root / ds_name / "full_extracted_features.pt",
+                    root / f"{ds_name}.pt",
+                    root / f"{ds_name}_5scale.pt",
+                ]
+            )
+        else:
+            candidates.extend(
+                [
+                    root / "full_extracted_features.pt",
+                ]
+            )
 
-    return candidates[0] if candidates else path
+        for cand in candidates:
+            if cand.exists():
+                return cand
+
+    return path / arch_folder / temp_folder / f"{ds_name}.pt" if ds_name else path
 
 
 def load_dataset_features(
@@ -79,9 +91,10 @@ def load_dataset_features(
     arch: str = "m3",
     gen_temperature: float = 0.0,
     fine_scale: int | None = None,
+    scales: list[int] | None = None,
 ) -> pd.DataFrame:
     """
-    Loads dataset features from .pt file and builds a Pandas DataFrame.
+    Loads dataset features from .pt file and builds a Pandas DataFrame across a full or prefix trajectory.
     """
     pt_path = find_feature_file(
         features_dir_or_file, ds_name=ds_name, arch=arch, gen_temperature=gen_temperature
@@ -95,7 +108,9 @@ def load_dataset_features(
     raw_data = safe_torch_load(pt_path)
     rows = []
     for idx, item in enumerate(raw_data):
-        feat_dict = compute_features_from_sample(item, fine_scale=fine_scale, idx=idx)
+        feat_dict = compute_features_from_sample(
+            item, fine_scale=fine_scale, idx=idx, scales=scales
+        )
         rows.append(feat_dict)
 
     df = pd.DataFrame(rows)

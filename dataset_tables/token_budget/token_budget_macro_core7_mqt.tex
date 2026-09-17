@@ -1,0 +1,37 @@
+\begin{table}[t]
+\caption{\textbf{Token Budget vs. Macro Calibration Performance Across Core 7 Datasets (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:token_budget_macro_core7_mqt}
+\tablestyle{4pt}{1.05}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{cclcccc}
+\toprule
+\textbf{Depth ($k$)} & \textbf{Tokens ($T$)} & \textbf{Calibration Method} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\midrule
+\multirow{4}{*}{1} & 1 & Naive Confidence (NC) & 32.52 & 32.28 & 0.3124 & \textit{0.664} \\
+ & 1 & Temperature Scaling (TS) & 27.48 & \textit{28.06} & \textit{0.2278} & \textit{0.664} \\
+ & 1 & Platt Scaling (1D) & \textbf{6.04} & \textbf{8.69} & \textbf{0.1342} & \textbf{0.687} \\
+\rowcolor{gray!10}  & 1 & \textbf{Trajectory Platt (5D)} & \textit{6.07} & \textbf{8.69} & \textbf{0.1342} & \textbf{0.687} \\
+\midrule
+\multirow{4}{*}{2} & 9 & Naive Confidence (NC) & 32.57 & 32.38 & 0.3068 & 0.694 \\
+ & 9 & Temperature Scaling (TS) & 26.67 & 27.15 & 0.2262 & 0.694 \\
+ & 9 & Platt Scaling (1D) & \textit{6.21} & \textit{8.57} & \textit{0.1389} & \textit{0.699} \\
+\rowcolor{gray!10}  & 10 & \textbf{Trajectory Platt (5D)} & \textbf{5.04} & \textbf{6.75} & \textbf{0.1365} & \textbf{0.732} \\
+\midrule
+\multirow{4}{*}{3} & 36 & Naive Confidence (NC) & 33.26 & 33.20 & 0.3159 & 0.684 \\
+ & 36 & Temperature Scaling (TS) & 25.24 & 25.64 & 0.2286 & 0.684 \\
+ & 36 & Platt Scaling (1D) & \textit{6.46} & \textit{8.86} & \textit{0.1484} & \textit{0.695} \\
+\rowcolor{gray!10}  & 46 & \textbf{Trajectory Platt (5D)} & \textbf{4.79} & \textbf{6.58} & \textbf{0.1443} & \textbf{0.732} \\
+\midrule
+\multirow{4}{*}{4} & 144 & Naive Confidence (NC) & 33.10 & 32.89 & 0.3151 & 0.693 \\
+ & 144 & Temperature Scaling (TS) & 24.23 & 24.94 & 0.2247 & 0.693 \\
+ & 144 & Platt Scaling (1D) & \textit{6.29} & \textit{8.92} & \textit{0.1489} & \textit{0.719} \\
+\rowcolor{gray!10}  & 190 & \textbf{Trajectory Platt (5D)} & \textbf{5.46} & \textbf{6.81} & \textbf{0.1440} & \textbf{0.735} \\
+\midrule
+\multirow{4}{*}{5} & 256 & Naive Confidence (NC) & 34.34 & 34.08 & 0.3224 & 0.680 \\
+ & 256 & Temperature Scaling (TS) & 24.83 & 25.38 & 0.2278 & 0.680 \\
+ & 256 & Platt Scaling (1D) & \textit{6.54} & \textit{8.74} & \textit{0.1483} & \textit{0.705} \\
+\rowcolor{gray!10}  & 446 & \textbf{Trajectory Platt (5D)} & \textbf{5.73} & \textbf{6.80} & \textbf{0.1429} & \textbf{0.742} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
