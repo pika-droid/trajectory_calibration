@@ -17,7 +17,7 @@ cd "${REPO_ROOT}"
 # Ensure canonical manifest exists
 if [ ! -f "data/canonical_manifest_all.json" ]; then
     echo "Canonical manifest not found! Generating data/canonical_manifest_all.json..."
-    uv run python scripts/build_canonical_manifest.py
+    python3 scripts/build_canonical_manifest.py
 fi
 
 # Ensure MQT repository is cloned
@@ -28,7 +28,7 @@ fi
 
 # Execute MQT top-up
 echo "Executing MQT top-up across ai2d, chartqa, docvqa, and vqav2_5scale..."
-uv run python scripts/run_mqt_topup_2k.py \
+python3 scripts/run_mqt_topup_2k.py \
     --model_path "gordonhu/MQT-LLaVA-7b" \
     --gen_temperature 0.0
 
