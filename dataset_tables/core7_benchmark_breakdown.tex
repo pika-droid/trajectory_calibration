@@ -1,0 +1,29 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{Comprehensive Calibration Benchmark Breakdown Across Core 7 Datasets.} Evaluated across Adaptive ECE (Ada-ECE (\%) $\downarrow$) and AUROC ($\uparrow$) on M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B). \textbf{Bold}: best; \textit{italic}: second best within each metric column. Clean unshaded presentation.}
+\label{tab:core7_benchmark_breakdown}
+\tablestyle{2.8pt}{1.05}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l cccccccccccccccc}
+\toprule
+ & \multicolumn{2}{c}{\textbf{AI2D}} & \multicolumn{2}{c}{\textbf{ChartQA}} & \multicolumn{2}{c}{\textbf{DocVQA}} & \multicolumn{2}{c}{\textbf{ScienceQA}} & \multicolumn{2}{c}{\textbf{TextVQA}} & \multicolumn{2}{c}{\textbf{VizWiz-VQA}} & \multicolumn{2}{c}{\textbf{VQAv2}} & \multicolumn{2}{c}{\textbf{Average}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9} \cmidrule(lr){10-11} \cmidrule(lr){12-13} \cmidrule(lr){14-15} \cmidrule(lr){16-17}
+\textbf{Calibration Method} & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ \\
+\midrule
+\multicolumn{17}{l}{\textbf{Panel A: M3-LLaVA (7B)}} \\
+\midrule
+Naive Confidence (NC) & 41.80 & \textit{0.598} & 70.70 & \textbf{0.835} & 73.52 & \textbf{0.732} & 10.66 & \textit{0.701} & 9.07 & \textit{0.832} & 16.71 & \textit{0.835} & \textit{8.06} & \textit{0.756} & 32.93 & \textit{0.756} \\
+Temperature Scaling (TS) & 9.38 & \textit{0.598} & 45.07 & \textbf{0.835} & \textit{48.86} & \textbf{0.732} & 9.76 & \textit{0.701} & 8.92 & \textit{0.832} & 16.03 & \textit{0.835} & 10.51 & \textit{0.756} & 21.22 & \textit{0.756} \\
+Platt Scaling (1D) & \textbf{5.19} & \textit{0.598} & \textbf{2.35} & \textbf{0.835} & \textbf{2.39} & \textbf{0.732} & \textit{7.46} & \textit{0.701} & \textit{6.11} & \textit{0.832} & \textit{7.69} & \textit{0.835} & 9.71 & \textit{0.756} & \textit{5.84} & \textit{0.756} \\
+Trajectory Platt (5D) & \textit{8.83} & \textbf{0.645} & \textit{3.88} & \textit{0.826} & \textbf{2.39} & \textbf{0.732} & \textbf{3.97} & \textbf{0.704} & \textbf{5.91} & \textbf{0.839} & \textbf{6.75} & \textbf{0.837} & \textbf{7.19} & \textbf{0.787} & \textbf{5.56} & \textbf{0.767} \\
+\midrule
+\multicolumn{17}{l}{\textbf{Panel B: MQT-LLaVA (7B)}} \\
+\midrule
+Naive Confidence (NC) & 24.32 & \textbf{0.705} & 62.99 & 0.467 & 51.18 & \textbf{0.644} & 23.04 & \textit{0.775} & 30.96 & \textit{0.681} & 30.26 & \textit{0.802} & \textit{10.93} & \textit{0.746} & 33.38 & 0.689 \\
+Temperature Scaling (TS) & \textit{13.01} & \textbf{0.705} & 41.54 & 0.467 & 46.63 & \textbf{0.644} & 10.84 & \textit{0.775} & 18.67 & \textit{0.681} & 28.77 & \textit{0.802} & 16.04 & \textit{0.746} & 25.07 & 0.689 \\
+Platt Scaling (1D) & \textbf{9.51} & \textbf{0.705} & \textit{8.03} & \textit{0.533} & \textit{4.56} & \textbf{0.644} & \textit{6.78} & \textit{0.775} & \textit{11.82} & \textit{0.681} & \textbf{5.76} & \textit{0.802} & 14.95 & \textit{0.746} & \textit{8.77} & \textit{0.698} \\
+Trajectory Platt (5D) & 13.41 & \textit{0.698} & \textbf{6.27} & \textbf{0.713} & \textbf{3.86} & \textit{0.585} & \textbf{5.46} & \textbf{0.782} & \textbf{7.83} & \textbf{0.714} & \textit{5.98} & \textbf{0.803} & \textbf{8.52} & \textbf{0.791} & \textbf{7.33} & \textbf{0.726} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}

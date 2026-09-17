@@ -70,6 +70,23 @@ UMP_DISPLAY_NAMES = {
     "umpire": "UMPIRE",
 }
 
+DATASET_DISPLAY_MAP = {
+    "ai2d": "AI2D",
+    "chartqa": "ChartQA",
+    "docvqa": "DocVQA",
+    "scienceqa": "ScienceQA",
+    "textvqa": "TextVQA",
+    "vizwiz-vqa": "VizWiz-VQA",
+    "vqav2": "VQAv2",
+}
+
+BREAKDOWN_METHODS = [
+    "Naive Confidence (NC)",
+    "Temperature Scaling (TS)",
+    "Platt Scaling (1D)",
+    "Trajectory Platt (5D)",
+]
+
 
 def rank_and_format(
     vals: list[float | None], higher_is_better: bool = False, decimals: int = 2
@@ -265,6 +282,93 @@ def generate_vqav2_multirollout_latex_table(
     return "\n".join(lines)
 
 
+def _render_breakdown_panel_rows(df_arch: pd.DataFrame) -> list[str]:
+    """Renders data rows for a single architecture panel across Core 7 datasets and Average."""
+    ada_by_ds: dict[str, list[str]] = {}
+    auc_by_ds: dict[str, list[str]] = {}
+
+    for ds in CORE_DATASETS:
+        ada_vals: list[float | None] = []
+        auc_vals: list[float | None] = []
+        for m in BREAKDOWN_METHODS:
+            sub = df_arch[(df_arch["dataset"] == ds) & (df_arch["method"] == m)]
+            ada_vals.append(float(sub["adaptive_ece_percent"].mean()) if not sub.empty else None)
+            auc_vals.append(float(sub["auroc"].mean()) if not sub.empty else None)
+        ada_by_ds[ds] = rank_and_format(ada_vals, higher_is_better=False, decimals=2)
+        auc_by_ds[ds] = rank_and_format(auc_vals, higher_is_better=True, decimals=3)
+
+    avg_ada_vals: list[float | None] = []
+    avg_auc_vals: list[float | None] = []
+    for m in BREAKDOWN_METHODS:
+        sub = df_arch[(df_arch["dataset"].isin(CORE_DATASETS)) & (df_arch["method"] == m)]
+        avg_ada_vals.append(float(sub["adaptive_ece_percent"].mean()) if not sub.empty else None)
+        avg_auc_vals.append(float(sub["auroc"].mean()) if not sub.empty else None)
+
+    avg_ada_formatted = rank_and_format(avg_ada_vals, higher_is_better=False, decimals=2)
+    avg_auc_formatted = rank_and_format(avg_auc_vals, higher_is_better=True, decimals=3)
+
+    lines: list[str] = []
+    for i, m in enumerate(BREAKDOWN_METHODS):
+        cells: list[str] = [m]
+        for ds in CORE_DATASETS:
+            cells.append(ada_by_ds[ds][i])
+            cells.append(auc_by_ds[ds][i])
+        cells.append(avg_ada_formatted[i])
+        cells.append(avg_auc_formatted[i])
+        lines.append(" & ".join(cells) + " \\\\")
+
+    return lines
+
+
+def build_core7_breakdown_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> str:
+    """Builds unified stacked 2-panel Core 7 benchmark breakdown table with Ada-ECE and AUROC."""
+    tab_label = "tab:core7_benchmark_breakdown"
+
+    top_ds_headers = " & ".join(
+        [rf"\multicolumn{{2}}{{c}}{{\textbf{{{DATASET_DISPLAY_MAP[ds]}}}}}" for ds in CORE_DATASETS]
+    )
+    cmidrules = " ".join(
+        [rf"\cmidrule(lr){{{2 * i + 2}-{2 * i + 3}}}" for i in range(len(CORE_DATASETS) + 1)]
+    )
+    sub_headers = " & ".join([r"Ada $\downarrow$ & AUC $\uparrow$"] * (len(CORE_DATASETS) + 1))
+
+    lines = [
+        r"\begin{table*}[t]",
+        r"\centering",
+        r"\caption{\textbf{Comprehensive Calibration Benchmark Breakdown Across Core 7 Datasets.} Evaluated across Adaptive ECE (Ada-ECE (\%) $\downarrow$) and AUROC ($\uparrow$) on M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B). \textbf{Bold}: best; \textit{italic}: second best within each metric column. Clean unshaded presentation.}",
+        rf"\label{{{tab_label}}}",
+        r"\tablestyle{2.8pt}{1.05}",
+        r"\resizebox{\textwidth}{!}{%",
+        r"\begin{tabular}{l cccccccccccccccc}",
+        r"\toprule",
+        rf" & {top_ds_headers} & \multicolumn{{2}}{{c}}{{\textbf{{Average}}}} \\",
+        cmidrules,
+        rf"\textbf{{Calibration Method}} & {sub_headers} \\",
+        r"\midrule",
+        r"\multicolumn{17}{l}{\textbf{Panel A: M3-LLaVA (7B)}} \\",
+        r"\midrule",
+    ]
+
+    lines.extend(_render_breakdown_panel_rows(df_m3))
+    lines.extend(
+        [
+            r"\midrule",
+            r"\multicolumn{17}{l}{\textbf{Panel B: MQT-LLaVA (7B)}} \\",
+            r"\midrule",
+        ]
+    )
+    lines.extend(_render_breakdown_panel_rows(df_mqt))
+    lines.extend(
+        [
+            r"\bottomrule",
+            r"\end{tabular}%",
+            r"}",
+            r"\end{table*}",
+        ]
+    )
+    return "\n".join(lines)
+
+
 def generate_benchmark_tables():
     """Generates individual dataset tables, macro mean table, and VQAv2 multi-rollout table."""
     df_m3 = pd.read_csv(ROOT / "results/experiments/benchmark/benchmark_m3_summary.csv")
@@ -313,7 +417,13 @@ def generate_benchmark_tables():
     )
     print(f"Generated: {TABLES_DIR / 'vqav2_multirollout_comparison.tex'}")
 
-    # 4. Calculate and display win statistics on Adaptive ECE across Core 7 datasets
+    # 4. Core 7 comprehensive breakdown table in dataset_tables/core7_benchmark_breakdown.tex
+    core7_breakdown = build_core7_breakdown_table(df_m3, df_mqt)
+    out_core7 = TABLES_DIR / "core7_benchmark_breakdown.tex"
+    out_core7.write_text(core7_breakdown + "\n", encoding="utf-8")
+    print(f"Generated: {out_core7}")
+
+    # 5. Calculate and display win statistics on Adaptive ECE across Core 7 datasets
     our_methods = {"Trajectory Platt (5D)"}
     target_methods = [m[0] for m in TARGET_METHODS_ORDER]
     for arch_name, df_arch in [("M3-LLaVA", df_m3), ("MQT-LLaVA", df_mqt)]:

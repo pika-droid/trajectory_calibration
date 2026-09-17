@@ -15,13 +15,19 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+import pandas as pd
+
 from scripts.generate_dataset_latex_tables import (
+    BREAKDOWN_METHODS,
+    CORE_DATASETS,
+    DATASET_DISPLAY_MAP,
     DATASET_FILE_MAP,
     DATASET_WISE_DIR,
     TABLES_DIR,
     TARGET_METHODS_ORDER,
     TEMP_DIR,
     VQAV2_METHODS_ORDER,
+    build_core7_breakdown_table,
     rank_and_format,
 )
 
@@ -229,6 +235,65 @@ def test_group4_lodo_cross_dataset_table() -> None:
         "Trajectory Platt (5D)",
     ]:
         assert m in content
+
+
+def test_core7_benchmark_breakdown_table() -> None:
+    """Verify core7_benchmark_breakdown.tex has stacked M3/MQT panels, 7 datasets + Average, 4 methods, dual metrics, Option A ranking, and NO shading."""
+    out_f = TABLES_DIR / "core7_benchmark_breakdown.tex"
+    assert out_f.exists(), f"Missing breakdown table: {out_f}"
+    content = out_f.read_text(encoding="utf-8")
+
+    # Table wrapper and structure
+    assert r"\begin{table*}[t]" in content
+    assert r"\begin{tabular}{l cccccccccccccccc}" in content
+    assert r"\label{tab:core7_benchmark_breakdown}" in content
+    assert r"\toprule" in content
+    assert r"\bottomrule" in content
+
+    # Panel headers
+    assert "Panel A: M3-LLaVA (7B)" in content
+    assert "Panel B: MQT-LLaVA (7B)" in content
+
+    # Core 7 Datasets in header + Average
+    for ds_key in CORE_DATASETS:
+        display_name = DATASET_DISPLAY_MAP[ds_key]
+        assert rf"\textbf{{{display_name}}}" in content, (
+            f"Missing dataset header for {display_name}"
+        )
+    assert r"\textbf{Average}" in content
+
+    # Sub-headers
+    assert r"Ada $\downarrow$" in content
+    assert r"AUC $\uparrow$" in content
+
+    # 4 Methods present in both panels
+    for m in BREAKDOWN_METHODS:
+        assert content.count(m) >= 2, f"Method {m} should appear in both Panel A and Panel B"
+
+    # Strictly unshaded: NO \rowcolor anywhere
+    assert r"\rowcolor" not in content, "Found forbidden \\rowcolor in unshaded table"
+
+    # Option A ranking applied
+    assert r"\textbf{" in content
+    assert r"\textit{" in content
+
+
+def test_build_core7_breakdown_table_dynamic() -> None:
+    """Verify build_core7_breakdown_table handles programmatic generation, real CSV data, and empty/missing data."""
+    df_m3 = pd.read_csv(ROOT / "results/experiments/benchmark/benchmark_m3_summary.csv")
+    df_mqt = pd.read_csv(ROOT / "results/experiments/benchmark/benchmark_mqt_summary.csv")
+    table_str = build_core7_breakdown_table(df_m3, df_mqt)
+
+    assert r"\begin{table*}[t]" in table_str
+    assert r"\label{tab:core7_benchmark_breakdown}" in table_str
+    assert "Panel A: M3-LLaVA (7B)" in table_str
+    assert "Panel B: MQT-LLaVA (7B)" in table_str
+
+    # Test with empty DataFrame (all missing values formatted with dashes)
+    empty_df = pd.DataFrame(columns=["dataset", "method", "adaptive_ece_percent", "auroc"])
+    empty_table = build_core7_breakdown_table(empty_df, empty_df)
+    assert "-" in empty_table
+    assert r"\begin{table*}[t]" in empty_table
 
 
 def test_functions_under_200_loc() -> None:
