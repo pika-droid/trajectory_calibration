@@ -1,0 +1,35 @@
+\begin{table}[t]
+\caption{\textbf{Calibration Benchmark on \texttt{vllm-safety} (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:benchmark_m3_vllmsafety}
+\tablestyle{4pt}{1.05}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\midrule
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 17.98 & 18.18 & 0.2473 & \textbf{0.633} \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 30.14 & 30.14 & 0.2456 & \textbf{0.633} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{8.49} & \textit{13.79} & \textbf{0.1537} & 0.367 \\
+\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Single-Pass ($T = 0.0$) & \textbf{7.44} & \textbf{7.46} & \textit{0.1572} & \textit{0.573} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[t]
+\caption{\textbf{Calibration Benchmark on \texttt{vllm-safety} (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:benchmark_mqt_vllmsafety}
+\tablestyle{4pt}{1.05}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\midrule
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 19.97 & 20.14 & 0.2729 & \textit{0.619} \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 28.44 & 28.75 & 0.2503 & \textit{0.619} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{0.71} & \textit{16.38} & \textit{0.1687} & 0.381 \\
+\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Single-Pass ($T = 0.0$) & \textit{4.72} & \textbf{5.11} & \textbf{0.1498} & \textbf{0.719} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}

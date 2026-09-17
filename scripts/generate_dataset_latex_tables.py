@@ -21,6 +21,7 @@ CORE_DATASETS = ["ai2d", "chartqa", "docvqa", "scienceqa", "textvqa", "vizwiz-vq
 
 DATASET_FILE_MAP = {
     "ai2d": "ai2d.tex",
+    "avqa": "avqa.tex",
     "chartqa": "chartqa.tex",
     "docvqa": "docvqa.tex",
     "gqa": "gqa.tex",
@@ -33,12 +34,14 @@ DATASET_FILE_MAP = {
     "seedbench": "seedbench.tex",
     "textvqa": "textvqa.tex",
     "vizwiz-vqa": "vizwizvqa.tex",
+    "vllm-safety": "vllmsafety.tex",
     "vqav2": "vqav2.tex",
 }
 
 DATASET_NAME_MAP = {
     "lego-puzzles": "legopuzzles",
     "vizwiz-vqa": "vizwizvqa",
+    "vllm-safety": "vllmsafety",
     "vqav2_5scale": "vqav2",
 }
 
@@ -272,6 +275,14 @@ def generate_benchmark_tables():
     ump_m3 = pd.read_csv(ROOT / "results/umpire_eval/m3_llava_cumulative_summary.csv")
     ump_mqt = pd.read_csv(ROOT / "results/umpire_eval/mqt_llava_cumulative_summary.csv")
 
+    adv_csv = ROOT / "results/adversarial_safety_benchmark_results.csv"
+    if adv_csv.exists():
+        df_adv = pd.read_csv(adv_csv)
+        df_adv_m3 = df_adv[df_adv["arch"] == "M3"].copy()
+        df_adv_mqt = df_adv[df_adv["arch"] == "MQT"].copy()
+        df_m3 = pd.concat([df_m3, df_adv_m3], ignore_index=True)
+        df_mqt = pd.concat([df_mqt, df_adv_mqt], ignore_index=True)
+
     # 1. Per-dataset tables into dataset_wise_results/
     for ds_key, filename in DATASET_FILE_MAP.items():
         t_m3 = generate_single_table(df_m3, ds_key, "m3", "M3-LLaVA", is_macro=False)
@@ -286,7 +297,7 @@ def generate_benchmark_tables():
             old_file.unlink()
         print(f"Generated: {out_file}")
 
-    # 2. Macro mean table in dataset_tables/macro_mean.tex across Core 6 datasets
+    # 2. Macro mean table in dataset_tables/macro_mean.tex across Core 7 datasets
     macro_m3 = generate_single_table(df_m3, "macro_mean", "macro_m3", "M3-LLaVA", is_macro=True)
     macro_mqt = generate_single_table(df_mqt, "macro_mean", "macro_mqt", "MQT-LLaVA", is_macro=True)
     (TABLES_DIR / "macro_mean.tex").write_text(
@@ -302,7 +313,7 @@ def generate_benchmark_tables():
     )
     print(f"Generated: {TABLES_DIR / 'vqav2_multirollout_comparison.tex'}")
 
-    # 4. Calculate and display win statistics on Adaptive ECE across Core 6 datasets
+    # 4. Calculate and display win statistics on Adaptive ECE across Core 7 datasets
     our_methods = {"Trajectory Platt (5D)"}
     target_methods = [m[0] for m in TARGET_METHODS_ORDER]
     for arch_name, df_arch in [("M3-LLaVA", df_m3), ("MQT-LLaVA", df_mqt)]:

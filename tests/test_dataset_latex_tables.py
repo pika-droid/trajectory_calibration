@@ -2,8 +2,8 @@
 Unit tests for Group 1-4 & Group 9 LaTeX table generation and Option A ranking invariants.
 Covers:
 1. rank_and_format handles ties and precision collision gracefully.
-2. Group 1: 14 per-dataset tables in dataset_tables/dataset_wise_results/ with 4 methods & 4 metrics.
-3. Group 2: macro_mean.tex with 4 methods & 4 metrics across Core 6 datasets.
+2. Group 1: 16 per-dataset tables in dataset_tables/dataset_wise_results/ with 4 methods & 4 metrics.
+3. Group 2: macro_mean.tex with 4 methods & 4 metrics across Core 7 datasets.
 4. Group 9: vqav2_multirollout_comparison.tex with single-pass and multi-rollout methods.
 5. Group 3: temp_ablation tables with stacked temperature blocks and 4 methods & 4 metrics.
 6. Group 4: lodo_cross_dataset.tex with 4 methods & 4 metrics across both protocols.
@@ -58,7 +58,7 @@ def test_rank_and_format_precision_and_ties() -> None:
 def test_group1_dataset_wise_tables_exist_and_structure() -> None:
     """Verify Group 1 tables exist in dataset_wise_results and older copies removed from root."""
     assert DATASET_WISE_DIR.exists()
-    assert len(DATASET_FILE_MAP) == 14
+    assert len(DATASET_FILE_MAP) == 16
 
     for filename in DATASET_FILE_MAP.values():
         out_f = DATASET_WISE_DIR / filename
@@ -79,6 +79,53 @@ def test_group1_dataset_wise_tables_exist_and_structure() -> None:
         # Check all 4 methods present in both M3 and MQT sections
         for m_key, _, _ in TARGET_METHODS_ORDER:
             assert m_key in content
+
+
+def test_adversarial_safety_latex_tables() -> None:
+    """Verify avqa.tex and vllmsafety.tex exist with proper M3/MQT blocks, 4 methods, 4 metrics, Option A formatting, and macro_mean exclusion."""
+    for ds_key, fname, label_suffix in [
+        ("avqa", "avqa.tex", "avqa"),
+        ("vllm-safety", "vllmsafety.tex", "vllmsafety"),
+    ]:
+        out_f = DATASET_WISE_DIR / fname
+        assert out_f.exists(), f"Missing {fname} in {DATASET_WISE_DIR}"
+
+        content = out_f.read_text(encoding="utf-8")
+
+        # Table 1: M3-LLaVA (7B)
+        assert f"\\label{{tab:benchmark_m3_{label_suffix}}}" in content
+        assert "M3-LLaVA 7B" in content
+        assert f"on \\texttt{{{ds_key}}}" in content
+
+        # Table 2: MQT-LLaVA (7B)
+        assert f"\\label{{tab:benchmark_mqt_{label_suffix}}}" in content
+        assert "MQT-LLaVA 7B" in content
+
+        # Formatting structure
+        assert "\\begin{tabular}{lccccc}" in content
+        assert "\\toprule" in content
+        assert "\\bottomrule" in content
+        assert "ECE (\\%)" in content
+        assert "Ada-ECE (\\%)" in content
+        assert "Brier" in content
+        assert "AUROC" in content
+
+        # 4 Methods in order
+        for m_key, _, is_ours in TARGET_METHODS_ORDER:
+            assert m_key in content
+            if is_ours:
+                assert f"\\rowcolor{{gray!10}} \\textbf{{{m_key}}}" in content
+
+        # Option A ranking formatting (Rank 1 bold, Rank 2 italic)
+        assert "\\textbf{" in content
+        assert "\\textit{" in content
+
+    # Verify macro_mean.tex does NOT include avqa or vllm-safety
+    macro_f = TABLES_DIR / "macro_mean.tex"
+    macro_content = macro_f.read_text(encoding="utf-8")
+    assert "avqa" not in macro_content
+    assert "vllm-safety" not in macro_content
+    assert "vllmsafety" not in macro_content
 
 
 def test_group2_macro_mean_table() -> None:
