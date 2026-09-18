@@ -125,6 +125,28 @@ def test_transformers_compatibility_patches() -> None:
     assert val_out.get("use_cache") is True
 
 
+def test_rotary_embedding_device_alignment() -> None:
+    """Verify patch_llama_rotary_embedding dynamically moves inv_freq buffer to input tensor device."""
+    from trajectory_calibration.vlm.patches import _make_safe_rotary_forward
+
+    class DummyRotaryEmbedding:
+        def __init__(self) -> None:
+            self.inv_freq = torch.tensor([1.0, 2.0, 3.0], device="cpu")
+
+        def forward(
+            self, x: torch.Tensor, position_ids: torch.Tensor | None = None
+        ) -> torch.Tensor:
+            return self.inv_freq * x
+
+    rotary = DummyRotaryEmbedding()
+    rotary.forward = _make_safe_rotary_forward(rotary.forward)
+
+    input_tensor = torch.tensor([1.0, 2.0, 3.0])
+    out = rotary.forward(input_tensor)
+    assert out.device == input_tensor.device
+    assert rotary.inv_freq.device == input_tensor.device
+
+
 def test_spectral_logdet_numerical_stability() -> None:
     """Verify spectral logdet eliminates -inf collapse and NaN on collinear and zero matrices."""
     import sys
