@@ -16,7 +16,10 @@ from PIL import Image
 
 from trajectory_calibration.utils.config import ARCH_SCALES
 from trajectory_calibration.vlm.llava_compat import load_llava_modules
-from trajectory_calibration.vlm.patches import apply_transformers_compatibility_patches
+from trajectory_calibration.vlm.patches import (
+    apply_transformers_compatibility_patches,
+    patch_transformers_quantization,
+)
 
 logger = logging.getLogger("trajectory_calibration.vlm.wrapper")
 
@@ -62,6 +65,7 @@ class UnifiedVLMWrapper:
             else ("gordonhu/MQT-LLaVA-7b" if self.arch == "mqt" else "mucai/llava-v1.5-7b-m3")
         )
         self.model_name = get_model_name_from_path(actual_path)
+        patch_transformers_quantization()
 
         old_verbosity = transformers.logging.get_verbosity()
         transformers.logging.set_verbosity_error()
