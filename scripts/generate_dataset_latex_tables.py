@@ -18,6 +18,11 @@ DATASET_WISE_DIR.mkdir(parents=True, exist_ok=True)
 TEMP_DIR.mkdir(parents=True, exist_ok=True)
 
 CORE_DATASETS = ["ai2d", "chartqa", "docvqa", "scienceqa", "textvqa", "vizwiz-vqa", "vqav2"]
+ADVERSARIAL_DATASETS = ["avqa", "vllm-safety"]
+TARGET_9_DATASETS = set(CORE_DATASETS) | set(ADVERSARIAL_DATASETS)
+
+RQ1_CORE7_FILE = TABLES_DIR / "rq1_core7_benchmark.tex"
+RQ1_ADVERSARIAL_FILE = TABLES_DIR / "rq1_adversarial_benchmark.tex"
 
 DATASET_FILE_MAP = {
     "ai2d": "ai2d.tex",
@@ -45,6 +50,24 @@ DATASET_NAME_MAP = {
     "vqav2_5scale": "vqav2",
 }
 
+SINGLE_PASS_BASELINES = [
+    "Naive Confidence (NC)",
+    "Temperature Scaling (TS)",
+    "Platt Scaling (1D)",
+]
+
+MULTI_PASS_METHODS = [
+    "LN-Entropy",
+    "Semantic Entropy",
+    "EigenScore",
+    "UMPIRE",
+]
+
+PROPOSED_METHOD = "Trajectory Platt (5D)"
+
+ALL_8_METHODS = SINGLE_PASS_BASELINES + MULTI_PASS_METHODS + [PROPOSED_METHOD]
+SINGLE_PASS_METHODS = SINGLE_PASS_BASELINES + [PROPOSED_METHOD]
+
 TARGET_METHODS_ORDER = [
     ("Naive Confidence (NC)", "Single-Pass ($T = 0.0$)", False),
     ("Temperature Scaling (TS)", "Single-Pass ($T = 0.0$)", False),
@@ -52,15 +75,26 @@ TARGET_METHODS_ORDER = [
     ("Trajectory Platt (5D)", "Single-Pass ($T = 0.0$)", True),
 ]
 
+TARGET_METHODS_8_ORDER = [
+    ("Naive Confidence (NC)", "Single-Pass ($T = 0.0$)", False),
+    ("Temperature Scaling (TS)", "Single-Pass ($T = 0.0$)", False),
+    ("Platt Scaling (1D)", "Single-Pass ($T = 0.0$)", False),
+    ("LN-Entropy", "Multi-Pass ($T = 0.5, K = 10$)", False),
+    ("Semantic Entropy", "Multi-Pass ($T = 0.5, K = 10$)", False),
+    ("EigenScore", "Multi-Pass ($T = 0.5, K = 10$)", False),
+    ("UMPIRE", "Multi-Pass ($T = 0.5, K = 10$)", False),
+    ("Trajectory Platt (5D)", "Single-Pass ($T = 0.0$)", True),
+]
+
 VQAV2_METHODS_ORDER = [
     ("Naive Confidence (NC)", "Single-Pass ($T = 0.0, K = 1$)", False),
     ("Temperature Scaling (TS)", "Single-Pass ($T = 0.0, K = 1$)", False),
     ("Platt Scaling (1D)", "Single-Pass ($T = 0.0, K = 1$)", False),
-    ("Trajectory Platt (5D)", "Single-Pass ($T = 0.0, K = 1$)", True),
     ("ln_entropy", "Multi-Pass ($T = 0.5, K = 10$)", False),
     ("semantic_entropy", "Multi-Pass ($T = 0.5, K = 10$)", False),
     ("eigen_score", "Multi-Pass ($T = 0.5, K = 10$)", False),
     ("umpire", "Multi-Pass ($T = 0.5, K = 10$)", False),
+    ("Trajectory Platt (5D)", "Single-Pass ($T = 0.0, K = 1$)", True),
 ]
 
 UMP_DISPLAY_NAMES = {
@@ -78,6 +112,8 @@ DATASET_DISPLAY_MAP = {
     "textvqa": "TextVQA",
     "vizwiz-vqa": "VizWiz-VQA",
     "vqav2": "VQAv2",
+    "avqa": "AVQA",
+    "vllm-safety": "VLLM-Safety",
 }
 
 BREAKDOWN_METHODS = [
@@ -123,7 +159,7 @@ def generate_single_table(
     arch_model: str,
     is_macro: bool = False,
 ) -> str:
-    """Generates a standardized 4-method, 4-metric LaTeX benchmark table."""
+    """Generates a standardized LaTeX benchmark table (8 methods for target 9 datasets, 4 for others)."""
     tab_label = (
         f"tab:benchmark_{arch_label}_{DATASET_NAME_MAP.get(ds, ds)}"
         if not is_macro
@@ -138,8 +174,14 @@ def generate_single_table(
         else df_bench[df_bench["dataset"] == ds]
     )
 
+    methods_order = (
+        TARGET_METHODS_8_ORDER
+        if (ds in TARGET_9_DATASETS and not is_macro)
+        else TARGET_METHODS_ORDER
+    )
+
     rows = []
-    for m_key, regime, is_ours in TARGET_METHODS_ORDER:
+    for m_key, regime, is_ours in methods_order:
         sub = sub_df[sub_df["method"] == m_key]
         if not sub.empty:
             ece = float(sub["ece_percent"].mean())
@@ -147,6 +189,8 @@ def generate_single_table(
             brier = float(sub["brier"].mean())
             auroc = float(sub["auroc"].mean())
             rows.append((m_key, regime, is_ours, ece, ada_ece, brier, auroc))
+        else:
+            rows.append((m_key, regime, is_ours, None, None, None, None))
 
     if not rows:
         return ""
@@ -171,17 +215,12 @@ def generate_single_table(
     brier_formatted = rank_and_format([r[5] for r in rows], higher_is_better=False, decimals=4)
     auroc_formatted = rank_and_format([r[6] for r in rows], higher_is_better=True, decimals=3)
 
-    for i, (disp_name, regime, is_ours, _, _, _, _) in enumerate(rows):
+    for i, (disp_name, regime, _, _, _, _, _) in enumerate(rows):
         ece_str = ece_formatted[i]
         ada_str = ada_ece_formatted[i]
         brier_str = brier_formatted[i]
         auc_str = auroc_formatted[i]
-        if is_ours:
-            row_str = f"\\rowcolor{{gray!10}} \\textbf{{{disp_name}}} & {regime} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\"
-        else:
-            row_str = (
-                f"{disp_name} & {regime} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\"
-            )
+        row_str = f"{disp_name} & {regime} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\"
         lines.append(row_str)
 
     lines.extend(
@@ -258,17 +297,12 @@ def generate_vqav2_multirollout_latex_table(
     brier_formatted = rank_and_format([r[5] for r in rows], higher_is_better=False, decimals=4)
     auroc_formatted = rank_and_format([r[6] for r in rows], higher_is_better=True, decimals=3)
 
-    for i, (disp_name, regime, is_ours, _, _, _, _) in enumerate(rows):
+    for i, (disp_name, regime, _, _, _, _, _) in enumerate(rows):
         ece_str = ece_formatted[i]
         ada_str = ada_ece_formatted[i]
         brier_str = brier_formatted[i]
         auc_str = auroc_formatted[i]
-        if is_ours:
-            row_str = f"\\rowcolor{{gray!10}} \\textbf{{{disp_name}}} & {regime} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\"
-        else:
-            row_str = (
-                f"{disp_name} & {regime} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\"
-            )
+        row_str = f"{disp_name} & {regime} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\"
         lines.append(row_str)
 
     lines.extend(
@@ -369,8 +403,187 @@ def build_core7_breakdown_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> st
     return "\n".join(lines)
 
 
+def _render_rq1_panel_rows(
+    df_arch: pd.DataFrame,
+    datasets: list[str],
+) -> list[str]:
+    """Renders data rows for an RQ1 architecture panel across datasets and Macro Average."""
+    ds_metrics: dict[str, tuple[list[str], list[str], list[str], list[str]]] = {}
+    for ds in datasets:
+        ece_vals: list[float | None] = []
+        ada_vals: list[float | None] = []
+        brier_vals: list[float | None] = []
+        auc_vals: list[float | None] = []
+        for m in ALL_8_METHODS:
+            sub = df_arch[(df_arch["dataset"] == ds) & (df_arch["method"] == m)]
+            if not sub.empty:
+                ece_vals.append(float(sub["ece_percent"].mean()))
+                ada_vals.append(float(sub["adaptive_ece_percent"].mean()))
+                brier_vals.append(float(sub["brier"].mean()))
+                auc_vals.append(float(sub["auroc"].mean()))
+            else:
+                ece_vals.append(None)
+                ada_vals.append(None)
+                brier_vals.append(None)
+                auc_vals.append(None)
+        ds_metrics[ds] = (
+            rank_and_format(ece_vals, higher_is_better=False, decimals=2),
+            rank_and_format(ada_vals, higher_is_better=False, decimals=2),
+            rank_and_format(brier_vals, higher_is_better=False, decimals=4),
+            rank_and_format(auc_vals, higher_is_better=True, decimals=3),
+        )
+
+    avg_ece_vals: list[float | None] = []
+    avg_ada_vals: list[float | None] = []
+    avg_brier_vals: list[float | None] = []
+    avg_auc_vals: list[float | None] = []
+    for m in ALL_8_METHODS:
+        sub = df_arch[(df_arch["dataset"].isin(datasets)) & (df_arch["method"] == m)]
+        if not sub.empty:
+            avg_ece_vals.append(float(sub["ece_percent"].mean()))
+            avg_ada_vals.append(float(sub["adaptive_ece_percent"].mean()))
+            avg_brier_vals.append(float(sub["brier"].mean()))
+            avg_auc_vals.append(float(sub["auroc"].mean()))
+        else:
+            avg_ece_vals.append(None)
+            avg_ada_vals.append(None)
+            avg_brier_vals.append(None)
+            avg_auc_vals.append(None)
+
+    avg_ece_fmt = rank_and_format(avg_ece_vals, higher_is_better=False, decimals=2)
+    avg_ada_fmt = rank_and_format(avg_ada_vals, higher_is_better=False, decimals=2)
+    avg_brier_fmt = rank_and_format(avg_brier_vals, higher_is_better=False, decimals=4)
+    avg_auc_fmt = rank_and_format(avg_auc_vals, higher_is_better=True, decimals=3)
+
+    lines: list[str] = []
+    for i, m in enumerate(ALL_8_METHODS):
+        cells: list[str] = [m]
+        for ds in datasets:
+            ece_f, ada_f, brier_f, auc_f = ds_metrics[ds]
+            cells.extend([ece_f[i], ada_f[i], brier_f[i], auc_f[i]])
+        cells.extend([avg_ece_fmt[i], avg_ada_fmt[i], avg_brier_fmt[i], avg_auc_fmt[i]])
+        lines.append(" & ".join(cells) + " \\\\")
+
+    return lines
+
+
+def build_rq1_core7_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> str:
+    """Builds unified stacked 2-panel Core 7 master benchmark table for RQ1."""
+    tab_label = "tab:rq1_core7_benchmark"
+    num_cols = len(CORE_DATASETS) * 4 + 4 + 1  # 33 columns
+    col_spec = "l " + "c" * (num_cols - 1)
+
+    top_ds_headers = " & ".join(
+        [rf"\multicolumn{{4}}{{c}}{{\textbf{{{DATASET_DISPLAY_MAP[ds]}}}}}" for ds in CORE_DATASETS]
+    )
+    cmidrules = " ".join(
+        [rf"\cmidrule(lr){{{4 * i + 2}-{4 * i + 5}}}" for i in range(len(CORE_DATASETS) + 1)]
+    )
+    sub_headers = " & ".join(
+        [
+            r"ECE (\%) $\downarrow$ & Ada-ECE (\%) $\downarrow$ & Brier $\downarrow$ & AUROC $\uparrow$"
+        ]
+        * (len(CORE_DATASETS) + 1)
+    )
+
+    lines = [
+        r"\begin{table*}[t]",
+        r"\centering",
+        r"\caption{\textbf{RQ1 Evaluation: Autoregressive Trajectory Features vs. Calibration Baselines Across Core 7 Vision-Language Benchmarks.} Comparison of single-pass calibrators ($T = 0.0, K = 1$) against multi-pass sampling baselines ($K = 10$) across M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B). Metrics: Expected Calibration Error (ECE (\%) $\downarrow$), Adaptive ECE (Ada-ECE (\%) $\downarrow$), Brier Score ($\downarrow$), and AUROC ($\uparrow$). \textbf{Bold}: Rank 1; \textit{italic}: Rank 2 within each metric column among single-pass methods. Multi-pass baselines report placeholders ($-$) pending rerun completion. Clean unshaded presentation.}",
+        rf"\label{{{tab_label}}}",
+        r"\tablestyle{2.0pt}{1.05}",
+        r"\resizebox{\textwidth}{!}{%",
+        rf"\begin{{tabular}}{{{col_spec}}}",
+        r"\toprule",
+        rf" & {top_ds_headers} & \multicolumn{{4}}{{c}}{{\textbf{{Macro Average}}}} \\",
+        cmidrules,
+        rf"\textbf{{Calibration Method}} & {sub_headers} \\",
+        r"\midrule",
+        rf"\multicolumn{{{num_cols}}}{{l}}{{\textbf{{Panel A: M3-LLaVA (7B)}}}} \\",
+        r"\midrule",
+    ]
+
+    lines.extend(_render_rq1_panel_rows(df_m3, CORE_DATASETS))
+    lines.extend(
+        [
+            r"\midrule",
+            rf"\multicolumn{{{num_cols}}}{{l}}{{\textbf{{Panel B: MQT-LLaVA (7B)}}}} \\",
+            r"\midrule",
+        ]
+    )
+    lines.extend(_render_rq1_panel_rows(df_mqt, CORE_DATASETS))
+    lines.extend(
+        [
+            r"\bottomrule",
+            r"\end{tabular}%",
+            r"}",
+            r"\end{table*}",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def build_rq1_adversarial_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> str:
+    """Builds unified stacked 2-panel Adversarial master benchmark table for RQ1."""
+    tab_label = "tab:rq1_adversarial_benchmark"
+    num_cols = len(ADVERSARIAL_DATASETS) * 4 + 4 + 1  # 13 columns
+    col_spec = "l " + "c" * (num_cols - 1)
+
+    top_ds_headers = " & ".join(
+        [
+            rf"\multicolumn{{4}}{{c}}{{\textbf{{{DATASET_DISPLAY_MAP[ds]}}}}}"
+            for ds in ADVERSARIAL_DATASETS
+        ]
+    )
+    cmidrules = " ".join(
+        [rf"\cmidrule(lr){{{4 * i + 2}-{4 * i + 5}}}" for i in range(len(ADVERSARIAL_DATASETS) + 1)]
+    )
+    sub_headers = " & ".join(
+        [
+            r"ECE (\%) $\downarrow$ & Ada-ECE (\%) $\downarrow$ & Brier $\downarrow$ & AUROC $\uparrow$"
+        ]
+        * (len(ADVERSARIAL_DATASETS) + 1)
+    )
+
+    lines = [
+        r"\begin{table*}[t]",
+        r"\centering",
+        r"\caption{\textbf{RQ1 Evaluation: Calibration Robustness Under Adversarial and Safety Stress Benchmarks.} Evaluated across Expected Calibration Error (ECE (\%) $\downarrow$), Adaptive ECE (Ada-ECE (\%) $\downarrow$), Brier Score ($\downarrow$), and AUROC ($\uparrow$) on M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B) across AVQA, VLLM-Safety, and Adversarial Macro Average. \textbf{Bold}: Rank 1; \textit{italic}: Rank 2 within each metric column among single-pass methods. Multi-pass baselines report placeholders ($-$) pending rerun completion. Clean unshaded presentation.}",
+        rf"\label{{{tab_label}}}",
+        r"\tablestyle{4.0pt}{1.05}",
+        r"\resizebox{\textwidth}{!}{%",
+        rf"\begin{{tabular}}{{{col_spec}}}",
+        r"\toprule",
+        rf" & {top_ds_headers} & \multicolumn{{4}}{{c}}{{\textbf{{Macro Average}}}} \\",
+        cmidrules,
+        rf"\textbf{{Calibration Method}} & {sub_headers} \\",
+        r"\midrule",
+        rf"\multicolumn{{{num_cols}}}{{l}}{{\textbf{{Panel A: M3-LLaVA (7B)}}}} \\",
+        r"\midrule",
+    ]
+
+    lines.extend(_render_rq1_panel_rows(df_m3, ADVERSARIAL_DATASETS))
+    lines.extend(
+        [
+            r"\midrule",
+            rf"\multicolumn{{{num_cols}}}{{l}}{{\textbf{{Panel B: MQT-LLaVA (7B)}}}} \\",
+            r"\midrule",
+        ]
+    )
+    lines.extend(_render_rq1_panel_rows(df_mqt, ADVERSARIAL_DATASETS))
+    lines.extend(
+        [
+            r"\bottomrule",
+            r"\end{tabular}%",
+            r"}",
+            r"\end{table*}",
+        ]
+    )
+    return "\n".join(lines)
+
+
 def generate_benchmark_tables():
-    """Generates individual dataset tables, macro mean table, and VQAv2 multi-rollout table."""
+    """Generates individual dataset tables, macro mean table, RQ1 master tables, and VQAv2 multi-rollout table."""
     df_m3 = pd.read_csv(ROOT / "results/experiments/benchmark/benchmark_m3_summary.csv")
     df_mqt = pd.read_csv(ROOT / "results/experiments/benchmark/benchmark_mqt_summary.csv")
     df_m3["dataset"] = df_m3["dataset"].replace({"vqav2_5scale": "vqav2"})
@@ -423,7 +636,19 @@ def generate_benchmark_tables():
     out_core7.write_text(core7_breakdown + "\n", encoding="utf-8")
     print(f"Generated: {out_core7}")
 
-    # 5. Calculate and display win statistics on Adaptive ECE across Core 7 datasets
+    # 5. RQ1 Master Table: Core 7 Benchmark
+    rq1_core7 = build_rq1_core7_table(df_m3, df_mqt)
+    out_rq1_core7 = RQ1_CORE7_FILE
+    out_rq1_core7.write_text(rq1_core7 + "\n", encoding="utf-8")
+    print(f"Generated: {out_rq1_core7}")
+
+    # 6. RQ1 Master Table: Adversarial Benchmark
+    rq1_adv = build_rq1_adversarial_table(df_m3, df_mqt)
+    out_rq1_adv = RQ1_ADVERSARIAL_FILE
+    out_rq1_adv.write_text(rq1_adv + "\n", encoding="utf-8")
+    print(f"Generated: {out_rq1_adv}")
+
+    # 7. Calculate and display win statistics on Adaptive ECE across Core 7 datasets
     our_methods = {"Trajectory Platt (5D)"}
     target_methods = [m[0] for m in TARGET_METHODS_ORDER]
     for arch_name, df_arch in [("M3-LLaVA", df_m3), ("MQT-LLaVA", df_mqt)]:
@@ -458,12 +683,7 @@ def _render_temp_block(
 
     for i, (m, _, _, _, _) in enumerate(raw_rows):
         ece_s, ada_s, brier_s, auc_s = ece_strs[i], ada_strs[i], brier_strs[i], auc_strs[i]
-        if "5D" in m:
-            lines.append(
-                f"\\rowcolor{{gray!10}} \\textbf{{{m}}} & {ece_s} & {ada_s} & {brier_s} & {auc_s} \\\\"
-            )
-        else:
-            lines.append(f"{m} & {ece_s} & {ada_s} & {brier_s} & {auc_s} \\\\")
+        lines.append(f"{m} & {ece_s} & {ada_s} & {brier_s} & {auc_s} \\\\")
     return lines
 
 
@@ -620,17 +840,12 @@ def build_lodo_table(df: pd.DataFrame, arch_label: str, arch_model: str) -> str:
     brier_formatted = rank_and_format([r[4] for r in rows], higher_is_better=False, decimals=4)
     auc_formatted = rank_and_format([r[5] for r in rows], higher_is_better=True, decimals=3)
 
-    for i, (m, mode, _, _, _, _, is_ours) in enumerate(rows):
+    for i, (m, mode, _, _, _, _, _) in enumerate(rows):
         ece_str = ece_formatted[i]
         ada_str = ada_formatted[i]
         brier_str = brier_formatted[i]
         auc_str = auc_formatted[i]
-        if is_ours:
-            lines.append(
-                f"\\rowcolor{{gray!10}} \\textbf{{{m}}} & {mode} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\"
-            )
-        else:
-            lines.append(f"{m} & {mode} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\")
+        lines.append(f"{m} & {mode} & {ece_str} & {ada_str} & {brier_str} & {auc_str} \\\\")
 
     lines.extend(
         [

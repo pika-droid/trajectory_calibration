@@ -109,6 +109,12 @@ DATASET_REGISTRY: dict[str, dict[str, Any]] = {
         "default_split": "test",
         "answer_type": "open",
     },
+    "vqav2_5scale": {
+        "hf_repo": "lmms-lab/vqav2",
+        "config": None,
+        "default_split": "validation",
+        "answer_type": "list_soft",
+    },
 }
 
 ALL_DATASET_KEYS = list(DATASET_REGISTRY.keys())
@@ -316,6 +322,12 @@ def _load_local_vllm_safety(
                     s = dict(item)
                     s["task"] = s.get("task", jf.stem)
                     s["question_id"] = f"{jf.stem}_{idx}"
+                    if "text_answer" in s:
+                        txt_ans = str(s["text_answer"]).strip()
+                        if "answer" not in s:
+                            s["answer"] = txt_ans
+                        if "labels" not in s:
+                            s["labels"] = [txt_ans]
                     img = s.get("image", s.get("image_path"))
                     if img:
                         img_p = gpt4v_dir / str(img)

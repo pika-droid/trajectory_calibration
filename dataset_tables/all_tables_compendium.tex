@@ -9,7 +9,7 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-This document compiles all 32 publication-ready LaTeX tables across Groups 1--8 for local inspection before Overleaf integration. All tables follow the standardized 4-metric schema: ECE (\%) $\downarrow$, Ada-ECE (\%) $\downarrow$, Brier score $\downarrow$, and AUROC $\uparrow$, featuring Option A ranking (\textbf{bold} Rank 1, \textit{italic} Rank 2), Core 6 macro aggregation, Trajectory Platt (5D) evaluation, and dedicated VQAv2 single-pass vs. multi-rollout comparison.
+This document compiles all 37 publication-ready LaTeX tables across Groups 1--8 and RQ1 Master Tables for local inspection before Overleaf integration. All tables follow the standardized 4-metric schema: ECE (\%) $\downarrow$, Ada-ECE (\%) $\downarrow$, Brier score $\downarrow$, and AUROC $\uparrow$, featuring Option A ranking (\textbf{bold} Rank 1, \textit{italic} Rank 2), Core 7 macro aggregation, Trajectory Platt (5D) evaluation, dedicated VQAv2 single-pass vs. multi-rollout comparison, and isolated RQ1 Core 7 and Adversarial master benchmarks.
 \end{abstract}
 \tableofcontents
 \clearpage
@@ -25,6 +25,12 @@ This document compiles all 32 publication-ready LaTeX tables across Groups 1--8 
 \clearpage
 \subsection{Comprehensive Core 7 Dataset Benchmark Breakdown (M3 \& MQT 7B)}
 \input{dataset_tables/core7_benchmark_breakdown}
+\clearpage
+\subsection{RQ1 Master Table: Core 7 Vision-Language Calibration Benchmark (M3 \& MQT 7B)}
+\input{dataset_tables/rq1_core7_benchmark}
+\clearpage
+\subsection{RQ1 Master Table: Adversarial \& Safety Benchmark (M3 \& MQT 7B)}
+\input{dataset_tables/rq1_adversarial_benchmark}
 \clearpage
 \subsection{Group 9: VQAv2 Single-Pass ($1\times$) vs. Multi-Rollout UMPIRE Suite ($10\times$)}
 \input{dataset_tables/vqav2_multirollout_comparison}
@@ -115,5 +121,14 @@ Exhaustive 5-fold cross-validation combinatorial ablation across all $\sum_{k=1}
 \clearpage
 \subsection{Table 6: Exhaustive 14-Benchmark Adaptive ECE Progression Grid}
 \input{dataset_tables/table_ablation_5d_14ds_grid}
+\clearpage
+\subsection{Table 7: Cardinality Progression on TextVQA}
+\input{dataset_tables/table_ablation_5d_textvqa}
+\clearpage
+\subsection{Table 8: Cardinality Progression on VQAv2}
+\input{dataset_tables/table_ablation_5d_vqav2}
+\clearpage
+\subsection{Table 9: Cardinality Progression on LegoPuzzles}
+\input{dataset_tables/table_ablation_5d_legopuzzles}
 \clearpage
 \end{document}

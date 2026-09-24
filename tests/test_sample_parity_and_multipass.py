@@ -294,12 +294,29 @@ def test_mqt_topup_mock_flow(tmp_path: Path) -> None:
     assert final_data[1999]["question_id"] == "q_1999"
 
 
+def test_mqt_repaired_features_non_zero_accuracy() -> None:
+    """Verify MQT ai2d, chartqa, and vqav2_5scale have non-zero accuracy in samples 1000..1999."""
+    mqt_dir = Path("data/features/mqt_llava/temp_0.0")
+    for ds, min_expected_acc in [("ai2d", 0.40), ("chartqa", 0.03), ("vqav2_5scale", 0.60)]:
+        pt_path = mqt_dir / f"{ds}.pt"
+        assert pt_path.exists(), f"{pt_path} must exist"
+        data = torch.load(pt_path, map_location="cpu", weights_only=False)
+        assert len(data) == 2000
+        last_1k_accs = [it["features"][256]["vqa_accuracy"] for it in data[1000:]]
+        mean_last_1k = float(np.mean(last_1k_accs))
+        assert mean_last_1k >= min_expected_acc, (
+            f"{ds} samples 1000..1999 expected mean acc >= {min_expected_acc}, got {mean_last_1k}"
+        )
+        assert all("is_correct" in it for it in data)
+
+
 def test_new_scripts_under_200_loc() -> None:
     """Verify all functions in new scripts are strictly under 200 LOC."""
     new_script_paths = [
         Path("scripts/build_canonical_manifest.py"),
         Path("scripts/trim_features_to_2k.py"),
         Path("scripts/run_mqt_topup_2k.py"),
+        Path("scripts/repair_dataset_features.py"),
     ]
     violations = []
     for sp in new_script_paths:

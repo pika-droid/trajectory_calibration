@@ -36,6 +36,7 @@ checkpoints/
 .pytest_cache/
 .hypothesis/
 *.log
+*.bak
 
 # AI Agent files and directories (kept fully local)
 .agents/

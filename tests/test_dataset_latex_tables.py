@@ -18,16 +18,25 @@ from pathlib import Path
 import pandas as pd
 
 from scripts.generate_dataset_latex_tables import (
+    ADVERSARIAL_DATASETS,
+    ALL_8_METHODS,
     BREAKDOWN_METHODS,
     CORE_DATASETS,
     DATASET_DISPLAY_MAP,
     DATASET_FILE_MAP,
     DATASET_WISE_DIR,
+    RQ1_ADVERSARIAL_FILE,
+    RQ1_CORE7_FILE,
     TABLES_DIR,
+    TARGET_9_DATASETS,
+    TARGET_METHODS_8_ORDER,
     TARGET_METHODS_ORDER,
     TEMP_DIR,
     VQAV2_METHODS_ORDER,
     build_core7_breakdown_table,
+    build_rq1_adversarial_table,
+    build_rq1_core7_table,
+    generate_single_table,
     rank_and_format,
 )
 
@@ -86,9 +95,12 @@ def test_group1_dataset_wise_tables_exist_and_structure() -> None:
         for m_key, _, _ in TARGET_METHODS_ORDER:
             assert m_key in content
 
+        # Strictly unshaded across all 16 dataset tables
+        assert r"\rowcolor" not in content, f"Found forbidden \\rowcolor in {filename}"
+
 
 def test_adversarial_safety_latex_tables() -> None:
-    """Verify avqa.tex and vllmsafety.tex exist with proper M3/MQT blocks, 4 methods, 4 metrics, Option A formatting, and macro_mean exclusion."""
+    """Verify avqa.tex and vllmsafety.tex exist with proper M3/MQT blocks, 8 methods, 4 metrics, unshaded Option A formatting, and macro_mean exclusion."""
     for ds_key, fname, label_suffix in [
         ("avqa", "avqa.tex", "avqa"),
         ("vllm-safety", "vllmsafety.tex", "vllmsafety"),
@@ -116,11 +128,20 @@ def test_adversarial_safety_latex_tables() -> None:
         assert "Brier" in content
         assert "AUROC" in content
 
-        # 4 Methods in order
-        for m_key, _, is_ours in TARGET_METHODS_ORDER:
+        # Strictly unshaded: NO \rowcolor
+        assert r"\rowcolor" not in content
+
+        # All 8 Methods present in order
+        for m_key, _, _ in TARGET_METHODS_8_ORDER:
             assert m_key in content
-            if is_ours:
-                assert f"\\rowcolor{{gray!10}} \\textbf{{{m_key}}}" in content
+
+        # Verify Trajectory Platt (5D) is the crowning final method row
+        last_m_pos = content.rfind("Trajectory Platt (5D)")
+        ump_pos = content.rfind("UMPIRE")
+        assert last_m_pos > ump_pos, "Trajectory Platt (5D) must be positioned as the final row"
+
+        # Multi-pass baselines have placeholder dashes
+        assert " - & - & - & - " in content or "- & - & - & -" in content
 
         # Option A ranking formatting (Rank 1 bold, Rank 2 italic)
         assert "\\textbf{" in content
@@ -135,7 +156,7 @@ def test_adversarial_safety_latex_tables() -> None:
 
 
 def test_group2_macro_mean_table() -> None:
-    """Verify Group 2 macro_mean.tex exists and contains all 4 methods and 4 metrics across Core 6."""
+    """Verify Group 2 macro_mean.tex exists, unshaded, with 4 methods across Core 7."""
     macro_f = TABLES_DIR / "macro_mean.tex"
     assert macro_f.exists(), f"Missing macro table: {macro_f}"
     content = macro_f.read_text(encoding="utf-8")
@@ -148,11 +169,12 @@ def test_group2_macro_mean_table() -> None:
     assert "Macro Ada-ECE (\\%)" in content
     assert "Macro Brier" in content
     assert "Macro AUROC" in content
-    assert "\\rowcolor{gray!10} \\textbf{Trajectory Platt (5D)}" in content
+    assert "Trajectory Platt (5D)" in content
+    assert r"\rowcolor" not in content
 
 
 def test_group9_vqav2_multirollout_table() -> None:
-    """Verify Group 9 vqav2_multirollout_comparison.tex contains single-pass and multi-pass methods."""
+    """Verify Group 9 vqav2_multirollout_comparison.tex contains single-pass and multi-pass methods, unshaded."""
     vqa_f = TABLES_DIR / "vqav2_multirollout_comparison.tex"
     assert vqa_f.exists(), f"Missing VQAv2 multirollout table: {vqa_f}"
     content = vqa_f.read_text(encoding="utf-8")
@@ -164,6 +186,7 @@ def test_group9_vqav2_multirollout_table() -> None:
     assert "Ada-ECE (\\%)" in content
     assert "Brier" in content
     assert "AUROC" in content
+    assert r"\rowcolor" not in content
 
     for m_key, _, _ in VQAV2_METHODS_ORDER:
         if m_key == "ln_entropy":
@@ -212,10 +235,11 @@ def test_group3_temp_ablation_tables() -> None:
             assert m in content, f"Missing method {m} in {fname}"
         for em in excluded_methods:
             assert em not in content, f"Unexpected method {em} found in {fname}"
+        assert r"\rowcolor" not in content, f"Found forbidden \\rowcolor in {fname}"
 
 
 def test_group4_lodo_cross_dataset_table() -> None:
-    """Verify Group 4 lodo_cross_dataset.tex has 4 methods across both protocols."""
+    """Verify Group 4 lodo_cross_dataset.tex has 4 methods across both protocols, unshaded."""
     lodo_f = TABLES_DIR / "lodo_cross_dataset.tex"
     assert lodo_f.exists(), f"Missing LODO table: {lodo_f}"
     content = lodo_f.read_text(encoding="utf-8")
@@ -227,6 +251,7 @@ def test_group4_lodo_cross_dataset_table() -> None:
     assert "Macro Ada-ECE (\\%)" in content
     assert "Macro Brier" in content
     assert "Macro AUROC" in content
+    assert r"\rowcolor" not in content, "Found forbidden \\rowcolor in lodo_cross_dataset.tex"
 
     for m in [
         "Naive Confidence (NC)",
@@ -294,6 +319,206 @@ def test_build_core7_breakdown_table_dynamic() -> None:
     empty_table = build_core7_breakdown_table(empty_df, empty_df)
     assert "-" in empty_table
     assert r"\begin{table*}[t]" in empty_table
+
+
+def test_9_dataset_wise_tables_all_8_methods_and_unshaded() -> None:
+    """Verify the 9 dataset-wise tables contain all 8 methods in canonical order, unshaded, with multi-pass placeholders."""
+    assert len(TARGET_9_DATASETS) == 9
+    for ds in TARGET_9_DATASETS:
+        fname = DATASET_FILE_MAP[ds]
+        p = DATASET_WISE_DIR / fname
+        assert p.exists(), f"Missing dataset table: {p}"
+        content = p.read_text(encoding="utf-8")
+
+        # Strictly unshaded: NO \rowcolor
+        assert r"\rowcolor" not in content, f"Found forbidden \\rowcolor in {fname}"
+
+        # Both architectures present
+        assert "M3-LLaVA 7B" in content
+        assert "MQT-LLaVA 7B" in content
+
+        # All 8 methods present in strict canonical order in both panels
+        panels = content.split(r"\begin{table}[t]")
+        assert len(panels) >= 3  # empty prefix + 2 tables
+        for panel in panels[1:]:
+            positions = [panel.find(m) for m in ALL_8_METHODS]
+            assert all(pos != -1 for pos in positions), f"Missing method in panel of {fname}"
+            assert positions == sorted(positions), (
+                f"Methods not in canonical order in panel of {fname}: {positions}"
+            )
+
+        # Multi-pass baselines have placeholder dashes
+        assert "- & - & - & -" in content
+
+
+def test_rq1_core7_benchmark_table() -> None:
+    """Verify rq1_core7_benchmark.tex structure, 33 columns, Core 7 isolation, 8 methods, unshaded Option A ranking."""
+    assert RQ1_CORE7_FILE.exists(), f"Missing {RQ1_CORE7_FILE}"
+    content = RQ1_CORE7_FILE.read_text(encoding="utf-8")
+
+    # Table environment and column specification (1 method col + 32 metric cols = 33 cols)
+    assert r"\begin{table*}[t]" in content
+    assert r"\label{tab:rq1_core7_benchmark}" in content
+    assert r"\begin{tabular}{l cccccccccccccccccccccccccccccccc}" in content
+    assert r"\toprule" in content
+    assert r"\bottomrule" in content
+
+    # Panel headers
+    assert "Panel A: M3-LLaVA (7B)" in content
+    assert "Panel B: MQT-LLaVA (7B)" in content
+
+    # Top headers: exactly the 7 Core datasets + Macro Average
+    for ds in CORE_DATASETS:
+        display_name = DATASET_DISPLAY_MAP[ds]
+        assert rf"\textbf{{{display_name}}}" in content, f"Missing {display_name} in header"
+    assert r"\textbf{Macro Average}" in content
+
+    # Strict isolation: adversarial datasets must NOT be present
+    assert "AVQA" not in content
+    assert "VLLM-Safety" not in content
+
+    # Sub-headers (4 metrics per dataset)
+    assert r"ECE (\%) $\downarrow$" in content
+    assert r"Ada-ECE (\%) $\downarrow$" in content
+    assert r"Brier $\downarrow$" in content
+    assert r"AUROC $\uparrow$" in content
+
+    # All 8 methods present in both panels in strict canonical order
+    panels = content.split(r"Panel B: MQT-LLaVA (7B)")
+    assert len(panels) == 2
+    for panel_idx, panel in enumerate(panels):
+        positions = [panel.find(m) for m in ALL_8_METHODS]
+        assert all(pos != -1 for pos in positions), f"Missing method in panel {panel_idx}"
+        assert positions == sorted(positions), (
+            f"Methods not in canonical order in panel {panel_idx} of rq1_core7: {positions}"
+        )
+
+    # Strictly unshaded: NO \rowcolor
+    assert r"\rowcolor" not in content, "Found forbidden \\rowcolor in rq1_core7_benchmark.tex"
+
+    # Option A ranking applied for single-pass methods
+    assert r"\textbf{" in content
+    assert r"\textit{" in content
+
+    # Multi-pass baselines have placeholder dashes
+    assert "- & - & - & -" in content
+
+
+def test_rq1_adversarial_benchmark_table() -> None:
+    """Verify rq1_adversarial_benchmark.tex structure, 13 columns, adversarial isolation, 8 methods, unshaded Option A ranking."""
+    assert RQ1_ADVERSARIAL_FILE.exists(), f"Missing {RQ1_ADVERSARIAL_FILE}"
+    content = RQ1_ADVERSARIAL_FILE.read_text(encoding="utf-8")
+
+    # Table environment and column specification (1 method col + 12 metric cols = 13 cols)
+    assert r"\begin{table*}[t]" in content
+    assert r"\label{tab:rq1_adversarial_benchmark}" in content
+    assert r"\begin{tabular}{l cccccccccccc}" in content
+    assert r"\toprule" in content
+    assert r"\bottomrule" in content
+
+    # Panel headers
+    assert "Panel A: M3-LLaVA (7B)" in content
+    assert "Panel B: MQT-LLaVA (7B)" in content
+
+    # Top headers: exactly the 2 Adversarial datasets + Macro Average
+    for ds in ADVERSARIAL_DATASETS:
+        display_name = DATASET_DISPLAY_MAP[ds]
+        assert rf"\textbf{{{display_name}}}" in content, f"Missing {display_name} in header"
+    assert r"\textbf{Macro Average}" in content
+
+    # Strict isolation: Core 7 dataset display names must NOT be column headers
+    for ds in ["ai2d", "chartqa", "docvqa", "scienceqa"]:
+        assert rf"\textbf{{{DATASET_DISPLAY_MAP[ds]}}}" not in content
+
+    # All 8 methods present in both panels in strict canonical order
+    panels = content.split(r"Panel B: MQT-LLaVA (7B)")
+    assert len(panels) == 2
+    for panel_idx, panel in enumerate(panels):
+        positions = [panel.find(m) for m in ALL_8_METHODS]
+        assert all(pos != -1 for pos in positions), f"Missing method in panel {panel_idx}"
+        assert positions == sorted(positions), (
+            f"Methods not in canonical order in panel {panel_idx} of rq1_adv: {positions}"
+        )
+
+    # Strictly unshaded: NO \rowcolor
+    assert r"\rowcolor" not in content, (
+        "Found forbidden \\rowcolor in rq1_adversarial_benchmark.tex"
+    )
+
+    # Option A ranking applied
+    assert r"\textbf{" in content
+    assert r"\textit{" in content
+
+    # Multi-pass baselines have placeholder dashes
+    assert "- & - & - & -" in content
+
+
+def test_all_tables_compendium_inputs() -> None:
+    """Verify all_tables_compendium.tex inputs both rq1_core7_benchmark and rq1_adversarial_benchmark."""
+    compendium_f = TABLES_DIR / "all_tables_compendium.tex"
+    assert compendium_f.exists(), f"Missing {compendium_f}"
+    content = compendium_f.read_text(encoding="utf-8")
+
+    assert r"\input{dataset_tables/rq1_core7_benchmark}" in content
+    assert r"\input{dataset_tables/rq1_adversarial_benchmark}" in content
+
+
+def test_build_rq1_tables_dynamic() -> None:
+    """Verify programmatic resilience of build_rq1_core7_table and build_rq1_adversarial_table with empty and partial DataFrames."""
+    empty_df = pd.DataFrame(
+        columns=["dataset", "method", "ece_percent", "adaptive_ece_percent", "brier", "auroc"]
+    )
+    t_core7 = build_rq1_core7_table(empty_df, empty_df)
+    assert r"\begin{table*}[t]" in t_core7
+    assert r"\label{tab:rq1_core7_benchmark}" in t_core7
+    assert "-" in t_core7
+
+    t_adv = build_rq1_adversarial_table(empty_df, empty_df)
+    assert r"\begin{table*}[t]" in t_adv
+    assert r"\label{tab:rq1_adversarial_benchmark}" in t_adv
+    assert "-" in t_adv
+
+
+def test_dynamic_multi_pass_data_ingestion() -> None:
+    """Verify that when df_arch contains multi-pass baseline rows, table builders dynamically populate and rank them."""
+    rows = []
+    for ds in CORE_DATASETS:
+        for m in ALL_8_METHODS:
+            rows.append(
+                {
+                    "dataset": ds,
+                    "method": m,
+                    "ece_percent": 10.0,
+                    "adaptive_ece_percent": 8.0 if "5D" in m else 9.0,
+                    "brier": 0.15,
+                    "auroc": 0.85 if "5D" in m else 0.80,
+                }
+            )
+    df_full = pd.DataFrame(rows)
+
+    # Core 7 table should format numerical values for multi-pass instead of dashes
+    t_core7 = build_rq1_core7_table(df_full, df_full)
+    assert r"\begin{table*}[t]" in t_core7
+    for m in ["LN-Entropy", "Semantic Entropy", "EigenScore", "UMPIRE"]:
+        assert m in t_core7
+        for line in t_core7.splitlines():
+            if line.startswith(m):
+                # Verify cells do not contain placeholder dash "-"
+                clean_line = line.strip().removesuffix(r"\\").strip()
+                cells = [c.strip() for c in clean_line.split("&")[1:]]
+                assert all(c != "-" for c in cells), f"Method {m} has placeholder dashes: {line}"
+                assert "10.00" in line
+                assert "0.1500" in line
+
+    # Single table should also dynamically populate multi-pass rows
+    t_single = generate_single_table(df_full, "ai2d", "m3", "M3-LLaVA", is_macro=False)
+    for m in ["LN-Entropy", "Semantic Entropy", "EigenScore", "UMPIRE"]:
+        for line in t_single.splitlines():
+            if line.startswith(m):
+                clean_line = line.strip().removesuffix(r"\\").strip()
+                cells = [c.strip() for c in clean_line.split("&")[2:]]
+                assert all(c != "-" for c in cells), f"Single table method {m} has dashes: {line}"
+                assert "10.00" in line
 
 
 def test_functions_under_200_loc() -> None:

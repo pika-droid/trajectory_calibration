@@ -4,6 +4,7 @@ Multi-benchmark ground-truth evaluation and scoring engine.
 
 from __future__ import annotations
 
+import ast
 import re
 from typing import Any
 
@@ -35,14 +36,47 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
         candidates: list[str] = []
         labels_val = sample.get("labels", sample.get("label", []))
         if isinstance(labels_val, list):
-            candidates.extend([str(x) for x in labels_val if x is not None])
+            for x in labels_val:
+                if isinstance(x, dict):
+                    ans_str = x.get("answer", x.get("text", x.get("raw_answer", "")))
+                    if ans_str is not None and str(ans_str).strip():
+                        candidates.append(str(ans_str).strip())
+                elif x is not None and str(x).strip():
+                    candidates.append(str(x).strip())
         elif isinstance(labels_val, (str, int, float)) and str(labels_val).strip():
             candidates.append(str(labels_val).strip())
 
-        for k in ["answer", "text_answer", "ground_truth", "gt_answer", "target", "reference"]:
+        for k in [
+            "answers",
+            "answer",
+            "text_answer",
+            "ground_truth",
+            "gt_answer",
+            "target",
+            "reference",
+        ]:
             v = sample.get(k)
+            if isinstance(v, str):
+                s = v.strip()
+                if s.startswith("[") and s.endswith("]"):
+                    try:
+                        parsed = ast.literal_eval(s)
+                        if isinstance(parsed, list):
+                            v = parsed
+                    except Exception:
+                        pass
             if isinstance(v, list):
-                candidates.extend([str(x) for x in v if x is not None])
+                for x in v:
+                    if isinstance(x, dict):
+                        ans_str = x.get("answer", x.get("text", x.get("raw_answer", "")))
+                        if ans_str is not None and str(ans_str).strip():
+                            candidates.append(str(ans_str).strip())
+                    elif x is not None and str(x).strip():
+                        candidates.append(str(x).strip())
+            elif isinstance(v, dict):
+                ans_str = v.get("answer", v.get("text", v.get("raw_answer", "")))
+                if ans_str is not None and str(ans_str).strip():
+                    candidates.append(str(ans_str).strip())
             elif isinstance(v, (str, int, float)) and str(v).strip():
                 candidates.append(str(v).strip())
 
@@ -61,22 +95,56 @@ def evaluate_accuracy(pred_answer: str, sample: dict[str, Any], dataset_key: str
         return 0.0
 
     elif ans_type == "list_soft":
-        gt_answers = sample.get(
-            "answers", sample.get("annotations", sample.get("answers_list", []))
-        )
+        gt_answers = sample.get("answers")
+        if not gt_answers:
+            gt_answers = sample.get("annotations")
+        if not gt_answers:
+            gt_answers = sample.get("answers_list")
+        if not gt_answers:
+            gt_answers = sample.get("ground_truth")
+        if not gt_answers:
+            gt_ans = sample.get(
+                "answer",
+                sample.get(
+                    "label",
+                    sample.get("multiple_choice_answer", sample.get("ground_truth")),
+                ),
+            )
+            gt_answers = [gt_ans] if gt_ans is not None else []
+
+        if isinstance(gt_answers, str):
+            s = gt_answers.strip()
+            if s.startswith("[") and s.endswith("]"):
+                try:
+                    parsed = ast.literal_eval(s)
+                    if isinstance(parsed, list):
+                        gt_answers = parsed
+                except Exception:
+                    pass
         if isinstance(gt_answers, (str, int, float)):
             gt_answers = [gt_answers]
-        if not gt_answers:
-            gt_ans = sample.get("answer", sample.get("label", sample.get("multiple_choice_answer")))
-            gt_answers = [gt_ans] if gt_ans is not None else []
 
         match_count = 0
         for gt in gt_answers:
-            gt_text = (
-                gt.get("answer", gt.get("text", gt.get("raw_answer", "")))
-                if isinstance(gt, dict)
-                else str(gt)
-            )
+            if isinstance(gt, dict):
+                gt_text = str(gt.get("answer", gt.get("text", gt.get("raw_answer", ""))))
+            elif isinstance(gt, str) and gt.strip().startswith("{") and gt.strip().endswith("}"):
+                try:
+                    parsed_dict = ast.literal_eval(gt.strip())
+                    if isinstance(parsed_dict, dict):
+                        gt_text = str(
+                            parsed_dict.get(
+                                "answer",
+                                parsed_dict.get("text", parsed_dict.get("raw_answer", "")),
+                            )
+                        )
+                    else:
+                        gt_text = str(gt)
+                except Exception:
+                    gt_text = str(gt)
+            else:
+                gt_text = str(gt)
+
             gt_clean = clean_text(gt_text)
             if not gt_clean:
                 continue

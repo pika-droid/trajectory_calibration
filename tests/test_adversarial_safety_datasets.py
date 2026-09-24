@@ -20,6 +20,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import torch
 from PIL import Image
 
 from scripts.extract_features import generate_mock_extraction
@@ -510,3 +511,33 @@ def test_local_fallback_loaders(tmp_path: Path) -> None:
     assert _load_local_avqa(bad_dir) == []
     (bad_dir / "annotation.json").write_text("INVALID JSON", encoding="utf-8")
     assert _load_local_vllm_safety(bad_dir) == []
+
+
+def test_vllm_safety_ground_truth_completeness() -> None:
+    """Verify VLLM safety features have 0 empty ground-truth entries across all 1900 samples."""
+    for arch in ["m3_llava", "mqt_llava"]:
+        pt_path = (
+            Path("results/features")
+            / arch
+            / "temp_0.0"
+            / "vllm-safety"
+            / "full_extracted_features.pt"
+        )
+        if pt_path.exists():
+            data = torch.load(pt_path, map_location="cpu", weights_only=False)
+            assert len(data) == 1900
+            empty_gt = sum(
+                1
+                for it in data
+                if not it.get("ground_truth") and not it.get("sample", {}).get("answers")
+            )
+            assert empty_gt == 0, f"{arch} vllm-safety has {empty_gt} empty ground-truth entries"
+            fine_scale = 576 if "m3" in arch else 256
+            range_300_700_acc = [
+                float(it["features"][fine_scale]["vqa_accuracy"]) for it in data[300:700]
+            ]
+            mean_acc = float(np.mean(range_300_700_acc))
+            assert mean_acc > 0.40, (
+                f"{arch} vllm-safety samples 300..699 mean accuracy must be > 0.40, got {mean_acc}"
+            )
+            assert all("is_correct" in it for it in data)

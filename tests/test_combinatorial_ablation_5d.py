@@ -241,6 +241,9 @@ def test_ablation_artifacts_exist_and_valid() -> None:
     assert (tbls_dir / "table_ablation_5d_macro_progression.tex").exists()
     assert (tbls_dir / "table_ablation_5d_loo.tex").exists()
     assert (tbls_dir / "table_ablation_5d_14ds_grid.tex").exists()
+    assert (tbls_dir / "table_ablation_5d_textvqa.tex").exists()
+    assert (tbls_dir / "table_ablation_5d_vqav2.tex").exists()
+    assert (tbls_dir / "table_ablation_5d_legopuzzles.tex").exists()
 
 
 def test_all_functions_under_200_loc() -> None:

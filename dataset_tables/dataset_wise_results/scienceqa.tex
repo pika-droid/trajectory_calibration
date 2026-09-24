@@ -7,10 +7,14 @@
 \toprule
 \textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 11.08 & 10.66 & 0.1566 & \textit{0.701} \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 8.69 & 9.76 & 0.1529 & \textit{0.701} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{3.63} & \textit{7.46} & \textit{0.1450} & \textit{0.701} \\
-\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Single-Pass ($T = 0.0$) & \textit{3.73} & \textbf{3.97} & \textbf{0.1446} & \textbf{0.704} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 10.87 & 11.26 & 0.1669 & \textbf{0.677} \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 9.33 & 9.83 & 0.1590 & \textbf{0.677} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{5.77} & \textbf{6.91} & \textbf{0.1492} & \textbf{0.677} \\
+LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
+Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
+EigenScore & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
+UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textbf{5.65} & \textit{9.58} & \textit{0.1499} & \textit{0.670} \\
 \bottomrule
 \end{tabular}%
 }
@@ -25,10 +29,14 @@ Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{3.63} & \textit{7.46} & \
 \toprule
 \textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 23.29 & 23.04 & 0.2529 & \textit{0.775} \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 10.47 & 10.84 & 0.1937 & \textit{0.775} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{7.75} & \textit{6.78} & \textit{0.1851} & \textit{0.775} \\
-\rowcolor{gray!10} \textbf{Trajectory Platt (5D)} & Single-Pass ($T = 0.0$) & \textbf{4.37} & \textbf{5.46} & \textbf{0.1798} & \textbf{0.782} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 23.65 & 23.17 & 0.2579 & \textit{0.760} \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 9.32 & 10.23 & 0.1975 & \textit{0.760} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{7.99} & \textit{6.91} & \textit{0.1916} & \textit{0.760} \\
+LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
+Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
+EigenScore & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
+UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textbf{6.46} & \textbf{5.72} & \textbf{0.1860} & \textbf{0.769} \\
 \bottomrule
 \end{tabular}%
 }

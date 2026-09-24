@@ -1,0 +1,30 @@
+\begin{table}[t]
+\centering
+\caption{\textbf{Combinatorial 5D Trajectory Feature Cardinality Progression on \textsc{LegoPuzzles} ($k \in \{1 \dots 5\}$)}. Out-of-fold calibration error and discrimination across feature cardinality levels for M3-LLaVA (7B) and MQT-LLaVA (7B). Evaluated across all $\sum_{k=1}^5 \binom{5}{k} = 31$ feature subsets. Reported in pure decimal format. \textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 within each architecture. Note: Subsets lacking the base logit anchor $x_1$ achieve artificially low quantile Ada-ECE via class-prior probability clustering, but suffer severe AUROC collapse and degraded Brier scores; joint calibration and discrimination require the full 5D representation.}
+\label{tab:ablation_5d_legopuzzles}
+\providecommand{\tablestyle}[2]{\setlength{\tabcolsep}{#1}\renewcommand{\arraystretch}{#2}}
+\tablestyle{3.5pt}{1.05}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{ccccccc}
+\toprule
+\textbf{Cardinality ($k$)} & \textbf{Subsets} & \textbf{Optimal Formula} & \textbf{Ada-ECE} $\downarrow$ & \textbf{Mean $\pm$ Std} & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ \\
+\midrule
+\multicolumn{7}{l}{\textbf{M3-LLaVA (7B)}} \\
+\midrule
+$k = 1$ & 5 & $x_{5}$ & 0.0411 & 0.0581 $\pm$ 0.0216 & 0.516 & 0.1971 \\
+$k = 2$ & 10 & $x_{2} + x_{4}$ & 0.0459 & 0.0589 $\pm$ 0.0151 & 0.494 & 0.1981 \\
+$k = 3$ & 10 & $x_{3} + x_{4} + x_{5}$ & \textit{0.0357} & 0.0568 $\pm$ 0.0186 & \textbf{0.589} & \textbf{0.1927} \\
+$k = 4$ & 5 & $x_{1} + x_{2} + x_{3} + x_{5}$ & 0.0413 & 0.0495 $\pm$ 0.0106 & \textit{0.583} & \textbf{0.1927} \\
+$k = 5$ & 1 & $x_{1} + x_{2} + x_{3} + x_{4} + x_{5}$ & \textbf{0.0345} & 0.0345 $\pm$ 0.0000 & 0.579 & \textit{0.1932} \\
+\midrule
+\multicolumn{7}{l}{\textbf{MQT-LLaVA (7B)}} \\
+\midrule
+$k = 1$ & 5 & $x_{2}$ & \textit{0.0337} & 0.0549 $\pm$ 0.0212 & 0.485 & 0.1982 \\
+$k = 2$ & 10 & $x_{2} + x_{4}$ & 0.0395 & 0.0623 $\pm$ 0.0260 & 0.485 & 0.2002 \\
+$k = 3$ & 10 & $x_{1} + x_{3} + x_{4}$ & \textbf{0.0303} & 0.0535 $\pm$ 0.0224 & \textbf{0.613} & \textbf{0.1913} \\
+$k = 4$ & 5 & $x_{1} + x_{2} + x_{3} + x_{4}$ & 0.0383 & 0.0536 $\pm$ 0.0172 & 0.607 & 0.1934 \\
+$k = 5$ & 1 & $x_{1} + x_{2} + x_{3} + x_{4} + x_{5}$ & 0.0520 & 0.0520 $\pm$ 0.0000 & \textit{0.611} & \textit{0.1929} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}

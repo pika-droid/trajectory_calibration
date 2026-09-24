@@ -62,7 +62,15 @@ def _extract_record_info(record: dict[str, Any], dataset_key: str) -> dict[str, 
 
     # Ground truth answers extraction
     answers: list[str] = []
-    if record.get("ground_truth"):
+    if record.get("text_answer"):
+        answers = _normalize_answers(record["text_answer"])
+    elif isinstance(sample, dict) and sample.get("text_answer"):
+        answers = _normalize_answers(sample["text_answer"])
+    elif record.get("labels"):
+        answers = _normalize_answers(record["labels"])
+    elif isinstance(sample, dict) and sample.get("labels"):
+        answers = _normalize_answers(sample["labels"])
+    elif record.get("ground_truth"):
         answers = _normalize_answers(record["ground_truth"])
     elif isinstance(sample, dict) and "answers" in sample:
         answers = _normalize_answers(sample["answers"])
@@ -111,12 +119,24 @@ def _extract_record_info(record: dict[str, Any], dataset_key: str) -> dict[str, 
     elif dataset_key == "vizwiz-vqa":
         image_str = f"{qid}.jpg"
 
-    return {
+    info: dict[str, Any] = {
         "question_id": qid,
         "question": question,
         "answers": answers,
         "image": image_str,
     }
+    if dataset_key == "ai2d":
+        if isinstance(sample, dict) and "options" in sample:
+            info["options"] = sample["options"]
+        elif "options" in record:
+            info["options"] = record["options"]
+
+        if isinstance(sample, dict) and "answer" in sample:
+            info["answer"] = sample["answer"]
+        elif "answer" in record:
+            info["answer"] = record["answer"]
+
+    return info
 
 
 def _load_core_dataset_records(

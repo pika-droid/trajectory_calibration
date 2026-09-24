@@ -324,6 +324,91 @@ def generate_14ds_grid_table(
     return "\n".join(lines)
 
 
+def generate_single_dataset_progression_table(
+    df_m3_raw: pd.DataFrame,
+    df_mqt_raw: pd.DataFrame,
+    dataset_key: str,
+    dataset_display: str,
+) -> str:
+    """Generate cardinality progression table k=1..5 for a single dataset."""
+    label_slug = dataset_key.replace("-", "")
+    lines: list[str] = [
+        r"\begin{table}[t]",
+        r"\centering",
+        (
+            r"\caption{\textbf{Combinatorial 5D Trajectory Feature Cardinality Progression on \textsc{"
+            + dataset_display
+            + r"} ($k \in \{1 \dots 5\}$)}. "
+            r"Out-of-fold calibration error and discrimination across feature cardinality levels for M3-LLaVA (7B) and MQT-LLaVA (7B). "
+            r"Evaluated across all $\sum_{k=1}^5 \binom{5}{k} = 31$ feature subsets. Reported in pure decimal format. "
+            r"\textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 within each architecture. Note: Subsets lacking the base logit anchor $x_1$ "
+            r"achieve artificially low quantile Ada-ECE via class-prior probability clustering, but suffer severe AUROC collapse "
+            r"and degraded Brier scores; joint calibration and discrimination require the full 5D representation.}"
+        ),
+        r"\label{tab:ablation_5d_" + label_slug + "}",
+        r"\providecommand{\tablestyle}[2]{\setlength{\tabcolsep}{#1}\renewcommand{\arraystretch}{#2}}",
+        r"\tablestyle{3.5pt}{1.05}",
+        r"\resizebox{\linewidth}{!}{%",
+        r"\begin{tabular}{ccccccc}",
+        r"\toprule",
+        (
+            r"\textbf{Cardinality ($k$)} & \textbf{Subsets} & \textbf{Optimal Formula} & "
+            r"\textbf{Ada-ECE} $\downarrow$ & \textbf{Mean $\pm$ Std} & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ \\"
+        ),
+        r"\midrule",
+    ]
+
+    for arch_name, df_raw in [("M3-LLaVA (7B)", df_m3_raw), ("MQT-LLaVA (7B)", df_mqt_raw)]:
+        lines.append(f"\\multicolumn{{7}}{{l}}{{\\textbf{{{arch_name}}}}} \\\\")
+        lines.append(r"\midrule")
+
+        ds_raw = df_raw[df_raw["dataset"] == dataset_key]
+
+        k_data: list[dict[str, object]] = []
+        for k in range(1, 6):
+            k_sub = ds_raw[ds_raw["cardinality"] == k]
+            best_row = k_sub.sort_values("ada_ece").iloc[0]
+            k_data.append(
+                {
+                    "cardinality": k,
+                    "n_subsets": len(k_sub),
+                    "best_subset": str(best_row["subset"]),
+                    "best_ada_ece": float(best_row["ada_ece"]),
+                    "mean_ada_ece": float(k_sub["ada_ece"].mean()),
+                    "std_ada_ece": float(k_sub["ada_ece"].std()) if len(k_sub) > 1 else 0.0,
+                    "best_auroc": float(best_row["auroc"]),
+                    "best_brier": float(best_row["brier"]),
+                }
+            )
+
+        ada_bests = [float(d["best_ada_ece"]) for d in k_data]
+        auroc_bests = [float(d["best_auroc"]) for d in k_data]
+        brier_bests = [float(d["best_brier"]) for d in k_data]
+
+        ranked_ada = rank_and_format_decimal(ada_bests, higher_is_better=False, decimals=4)
+        ranked_auroc = rank_and_format_decimal(auroc_bests, higher_is_better=True, decimals=3)
+        ranked_brier = rank_and_format_decimal(brier_bests, higher_is_better=False, decimals=4)
+
+        for idx, d in enumerate(k_data):
+            k_val = int(d["cardinality"])
+            n_sub = int(d["n_subsets"])
+            formula = format_latex_formula(str(d["best_subset"]))
+            ada_best_str = ranked_ada[idx]
+            mean_std_str = f"{float(d['mean_ada_ece']):.4f} $\\pm$ {float(d['std_ada_ece']):.4f}"
+            auroc_best_str = ranked_auroc[idx]
+            brier_best_str = ranked_brier[idx]
+
+            lines.append(
+                f"$k = {k_val}$ & {n_sub} & {formula} & {ada_best_str} & {mean_std_str} & {auroc_best_str} & {brier_best_str} \\\\"
+            )
+        lines.append(r"\midrule")
+
+    if lines[-1] == r"\midrule":
+        lines[-1] = r"\bottomrule"
+    lines.extend([r"\end{tabular}%", r"}", r"\end{table}", ""])
+    return "\n".join(lines)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Generate publication LaTeX tables for 5D combinatorial ablation study."
@@ -368,6 +453,18 @@ def main() -> None:
     tex_grid = generate_14ds_grid_table(df_m3_raw, df_mqt_raw)
     (out_dir / "table_ablation_5d_14ds_grid.tex").write_text(tex_grid, encoding="utf-8")
     print(f"Generated {out_dir / 'table_ablation_5d_14ds_grid.tex'}")
+
+    # 4. Single-dataset progression tables
+    target_datasets = [
+        ("textvqa", "TextVQA"),
+        ("vqav2", "VQAv2"),
+        ("lego-puzzles", "LegoPuzzles"),
+    ]
+    for ds_key, ds_disp in target_datasets:
+        slug = ds_key.replace("-", "")
+        tex_ds = generate_single_dataset_progression_table(df_m3_raw, df_mqt_raw, ds_key, ds_disp)
+        (out_dir / f"table_ablation_5d_{slug}.tex").write_text(tex_ds, encoding="utf-8")
+        print(f"Generated {out_dir / f'table_ablation_5d_{slug}.tex'}")
 
 
 if __name__ == "__main__":

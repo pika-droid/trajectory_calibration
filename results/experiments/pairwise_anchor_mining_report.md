@@ -5,7 +5,7 @@
 > **Key Findings**:
 > 1. **Universal Source Anchor Discovered**: **VQAv2** is the premier calibration anchor across both M3-LLaVA and MQT-LLaVA, beating Platt 1D on **22 of 24 targets (91.7% win rate)** and delivering an average ECE reduction of **+6.29%** across both architectures.
 > 2. **Universal Anchor Cluster**: Behind VQAv2, **VizWiz-VQA** (19/24 wins, 79.2%), **DocVQA** (18/24 wins, 75.0%), **TextVQA** (18/24 wins, 75.0%), and **ChartQA** (18/24 wins, 75.0%) form an exceptionally reliable cluster of cross-domain source anchors.
-> 3. **Validation of Krish's Proposal (Platt 5D as Primary Method)**: In zero-shot cross-domain transfer, **Trajectory Platt 5D (6 params) decisively outperforms VCPS-5D (10 params)**, winning 181/312 pairs (58.0%) overall, and 91/120 pairs (75.8%) on top universal anchors where it lowers Macro Mean ECE from 34.43% to 32.64%. Parameter parsimony prevents slope over-adaptation under distribution shift.
+> 3. **Validation of Krish's Proposal (Platt 5D as Primary Method)**: In zero-shot cross-domain transfer, **Trajectory Platt 5D (6 params) decisively outperforms VCPS-5D (10 params)**, winning 186/312 pairs (59.6%) overall, and 97/120 pairs (80.8%) on top universal anchors where it lowers Macro Mean ECE from 34.43% to 32.64%. Parameter parsimony prevents slope over-adaptation under distribution shift.
 
 ---
 
@@ -15,19 +15,19 @@ For each candidate source dataset, we evaluate zero-shot calibration transfer ac
 
 | Rank | Source Anchor | Total Wins (P1 ECE) | Total Wins (P1 Ada) | Win Rate (P1) | Wins vs TS | Wins vs NC | Mean P5 ECE (%) | Mean P1 ECE (%) | ECE Δ (vs P1) | Ada-ECE Δ (vs P1) | Status |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| 1 | **VQAv2** | **22/24** | **22/24** | 91.7% | 16/24 | 19/24 | 35.13% | 41.43% | +6.29% | +6.45% | 🌟 Universal Primary |
-| 2 | VizWiz-VQA | **19/24** | **19/24** | 79.2% | 13/24 | 18/24 | 30.56% | 31.53% | +0.97% | +0.90% | ✅ Strong Anchor |
-| 3 | DocVQA | **18/24** | **18/24** | 75.0% | 11/24 | 13/24 | 33.35% | 35.22% | +1.87% | +1.88% | ✅ Strong Anchor |
-| 4 | TextVQA | **18/24** | **17/24** | 75.0% | 14/24 | 18/24 | 31.12% | 32.92% | +1.80% | +1.83% | ✅ Strong Anchor |
-| 5 | ChartQA | **18/24** | **19/24** | 75.0% | 10/24 | 13/24 | 33.01% | 34.27% | +1.26% | +1.45% | ✅ Strong Anchor |
-| 6 | MMMU | **15/24** | **15/24** | 62.5% | 8/24 | 10/24 | 40.57% | 40.05% | -0.52% | -0.51% | ⚠️ Domain-Specific |
-| 7 | SEEDBench | **14/24** | **16/24** | 58.3% | 18/24 | 17/24 | 26.16% | 27.22% | +1.06% | +1.78% | ⚠️ Domain-Specific |
-| 8 | InfographicVQA | **14/24** | **12/24** | 58.3% | 8/24 | 9/24 | 45.20% | 45.20% | +0.00% | +0.02% | ⚠️ Domain-Specific |
-| 9 | LegoPuzzles | **11/24** | **12/24** | 45.8% | 7/24 | 11/24 | 38.49% | 33.78% | -4.71% | -4.28% | ❌ High Transfer Risk |
-| 10 | MMBench | **10/24** | **9/24** | 41.7% | 16/24 | 17/24 | 27.64% | 27.66% | +0.01% | -0.04% | ❌ High Transfer Risk |
-| 11 | POPE | **10/24** | **7/24** | 41.7% | 17/24 | 22/24 | 38.19% | 38.08% | -0.11% | -0.10% | ❌ High Transfer Risk |
-| 12 | ScienceQA | **10/24** | **7/24** | 41.7% | 14/24 | 18/24 | 33.74% | 33.57% | -0.17% | -0.39% | ❌ High Transfer Risk |
-| 13 | AI2D | **10/24** | **10/24** | 41.7% | 15/24 | 17/24 | 26.03% | 25.84% | -0.19% | -0.28% | ❌ High Transfer Risk |
+| 1 | **VQAv2** | **22/24** | **22/24** | 91.7% | 16/24 | 19/24 | 36.57% | 42.29% | +5.72% | +5.86% | 🌟 Universal Primary |
+| 2 | TextVQA | **20/24** | **20/24** | 83.3% | 14/24 | 17/24 | 31.01% | 32.92% | +1.91% | +1.97% | ✅ Strong Anchor |
+| 3 | VizWiz-VQA | **20/24** | **20/24** | 83.3% | 13/24 | 18/24 | 30.90% | 31.85% | +0.96% | +0.90% | ✅ Strong Anchor |
+| 4 | DocVQA | **18/24** | **18/24** | 75.0% | 10/24 | 13/24 | 34.76% | 36.04% | +1.28% | +1.40% | ✅ Strong Anchor |
+| 5 | ChartQA | **16/24** | **17/24** | 66.7% | 10/24 | 13/24 | 33.70% | 34.33% | +0.63% | +0.92% | ⚠️ Domain-Specific |
+| 6 | MMMU | **15/24** | **16/24** | 62.5% | 8/24 | 10/24 | 40.56% | 40.04% | -0.52% | -0.50% | ⚠️ Domain-Specific |
+| 7 | InfographicVQA | **13/24** | **14/24** | 54.2% | 8/24 | 9/24 | 45.19% | 45.19% | -0.00% | +0.00% | ❌ High Transfer Risk |
+| 8 | MMBench | **12/24** | **11/24** | 50.0% | 17/24 | 17/24 | 26.02% | 28.23% | +2.21% | +2.17% | ❌ High Transfer Risk |
+| 9 | SEEDBench | **12/24** | **13/24** | 50.0% | 16/24 | 17/24 | 31.46% | 27.47% | -3.99% | -2.78% | ❌ High Transfer Risk |
+| 10 | LegoPuzzles | **12/24** | **12/24** | 50.0% | 7/24 | 11/24 | 38.67% | 34.01% | -4.66% | -4.24% | ❌ High Transfer Risk |
+| 11 | AI2D | **11/24** | **10/24** | 45.8% | 14/24 | 17/24 | 24.53% | 26.48% | +1.95% | +1.90% | ❌ High Transfer Risk |
+| 12 | POPE | **9/24** | **8/24** | 37.5% | 17/24 | 22/24 | 38.40% | 38.58% | +0.18% | +0.15% | ❌ High Transfer Risk |
+| 13 | ScienceQA | **8/24** | **8/24** | 33.3% | 13/24 | 18/24 | 34.07% | 33.71% | -0.36% | -0.49% | ❌ High Transfer Risk |
 
 ### Analysis of Universal vs. Fragile Anchors
 - **VQAv2 (22/24 Wins, 91.7%)**: The universal primary anchor across both architectures. VQAv2 encompasses diverse real-world images, open-ended question types, and balanced confidence distributions. Models calibrated on VQAv2 generalize seamlessly to diagrammatic (AI2D), document (DocVQA), and perceptual (VizWiz) domains.
@@ -45,18 +45,18 @@ When calibrated zero-shot on VQAv2, where does Platt 5D achieve the largest win 
 
 | Target Benchmark | Platt 1D ECE | Platt 5D ECE | Δ ECE (%) (↑) | Δ Ada-ECE (%) (↑) | Δ AUROC (↑) | Δ Brier (↑) | M3 Δ ECE | MQT Δ ECE | All 4 Metrics? |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `DocVQA` | 68.22% | 50.17% | **+18.05%** | **+18.05%** | +0.0116 | +0.1872 | +18.80% | +17.29% | ⚡ Partial (MQT) |
-| `ChartQA` | 67.81% | 54.82% | **+12.99%** | **+13.03%** | +0.0517 | +0.1462 | +15.23% | +10.74% | ⚡ Partial (MQT) |
-| `TextVQA` | 26.81% | 14.72% | **+12.08%** | **+12.33%** | -0.0066 | +0.0533 | +11.36% | +12.80% | ⚡ Partial (MQT) |
-| `InfographicVQA` | 78.72% | 69.82% | **+8.90%** | **+8.90%** | +0.0009 | +0.1117 | +9.87% | +7.94% | ⚡ Partial (M3) |
-| `MMMU` | 71.46% | 62.59% | **+8.87%** | **+8.87%** | +0.0736 | +0.0953 | +9.99% | +7.75% | ✅ Yes (Both) |
-| `VizWiz-VQA` | 34.62% | 28.70% | **+5.92%** | **+5.85%** | -0.0719 | +0.0271 | +4.24% | +7.60% | ❌ |
-| `POPE` | 7.38% | 2.47% | **+4.91%** | **+5.00%** | -0.0544 | +0.0013 | +3.69% | +6.12% | ❌ |
-| `AI2D` | 31.94% | 28.37% | **+3.57%** | **+3.56%** | -0.0232 | +0.0146 | +2.95% | +4.19% | ⚡ Partial (M3) |
-| `MMBench` | 20.03% | 18.05% | **+1.98%** | **+2.29%** | -0.0129 | +0.0030 | +1.97% | +1.98% | ⚡ Partial (M3) |
-| `SEEDBench` | 23.31% | 21.48% | **+1.83%** | **+2.36%** | +0.0404 | +0.0115 | +2.28% | +1.39% | ⚡ Partial (M3) |
-| `ScienceQA` | 11.69% | 12.36% | **-0.67%** | **-0.04%** | -0.0544 | -0.0088 | -2.84% | +1.50% | ❌ |
-| `LegoPuzzles` | 55.15% | 58.07% | **-2.91%** | **-2.78%** | +0.0002 | -0.0201 | +3.01% | -8.84% | ⚡ Partial (M3) |
+| `DocVQA` | 69.84% | 52.18% | **+17.66%** | **+17.66%** | -0.0013 | +0.1848 | +16.97% | +18.35% | ⚡ Partial (M3) |
+| `TextVQA` | 27.51% | 15.46% | **+12.05%** | **+11.94%** | -0.0087 | +0.0546 | +10.52% | +13.58% | ⚡ Partial (MQT) |
+| `ChartQA` | 70.40% | 58.63% | **+11.77%** | **+11.82%** | +0.0637 | +0.1372 | +13.29% | +10.24% | ⚡ Partial (MQT) |
+| `MMMU` | 72.86% | 64.89% | **+7.97%** | **+7.97%** | +0.0837 | +0.0879 | +8.92% | +7.02% | ✅ Yes (Both) |
+| `InfographicVQA` | 79.62% | 71.75% | **+7.87%** | **+7.87%** | -0.0106 | +0.1008 | +8.59% | +7.15% | ⚡ Partial (M3) |
+| `VizWiz-VQA` | 35.76% | 29.38% | **+6.38%** | **+6.40%** | -0.0684 | +0.0348 | +3.64% | +9.12% | ❌ |
+| `POPE` | 7.34% | 2.86% | **+4.48%** | **+4.52%** | -0.0516 | +0.0020 | +2.76% | +6.21% | ❌ |
+| `AI2D` | 32.73% | 30.78% | **+1.95%** | **+2.04%** | -0.0308 | +0.0056 | +1.58% | +2.32% | ⚡ Partial (M3) |
+| `MMBench` | 19.57% | 17.96% | **+1.62%** | **+2.07%** | -0.0052 | -0.0007 | +1.00% | +2.24% | ⚡ Partial (M3) |
+| `SEEDBench` | 23.40% | 22.70% | **+0.70%** | **+1.22%** | +0.0348 | +0.0059 | +1.01% | +0.39% | ⚡ Partial (M3) |
+| `ScienceQA` | 12.12% | 12.27% | **-0.16%** | **+0.38%** | -0.0592 | -0.0096 | -2.27% | +1.96% | ❌ |
+| `LegoPuzzles` | 56.34% | 60.02% | **-3.69%** | **-3.52%** | -0.0025 | -0.0291 | +2.04% | -9.42% | ⚡ Partial (M3) |
 
 ### Decisive Target Wins (Trained on VQAv2)
 Platt 5D trained on VQAv2 achieves dramatic calibration gains on the most challenging vision-language benchmarks:
@@ -72,11 +72,11 @@ Platt 5D trained on VQAv2 achieves dramatic calibration gains on the most challe
 
 | Source Anchor | Top Winning Target | Δ ECE (%) (↑) | Δ Ada-ECE (%) (↑) | Δ AUROC (↑) | Δ Brier (↑) |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **VizWiz-VQA** | `ChartQA` | **+2.87%** | **+2.82%** | +0.0095 | +0.0259 |
-| **DocVQA** | `POPE` | **+5.94%** | **+5.94%** | -0.0604 | +0.0973 |
-| **TextVQA** | `POPE` | **+8.65%** | **+8.79%** | -0.0321 | +0.0509 |
-| **ChartQA** | `VizWiz-VQA` | **+3.54%** | **+4.20%** | +0.1472 | +0.0059 |
-| **POPE** | `DocVQA` | **+0.79%** | **+0.79%** | -0.0036 | +0.0038 |
+| **VizWiz-VQA** | `ChartQA` | **+2.44%** | **+2.52%** | +0.0095 | +0.0269 |
+| **DocVQA** | `POPE` | **+4.55%** | **+4.55%** | -0.0775 | +0.0766 |
+| **TextVQA** | `POPE` | **+8.74%** | **+9.01%** | -0.0302 | +0.0523 |
+| **ChartQA** | `LegoPuzzles` | **+2.43%** | **+2.60%** | -0.0037 | +0.0048 |
+| **POPE** | `DocVQA` | **+1.55%** | **+1.55%** | +0.0016 | +0.0147 |
 
 ---
 ## 3. Platt 5D vs. VCPS-5D: Parsimony vs. Over-parameterization
@@ -87,12 +87,12 @@ We performed a rigorous empirical and architectural comparison across all 312 pa
 
 | Evaluation Metric | M3-LLaVA (N=156) | MQT-LLaVA (N=156) | Overall Combined (N=312) | Top 5 Universal Anchors (N=120) | Advantage |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **ECE Win Rate** | 100/156 (64.1%) | 81/156 (51.9%) | **181/312 (58.0%)** | **91/120 (75.8%)** | Platt 5D wins 75.8% on universal anchors |
-| **Ada-ECE Win Rate** | 97/156 (62.2%) | 80/156 (51.3%) | **177/312 (56.7%)** | **93/120 (77.5%)** | Superior quantile bin calibration |
-| **AUROC Win Rate** | 50/156 (32.1%) | 35/156 (22.4%) | 85/312 (27.2%) | 42/120 (35.0%) | Monotonic rank retention |
-| **Brier Score Win Rate** | 80/156 (51.3%) | 69/156 (44.2%) | 149/312 (47.8%) | 68/120 (56.7%) | Strong probabilistic scoring |
-| **Macro Mean ECE** | P5: 37.08% vs VC: **37.00%** | P5: 30.49% vs VC: **30.21%** | P5: 33.78% vs VC: **33.61%** | P5: **32.64%** vs VC: 34.43% | P5 +1.79% better on top anchors |
-| **Median ECE Difference** | **-0.18%** | **-0.09%** | **-0.14%** | **-0.28%** | P5 lower on typical transfer pairs |
+| **ECE Win Rate** | 102/156 (65.4%) | 84/156 (53.8%) | **186/312 (59.6%)** | **97/120 (80.8%)** | Platt 5D wins 75.8% on universal anchors |
+| **Ada-ECE Win Rate** | 102/156 (65.4%) | 83/156 (53.2%) | **185/312 (59.3%)** | **99/120 (82.5%)** | Superior quantile bin calibration |
+| **AUROC Win Rate** | 52/156 (33.3%) | 35/156 (22.4%) | 87/312 (27.9%) | 42/120 (35.0%) | Monotonic rank retention |
+| **Brier Score Win Rate** | 85/156 (54.5%) | 68/156 (43.6%) | 153/312 (49.0%) | 68/120 (56.7%) | Strong probabilistic scoring |
+| **Macro Mean ECE** | P5: 37.08% vs VC: **37.08%** | P5: 30.49% vs VC: **30.90%** | P5: 33.78% vs VC: **33.99%** | P5: **33.39%** vs VC: 35.03% | P5 +1.79% better on top anchors |
+| **Median ECE Difference** | **-0.14%** | **-0.13%** | **-0.14%** | **-0.28%** | P5 lower on typical transfer pairs |
 
 ### Statistical Interpretation: Why Platt 5D Dominates
 1. **Universal Anchors Reality (Top 5 Anchors, N=120 Transfers)**:
