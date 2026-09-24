@@ -1,0 +1,83 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{RQ1 Evaluation on MQT-LLaVA (7B).}
+Comparison of calibration methods across seven vision-language benchmarks.
+Metrics: Expected Calibration Error (ECE (\%) $\downarrow$), Adaptive ECE
+(Ada-ECE (\%) $\downarrow$), Brier Score ($\downarrow$), and AUROC ($\uparrow$).
+\textbf{Bold}: Rank 1; \textit{italic}: Rank 2 among single-pass methods.}
+\label{tab:rq1_mqt_llava}
+
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{1.05}
+
+\begin{tabularx}{\textwidth}{l *{16}{Y}}
+\toprule
+& \multicolumn{4}{c}{\textbf{Naive Confidence}}
+& \multicolumn{4}{c}{\textbf{Temperature Scaling}}
+& \multicolumn{4}{c}{\textbf{Platt Scaling (1D)}}
+& \multicolumn{4}{c}{\textbf{Trajectory Platt (5D)}} \\
+\cmidrule(lr){2-5}
+\cmidrule(lr){6-9}
+\cmidrule(lr){10-13}
+\cmidrule(lr){14-17}
+
+\textbf{Dataset}
+& ECE & Ada. & Brier & AUROC
+& ECE & Ada. & Brier & AUROC
+& ECE & Ada. & Brier & AUROC
+& ECE & Ada. & Brier & AUROC \\
+\midrule
+
+AI2D
+& 27.15 & 26.92 & 0.2887 & \textbf{0.746}
+& 13.31 & 13.10 & 0.2197 & \textbf{0.746}
+& \textbf{5.92} & \textit{8.25} & \textbf{0.2015} & \textbf{0.746}
+& \textit{6.27} & \textbf{6.53} & \textit{0.2035} & \textit{0.739} \\
+
+ChartQA
+& 71.30 & 71.30 & 0.6483 & 0.491
+& 44.88 & 44.88 & 0.2779 & 0.491
+& \textit{3.06} & \textit{4.27} & \textbf{0.0762} & \textit{0.509}
+& \textbf{2.44} & \textbf{3.92} & \textit{0.0765} & \textbf{0.603} \\
+
+DocVQA
+& 53.30 & 53.30 & 0.4162 & \textit{0.517}
+& 47.07 & 47.07 & 0.2584 & \textit{0.517}
+& \textbf{0.09} & \textit{3.67} & \textbf{0.0362} & \textit{0.517}
+& \textit{1.08} & \textbf{2.06} & \textit{0.0364} & \textbf{0.594} \\
+
+ScienceQA
+& 23.65 & 23.17 & 0.2579 & \textit{0.760}
+& 9.32 & 10.23 & 0.1975 & \textit{0.760}
+& \textit{7.99} & \textit{6.91} & \textit{0.1916} & \textit{0.760}
+& \textbf{6.46} & \textbf{5.72} & \textbf{0.1860} & \textbf{0.769} \\
+
+TextVQA
+& 32.27 & 31.91 & 0.3286 & \textit{0.684}
+& 18.21 & 18.32 & 0.2503 & \textit{0.684}
+& \textit{8.95} & \textit{10.46} & \textit{0.2148} & \textit{0.684}
+& \textbf{5.25} & \textbf{7.76} & \textbf{0.1948} & \textbf{0.719} \\
+
+VizWiz-VQA
+& 30.66 & 30.66 & 0.2435 & \textbf{0.797}
+& 29.41 & 29.41 & 0.2328 & \textbf{0.797}
+& \textit{6.27} & \textbf{7.62} & \textit{0.1433} & \textbf{0.797}
+& \textbf{6.03} & \textit{8.17} & \textbf{0.1418} & \textit{0.795} \\
+
+VQAv2
+& \textit{10.49} & \textit{10.31} & 0.1713 & \textit{0.641}
+& 13.87 & 13.65 & 0.1789 & \textit{0.641}
+& 10.54 & 10.94 & \textit{0.1712} & \textit{0.641}
+& \textbf{7.16} & \textbf{7.64} & \textbf{0.1629} & \textbf{0.739} \\
+
+\midrule
+\textbf{Macro Avg.}
+& 35.55 & 35.37 & 0.3364 & 0.662
+& 25.15 & 25.24 & 0.2308 & 0.662
+& \textit{6.12} & \textit{7.45} & \textit{0.1478} & \textit{0.665}
+& \textbf{4.96} & \textbf{5.97} & \textbf{0.1431} & \textbf{0.708} \\
+
+\bottomrule
+\end{tabularx}
+\end{table*}

@@ -352,46 +352,40 @@ def test_9_dataset_wise_tables_all_8_methods_and_unshaded() -> None:
 
 
 def test_rq1_core7_benchmark_table() -> None:
-    """Verify rq1_core7_benchmark.tex structure, 33 columns, Core 7 isolation, 8 methods, unshaded Option A ranking."""
+    """Verify rq1_core7_benchmark.tex structure, tabularx format, Core 7 isolation, 4 methods, unshaded Option A ranking."""
     assert RQ1_CORE7_FILE.exists(), f"Missing {RQ1_CORE7_FILE}"
     content = RQ1_CORE7_FILE.read_text(encoding="utf-8")
 
-    # Table environment and column specification (1 method col + 32 metric cols = 33 cols)
+    # Table environment and tabularx column specification
     assert r"\begin{table*}[t]" in content
-    assert r"\label{tab:rq1_core7_benchmark}" in content
-    assert r"\begin{tabular}{l cccccccccccccccccccccccccccccccc}" in content
+    assert r"\label{tab:rq1_m3_llava}" in content
+    assert r"\label{tab:rq1_mqt_llava}" in content
+    assert r"\begin{tabularx}{\textwidth}{l *{16}{Y}}" in content
     assert r"\toprule" in content
     assert r"\bottomrule" in content
 
-    # Panel headers
-    assert "Panel A: M3-LLaVA (7B)" in content
-    assert "Panel B: MQT-LLaVA (7B)" in content
+    # Both architecture titles present
+    assert "RQ1 Evaluation on M3-LLaVA (7B)" in content
+    assert "RQ1 Evaluation on MQT-LLaVA (7B)" in content
 
-    # Top headers: exactly the 7 Core datasets + Macro Average
+    # Top headers: exactly the 4 methods
+    assert r"\multicolumn{4}{c}{\textbf{Naive Confidence}}" in content
+    assert r"\multicolumn{4}{c}{\textbf{Temperature Scaling}}" in content
+    assert r"\multicolumn{4}{c}{\textbf{Platt Scaling (1D)}}" in content
+    assert r"\multicolumn{4}{c}{\textbf{Trajectory Platt (5D)}}" in content
+
+    # Datasets
     for ds in CORE_DATASETS:
         display_name = DATASET_DISPLAY_MAP[ds]
-        assert rf"\textbf{{{display_name}}}" in content, f"Missing {display_name} in header"
-    assert r"\textbf{Macro Average}" in content
+        assert display_name in content, f"Missing {display_name} in content"
+    assert r"\textbf{Macro Avg.}" in content
 
     # Strict isolation: adversarial datasets must NOT be present
     assert "AVQA" not in content
     assert "VLLM-Safety" not in content
 
-    # Sub-headers (4 metrics per dataset)
-    assert r"ECE (\%) $\downarrow$" in content
-    assert r"Ada-ECE (\%) $\downarrow$" in content
-    assert r"Brier $\downarrow$" in content
-    assert r"AUROC $\uparrow$" in content
-
-    # All 8 methods present in both panels in strict canonical order
-    panels = content.split(r"Panel B: MQT-LLaVA (7B)")
-    assert len(panels) == 2
-    for panel_idx, panel in enumerate(panels):
-        positions = [panel.find(m) for m in ALL_8_METHODS]
-        assert all(pos != -1 for pos in positions), f"Missing method in panel {panel_idx}"
-        assert positions == sorted(positions), (
-            f"Methods not in canonical order in panel {panel_idx} of rq1_core7: {positions}"
-        )
+    # Sub-headers (4 metrics per method)
+    assert "ECE & Ada. & Brier & AUROC" in content
 
     # Strictly unshaded: NO \rowcolor
     assert r"\rowcolor" not in content, "Found forbidden \\rowcolor in rq1_core7_benchmark.tex"
@@ -399,9 +393,6 @@ def test_rq1_core7_benchmark_table() -> None:
     # Option A ranking applied for single-pass methods
     assert r"\textbf{" in content
     assert r"\textit{" in content
-
-    # Multi-pass baselines have placeholder dashes
-    assert "- & - & - & -" in content
 
 
 def test_rq1_adversarial_benchmark_table() -> None:
@@ -470,7 +461,8 @@ def test_build_rq1_tables_dynamic() -> None:
     )
     t_core7 = build_rq1_core7_table(empty_df, empty_df)
     assert r"\begin{table*}[t]" in t_core7
-    assert r"\label{tab:rq1_core7_benchmark}" in t_core7
+    assert r"\label{tab:rq1_m3_llava}" in t_core7
+    assert r"\label{tab:rq1_mqt_llava}" in t_core7
     assert "-" in t_core7
 
     t_adv = build_rq1_adversarial_table(empty_df, empty_df)
@@ -482,7 +474,7 @@ def test_build_rq1_tables_dynamic() -> None:
 def test_dynamic_multi_pass_data_ingestion() -> None:
     """Verify that when df_arch contains multi-pass baseline rows, table builders dynamically populate and rank them."""
     rows = []
-    for ds in CORE_DATASETS:
+    for ds in list(CORE_DATASETS) + list(ADVERSARIAL_DATASETS):
         for m in ALL_8_METHODS:
             rows.append(
                 {
@@ -496,17 +488,22 @@ def test_dynamic_multi_pass_data_ingestion() -> None:
             )
     df_full = pd.DataFrame(rows)
 
-    # Core 7 table should format numerical values for multi-pass instead of dashes
+    # Core 7 table should format numerical values for core 4 methods
     t_core7 = build_rq1_core7_table(df_full, df_full)
     assert r"\begin{table*}[t]" in t_core7
+    assert "10.00" in t_core7
+    assert "0.1500" in t_core7
+
+    # Adversarial table should dynamically populate multi-pass rows
+    t_adv = build_rq1_adversarial_table(df_full, df_full)
+    assert r"\begin{table*}[t]" in t_adv
     for m in ["LN-Entropy", "Semantic Entropy", "EigenScore", "UMPIRE"]:
-        assert m in t_core7
-        for line in t_core7.splitlines():
+        assert m in t_adv
+        for line in t_adv.splitlines():
             if line.startswith(m):
-                # Verify cells do not contain placeholder dash "-"
                 clean_line = line.strip().removesuffix(r"\\").strip()
                 cells = [c.strip() for c in clean_line.split("&")[1:]]
-                assert all(c != "-" for c in cells), f"Method {m} has placeholder dashes: {line}"
+                assert all(c != "-" for c in cells), f"Adversarial method {m} has dashes: {line}"
                 assert "10.00" in line
                 assert "0.1500" in line
 

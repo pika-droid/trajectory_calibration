@@ -467,60 +467,139 @@ def _render_rq1_panel_rows(
     return lines
 
 
-def build_rq1_core7_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> str:
-    """Builds unified stacked 2-panel Core 7 master benchmark table for RQ1."""
-    tab_label = "tab:rq1_core7_benchmark"
-    num_cols = len(CORE_DATASETS) * 4 + 4 + 1  # 33 columns
-    col_spec = "l " + "c" * (num_cols - 1)
+RQ1_CORE7_METHODS = [
+    "Naive Confidence (NC)",
+    "Temperature Scaling (TS)",
+    "Platt Scaling (1D)",
+    "Trajectory Platt (5D)",
+]
 
-    top_ds_headers = " & ".join(
-        [rf"\multicolumn{{4}}{{c}}{{\textbf{{{DATASET_DISPLAY_MAP[ds]}}}}}" for ds in CORE_DATASETS]
-    )
-    cmidrules = " ".join(
-        [rf"\cmidrule(lr){{{4 * i + 2}-{4 * i + 5}}}" for i in range(len(CORE_DATASETS) + 1)]
-    )
-    sub_headers = " & ".join(
-        [
-            r"ECE (\%) $\downarrow$ & Ada-ECE (\%) $\downarrow$ & Brier $\downarrow$ & AUROC $\uparrow$"
-        ]
-        * (len(CORE_DATASETS) + 1)
-    )
 
+def _render_rq1_core7_arch_table(
+    df_arch: pd.DataFrame,
+    arch_title: str,
+    arch_label: str,
+) -> str:
+    """Renders a single-architecture 17-column tabularx table for RQ1 Core 7 evaluation."""
     lines = [
         r"\begin{table*}[t]",
         r"\centering",
-        r"\caption{\textbf{RQ1 Evaluation: Autoregressive Trajectory Features vs. Calibration Baselines Across Core 7 Vision-Language Benchmarks.} Comparison of single-pass calibrators ($T = 0.0, K = 1$) against multi-pass sampling baselines ($K = 10$) across M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B). Metrics: Expected Calibration Error (ECE (\%) $\downarrow$), Adaptive ECE (Ada-ECE (\%) $\downarrow$), Brier Score ($\downarrow$), and AUROC ($\uparrow$). \textbf{Bold}: Rank 1; \textit{italic}: Rank 2 within each metric column among single-pass methods. Multi-pass baselines report placeholders ($-$) pending rerun completion. Clean unshaded presentation.}",
-        rf"\label{{{tab_label}}}",
-        r"\tablestyle{2.0pt}{1.05}",
-        r"\resizebox{\textwidth}{!}{%",
-        rf"\begin{{tabular}}{{{col_spec}}}",
+        rf"\caption{{\textbf{{RQ1 Evaluation on {arch_title} (7B).}}",
+        r"Comparison of calibration methods across seven vision-language benchmarks.",
+        r"Metrics: Expected Calibration Error (ECE (\%) $\downarrow$), Adaptive ECE",
+        r"(Ada-ECE (\%) $\downarrow$), Brier Score ($\downarrow$), and AUROC ($\uparrow$).",
+        r"\textbf{Bold}: Rank 1; \textit{italic}: Rank 2 among single-pass methods.}",
+        rf"\label{{{arch_label}}}",
+        "",
+        r"\scriptsize",
+        r"\setlength{\tabcolsep}{2pt}",
+        r"\renewcommand{\arraystretch}{1.05}",
+        "",
+        r"\begin{tabularx}{\textwidth}{l *{16}{Y}}",
         r"\toprule",
-        rf" & {top_ds_headers} & \multicolumn{{4}}{{c}}{{\textbf{{Macro Average}}}} \\",
-        cmidrules,
-        rf"\textbf{{Calibration Method}} & {sub_headers} \\",
+        r"& \multicolumn{4}{c}{\textbf{Naive Confidence}}",
+        r"& \multicolumn{4}{c}{\textbf{Temperature Scaling}}",
+        r"& \multicolumn{4}{c}{\textbf{Platt Scaling (1D)}}",
+        r"& \multicolumn{4}{c}{\textbf{Trajectory Platt (5D)}} \\",
+        r"\cmidrule(lr){2-5}",
+        r"\cmidrule(lr){6-9}",
+        r"\cmidrule(lr){10-13}",
+        r"\cmidrule(lr){14-17}",
+        "",
+        r"\textbf{Dataset}",
+        r"& ECE & Ada. & Brier & AUROC",
+        r"& ECE & Ada. & Brier & AUROC",
+        r"& ECE & Ada. & Brier & AUROC",
+        r"& ECE & Ada. & Brier & AUROC \\",
         r"\midrule",
-        rf"\multicolumn{{{num_cols}}}{{l}}{{\textbf{{Panel A: M3-LLaVA (7B)}}}} \\",
-        r"\midrule",
+        "",
     ]
 
-    lines.extend(_render_rq1_panel_rows(df_m3, CORE_DATASETS))
-    lines.extend(
-        [
-            r"\midrule",
-            rf"\multicolumn{{{num_cols}}}{{l}}{{\textbf{{Panel B: MQT-LLaVA (7B)}}}} \\",
-            r"\midrule",
-        ]
-    )
-    lines.extend(_render_rq1_panel_rows(df_mqt, CORE_DATASETS))
-    lines.extend(
-        [
-            r"\bottomrule",
-            r"\end{tabular}%",
-            r"}",
-            r"\end{table*}",
-        ]
-    )
+    for ds in CORE_DATASETS:
+        ece_vals: list[float | None] = []
+        ada_vals: list[float | None] = []
+        brier_vals: list[float | None] = []
+        auc_vals: list[float | None] = []
+        for m in RQ1_CORE7_METHODS:
+            sub = df_arch[(df_arch["dataset"] == ds) & (df_arch["method"] == m)]
+            ece_vals.append(float(sub["ece_percent"].mean()) if not sub.empty else None)
+            ada_vals.append(float(sub["adaptive_ece_percent"].mean()) if not sub.empty else None)
+            brier_vals.append(float(sub["brier"].mean()) if not sub.empty else None)
+            auc_vals.append(float(sub["auroc"].mean()) if not sub.empty else None)
+
+        ece_fmt = rank_and_format(ece_vals, higher_is_better=False, decimals=2)
+        ada_fmt = rank_and_format(ada_vals, higher_is_better=False, decimals=2)
+        brier_fmt = rank_and_format(brier_vals, higher_is_better=False, decimals=4)
+        auc_fmt = rank_and_format(auc_vals, higher_is_better=True, decimals=3)
+
+        ds_name = DATASET_DISPLAY_MAP[ds]
+        lines.append(ds_name)
+        for i in range(len(RQ1_CORE7_METHODS)):
+            suffix = " \\\\" if i == len(RQ1_CORE7_METHODS) - 1 else ""
+            lines.append(f"& {ece_fmt[i]} & {ada_fmt[i]} & {brier_fmt[i]} & {auc_fmt[i]}{suffix}")
+        lines.append("")
+
+    # Macro Average row across Core 7 datasets
+    avg_ece_vals: list[float | None] = []
+    avg_ada_vals: list[float | None] = []
+    avg_brier_vals: list[float | None] = []
+    avg_auc_vals: list[float | None] = []
+    for m in RQ1_CORE7_METHODS:
+        sub = df_arch[(df_arch["dataset"].isin(CORE_DATASETS)) & (df_arch["method"] == m)]
+        avg_ece_vals.append(float(sub["ece_percent"].mean()) if not sub.empty else None)
+        avg_ada_vals.append(float(sub["adaptive_ece_percent"].mean()) if not sub.empty else None)
+        avg_brier_vals.append(float(sub["brier"].mean()) if not sub.empty else None)
+        avg_auc_vals.append(float(sub["auroc"].mean()) if not sub.empty else None)
+
+    avg_ece_fmt = rank_and_format(avg_ece_vals, higher_is_better=False, decimals=2)
+    avg_ada_fmt = rank_and_format(avg_ada_vals, higher_is_better=False, decimals=2)
+    avg_brier_fmt = rank_and_format(avg_brier_vals, higher_is_better=False, decimals=4)
+    avg_auc_fmt = rank_and_format(avg_auc_vals, higher_is_better=True, decimals=3)
+
+    lines.append(r"\midrule")
+    lines.append(r"\textbf{Macro Avg.}")
+    for i in range(len(RQ1_CORE7_METHODS)):
+        suffix = " \\\\" if i == len(RQ1_CORE7_METHODS) - 1 else ""
+        lines.append(
+            f"& {avg_ece_fmt[i]} & {avg_ada_fmt[i]} & {avg_brier_fmt[i]} & {avg_auc_fmt[i]}{suffix}"
+        )
+    lines.append("")
+    lines.append(r"\bottomrule")
+    lines.append(r"\end{tabularx}")
+    lines.append(r"\end{table*}")
+
     return "\n".join(lines)
+
+
+def build_rq1_core7_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> str:
+    """Builds unified Core 7 master benchmark tables for RQ1 across M3 and MQT."""
+    m3_table = _render_rq1_core7_arch_table(
+        df_m3, arch_title="M3-LLaVA", arch_label="tab:rq1_m3_llava"
+    )
+    mqt_table = _render_rq1_core7_arch_table(
+        df_mqt, arch_title="MQT-LLaVA", arch_label="tab:rq1_mqt_llava"
+    )
+
+    parts = [
+        "% Preamble",
+        r"\usepackage{tabularx}",
+        r"\usepackage{array}",
+        "",
+        r"\newcolumntype{Y}{>{\centering\arraybackslash}X}",
+        "",
+        "",
+        "% ============================================================",
+        "% M3-LLaVA",
+        "% ============================================================",
+        m3_table,
+        "",
+        "",
+        "% ============================================================",
+        "% MQT-LLaVA",
+        "% ============================================================",
+        mqt_table,
+    ]
+    return "\n".join(parts)
 
 
 def build_rq1_adversarial_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> str:
@@ -641,6 +720,18 @@ def generate_benchmark_tables():
     out_rq1_core7 = RQ1_CORE7_FILE
     out_rq1_core7.write_text(rq1_core7 + "\n", encoding="utf-8")
     print(f"Generated: {out_rq1_core7}")
+
+    # Also generate individual per-arch files for standalone modular inclusion
+    m3_table = _render_rq1_core7_arch_table(
+        df_m3, arch_title="M3-LLaVA", arch_label="tab:rq1_m3_llava"
+    )
+    mqt_table = _render_rq1_core7_arch_table(
+        df_mqt, arch_title="MQT-LLaVA", arch_label="tab:rq1_mqt_llava"
+    )
+    (TABLES_DIR / "rq1_core7_m3.tex").write_text(m3_table + "\n", encoding="utf-8")
+    (TABLES_DIR / "rq1_core7_mqt.tex").write_text(mqt_table + "\n", encoding="utf-8")
+    print(f"Generated: {TABLES_DIR / 'rq1_core7_m3.tex'}")
+    print(f"Generated: {TABLES_DIR / 'rq1_core7_mqt.tex'}")
 
     # 6. RQ1 Master Table: Adversarial Benchmark
     rq1_adv = build_rq1_adversarial_table(df_m3, df_mqt)

@@ -2,6 +2,13 @@
 \usepackage[margin=0.7in]{geometry}
 \usepackage{amsmath,amssymb,booktabs,graphicx,multirow,colortbl,xcolor}
 \usepackage[colorlinks=true,linkcolor=blue!70!black,citecolor=blue!70!black,urlcolor=blue!70!black]{hyperref}
+\usepackage{tabularx}
+\usepackage{array}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\makeatletter
+\let\orig@usepackage\usepackage
+\renewcommand{\usepackage}[2][]{}
+\makeatother
 \newcommand{\tablestyle}[2]{\setlength{\tabcolsep}{#1}\renewcommand{\arraystretch}{#2}}
 \title{\textbf{Trajectory Uncertainty Calibration for Multimodal VLMs}\\[0.4em] \Large Complete Benchmark \& Transfer LaTeX Table Compendium}
 \author{M3-LLaVA (7B) \& MQT-LLaVA (7B) Evaluations}
