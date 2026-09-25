@@ -177,10 +177,10 @@ Evaluated across all 14 vision-language benchmarks on single-pass feature matric
 
 | Calibration Method | ai2d | chartqa | docvqa | scienceqa | textvqa | vizwiz-vqa | vqav2 | Macro Mean |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Naive Confidence (NC) | 42.00% | 71.03% | 74.57% | 11.26% | 11.07% | 15.97% | 7.23% | 33.30% |
-| Temperature Scaling (TS) | 12.18% | 44.47% | 48.89% | 9.83% | 11.14% | 15.09% | 8.58% | 21.45% |
-| Platt Scaling (1D) | **7.70%** | *3.62%* | *2.52%* | **6.91%** | *8.22%* | **5.80%** | *6.97%* | **5.96%** |
-| **Trajectory Platt (5D) [Our Method]** | *11.15%* | **2.88%** | **1.81%** | *9.58%* | **5.35%** | *6.57%* | **6.50%** | *6.26%* |
+| Naive Confidence (NC) | 42.00% | 71.03% | 74.57% | 21.93% | 11.07% | 15.97% | 7.23% | 34.83% |
+| Temperature Scaling (TS) | 12.18% | 44.47% | 48.89% | 12.68% | 11.14% | 15.09% | 8.58% | 21.86% |
+| Platt Scaling (1D) | **7.70%** | *3.62%* | *2.52%* | **4.99%** | *8.22%* | **5.80%** | *6.97%* | **5.69%** |
+| **Trajectory Platt (5D) [Our Method]** | *11.15%* | **2.88%** | **1.81%** | *6.15%* | **5.35%** | *6.57%* | **6.50%** | *5.78%* |
 
 - **Trajectory Platt (5D) vs. Global Temperature Scaling (TS)**:
   - Trajectory Platt (5D) beats TS on **7 / 7 Core datasets**.
@@ -223,10 +223,10 @@ Compares single-pass greedy calibration ($T=0.0$, $1\times$ compute) against cla
 
 | Model | Calibration Method | Regime / Sampling | Macro ECE (%) $\downarrow$ | Macro Ada-ECE (%) $\downarrow$ | Macro Brier $\downarrow$ | Macro AUROC $\uparrow$ |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: |
-| **M3-LLaVA** | Naive Confidence (NC) | Single-Pass ($T = 0.0$) | 33.37% | 33.30% | 0.3375 | *0.764* |
-|  | Temperature Scaling (TS) | Single-Pass ($T = 0.0$) | 20.88% | 21.45% | 0.2120 | *0.764* |
-|  | Platt Scaling (1D) | Single-Pass ($T = 0.0$) | **5.41%** | **5.96%** | *0.1408* | *0.764* |
-|  | **Trajectory Platt (5D) [Our Method]** | Single-Pass ($T = 0.0$) | *5.49%* | *6.26%* | **0.1393** | **0.779** |
+| **M3-LLaVA** | Naive Confidence (NC) | Single-Pass ($T = 0.0$) | 34.98% | 34.83% | 0.3475 | *0.782* |
+|  | Temperature Scaling (TS) | Single-Pass ($T = 0.0$) | 21.42% | 21.86% | 0.2168 | *0.782* |
+|  | Platt Scaling (1D) | Single-Pass ($T = 0.0$) | **5.27%** | **5.69%** | *0.1442* | *0.782* |
+|  | **Trajectory Platt (5D) [Our Method]** | Single-Pass ($T = 0.0$) | *5.42%* | *5.78%* | **0.1425** | **0.800** |
 | **MQT-LLaVA** | Naive Confidence (NC) | Single-Pass ($T = 0.0$) | 35.55% | 35.37% | 0.3364 | 0.662 |
 |  | Temperature Scaling (TS) | Single-Pass ($T = 0.0$) | 25.15% | 25.24% | 0.2308 | 0.662 |
 |  | Platt Scaling (1D) | Single-Pass ($T = 0.0$) | *6.12%* | *7.45%* | *0.1478* | *0.665* |
@@ -266,10 +266,10 @@ To rigorously evaluate zero-shot calibration stability under generation temperat
 
 | Model | Calibration Method | $T=0.0$ | $T=0.3$ | $T=0.6$ | $T=1.0$ | $T=1.5$ | Mean ECE $\downarrow$ |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **M3-LLaVA** | Platt Scaling (1D) | *6.27%* | *20.51%* | **9.21%** | **6.42%** | **8.74%** | **10.23%** |
-|  | **Trajectory Platt (5D) [Our Method]** | **5.66%** | **19.54%** | *9.42%* | *7.86%* | 11.84% | *10.86%* |
-|  | Temperature Scaling (TS) | 9.77% | 23.16% | 12.69% | 9.22% | 10.29% | 13.03% |
-|  | Naive Confidence (NC) | 10.20% | 24.89% | 15.37% | 10.00% | *10.06%* | 14.11% |
+| **M3-LLaVA** | Platt Scaling (1D) | *6.02%* | *21.35%* | *12.37%* | 10.17% | 14.88% | **12.96%** |
+|  | Temperature Scaling (TS) | 10.71% | 22.15% | 13.24% | **9.37%** | *10.36%* | *13.16%* |
+|  | **Trajectory Platt (5D) [Our Method]** | **5.54%** | **20.00%** | **12.19%** | 11.48% | 16.74% | 13.19% |
+|  | Naive Confidence (NC) | 13.02% | 24.78% | 16.11% | *9.89%* | **9.74%** | 14.71% |
 | **MQT-LLaVA** | **Trajectory Platt (5D) [Our Method]** | **5.42%** | **20.93%** | **10.87%** | **5.74%** | **7.83%** | **10.16%** |
 |  | Platt Scaling (1D) | *6.89%* | *25.26%* | *14.06%* | *7.39%* | *8.68%* | *12.46%* |
 |  | Temperature Scaling (TS) | 15.70% | 28.62% | 22.49% | 18.32% | 20.00% | 21.02% |

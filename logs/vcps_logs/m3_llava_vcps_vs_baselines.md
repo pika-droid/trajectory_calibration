@@ -230,19 +230,19 @@ In each table:
 **Dataset**: `scienceqa` | **Model**: M3-LLaVA
 | Calibration Method | Category | Regime / Sampling | ECE (%) $\downarrow$ | Adaptive ECE (%) $\downarrow$ | AUROC $\uparrow$ | Status |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 10.87% | 11.26% | 0.677 | `COLLAPSED` |
-| Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 9.33% | 9.83% | 0.677 | `COLLAPSED` |
-| Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 5.77% | 6.91% | 0.677 | `VALID` |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 5.25% | 9.57% | 0.670 | `VALID` |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 6.33% | 8.77% | *0.679* | `VALID` |
-| Trajectory Platt (5D) | Trajectory Platt Baseline (5D) | Single-Pass ($T=0.0$) | 5.65% | 9.58% | 0.670 | `VALID` |
-| Trajectory Platt (17D) | Trajectory Platt Baseline (17D) | Single-Pass ($T=0.0$) | 5.93% | 8.58% | 0.673 | `VALID` |
-| Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | **3.11%** | 4.88% | **0.683** | `VALID` |
-| Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | *3.49%* | 5.26% | 0.678 | `VALID` |
-| Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 8.28% | 9.36% | 0.676 | `COLLAPSED` |
-| Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 6.12% | 6.74% | 0.677 | `VALID` |
-| VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 4.90% | 7.67% | 0.677 | `VALID` |
-| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 4.39% | 8.15% | 0.677 | `VALID` |
+| Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 22.16% | 21.93% | 0.807 | `COLLAPSED` |
+| Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 13.10% | 12.68% | 0.807 | `VALID` |
+| Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 4.80% | 4.99% | 0.807 | `VALID` |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 5.06% | 6.68% | **0.813** | `VALID` |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 5.49% | 7.06% | 0.811 | `VALID` |
+| Trajectory Platt (5D) | Trajectory Platt Baseline (5D) | Single-Pass ($T=0.0$) | 5.17% | 6.15% | *0.813* | `VALID` |
+| Trajectory Platt (17D) | Trajectory Platt Baseline (17D) | Single-Pass ($T=0.0$) | 6.91% | 7.91% | 0.795 | `VALID` |
+| Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | *4.44%* | 4.71% | 0.807 | `VALID` |
+| Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | 4.47% | 5.05% | 0.807 | `VALID` |
+| Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 12.98% | 13.00% | 0.808 | `VALID` |
+| Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 5.20% | 5.16% | 0.809 | `VALID` |
+| VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 5.67% | 5.76% | 0.810 | `VALID` |
+| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | **4.18%** | 6.74% | 0.809 | `VALID` |
 | `ln_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 26.80% | - | 0.659 | `VALID` |
 | `semantic_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 30.00% | - | 0.633 | `VALID` |
 | `eigen_score` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 30.10% | - | 0.636 | `VALID` |
@@ -344,19 +344,19 @@ Macro-averaged evaluation metrics of 15 benchmark methods across all 14 datasets
 
 | Calibration Method | Category | Regime / Sampling | Macro ECE (%) $\downarrow$ | Macro Adaptive ECE (%) $\downarrow$ | Macro AUROC $\uparrow$ |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 40.43% | 40.47% | 0.665 |
-| Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 21.92% | 22.81% | 0.665 |
-| Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 3.97% | 5.83% | 0.689 |
-| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 4.82% | 6.07% | *0.711* |
-| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 5.01% | 6.15% | **0.715** |
-| Trajectory Platt (5D) | Trajectory Platt Baseline (5D) | Single-Pass ($T=0.0$) | 4.81% | 6.10% | 0.710 |
-| Trajectory Platt (17D) | Trajectory Platt Baseline (17D) | Single-Pass ($T=0.0$) | 4.83% | 5.80% | 0.691 |
-| Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | *3.86%* | 5.23% | 0.677 |
-| Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | **3.18%** | 6.28% | 0.679 |
-| Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 21.44% | 22.99% | 0.678 |
-| Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 4.62% | 6.31% | 0.711 |
-| VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 4.24% | 6.30% | 0.691 |
-| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 4.46% | 6.19% | 0.692 |
+| Naive Confidence (NC) | Uncalibrated Baseline | Single-Pass ($T=0.0$) | 41.24% | 41.23% | 0.674 |
+| Temperature Scaling (TS) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | 22.19% | 23.01% | 0.674 |
+| Platt Scaling (1D) | Classic Post-Hoc Calibrator | Single-Pass ($T=0.0$) | *3.90%* | 5.69% | 0.698 |
+| Trajectory LR | Linear Trajectory Baseline | Single-Pass ($T=0.0$) | 4.80% | 5.87% | *0.721* |
+| Trajectory LR (No Bias) | Linear Trajectory Baseline (Zero-Bias) | Single-Pass ($T=0.0$) | 4.95% | 6.03% | **0.724** |
+| Trajectory Platt (5D) | Trajectory Platt Baseline (5D) | Single-Pass ($T=0.0$) | 4.77% | 5.85% | 0.720 |
+| Trajectory Platt (17D) | Trajectory Platt Baseline (17D) | Single-Pass ($T=0.0$) | 4.90% | 5.75% | 0.700 |
+| Quadratic Platt (Logit-Only) | Logit-Only Polynomial Baseline | Single-Pass ($T=0.0$) | 3.95% | 5.22% | 0.686 |
+| Spline Calibration | Non-Parametric Calibrator | Single-Pass ($T=0.0$) | **3.25%** | 6.26% | 0.688 |
+| Adaptive TS (ATS) | Adaptive Calibrator | Single-Pass ($T=0.0$) | 21.77% | 23.25% | 0.687 |
+| Residual Calibrator | Feature-Aided Calibrator | Single-Pass ($T=0.0$) | 4.55% | 6.20% | 0.720 |
+| VCPS-5D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 4.30% | 6.17% | 0.701 |
+| VCPS-17D (Our Method) | Proposed Trajectory Calibration | Single-Pass ($T=0.0$) | 4.44% | 6.09% | 0.701 |
 | `ln_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 19.24% | - | 0.675 |
 | `semantic_entropy` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 28.25% | - | 0.641 |
 | `eigen_score` | UMPIRE Multi-Pass Baseline | Multi-Pass ($T=0.5, K=10$) | 24.74% | - | 0.694 |
@@ -367,8 +367,8 @@ Macro-averaged evaluation metrics of 15 benchmark methods across all 14 datasets
 ## Section 3: Win-Count & Comparative Analysis
 
 ### A. Win-Count Summary
-- **Overall Best ECE (#1 across ALL evaluated methods)**: Our VCPS methods (**VCPS-5D** / **VCPS-17D**) achieve the absolute lowest ECE on **3 out of 14 datasets** (21.4% win rate).
-  - **Specific Datasets Won in ECE**: `gqa` (VCPS-17D (Our Method): **4.73%**), `infographicvqa` (VCPS-17D (Our Method): **0.01%**), `vizwiz-vqa` (VCPS-17D (Our Method): **5.96%**).
+- **Overall Best ECE (#1 across ALL evaluated methods)**: Our VCPS methods (**VCPS-5D** / **VCPS-17D**) achieve the absolute lowest ECE on **4 out of 14 datasets** (28.6% win rate).
+  - **Specific Datasets Won in ECE**: `gqa` (VCPS-17D (Our Method): **4.73%**), `infographicvqa` (VCPS-17D (Our Method): **0.01%**), `scienceqa` (VCPS-17D (Our Method): **4.18%**), `vizwiz-vqa` (VCPS-17D (Our Method): **5.96%**).
 - **Win Rate vs. UMPIRE Multi-Pass Baselines in ECE**: VCPS trajectory calibration achieves lower ECE than all four UMPIRE multi-pass baselines on **14 out of 14 datasets**.
 - **Overall Best AUROC (#1 across ALL evaluated methods)**: Our VCPS methods achieve the highest selective prediction AUROC on **3 out of 14 datasets**.
   - **Specific Datasets Won in AUROC**: `gqa` (VCPS-5D (Our Method): **0.715**), `mmmu` (VCPS-17D (Our Method): **0.643**), `textvqa` (VCPS-5D (Our Method): **0.840**).
@@ -385,7 +385,7 @@ Macro-averaged evaluation metrics of 15 benchmark methods across all 14 datasets
 | `mmbench` | Spline Calibration | **0.12%** | `eigen_score` | **0.681** | `Competitive` |
 | `mmmu` | Spline Calibration | **0.24%** | VCPS-17D (Our Method) | **0.643** | `Top AUROC` |
 | `pope` | Naive Confidence (NC) | **3.45%** | Trajectory Platt (5D) | **0.751** | `Competitive` |
-| `scienceqa` | Quadratic Platt (Logit-Only) | **3.11%** | Quadratic Platt (Logit-Only) | **0.683** | `Competitive` |
+| `scienceqa` | VCPS-17D (Our Method) | **4.18%** | Trajectory LR | **0.813** | `Top ECE` |
 | `seedbench` | Spline Calibration | **0.12%** | `eigen_score` | **0.655** | `Competitive` |
 | `textvqa` | Trajectory LR | **5.76%** | VCPS-5D (Our Method) | **0.840** | `Top AUROC` |
 | `vizwiz-vqa` | VCPS-17D (Our Method) | **5.96%** | Trajectory Platt (17D) | **0.798** | `Top ECE` |

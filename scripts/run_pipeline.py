@@ -313,6 +313,14 @@ def build_full_pipeline(
             steps.extend(
                 build_calibration_steps(py_exec, arch, temperatures, skip_ablation=skip_ablation)
             )
+        steps.append(
+            PipelineStep(
+                name="adversarial_safety_benchmark",
+                description="Adversarial & Safety Calibration Benchmark (AVQA & VLLM-Safety)",
+                command=[py_exec, str(SCRIPTS_DIR / "update_adversarial_safety_results.py")],
+                category="calibration",
+            )
+        )
 
     # Stage 7-10: Section 3 Reporting, Figures & README Synchronization
     if not skip_tables:
