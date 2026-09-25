@@ -61,20 +61,21 @@ def test_mqt_scienceqa_test_split_integrity(
         )
 
 
-def test_m3_scienceqa_t0_split_integrity(
+def test_m3_scienceqa_all_temps_split_integrity(
     canonical_manifest: dict[str, list[dict[str, Any]]],
 ) -> None:
-    """Verify M3 ScienceQA at T=0.0 is on canonical test split."""
+    """Verify M3 ScienceQA is on canonical test split across all 5 temperatures."""
     canonical_qids = [str(x["question_id"]) for x in canonical_manifest["scienceqa"]]
-    p = Path("data/features/m3_llava/temp_0.0/scienceqa.pt")
-    assert p.exists(), f"Missing file: {p}"
-    data: list[dict[str, Any]] = torch.load(p, map_location="cpu")
-    assert len(data) == 2000
-    qids = [str(x["question_id"]) for x in data]
-    assert qids == canonical_qids
-    s0 = data[0].get("sample", {})
-    q0 = s0.get("question", "")
-    assert "Which property matches this object" in q0
+    for temp in ["temp_0.0", "temp_0.3", "temp_0.6", "temp_1.0", "temp_1.5"]:
+        p = Path(f"data/features/m3_llava/{temp}/scienceqa.pt")
+        assert p.exists(), f"Missing file: {p}"
+        data: list[dict[str, Any]] = torch.load(p, map_location="cpu")
+        assert len(data) == 2000, f"{p} has length {len(data)}, expected 2000"
+        qids = [str(x["question_id"]) for x in data]
+        assert qids == canonical_qids, f"QID mismatch in {p}"
+        s0 = data[0].get("sample", {})
+        q0 = s0.get("question", "")
+        assert "Which property matches this object" in q0, f"{p} sample 0 is not test split: '{q0}'"
 
 
 def test_pope_10_file_sample_parity() -> None:
