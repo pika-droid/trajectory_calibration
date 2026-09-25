@@ -126,7 +126,7 @@ PYEOF
     export HUGGING_FACE_HUB_TOKEN="${HF_TOKEN}"
     export HF_HUB_ENABLE_HF_TRANSFER=1
 else
-    echo "⚠  No HF_TOKEN set. Downloads of gated models/datasets may fail."
+    echo "No HF_TOKEN set — proceeding with public download (mucai/llava-v1.5-7b-m3 and lmms-lab/ScienceQA are both ungated)."
 fi
 
 # ---------------------------------------------------------------------------
