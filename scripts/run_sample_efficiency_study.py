@@ -483,6 +483,8 @@ def generate_latex_tables(macro_m3: pd.DataFrame, macro_mqt: pd.DataFrame, out_p
     full_content = t_m3 + "\n\n" + t_mqt + "\n"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(full_content, encoding="utf-8")
+    (out_path.parent / "sample_efficiency_macro_m3.tex").write_text(t_m3 + "\n", encoding="utf-8")
+    (out_path.parent / "sample_efficiency_macro_mqt.tex").write_text(t_mqt + "\n", encoding="utf-8")
     print(f"Saved LaTeX tables to: {out_path.resolve()}")
 
 
