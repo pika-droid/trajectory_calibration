@@ -46,19 +46,33 @@ def test_build_full_pipeline_combinations() -> None:
     no_mock = build_full_pipeline(architectures=["m3", "mqt"], temperatures=[0.0], skip_mock=True)
     assert not any(s.name == "smoke_test" for s in no_mock)
 
-    # Skip calibration (reporting only, with ablation reporting by default)
+    # Skip calibration (reporting only, with ablation reporting and compendium compilation by default)
     reporting_only = build_full_pipeline(
         architectures=["m3", "mqt"], temperatures=[0.0], skip_calibration=True
     )
-    assert len(reporting_only) == 7
+    assert len(reporting_only) == 10
     assert all(s.category == "reporting" for s in reporting_only)
 
     # Skip calibration and ablation reporting
     reporting_no_ablation = build_full_pipeline(
-        architectures=["m3", "mqt"], temperatures=[0.0], skip_calibration=True, skip_ablation=True
+        architectures=["m3", "mqt"],
+        temperatures=[0.0],
+        skip_calibration=True,
+        skip_ablation=True,
     )
-    assert len(reporting_no_ablation) == 5
+    assert len(reporting_no_ablation) == 8
     assert all(s.category == "reporting" for s in reporting_no_ablation)
+
+    # Skip calibration, ablation, and compendium compilation
+    reporting_minimal = build_full_pipeline(
+        architectures=["m3", "mqt"],
+        temperatures=[0.0],
+        skip_calibration=True,
+        skip_ablation=True,
+        skip_compendium=True,
+    )
+    assert len(reporting_minimal) == 7
+    assert all(s.category == "reporting" for s in reporting_minimal)
 
     # Skip tables (calibration only)
     calibration_only = build_full_pipeline(
@@ -79,7 +93,12 @@ def test_pipeline_dry_run() -> None:
     assert "DRY RUN MODE" in res.stdout
     assert "benchmark_m3" in res.stdout
     assert "benchmark_mqt" in res.stdout
+    assert "sample_efficiency_study" in res.stdout
+    assert "token_budget_study" in res.stdout
     assert "generate_paper_table2" in res.stdout
+    assert "mine_pairwise_anchors" in res.stdout
+    assert "generate_token_budget_markdown_log" in res.stdout
+    assert "compile_compendium" in res.stdout
     assert "update_readme_tables" in res.stdout
     assert "ablation_5d_m3" in res.stdout
     assert "plot_ablation_5d" in res.stdout

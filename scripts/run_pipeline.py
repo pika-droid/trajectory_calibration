@@ -228,13 +228,29 @@ def build_calibration_steps(
     return steps
 
 
-def build_reporting_steps(py_exec: str, skip_ablation: bool = False) -> list[PipelineStep]:
+def build_reporting_steps(
+    py_exec: str,
+    skip_ablation: bool = False,
+    skip_compendium: bool = False,
+) -> list[PipelineStep]:
     """Assemble Section 3 table, log, figure, and README generation steps."""
     steps = [
         PipelineStep(
             name="generate_markdown_logs",
             description="Generate UMPIRE Baselines and VCPS vs Baselines Markdown Logs",
             command=[py_exec, str(SCRIPTS_DIR / "generate_markdown_logs.py")],
+            category="reporting",
+        ),
+        PipelineStep(
+            name="generate_token_budget_markdown_log",
+            description="Generate Autoregressive Token Budget Scaling Markdown Log",
+            command=[py_exec, str(SCRIPTS_DIR / "generate_token_budget_markdown_log.py")],
+            category="reporting",
+        ),
+        PipelineStep(
+            name="mine_pairwise_anchors",
+            description="Mine Pairwise Zero-Shot Calibration Anchors & Generate LaTeX Summary",
+            command=[py_exec, str(ROOT_DIR / "sheets" / "scripts" / "mine_pairwise_anchors.py")],
             category="reporting",
         ),
         PipelineStep(
@@ -281,6 +297,16 @@ def build_reporting_steps(py_exec: str, skip_ablation: bool = False) -> list[Pip
             ]
         )
 
+    if not skip_compendium:
+        steps.append(
+            PipelineStep(
+                name="compile_compendium",
+                description="Compile Master LaTeX Table Compendium into PDF via pdflatex",
+                command=[py_exec, str(SCRIPTS_DIR / "compile_compendium.py")],
+                category="reporting",
+            )
+        )
+
     return steps
 
 
@@ -291,6 +317,9 @@ def build_full_pipeline(
     skip_calibration: bool = False,
     skip_tables: bool = False,
     skip_ablation: bool = False,
+    skip_sample_efficiency: bool = False,
+    skip_token_budget: bool = False,
+    skip_compendium: bool = False,
 ) -> list[PipelineStep]:
     """Construct the complete sequence of pipeline steps according to configuration flags."""
     py_exec = sys.executable
@@ -321,10 +350,44 @@ def build_full_pipeline(
                 category="calibration",
             )
         )
+        if not skip_sample_efficiency:
+            steps.append(
+                PipelineStep(
+                    name="sample_efficiency_study",
+                    description="Sample Efficiency Calibration Scaling Study (All 14 Datasets)",
+                    command=[
+                        py_exec,
+                        str(SCRIPTS_DIR / "run_sample_efficiency_study.py"),
+                        "--architectures",
+                        *architectures,
+                    ],
+                    category="calibration",
+                )
+            )
+        if not skip_token_budget:
+            steps.append(
+                PipelineStep(
+                    name="token_budget_study",
+                    description="Autoregressive Visual Token Budget Scaling Study (9 Benchmarks)",
+                    command=[
+                        py_exec,
+                        str(SCRIPTS_DIR / "run_token_budget_study.py"),
+                        "--architectures",
+                        *architectures,
+                    ],
+                    category="calibration",
+                )
+            )
 
     # Stage 7-10: Section 3 Reporting, Figures & README Synchronization
     if not skip_tables:
-        steps.extend(build_reporting_steps(py_exec, skip_ablation=skip_ablation))
+        steps.extend(
+            build_reporting_steps(
+                py_exec,
+                skip_ablation=skip_ablation,
+                skip_compendium=skip_compendium,
+            )
+        )
 
     return steps
 
@@ -368,6 +431,21 @@ def parse_args() -> argparse.Namespace:
         "--skip-ablation",
         action="store_true",
         help="Skip combinatorial 5D trajectory feature ablation study.",
+    )
+    parser.add_argument(
+        "--skip-sample-efficiency",
+        action="store_true",
+        help="Skip sample efficiency calibration scaling study.",
+    )
+    parser.add_argument(
+        "--skip-token-budget",
+        action="store_true",
+        help="Skip visual token budget scaling study.",
+    )
+    parser.add_argument(
+        "--skip-compendium",
+        action="store_true",
+        help="Skip LaTeX compendium PDF compilation.",
     )
     parser.add_argument(
         "--continue-on-error",
@@ -434,6 +512,9 @@ def main() -> None:
         skip_calibration=args.skip_calibration,
         skip_tables=args.skip_tables,
         skip_ablation=args.skip_ablation,
+        skip_sample_efficiency=args.skip_sample_efficiency,
+        skip_token_budget=args.skip_token_budget,
+        skip_compendium=args.skip_compendium,
     )
 
     if args.dry_run:
