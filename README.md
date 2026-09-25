@@ -266,14 +266,14 @@ To rigorously evaluate zero-shot calibration stability under generation temperat
 
 | Model | Calibration Method | $T=0.0$ | $T=0.3$ | $T=0.6$ | $T=1.0$ | $T=1.5$ | Mean ECE $\downarrow$ |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **M3-LLaVA** | Platt Scaling (1D) | *6.02%* | *21.35%* | *12.37%* | 10.17% | 14.88% | **12.96%** |
-|  | Temperature Scaling (TS) | 10.71% | 22.15% | 13.24% | **9.37%** | *10.36%* | *13.16%* |
-|  | **Trajectory Platt (5D) [Our Method]** | **5.54%** | **20.00%** | **12.19%** | 11.48% | 16.74% | 13.19% |
-|  | Naive Confidence (NC) | 13.02% | 24.78% | 16.11% | *9.89%* | **9.74%** | 14.71% |
-| **MQT-LLaVA** | **Trajectory Platt (5D) [Our Method]** | **5.42%** | **20.93%** | **10.87%** | **5.74%** | **7.83%** | **10.16%** |
-|  | Platt Scaling (1D) | *6.89%* | *25.26%* | *14.06%* | *7.39%* | *8.68%* | *12.46%* |
-|  | Temperature Scaling (TS) | 15.70% | 28.62% | 22.49% | 18.32% | 20.00% | 21.02% |
-|  | Naive Confidence (NC) | 23.41% | 41.47% | 35.13% | 26.83% | 20.54% | 29.48% |
+| **M3-LLaVA** | Platt Scaling (1D) | *6.02%* | *23.60%* | *11.45%* | **5.78%** | **9.07%** | **11.19%** |
+|  | **Trajectory Platt (5D) [Our Method]** | **5.54%** | **22.47%** | **11.07%** | *7.67%* | 10.92% | *11.53%* |
+|  | Temperature Scaling (TS) | 10.71% | 25.61% | 14.84% | 9.54% | *9.25%* | 13.99% |
+|  | Naive Confidence (NC) | 13.02% | 28.46% | 18.97% | 11.89% | 9.92% | 16.45% |
+| **MQT-LLaVA** | **Trajectory Platt (5D) [Our Method]** | **5.32%** | **20.66%** | **10.48%** | **5.03%** | **7.79%** | **9.86%** |
+|  | Platt Scaling (1D) | *6.79%* | *24.89%* | *13.50%* | *7.14%* | *8.72%* | *12.21%* |
+|  | Temperature Scaling (TS) | 15.11% | 28.26% | 21.79% | 17.81% | 19.86% | 20.57% |
+|  | Naive Confidence (NC) | 22.65% | 41.12% | 34.52% | 25.72% | 20.45% | 28.89% |
 ---
 
 ### Leave-One-Dataset-Out (LODO) Cross-Domain Generalization

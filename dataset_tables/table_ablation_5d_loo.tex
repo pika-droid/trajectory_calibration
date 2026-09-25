@@ -10,11 +10,11 @@
 \cmidrule(lr){3-4} \cmidrule(lr){5-6}
 & & \textbf{$\Delta$ Ada-ECE} & \textbf{$\Delta$ AUROC} & \textbf{$\Delta$ Ada-ECE} & \textbf{$\Delta$ AUROC} & \\
 \midrule
-$x_{1}$ (Final Logit) & Base Fine-Scale Log-Odds Anchor ($\ell_{576/256}$) & +0.0026 & \textbf{-0.091} & \textbf{+0.0027} & \textbf{-0.054} & \textbf{Catastrophic AUROC Collapse (Anchor Loss)} \\
-$x_{2}$ (Discrete Answer Stability) & Categorical Scale Consistency & +0.0014 & +0.001 & -0.0010 & +0.001 & Scale Invariance Shift \\
-$x_{3}$ (Scale Entropy Slope) & Predictive Entropy Decay Dynamics & \textit{+0.0029} & \textit{-0.004} & \textit{+0.0015} & \textit{-0.016} & Entropy Dynamics Degradation \\
+$x_{1}$ (Final Logit) & Base Fine-Scale Log-Odds Anchor ($\ell_{576/256}$) & +0.0026 & \textbf{-0.091} & \textbf{+0.0025} & \textbf{-0.054} & \textbf{Catastrophic AUROC Collapse (Anchor Loss)} \\
+$x_{2}$ (Discrete Answer Stability) & Categorical Scale Consistency & +0.0014 & +0.001 & -0.0008 & +0.001 & Scale Invariance Shift \\
+$x_{3}$ (Scale Entropy Slope) & Predictive Entropy Decay Dynamics & \textit{+0.0029} & \textit{-0.004} & \textit{+0.0013} & \textit{-0.016} & Entropy Dynamics Degradation \\
 $x_{4}$ (Answer Flip Frequency) & Argmax Scale Transition Rate & +0.0015 & -0.000 & -0.0015 & -0.002 & Argmax Flipping Instability \\
-$x_{5}$ (Monotonicity Count) & Directional Monotonicity Trend & \textbf{+0.0031} & -0.003 & -0.0024 & -0.008 & Monotonic Decay Disruption \\
+$x_{5}$ (Monotonicity Count) & Directional Monotonicity Trend & \textbf{+0.0031} & -0.003 & -0.0027 & -0.008 & Monotonic Decay Disruption \\
 \bottomrule
 \end{tabular}
 \end{table*}
