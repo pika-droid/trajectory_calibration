@@ -46,8 +46,8 @@ def build_macro_section(arch_key, arch_display):
     lines = [
         f"### Macro-Averaged Performance Across Core 7 Benchmarks ({arch_display})",
         "",
-        "| Depth ($k$) | Tokens ($T$) | Calibration Method | ECE (%) $\\downarrow$ | Ada-ECE (%) $\\downarrow$ | Brier $\\downarrow$ | AUROC $\\uparrow$ |",
-        "| :---: | :---: | :--- | :---: | :---: | :---: | :---: |",
+        "| Depth ($k$) | Tokens ($T$) | Acc (%) $\\uparrow$ | Calibration Method | ECE (%) $\\downarrow$ | Ada-ECE (%) $\\downarrow$ | Brier $\\downarrow$ | AUROC $\\uparrow$ |",
+        "| :---: | :---: | :---: | :--- | :---: | :---: | :---: | :---: |",
     ]
     for k in sorted(df["level"].unique()):
         k_df = df[df["level"] == k]
@@ -64,15 +64,21 @@ def build_macro_section(arch_key, arch_display):
             k_df["auroc_mean"].tolist(), higher_is_better=True, is_pct=False, decimals=3
         )
 
+        acc_col = "acc_mean" if "acc_mean" in k_df.columns else "accuracy_mean"
+        acc_val = (
+            float(k_df[acc_col].iloc[0]) if acc_col in k_df.columns and not k_df.empty else np.nan
+        )
+        acc_str = f"{acc_val:.2f}%" if not np.isnan(acc_val) else "-"
+
         for idx, (_, row) in enumerate(k_df.iterrows()):
             m_name = row["method"]
             t_val = int(row["tokens_used"])
             t_str = f"**{t_val}**" if m_name == "Trajectory Platt (5D)" else str(t_val)
             disp_m = f"**{m_name}**" if m_name == "Trajectory Platt (5D)" else m_name
             lines.append(
-                f"| {k} | {t_str} | {disp_m} | {ece_fmt[idx]} | {ada_fmt[idx]} | {brier_fmt[idx]} | {auroc_fmt[idx]} |"
+                f"| {k} | {t_str} | {acc_str} | {disp_m} | {ece_fmt[idx]} | {ada_fmt[idx]} | {brier_fmt[idx]} | {auroc_fmt[idx]} |"
             )
-        lines.append("| --- | --- | --- | --- | --- | --- | --- |")
+        lines.append("| --- | --- | --- | --- | --- | --- | --- | --- |")
     lines.append("")
     return "\n".join(lines)
 
@@ -82,8 +88,8 @@ def build_dataset_section(ds_key, ds_display, df_all):
         f"### {ds_display} (`{ds_key}`)",
         "",
         "#### M3-LLaVA (7B)",
-        "| Depth ($k$) | Tokens ($T$) | Method | ECE (%) $\\downarrow$ | Ada-ECE (%) $\\downarrow$ | Brier $\\downarrow$ | AUROC $\\uparrow$ |",
-        "| :---: | :---: | :--- | :---: | :---: | :---: | :---: |",
+        "| Depth ($k$) | Tokens ($T$) | Acc (%) $\\uparrow$ | Method | ECE (%) $\\downarrow$ | Ada-ECE (%) $\\downarrow$ | Brier $\\downarrow$ | AUROC $\\uparrow$ |",
+        "| :---: | :---: | :---: | :--- | :---: | :---: | :---: | :---: |",
     ]
     for arch in ["m3", "mqt"]:
         if arch == "mqt":
@@ -91,8 +97,8 @@ def build_dataset_section(ds_key, ds_display, df_all):
                 [
                     "",
                     "#### MQT-LLaVA (7B)",
-                    "| Depth ($k$) | Tokens ($T$) | Method | ECE (%) $\\downarrow$ | Ada-ECE (%) $\\downarrow$ | Brier $\\downarrow$ | AUROC $\\uparrow$ |",
-                    "| :---: | :---: | :--- | :---: | :---: | :---: | :---: |",
+                    "| Depth ($k$) | Tokens ($T$) | Acc (%) $\\uparrow$ | Method | ECE (%) $\\downarrow$ | Ada-ECE (%) $\\downarrow$ | Brier $\\downarrow$ | AUROC $\\uparrow$ |",
+                    "| :---: | :---: | :---: | :--- | :---: | :---: | :---: | :---: |",
                 ]
             )
         sub = df_all[(df_all["dataset"] == ds_key) & (df_all["arch"] == arch)]
@@ -117,13 +123,21 @@ def build_dataset_section(ds_key, ds_display, df_all):
                 k_df["auroc_mean"].tolist(), higher_is_better=True, is_pct=False, decimals=3
             )
 
+            acc_col = "accuracy_mean" if "accuracy_mean" in k_df.columns else "acc_mean"
+            acc_val = (
+                float(k_df[acc_col].iloc[0])
+                if acc_col in k_df.columns and not k_df.empty
+                else np.nan
+            )
+            acc_str = f"{acc_val:.2f}%" if not np.isnan(acc_val) else "-"
+
             for idx, (_, row) in enumerate(k_df.iterrows()):
                 m_name = row["method"]
                 t_val = int(row["tokens_used"])
                 t_str = f"**{t_val}**" if m_name == "Trajectory Platt (5D)" else str(t_val)
                 disp_m = f"**{m_name}**" if m_name == "Trajectory Platt (5D)" else m_name
                 lines.append(
-                    f"| {k} | {t_str} | {disp_m} | {ece_fmt[idx]} | {ada_fmt[idx]} | {brier_fmt[idx]} | {auroc_fmt[idx]} |"
+                    f"| {k} | {t_str} | {acc_str} | {disp_m} | {ece_fmt[idx]} | {ada_fmt[idx]} | {brier_fmt[idx]} | {auroc_fmt[idx]} |"
                 )
     lines.append("")
     return "\n".join(lines)

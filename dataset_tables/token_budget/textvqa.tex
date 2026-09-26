@@ -3,34 +3,34 @@
 \label{tab:token_budget_textvqa_m3}
 \tablestyle{4pt}{1.05}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{cclcccc}
+\begin{tabular}{ccclcccc}
 \toprule
-\textbf{Depth ($k$)} & \textbf{Tokens ($T$)} & \textbf{Calibration Method} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Depth ($k$)} & \textbf{Tokens ($T$)} & \textbf{Acc (\%)} $\uparrow$ & \textbf{Calibration Method} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-\multirow{4}{*}{1} & 1 & Naive Confidence (NC) & 14.63 & 14.67 & 0.1819 & \textbf{0.823} \\
- & 1 & Temperature Scaling (TS) & 15.14 & 14.62 & 0.1815 & \textbf{0.823} \\
- & 1 & Platt Scaling (1D) & \textit{7.74} & \textbf{6.81} & \textbf{0.1576} & \textbf{0.823} \\
-\rowcolor{gray!10}  & 1 & \textbf{Trajectory Platt (5D)} & \textbf{7.69} & \textit{6.83} & \textit{0.1577} & \textbf{0.823} \\
+\multirow{4}{*}{1} & 1 & \multirow{4}{*}{35.75} & Naive Confidence (NC) & 14.63 & 14.67 & 0.1819 & \textbf{0.823} \\
+ & 1 &  & Temperature Scaling (TS) & 15.14 & 14.62 & 0.1815 & \textbf{0.823} \\
+ & 1 &  & Platt Scaling (1D) & \textit{7.74} & \textbf{6.81} & \textbf{0.1576} & \textbf{0.823} \\
+\rowcolor{gray!10}  & 1 &  & \textbf{Trajectory Platt (5D)} & \textbf{7.69} & \textit{6.83} & \textit{0.1577} & \textbf{0.823} \\
 \midrule
-\multirow{4}{*}{2} & 9 & Naive Confidence (NC) & 11.01 & 10.63 & 0.1772 & \textbf{0.830} \\
- & 9 & Temperature Scaling (TS) & 11.20 & 10.83 & 0.1773 & \textbf{0.830} \\
- & 9 & Platt Scaling (1D) & \textbf{7.15} & \textbf{7.11} & \textbf{0.1675} & \textbf{0.830} \\
-\rowcolor{gray!10}  & 10 & \textbf{Trajectory Platt (5D)} & \textit{7.29} & \textit{7.22} & \textit{0.1681} & \textit{0.828} \\
+\multirow{4}{*}{2} & 9 & \multirow{4}{*}{51.25} & Naive Confidence (NC) & 11.01 & 10.63 & 0.1772 & \textbf{0.830} \\
+ & 9 &  & Temperature Scaling (TS) & 11.20 & 10.83 & 0.1773 & \textbf{0.830} \\
+ & 9 &  & Platt Scaling (1D) & \textbf{7.15} & \textbf{7.11} & \textbf{0.1675} & \textbf{0.830} \\
+\rowcolor{gray!10}  & 10 &  & \textbf{Trajectory Platt (5D)} & \textit{7.29} & \textit{7.22} & \textit{0.1681} & \textit{0.828} \\
 \midrule
-\multirow{4}{*}{3} & 36 & Naive Confidence (NC) & 9.88 & 9.71 & 0.1650 & \textbf{0.852} \\
- & 36 & Temperature Scaling (TS) & 9.61 & 9.80 & 0.1653 & \textbf{0.852} \\
- & 36 & Platt Scaling (1D) & \textbf{6.91} & \textit{6.83} & \textit{0.1564} & \textbf{0.852} \\
-\rowcolor{gray!10}  & 46 & \textbf{Trajectory Platt (5D)} & \textit{7.01} & \textbf{6.71} & \textbf{0.1559} & \textbf{0.852} \\
+\multirow{4}{*}{3} & 36 & \multirow{4}{*}{56.00} & Naive Confidence (NC) & 9.88 & 9.71 & 0.1650 & \textbf{0.852} \\
+ & 36 &  & Temperature Scaling (TS) & 9.61 & 9.80 & 0.1653 & \textbf{0.852} \\
+ & 36 &  & Platt Scaling (1D) & \textbf{6.91} & \textit{6.83} & \textit{0.1564} & \textbf{0.852} \\
+\rowcolor{gray!10}  & 46 &  & \textbf{Trajectory Platt (5D)} & \textit{7.01} & \textbf{6.71} & \textbf{0.1559} & \textbf{0.852} \\
 \midrule
-\multirow{4}{*}{4} & 144 & Naive Confidence (NC) & 9.65 & 9.47 & 0.1718 & \textit{0.840} \\
- & 144 & Temperature Scaling (TS) & 9.28 & 9.31 & 0.1714 & \textit{0.840} \\
- & 144 & Platt Scaling (1D) & \textbf{6.20} & \textit{6.37} & \textit{0.1621} & \textit{0.840} \\
-\rowcolor{gray!10}  & 190 & \textbf{Trajectory Platt (5D)} & \textit{6.82} & \textbf{5.57} & \textbf{0.1599} & \textbf{0.843} \\
+\multirow{4}{*}{4} & 144 & \multirow{4}{*}{57.75} & Naive Confidence (NC) & 9.65 & 9.47 & 0.1718 & \textit{0.840} \\
+ & 144 &  & Temperature Scaling (TS) & 9.28 & 9.31 & 0.1714 & \textit{0.840} \\
+ & 144 &  & Platt Scaling (1D) & \textbf{6.20} & \textit{6.37} & \textit{0.1621} & \textit{0.840} \\
+\rowcolor{gray!10}  & 190 &  & \textbf{Trajectory Platt (5D)} & \textit{6.82} & \textbf{5.57} & \textbf{0.1599} & \textbf{0.843} \\
 \midrule
-\multirow{4}{*}{5} & 576 & Naive Confidence (NC) & 9.54 & 9.69 & 0.1667 & \textit{0.845} \\
- & 576 & Temperature Scaling (TS) & 9.50 & 10.00 & 0.1666 & \textit{0.845} \\
- & 576 & Platt Scaling (1D) & \textit{6.94} & \textit{7.65} & \textit{0.1584} & \textit{0.845} \\
-\rowcolor{gray!10}  & 766 & \textbf{Trajectory Platt (5D)} & \textbf{6.69} & \textbf{6.70} & \textbf{0.1559} & \textbf{0.849} \\
+\multirow{4}{*}{5} & 576 & \multirow{4}{*}{58.75} & Naive Confidence (NC) & 9.54 & 9.69 & 0.1667 & \textit{0.845} \\
+ & 576 &  & Temperature Scaling (TS) & 9.50 & 10.00 & 0.1666 & \textit{0.845} \\
+ & 576 &  & Platt Scaling (1D) & \textit{6.94} & \textit{7.65} & \textit{0.1584} & \textit{0.845} \\
+\rowcolor{gray!10}  & 766 &  & \textbf{Trajectory Platt (5D)} & \textbf{6.69} & \textbf{6.70} & \textbf{0.1559} & \textbf{0.849} \\
 \bottomrule
 \end{tabular}%
 }
@@ -41,34 +41,34 @@
 \label{tab:token_budget_textvqa_mqt}
 \tablestyle{4pt}{1.05}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{cclcccc}
+\begin{tabular}{ccclcccc}
 \toprule
-\textbf{Depth ($k$)} & \textbf{Tokens ($T$)} & \textbf{Calibration Method} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Depth ($k$)} & \textbf{Tokens ($T$)} & \textbf{Acc (\%)} $\uparrow$ & \textbf{Calibration Method} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-\multirow{4}{*}{1} & 1 & Naive Confidence (NC) & 29.00 & \textit{28.94} & 0.2660 & \textbf{0.694} \\
- & 1 & Temperature Scaling (TS) & 36.43 & 36.64 & 0.2415 & \textbf{0.694} \\
- & 1 & Platt Scaling (1D) & \textit{5.84} & \textbf{9.77} & \textit{0.1084} & \textbf{0.694} \\
-\rowcolor{gray!10}  & 1 & \textbf{Trajectory Platt (5D)} & \textbf{5.81} & \textbf{9.77} & \textbf{0.1083} & \textbf{0.694} \\
+\multirow{4}{*}{1} & 1 & \multirow{4}{*}{12.50} & Naive Confidence (NC) & 29.00 & \textit{28.94} & 0.2660 & \textbf{0.694} \\
+ & 1 &  & Temperature Scaling (TS) & 36.43 & 36.64 & 0.2415 & \textbf{0.694} \\
+ & 1 &  & Platt Scaling (1D) & \textit{5.84} & \textbf{9.77} & \textit{0.1084} & \textbf{0.694} \\
+\rowcolor{gray!10}  & 1 &  & \textbf{Trajectory Platt (5D)} & \textbf{5.81} & \textbf{9.77} & \textbf{0.1083} & \textbf{0.694} \\
 \midrule
-\multirow{4}{*}{2} & 9 & Naive Confidence (NC) & 29.01 & 29.01 & 0.2785 & \textbf{0.717} \\
- & 9 & Temperature Scaling (TS) & 30.77 & 30.93 & 0.2462 & \textbf{0.717} \\
- & 9 & Platt Scaling (1D) & \textit{9.38} & \textit{10.15} & \textit{0.1508} & \textbf{0.717} \\
-\rowcolor{gray!10}  & 10 & \textbf{Trajectory Platt (5D)} & \textbf{5.54} & \textbf{7.55} & \textbf{0.1405} & \textit{0.707} \\
+\multirow{4}{*}{2} & 9 & \multirow{4}{*}{19.75} & Naive Confidence (NC) & 29.01 & 29.01 & 0.2785 & \textbf{0.717} \\
+ & 9 &  & Temperature Scaling (TS) & 30.77 & 30.93 & 0.2462 & \textbf{0.717} \\
+ & 9 &  & Platt Scaling (1D) & \textit{9.38} & \textit{10.15} & \textit{0.1508} & \textbf{0.717} \\
+\rowcolor{gray!10}  & 10 &  & \textbf{Trajectory Platt (5D)} & \textbf{5.54} & \textbf{7.55} & \textbf{0.1405} & \textit{0.707} \\
 \midrule
-\multirow{4}{*}{3} & 36 & Naive Confidence (NC) & 30.39 & 30.39 & 0.2951 & \textit{0.726} \\
- & 36 & Temperature Scaling (TS) & 22.21 & 23.12 & 0.2476 & \textit{0.726} \\
- & 36 & Platt Scaling (1D) & \textit{10.49} & \textit{12.08} & \textit{0.1924} & \textit{0.726} \\
-\rowcolor{gray!10}  & 46 & \textbf{Trajectory Platt (5D)} & \textbf{6.02} & \textbf{6.54} & \textbf{0.1742} & \textbf{0.741} \\
+\multirow{4}{*}{3} & 36 & \multirow{4}{*}{30.00} & Naive Confidence (NC) & 30.39 & 30.39 & 0.2951 & \textit{0.726} \\
+ & 36 &  & Temperature Scaling (TS) & 22.21 & 23.12 & 0.2476 & \textit{0.726} \\
+ & 36 &  & Platt Scaling (1D) & \textit{10.49} & \textit{12.08} & \textit{0.1924} & \textit{0.726} \\
+\rowcolor{gray!10}  & 46 &  & \textbf{Trajectory Platt (5D)} & \textbf{6.02} & \textbf{6.54} & \textbf{0.1742} & \textbf{0.741} \\
 \midrule
-\multirow{4}{*}{4} & 144 & Naive Confidence (NC) & 29.65 & 29.33 & 0.2998 & \textit{0.712} \\
- & 144 & Temperature Scaling (TS) & 17.04 & 19.24 & 0.2469 & \textit{0.712} \\
- & 144 & Platt Scaling (1D) & \textit{12.33} & \textit{12.62} & \textit{0.2108} & \textit{0.712} \\
-\rowcolor{gray!10}  & 190 & \textbf{Trajectory Platt (5D)} & \textbf{6.23} & \textbf{7.57} & \textbf{0.1891} & \textbf{0.742} \\
+\multirow{4}{*}{4} & 144 & \multirow{4}{*}{36.00} & Naive Confidence (NC) & 29.65 & 29.33 & 0.2998 & \textit{0.712} \\
+ & 144 &  & Temperature Scaling (TS) & 17.04 & 19.24 & 0.2469 & \textit{0.712} \\
+ & 144 &  & Platt Scaling (1D) & \textit{12.33} & \textit{12.62} & \textit{0.2108} & \textit{0.712} \\
+\rowcolor{gray!10}  & 190 &  & \textbf{Trajectory Platt (5D)} & \textbf{6.23} & \textbf{7.57} & \textbf{0.1891} & \textbf{0.742} \\
 \midrule
-\multirow{4}{*}{5} & 256 & Naive Confidence (NC) & 31.96 & 31.68 & 0.3102 & \textit{0.721} \\
- & 256 & Temperature Scaling (TS) & 18.03 & 19.46 & 0.2469 & \textit{0.721} \\
- & 256 & Platt Scaling (1D) & \textit{10.39} & \textit{10.87} & \textit{0.2053} & \textit{0.721} \\
-\rowcolor{gray!10}  & 446 & \textbf{Trajectory Platt (5D)} & \textbf{5.59} & \textbf{6.08} & \textbf{0.1819} & \textbf{0.760} \\
+\multirow{4}{*}{5} & 256 & \multirow{4}{*}{35.25} & Naive Confidence (NC) & 31.96 & 31.68 & 0.3102 & \textit{0.721} \\
+ & 256 &  & Temperature Scaling (TS) & 18.03 & 19.46 & 0.2469 & \textit{0.721} \\
+ & 256 &  & Platt Scaling (1D) & \textit{10.39} & \textit{10.87} & \textit{0.2053} & \textit{0.721} \\
+\rowcolor{gray!10}  & 446 &  & \textbf{Trajectory Platt (5D)} & \textbf{5.59} & \textbf{6.08} & \textbf{0.1819} & \textbf{0.760} \\
 \bottomrule
 \end{tabular}%
 }

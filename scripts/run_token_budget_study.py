@@ -206,6 +206,7 @@ def run_dataset_eval(
             test_df = df.iloc[te_idx].reset_index(drop=True)
 
             evals = fit_and_eval_level(train_df, test_df, seed=seed)
+            test_acc = float(np.mean(test_df["is_correct"].to_numpy()) * 100.0)
 
             for m_name in METHODS_ORDER:
                 panel = evals[m_name]
@@ -220,6 +221,7 @@ def run_dataset_eval(
                     "tokens_used": tokens_used,
                     "seed": seed,
                     "method": m_name,
+                    "accuracy": test_acc,
                     "ece_percent": panel["ece_percent"],
                     "adaptive_ece_percent": panel["adaptive_ece_percent"],
                     "brier": panel["brier"],
@@ -246,7 +248,7 @@ def run_architecture_benchmark(
 
     raw_df = pd.DataFrame(all_rows)
 
-    metrics = ["ece_percent", "adaptive_ece_percent", "brier", "auroc"]
+    metrics = ["accuracy", "ece_percent", "adaptive_ece_percent", "brier", "auroc"]
     agg_dict = {m: ["mean", "std"] for m in metrics}
     grouped = raw_df.groupby(
         [
@@ -274,12 +276,14 @@ def compute_core7_macro(raw_df: pd.DataFrame) -> pd.DataFrame:
 
     seed_macro_raw = core7_df.groupby(
         ["arch", "level", "scale", "single_tokens", "cum_tokens", "tokens_used", "seed", "method"]
-    )[["ece_percent", "adaptive_ece_percent", "brier", "auroc"]].mean()
+    )[["accuracy", "ece_percent", "adaptive_ece_percent", "brier", "auroc"]].mean()
     seed_macro = pd.DataFrame(seed_macro_raw).reset_index()
 
     macro_agg = seed_macro.groupby(
         ["arch", "level", "scale", "single_tokens", "cum_tokens", "tokens_used", "method"]
     ).agg(
+        acc_mean=("accuracy", "mean"),
+        acc_std=("accuracy", "std"),
         ece_mean=("ece_percent", "mean"),
         ece_std=("ece_percent", "std"),
         ada_ece_mean=("adaptive_ece_percent", "mean"),
@@ -291,6 +295,7 @@ def compute_core7_macro(raw_df: pd.DataFrame) -> pd.DataFrame:
     )
     macro_df = pd.DataFrame(macro_agg).reset_index()
 
+    macro_df["acc_std"] = macro_df["acc_std"].fillna(0.0)
     macro_df["ece_std"] = macro_df["ece_std"].fillna(0.0)
     macro_df["ada_ece_std"] = macro_df["ada_ece_std"].fillna(0.0)
     macro_df["brier_std"] = macro_df["brier_std"].fillna(0.0)
@@ -341,6 +346,9 @@ def format_token_budget_latex_subtable(
     ada_col = "ada_ece_mean" if is_macro else "adaptive_ece_percent_mean"
     brier_col = "brier_mean"
     auroc_col = "auroc_mean"
+    acc_col = "acc_mean" if is_macro else "accuracy_mean"
+    if acc_col not in df.columns:
+        acc_col = "accuracy_mean" if "accuracy_mean" in df.columns else "acc_mean"
 
     lines = [
         "\\begin{table}[t]",
@@ -348,9 +356,9 @@ def format_token_budget_latex_subtable(
         f"\\label{{{tab_label}}}",
         "\\tablestyle{4pt}{1.05}",
         "\\resizebox{\\columnwidth}{!}{%",
-        "\\begin{tabular}{cclcccc}",
+        "\\begin{tabular}{ccclcccc}",
         "\\toprule",
-        "\\textbf{Depth ($k$)} & \\textbf{Tokens ($T$)} & \\textbf{Calibration Method} & "
+        "\\textbf{Depth ($k$)} & \\textbf{Tokens ($T$)} & \\textbf{Acc (\\%)} $\\uparrow$ & \\textbf{Calibration Method} & "
         "\\textbf{ECE (\\%)} $\\downarrow$ & \\textbf{Ada-ECE (\\%)} $\\downarrow$ & "
         "\\textbf{Brier} $\\downarrow$ & \\textbf{AUROC} $\\uparrow$ \\\\",
         "\\midrule",
@@ -360,6 +368,13 @@ def format_token_budget_latex_subtable(
     for lvl_idx, lvl in enumerate(levels):
         sub = cast(pd.DataFrame, df[df["level"] == lvl])
         methods_in_sub = [m for m in METHODS_ORDER if m in list(sub["method"])]
+
+        acc_val = (
+            float(np.asarray(sub[acc_col])[0])
+            if acc_col in sub.columns and len(sub[acc_col]) > 0
+            else np.nan
+        )
+        acc_str = f"{acc_val:.2f}" if not np.isnan(acc_val) else "-"
 
         rows_data = []
         for m in methods_in_sub:
@@ -395,20 +410,16 @@ def format_token_budget_latex_subtable(
 
         for i, (m, t_used, s_val, cum_val, _, _, _, _) in enumerate(rows_data):
             first_col = f"\\multirow{{{len(methods_in_sub)}}}{{*}}{{{lvl}}}" if i == 0 else ""
+            acc_col_str = f"\\multirow{{{len(methods_in_sub)}}}{{*}}{{{acc_str}}}" if i == 0 else ""
             is_tp = "5D" in m
             t_str = f"{cum_val}" if is_tp else f"{s_val}"
+            disp_m = f"\\textbf{{{m}}}" if is_tp else m
 
-            if is_tp:
-                color_prefix = "\\rowcolor{gray!10} "
-                row_str = (
-                    f"{color_prefix}{first_col} & {t_str} & \\textbf{{{m}}} & "
-                    f"{ece_strs[i]} & {ada_strs[i]} & {brier_strs[i]} & {auc_strs[i]} \\\\"
-                )
-            else:
-                row_str = (
-                    f"{first_col} & {t_str} & {m} & "
-                    f"{ece_strs[i]} & {ada_strs[i]} & {brier_strs[i]} & {auc_strs[i]} \\\\"
-                )
+            color_prefix = "\\rowcolor{gray!10} " if is_tp else ""
+            row_str = (
+                f"{color_prefix}{first_col} & {t_str} & {acc_col_str} & {disp_m} & "
+                f"{ece_strs[i]} & {ada_strs[i]} & {brier_strs[i]} & {auc_strs[i]} \\\\"
+            )
             lines.append(row_str)
 
         if lvl_idx < len(levels) - 1:

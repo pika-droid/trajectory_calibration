@@ -136,6 +136,7 @@ def test_core7_macro_aggregation_isolation() -> None:
                             "tokens_used": 10 * lvl,
                             "seed": seed,
                             "method": m_name,
+                            "accuracy": 40.0 if ds != "avqa" else 10.0,
                             "ece_percent": 10.0 if ds != "avqa" else 99.0,
                             "adaptive_ece_percent": 8.0 if ds != "avqa" else 99.0,
                             "brier": 0.15 if ds != "avqa" else 0.99,
@@ -151,6 +152,7 @@ def test_core7_macro_aggregation_isolation() -> None:
     for lvl in range(1, 6):
         sub = macro_df[macro_df["level"] == lvl]
         for _, row in sub.iterrows():
+            assert np.isclose(row["acc_mean"], 40.0)
             assert np.isclose(row["ece_mean"], 10.0)
             assert np.isclose(row["ada_ece_mean"], 8.0)
             assert np.isclose(row["brier_mean"], 0.15)
@@ -188,6 +190,7 @@ def test_latex_subtable_generation(tmp_path: Path) -> None:
                     "cum_tokens": 10 * lvl * lvl,
                     "tokens_used": 10 * lvl * lvl if "5D" in m_name else 10 * lvl,
                     "method": m_name,
+                    "accuracy_mean": 42.5,
                     "ece_percent_mean": 5.0 + lvl,
                     "adaptive_ece_percent_mean": 4.0 + lvl,
                     "brier_mean": 0.12,
@@ -199,8 +202,45 @@ def test_latex_subtable_generation(tmp_path: Path) -> None:
         df, "Sample Caption", "tab:sample_test", is_macro=False
     )
 
+    # 1. Dataset table (is_macro=False)
     assert "\\begin{table}[t]" in tex_str
     assert "\\end{table}" in tex_str
     assert "\\label{tab:sample_test}" in tex_str
+    assert "\\begin{tabular}{ccclcccc}" in tex_str
+    assert "\\textbf{Acc (\\%)} $\\uparrow$" in tex_str
+    assert "\\multirow{4}{*}{42.50}" in tex_str
     assert "\\rowcolor{gray!10}" in tex_str
     assert "\\textbf{Trajectory Platt (5D)}" in tex_str
+
+    # 2. Macro table (is_macro=True) with acc_mean
+    macro_rows = []
+    for lvl in range(1, 6):
+        for m_name in METHODS_ORDER:
+            macro_rows.append(
+                {
+                    "level": lvl,
+                    "scale": 10 * lvl,
+                    "cum_tokens": 10 * lvl * lvl,
+                    "tokens_used": 10 * lvl * lvl if "5D" in m_name else 10 * lvl,
+                    "method": m_name,
+                    "acc_mean": 38.75,
+                    "ece_mean": 5.0 + lvl,
+                    "ada_ece_mean": 4.0 + lvl,
+                    "brier_mean": 0.12,
+                    "auroc_mean": 0.75,
+                }
+            )
+    df_macro = pd.DataFrame(macro_rows)
+    macro_tex_str = format_token_budget_latex_subtable(
+        df_macro, "Macro Caption", "tab:macro_test", is_macro=True
+    )
+    assert "\\begin{tabular}{ccclcccc}" in macro_tex_str
+    assert "\\textbf{Acc (\\%)} $\\uparrow$" in macro_tex_str
+    assert "\\multirow{4}{*}{38.75}" in macro_tex_str
+
+    # 3. Fallback when accuracy column is missing or NaN
+    df_no_acc = df.drop(columns=["accuracy_mean"])
+    no_acc_tex_str = format_token_budget_latex_subtable(
+        df_no_acc, "No Acc Caption", "tab:no_acc_test", is_macro=False
+    )
+    assert "\\multirow{4}{*}{-}" in no_acc_tex_str
