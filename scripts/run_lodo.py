@@ -23,6 +23,7 @@ from trajectory_calibration.calibrators.adaptation import (
     run_saerens_em_binary,
 )
 from trajectory_calibration.calibrators.baselines import (
+    AdaptiveTemperatureScaling,
     NaiveConfidenceEstimator,
     PlattScalingEstimator,
     TemperatureScalingEstimator,
@@ -138,6 +139,7 @@ def main() -> None:
                 X_train_17d,
                 X_test_17d,
             ),
+            "Adaptive TS (ATS)": (AdaptiveTemperatureScaling(), X_train_5d, X_test_5d),
             "Platt Scaling (1D)": (PlattScalingEstimator(), X_train_17d, X_test_17d),
             "Trajectory LR": (TrajectoryLREstimator(fit_intercept=True), X_train_5d, X_test_5d),
             "Trajectory LR (No Bias)": (

@@ -27,11 +27,13 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-SRC_PATH = Path(__file__).resolve().parent.parent / "src"
+ROOT = Path(__file__).resolve().parent.parent
+SRC_PATH = ROOT / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from trajectory_calibration.calibrators.baselines import (
+    AdaptiveTemperatureScaling,
     NaiveConfidenceEstimator,
     PlattScalingEstimator,
     TemperatureScalingEstimator,
@@ -61,12 +63,22 @@ ALL_14_DATASETS: list[str] = [
     "vqav2",
 ]
 
+CORE_5_DATASETS: list[str] = [
+    "ai2d",
+    "scienceqa",
+    "textvqa",
+    "vizwiz-vqa",
+    "vqav2",
+]
+CORE_7_DATASETS: list[str] = CORE_5_DATASETS  # Compatibility alias
+
 DEFAULT_BUDGETS: list[str] = ["50", "100", "200", "500", "1000", "1500", "Full"]
 DEFAULT_SEEDS: list[int] = [42, 43, 44, 45, 46]
 
 METHODS_ORDER: list[str] = [
     "Naive Confidence (NC)",
     "Temperature Scaling (TS)",
+    "Adaptive TS (ATS)",
     "Platt Scaling (1D)",
     "Trajectory Platt (5D)",
     "VCPS-5D (Our Method)",
@@ -96,7 +108,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--architectures",
+        "--arch",
         nargs="+",
+        dest="architectures",
         default=["m3", "mqt"],
         choices=["m3", "mqt"],
         help="Target model architectures.",
@@ -142,6 +156,14 @@ def parse_args() -> argparse.Namespace:
         "--skip_existing",
         action="store_true",
         help="Skip architectures whose raw results CSV is already complete.",
+    )
+    parser.add_argument(
+        "--generate_tables_only",
+        "--skip_evaluation",
+        "--skip-evaluation",
+        dest="generate_tables_only",
+        action="store_true",
+        help="Skip fitting and regenerate macro summaries, plots, and LaTeX tables from existing raw CSVs.",
     )
     return parser.parse_args()
 
@@ -217,6 +239,7 @@ def fit_and_evaluate_methods(
     models: dict[str, Any] = {
         "Naive Confidence (NC)": NaiveConfidenceEstimator(),
         "Temperature Scaling (TS)": TemperatureScalingEstimator(),
+        "Adaptive TS (ATS)": AdaptiveTemperatureScaling(random_state=seed),
         "Platt Scaling (1D)": PlattScalingEstimator(random_state=seed),
         "Trajectory Platt (5D)": TrajectoryPlattScaler(n_features=5),
         "VCPS-5D (Our Method)": VaryingCoefficientPlattScaler(feature_set="5d", random_state=seed),
@@ -333,8 +356,14 @@ def run_architecture_study(
 
 
 def compute_macro_aggregates(raw_df: pd.DataFrame) -> pd.DataFrame:
-    """Computes Macro-Averaged metrics across all datasets at each budget tier."""
-    seed_macro_raw = raw_df.groupby(["arch", "budget", "seed", "method"])[
+    """Computes Macro-Averaged metrics across Core 5 datasets at each budget tier."""
+    if "dataset" in raw_df.columns:
+        core_sub = raw_df[raw_df["dataset"].isin(CORE_5_DATASETS)]
+        target_df = core_sub if not core_sub.empty else raw_df
+    else:
+        target_df = raw_df
+
+    seed_macro_raw = target_df.groupby(["arch", "budget", "seed", "method"])[
         ["adaptive_ece_percent", "ece_percent", "auroc", "brier", "effective_n"]
     ].mean()
     seed_macro = pd.DataFrame(seed_macro_raw).reset_index()
@@ -399,7 +428,7 @@ def format_macro_latex_table(macro_df: pd.DataFrame, arch_name: str, tab_label: 
     lines = [
         "\\begin{table}[t]",
         f"\\caption{{\\textbf{{Macro-Averaged Calibration Scaling Across Training Budgets ({arch_name} 7B).}} "
-        "Evaluated across all 14 benchmarks over 5 subsampling seeds. "
+        "Evaluated across Core 5 benchmarks over 5 subsampling seeds (superseding legacy Core 7). "
         "\\textbf{Bold}: best; \\textit{italic}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}",
         f"\\label{{{tab_label}}}",
         "\\tablestyle{4pt}{1.05}",
@@ -417,6 +446,7 @@ def format_macro_latex_table(macro_df: pd.DataFrame, arch_name: str, tab_label: 
     target_methods = [
         "Naive Confidence (NC)",
         "Temperature Scaling (TS)",
+        "Adaptive TS (ATS)",
         "Platt Scaling (1D)",
         "Trajectory Platt (5D)",
     ]
@@ -456,17 +486,11 @@ def format_macro_latex_table(macro_df: pd.DataFrame, arch_name: str, tab_label: 
             b_label = f"$N = {budget}$" if budget != "Full" else "Full"
             first_col = f"\\multirow{{{len(methods_in_sub)}}}{{*}}{{{b_label}}}" if i == 0 else ""
             is_tp = "Trajectory Platt (5D)" in m
-            if is_tp:
-                color_prefix = "\\rowcolor{gray!10} "
-                row_str = (
-                    f"{color_prefix}{first_col} & \\textbf{{{m}}} & "
-                    f"{ece_strs[i]} & {ada_strs[i]} & {auc_strs[i]} & {brier_strs[i]} \\\\"
-                )
-            else:
-                row_str = (
-                    f"{first_col} & {m} & {ece_strs[i]} & {ada_strs[i]} & "
-                    f"{auc_strs[i]} & {brier_strs[i]} \\\\"
-                )
+            disp_m = f"\\textbf{{{m}}}" if is_tp else m
+            row_str = (
+                f"{first_col} & {disp_m} & {ece_strs[i]} & {ada_strs[i]} & "
+                f"{auc_strs[i]} & {brier_strs[i]} \\\\"
+            )
             lines.append(row_str)
 
         if b_idx < len(budgets_in_df) - 1:
@@ -476,16 +500,177 @@ def format_macro_latex_table(macro_df: pd.DataFrame, arch_name: str, tab_label: 
     return "\n".join(lines)
 
 
-def generate_latex_tables(macro_m3: pd.DataFrame, macro_mqt: pd.DataFrame, out_path: Path) -> None:
-    """Writes combined LaTeX tables for M3-LLaVA and MQT-LLaVA."""
-    t_m3 = format_macro_latex_table(macro_m3, "M3-LLaVA", "tab:sample_efficiency_macro_m3")
-    t_mqt = format_macro_latex_table(macro_mqt, "MQT-LLaVA", "tab:sample_efficiency_macro_mqt")
-    full_content = t_m3 + "\n\n" + t_mqt + "\n"
+def format_targeted_sample_efficiency_latex_table(
+    summary_df: pd.DataFrame,
+    arch_title: str,
+    datasets: list[tuple[str, str]],
+    tab_label: str = "tab:sample_efficiency_macro_m3",
+) -> str:
+    """Formats targeted multi-panel LaTeX subtable for an architecture across budget tiers."""
+    caption = (
+        rf"\textbf{{Calibration Sample Efficiency Scaling Across Training Budgets ({arch_title} 7B).}} "
+        r"Evaluated across 7 training budgets $N \in \{50, 100, 200, 500, 1000, 1500, \text{Full}\}$ "
+        r"over 5 subsampling seeds. Panel A: TextVQA (Scene Text VQA); Panel B: VQAv2 (General Scene VQA). "
+        r"\textbf{Bold}: best; \textit{italic}: second best within each budget tier."
+    )
+    lines = [
+        r"\begin{table}[t]",
+        rf"\caption{{{caption}}}",
+        rf"\label{{{tab_label}}}",
+        r"\tablestyle{4pt}{1.05}",
+        r"\resizebox{\columnwidth}{!}{%",
+        r"\begin{tabular}{llcccc}",
+        r"\toprule",
+        (
+            r"\textbf{Budget ($N$)} & \textbf{Calibration Method} & "
+            r"\textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & "
+            r"\textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ \\"
+        ),
+        r"\midrule",
+    ]
+
+    target_methods = [
+        "Naive Confidence (NC)",
+        "Temperature Scaling (TS)",
+        "Adaptive TS (ATS)",
+        "Platt Scaling (1D)",
+        "Trajectory Platt (5D)",
+    ]
+
+    panel_letters = ["Panel A", "Panel B", "Panel C", "Panel D"]
+
+    for d_idx, (ds_key, ds_title) in enumerate(datasets):
+        panel_tag = (
+            panel_letters[d_idx] if d_idx < len(panel_letters) else f"Panel {chr(65 + d_idx)}"
+        )
+        if d_idx > 0:
+            lines.append(r"\midrule")
+        lines.append(rf"\multicolumn{{6}}{{l}}{{\textbf{{{panel_tag}: {ds_title}}}}} \\")
+        lines.append(r"\midrule")
+
+        ds_sub = cast(pd.DataFrame, summary_df[summary_df["dataset"] == ds_key])
+        budgets_in_df = [b for b in DEFAULT_BUDGETS if b in list(ds_sub["budget"])]
+
+        for b_idx, budget in enumerate(budgets_in_df):
+            sub = cast(pd.DataFrame, ds_sub[ds_sub["budget"] == budget])
+            methods_in_sub = [m for m in target_methods if m in list(sub["method"])]
+
+            rows_data = []
+            for m in methods_in_sub:
+                sub_m = cast(pd.DataFrame, sub[sub["method"] == m])
+                ece_col = "ece_percent_mean" if "ece_percent_mean" in sub_m.columns else "ece_mean"
+                ada_col = (
+                    "adaptive_ece_percent_mean"
+                    if "adaptive_ece_percent_mean" in sub_m.columns
+                    else "ada_ece_mean"
+                )
+                ece_val = float(np.asarray(sub_m[ece_col])[0])
+                ada_val = float(np.asarray(sub_m[ada_col])[0])
+                auc_val = float(np.asarray(sub_m["auroc_mean"])[0])
+                brier_val = float(np.asarray(sub_m["brier_mean"])[0])
+                rows_data.append((m, ece_val, ada_val, auc_val, brier_val))
+
+            ece_strs = rank_and_format_latex(
+                [r[1] for r in rows_data], higher_is_better=False, decimals=2
+            )
+            ada_strs = rank_and_format_latex(
+                [r[2] for r in rows_data], higher_is_better=False, decimals=2
+            )
+            auc_strs = rank_and_format_latex(
+                [r[3] for r in rows_data], higher_is_better=True, decimals=3
+            )
+            brier_strs = rank_and_format_latex(
+                [r[4] for r in rows_data], higher_is_better=False, decimals=4
+            )
+
+            for i, (m, _, _, _, _) in enumerate(rows_data):
+                b_label = f"$N = {budget}$" if budget != "Full" else "Full"
+                first_col = (
+                    f"\\multirow{{{len(methods_in_sub)}}}{{*}}{{{b_label}}}" if i == 0 else ""
+                )
+                is_tp = "Trajectory Platt (5D)" in m
+                disp_m = f"\\textbf{{{m}}}" if is_tp else m
+                row_str = (
+                    f"{first_col} & {disp_m} & {ece_strs[i]} & {ada_strs[i]} & "
+                    f"{auc_strs[i]} & {brier_strs[i]} \\\\"
+                )
+                lines.append(row_str)
+
+            if b_idx < len(budgets_in_df) - 1:
+                lines.append(r"\midrule")
+
+    lines.extend([r"\bottomrule", r"\end{tabular}%", r"}", r"\end{table}"])
+    return "\n".join(lines)
+
+
+def generate_latex_tables(
+    macro_m3: pd.DataFrame,
+    macro_mqt: pd.DataFrame,
+    out_path: Path,
+    summary_m3: pd.DataFrame | None = None,
+    summary_mqt: pd.DataFrame | None = None,
+) -> None:
+    """Writes targeted dual-panel and macro LaTeX tables for M3-LLaVA and MQT-LLaVA."""
     out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # 1. Macro tables saved to dedicated reference files
+    t_macro_m3 = format_macro_latex_table(
+        macro_m3, "M3-LLaVA", "tab:sample_efficiency_macro_m3_full"
+    )
+    t_macro_mqt = format_macro_latex_table(
+        macro_mqt, "MQT-LLaVA", "tab:sample_efficiency_macro_mqt_full"
+    )
+    (out_path.parent / "sample_efficiency_all_macro_m3.tex").write_text(
+        t_macro_m3 + "\n", encoding="utf-8"
+    )
+    (out_path.parent / "sample_efficiency_all_macro_mqt.tex").write_text(
+        t_macro_mqt + "\n", encoding="utf-8"
+    )
+
+    # 2. Targeted dual-panel table for Table 11
+    targeted_ds = [
+        ("textvqa", "TextVQA (Scene Text VQA)"),
+        ("vqav2", "VQAv2 (General Scene VQA)"),
+    ]
+    if summary_m3 is not None:
+        t_targeted_m3 = format_targeted_sample_efficiency_latex_table(
+            summary_m3, "M3-LLaVA", targeted_ds, "tab:sample_efficiency_macro_m3"
+        )
+    else:
+        m3_csv = ROOT / "results/experiments/sample_efficiency/sample_efficiency_m3_summary.csv"
+        if m3_csv.exists():
+            s_m3 = pd.read_csv(m3_csv)
+            t_targeted_m3 = format_targeted_sample_efficiency_latex_table(
+                s_m3, "M3-LLaVA", targeted_ds, "tab:sample_efficiency_macro_m3"
+            )
+        else:
+            t_targeted_m3 = t_macro_m3
+
+    if summary_mqt is not None:
+        t_targeted_mqt = format_targeted_sample_efficiency_latex_table(
+            summary_mqt, "MQT-LLaVA", targeted_ds, "tab:sample_efficiency_macro_mqt"
+        )
+    else:
+        mqt_csv = ROOT / "results/experiments/sample_efficiency/sample_efficiency_mqt_summary.csv"
+        if mqt_csv.exists():
+            s_mqt = pd.read_csv(mqt_csv)
+            t_targeted_mqt = format_targeted_sample_efficiency_latex_table(
+                s_mqt, "MQT-LLaVA", targeted_ds, "tab:sample_efficiency_macro_mqt"
+            )
+        else:
+            t_targeted_mqt = t_macro_mqt
+
+    (out_path.parent / "sample_efficiency_macro_m3.tex").write_text(
+        t_targeted_m3 + "\n", encoding="utf-8"
+    )
+    (out_path.parent / "sample_efficiency_macro_mqt.tex").write_text(
+        t_targeted_mqt + "\n", encoding="utf-8"
+    )
+    full_content = t_targeted_m3 + "\n\n" + t_targeted_mqt + "\n"
     out_path.write_text(full_content, encoding="utf-8")
-    (out_path.parent / "sample_efficiency_macro_m3.tex").write_text(t_m3 + "\n", encoding="utf-8")
-    (out_path.parent / "sample_efficiency_macro_mqt.tex").write_text(t_mqt + "\n", encoding="utf-8")
-    print(f"Saved LaTeX tables to: {out_path.resolve()}")
+    print(
+        f"Saved Targeted LaTeX tables to: {out_path.resolve()} and sample_efficiency_macro_m3.tex"
+    )
 
 
 def plot_sample_efficiency_curves(
@@ -516,6 +701,13 @@ def plot_sample_efficiency_curves(
             "linestyle": "--",
             "marker": "o",
             "label": "Temperature Scaling (TS)",
+            "lw": 1.8,
+        },
+        "Adaptive TS (ATS)": {
+            "color": "#8e44ad",
+            "linestyle": "-.",
+            "marker": "v",
+            "label": "Adaptive TS (ATS)",
             "lw": 1.8,
         },
         "Platt Scaling (1D)": {
@@ -623,6 +815,90 @@ def plot_sample_efficiency_curves(
     print(f"Saved curve plot to: {out_png.resolve()} and {out_pdf.resolve()}")
 
 
+def compute_missing_methods_for_arch(
+    features_dir: Path | str,
+    arch: str,
+    raw_df: pd.DataFrame,
+    missing_methods: list[str],
+    datasets: list[str],
+    budgets: list[str],
+    seeds: list[int],
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Computes only missing methods and appends them to existing raw_df."""
+    fine_scale = 576 if arch.lower() == "m3" else 256
+    new_rows: list[dict[str, Any]] = []
+
+    for ds in datasets:
+        print(f"[{arch.upper()}] Computing missing methods for {ds}...")
+        try:
+            df = load_dataset_features(
+                features_dir,
+                ds_name=ds,
+                arch=arch,
+                gen_temperature=0.0,
+                fine_scale=fine_scale,
+            )
+        except Exception as exc:
+            print(f"[{arch.upper()}] Skipping {ds} due to load error: {exc}")
+            continue
+
+        train_idx, test_idx = get_stratified_split(df, test_size=0.2, random_state=42)
+        train_df = df.iloc[train_idx].reset_index(drop=True)
+        test_df = df.iloc[test_idx].reset_index(drop=True)
+
+        X_te_5d = np.asarray(test_df[CANONICAL_5D_KEYS].to_numpy(), dtype=np.float64)
+        y_te = np.asarray(test_df["is_correct"].to_numpy(), dtype=np.int64)
+        c_fine_col = (
+            "c_576"
+            if "c_576" in test_df.columns
+            else ("c_256" if "c_256" in test_df.columns else "c_fine")
+        )
+        c_te = np.asarray(test_df[c_fine_col].to_numpy(), dtype=np.float64)
+
+        for budget_str in budgets:
+            for seed in seeds:
+                sub_tr, effective_n, is_capped = subsample_train_split(train_df, budget_str, seed)
+                X_tr_5d = np.asarray(sub_tr[CANONICAL_5D_KEYS].to_numpy(), dtype=np.float64)
+                y_tr = np.asarray(sub_tr["is_correct"].to_numpy(), dtype=np.int64)
+
+                for m_name in missing_methods:
+                    if m_name == "Adaptive TS (ATS)":
+                        model = AdaptiveTemperatureScaling(random_state=seed)
+                        model.fit(X_tr_5d, y_tr)
+                        probs = model.predict_proba(X_te_5d)
+                        panel = evaluate_full_metric_panel(probs, y_te, c_te, y_train=y_tr)
+                        new_rows.append(
+                            {
+                                "dataset": ds,
+                                "arch": arch,
+                                "budget": budget_str,
+                                "effective_n": effective_n,
+                                "is_capped": is_capped,
+                                "seed": seed,
+                                "method": m_name,
+                                "adaptive_ece_percent": panel["adaptive_ece_percent"],
+                                "ece_percent": panel["ece_percent"],
+                                "auroc": panel["auroc"],
+                                "brier": panel["brier"],
+                                "adaptive_ece": panel["adaptive_ece"],
+                                "ece": panel["ece"],
+                            }
+                        )
+
+    combined_df = pd.concat([raw_df, pd.DataFrame(new_rows)], ignore_index=True)
+    metrics = ["adaptive_ece_percent", "ece_percent", "auroc", "brier", "effective_n"]
+    agg_dict = {m: ["mean", "std"] for m in metrics}
+    grouped = combined_df.groupby(["dataset", "arch", "budget", "method"])
+    agg_df = pd.DataFrame(grouped.agg(agg_dict)).reset_index()
+    agg_df.columns = [
+        f"{c[0]}_{c[1]}" if isinstance(c, tuple) and c[1] else str(c[0]) for c in agg_df.columns
+    ]
+    summary_df = agg_df
+    capped_series = grouped["is_capped"].any()
+    summary_df["is_capped"] = np.asarray(capped_series.to_numpy())
+    return combined_df, summary_df
+
+
 def main() -> None:
     """Main CLI driver for sample efficiency benchmark."""
     set_seed(42)
@@ -635,24 +911,41 @@ def main() -> None:
     table_dir.mkdir(parents=True, exist_ok=True)
 
     macro_dfs: dict[str, pd.DataFrame] = {}
+    summary_dfs: dict[str, pd.DataFrame] = {}
 
     for arch in args.architectures:
         print("\n" + "=" * 80)
-        print(f" RUNNING SAMPLE EFFICIENCY BENCHMARK: {arch.upper()} (All 14 Datasets)")
+        print(f" PROCESSING SAMPLE EFFICIENCY BENCHMARK: {arch.upper()} (All 14 Datasets)")
         print("=" * 80)
 
         raw_csv = out_dir / f"sample_efficiency_{arch}_raw.csv"
         summary_csv = out_dir / f"sample_efficiency_{arch}_summary.csv"
-        expected_rows = (
-            len(args.datasets) * len(args.budgets) * len(args.seeds) * len(METHODS_ORDER)
-        )
 
-        if args.skip_existing and raw_csv.exists() and len(pd.read_csv(raw_csv)) >= expected_rows:
-            print(
-                f"[{arch.upper()}] Found existing complete raw records ({raw_csv}). Skipping computation."
-            )
+        if args.generate_tables_only and raw_csv.exists():
+            print(f"[{arch.upper()}] Loading existing raw records from {raw_csv}...")
             raw_df = pd.read_csv(raw_csv)
-            summary_df = pd.read_csv(summary_csv) if summary_csv.exists() else pd.DataFrame()
+            if summary_csv.exists():
+                summary_dfs[arch] = pd.read_csv(summary_csv)
+        elif raw_csv.exists():
+            raw_df = pd.read_csv(raw_csv)
+            missing = [m for m in METHODS_ORDER if m not in raw_df["method"].unique()]
+            if missing:
+                print(f"[{arch.upper()}] Computing missing methods: {missing}...")
+                raw_df, summary_df = compute_missing_methods_for_arch(
+                    features_dir=args.features_dir,
+                    arch=arch,
+                    raw_df=raw_df,
+                    missing_methods=missing,
+                    datasets=args.datasets,
+                    budgets=args.budgets,
+                    seeds=args.seeds,
+                )
+                raw_df.to_csv(raw_csv, index=False)
+                summary_df.to_csv(summary_csv, index=False)
+                summary_dfs[arch] = summary_df
+                print(f"[{arch.upper()}] Updated raw records saved to {raw_csv}.")
+            elif summary_csv.exists():
+                summary_dfs[arch] = pd.read_csv(summary_csv)
         else:
             raw_df, summary_df = run_architecture_study(
                 features_dir=args.features_dir,
@@ -664,12 +957,16 @@ def main() -> None:
             raw_df.to_csv(raw_csv, index=False)
             print(f"Saved raw per-seed records ({len(raw_df)} rows) to: {raw_csv}")
             summary_df.to_csv(summary_csv, index=False)
+            summary_dfs[arch] = summary_df
             print(f"Saved per-dataset summary ({len(summary_df)} rows) to: {summary_csv}")
+
+        if arch not in summary_dfs and summary_csv.exists():
+            summary_dfs[arch] = pd.read_csv(summary_csv)
 
         macro_df = compute_macro_aggregates(raw_df)
         macro_csv = out_dir / f"sample_efficiency_{arch}_macro.csv"
         macro_df.to_csv(macro_csv, index=False)
-        print(f"Saved macro summary to: {macro_csv}")
+        print(f"Saved Core 5 macro summary to: {macro_csv}")
         macro_dfs[arch] = macro_df
 
         # Generate publication curves
@@ -681,11 +978,23 @@ def main() -> None:
     # Generate combined LaTeX table if both architectures were evaluated
     if "m3" in macro_dfs and "mqt" in macro_dfs:
         tex_path = table_dir / "sample_efficiency_macro.tex"
-        generate_latex_tables(macro_dfs["m3"], macro_dfs["mqt"], tex_path)
+        generate_latex_tables(
+            macro_dfs["m3"],
+            macro_dfs["mqt"],
+            tex_path,
+            summary_m3=summary_dfs.get("m3"),
+            summary_mqt=summary_dfs.get("mqt"),
+        )
     elif len(macro_dfs) == 1:
         arch_single = next(iter(macro_dfs.keys()))
         tex_path = table_dir / f"sample_efficiency_macro_{arch_single}.tex"
-        generate_latex_tables(macro_dfs[arch_single], macro_dfs[arch_single], tex_path)
+        generate_latex_tables(
+            macro_dfs[arch_single],
+            macro_dfs[arch_single],
+            tex_path,
+            summary_m3=summary_dfs.get(arch_single),
+            summary_mqt=summary_dfs.get(arch_single),
+        )
 
     print("\n" + "=" * 80)
     print(" SAMPLE EFFICIENCY BENCHMARK COMPLETE!")

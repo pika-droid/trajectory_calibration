@@ -297,6 +297,19 @@ def build_reporting_steps(
             ]
         )
 
+    steps.append(
+        PipelineStep(
+            name="generate_sample_efficiency_tables",
+            description="Generate Core 5 Sample Efficiency Scaling LaTeX Tables & Curves",
+            command=[
+                py_exec,
+                str(SCRIPTS_DIR / "run_sample_efficiency_study.py"),
+                "--generate_tables_only",
+            ],
+            category="reporting",
+        )
+    )
+
     if not skip_compendium:
         steps.append(
             PipelineStep(

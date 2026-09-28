@@ -12,25 +12,27 @@
 \midrule
 \multicolumn{13}{l}{\textbf{Panel A: M3-LLaVA (7B)}} \\
 \midrule
-Naive Confidence (NC) & 25.66 & 25.40 & 0.3194 & \textit{0.599} & \textit{11.59} & \textit{10.50} & \textit{0.1732} & \textbf{0.814} & 18.63 & 17.95 & 0.2463 & \textit{0.707} \\
-Temperature Scaling (TS) & \textbf{4.45} & 17.96 & 0.2480 & \textit{0.599} & 16.98 & 16.80 & 0.1812 & \textbf{0.814} & \textit{10.71} & 17.38 & 0.2146 & \textit{0.707} \\
-Platt Scaling (1D) & 6.84 & \textit{17.67} & \textit{0.2463} & \textit{0.599} & 14.76 & 14.04 & 0.1798 & \textbf{0.814} & 10.80 & \textit{15.85} & \textit{0.2131} & \textit{0.707} \\
+Naive Confidence (NC) & 25.66 & 25.40 & 0.3194 & 0.599 & \textit{11.59} & \textit{10.50} & 0.1732 & \textbf{0.814} & 18.63 & 17.95 & 0.2463 & \textit{0.707} \\
+Temperature Scaling (TS) & \textit{4.45} & 17.96 & 0.2480 & 0.599 & 16.98 & 16.80 & 0.1812 & \textbf{0.814} & 10.71 & 17.38 & 0.2146 & \textit{0.707} \\
+Adaptive TS (ATS) & \textbf{4.29} & \textit{16.94} & 0.2477 & \textit{0.601} & 14.08 & 13.84 & \textit{0.1730} & \textit{0.813} & \textit{9.18} & \textit{15.39} & \textit{0.2104} & \textit{0.707} \\
+Platt Scaling (1D) & 6.84 & 17.67 & \textit{0.2463} & 0.599 & 14.76 & 14.04 & 0.1798 & \textbf{0.814} & 10.80 & 15.85 & 0.2131 & \textit{0.707} \\
 LN-Entropy & - & - & - & - & - & - & - & - & - & - & - & - \\
 Semantic Entropy & - & - & - & - & - & - & - & - & - & - & - & - \\
 EigenScore & - & - & - & - & - & - & - & - & - & - & - & - \\
 UMPIRE & - & - & - & - & - & - & - & - & - & - & - & - \\
-Trajectory Platt (5D) & \textit{5.26} & \textbf{7.45} & \textbf{0.2240} & \textbf{0.691} & \textbf{5.87} & \textbf{6.88} & \textbf{0.1709} & \textit{0.773} & \textbf{5.57} & \textbf{7.17} & \textbf{0.1975} & \textbf{0.732} \\
+Trajectory Platt (5D) & 5.26 & \textbf{7.45} & \textbf{0.2240} & \textbf{0.691} & \textbf{5.87} & \textbf{6.88} & \textbf{0.1709} & 0.773 & \textbf{5.57} & \textbf{7.17} & \textbf{0.1975} & \textbf{0.732} \\
 \midrule
 \multicolumn{13}{l}{\textbf{Panel B: MQT-LLaVA (7B)}} \\
 \midrule
-Naive Confidence (NC) & 27.88 & 28.00 & 0.3385 & \textit{0.602} & \textit{9.63} & \textit{9.74} & 0.1966 & \textbf{0.763} & 18.76 & 18.87 & 0.2675 & \textit{0.682} \\
-Temperature Scaling (TS) & 6.56 & \textit{13.28} & 0.2491 & \textit{0.602} & 14.20 & 14.42 & 0.2054 & \textbf{0.763} & 10.38 & 13.85 & 0.2272 & \textit{0.682} \\
-Platt Scaling (1D) & \textbf{1.18} & 13.66 & \textit{0.2449} & \textit{0.602} & 11.34 & 11.29 & \textit{0.1937} & \textbf{0.763} & \textit{6.26} & \textit{12.48} & \textit{0.2193} & \textit{0.682} \\
+Naive Confidence (NC) & 27.88 & 28.00 & 0.3385 & 0.602 & \textit{9.63} & \textit{9.74} & 0.1966 & \textit{0.763} & 18.76 & 18.87 & 0.2675 & 0.682 \\
+Temperature Scaling (TS) & 6.56 & 13.28 & 0.2491 & 0.602 & 14.20 & 14.42 & 0.2054 & \textit{0.763} & 10.38 & 13.85 & 0.2272 & 0.682 \\
+Adaptive TS (ATS) & 6.62 & \textit{12.86} & 0.2488 & \textit{0.604} & 12.13 & 13.19 & 0.1966 & \textbf{0.768} & 9.37 & 13.03 & 0.2227 & \textit{0.686} \\
+Platt Scaling (1D) & \textbf{1.18} & 13.66 & \textit{0.2449} & 0.602 & 11.34 & 11.29 & \textit{0.1937} & \textit{0.763} & \textit{6.26} & \textit{12.48} & \textit{0.2193} & 0.682 \\
 LN-Entropy & - & - & - & - & - & - & - & - & - & - & - & - \\
 Semantic Entropy & - & - & - & - & - & - & - & - & - & - & - & - \\
 EigenScore & - & - & - & - & - & - & - & - & - & - & - & - \\
 UMPIRE & - & - & - & - & - & - & - & - & - & - & - & - \\
-Trajectory Platt (5D) & \textit{5.02} & \textbf{6.54} & \textbf{0.2332} & \textbf{0.654} & \textbf{5.68} & \textbf{6.58} & \textbf{0.1921} & \textit{0.733} & \textbf{5.35} & \textbf{6.56} & \textbf{0.2127} & \textbf{0.694} \\
+Trajectory Platt (5D) & \textit{5.02} & \textbf{6.54} & \textbf{0.2332} & \textbf{0.654} & \textbf{5.68} & \textbf{6.58} & \textbf{0.1921} & 0.733 & \textbf{5.35} & \textbf{6.56} & \textbf{0.2127} & \textbf{0.694} \\
 \bottomrule
 \end{tabular}%
 }

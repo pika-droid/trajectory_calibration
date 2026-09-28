@@ -1,28 +1,30 @@
 \begin{table*}[t]
 \centering
-\caption{\textbf{Comprehensive Calibration Benchmark Breakdown Across Core 7 Datasets.} Evaluated across Adaptive ECE (Ada-ECE (\%) $\downarrow$) and AUROC ($\uparrow$) on M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B). \textbf{Bold}: best; \textit{italic}: second best within each metric column. Clean unshaded presentation.}
+\caption{\textbf{Comprehensive Calibration Benchmark Breakdown Across Core 5 Datasets.} Evaluated across Adaptive ECE (Ada-ECE (\%) $\downarrow$) and AUROC ($\uparrow$) on M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B). \textbf{Bold}: best; \textit{italic}: second best within each metric column. Clean unshaded presentation.}
 \label{tab:core7_benchmark_breakdown}
 \tablestyle{2.8pt}{1.05}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{l cccccccccccccccc}
+\begin{tabular}{l cccccccccccc}
 \toprule
- & \multicolumn{2}{c}{\textbf{AI2D}} & \multicolumn{2}{c}{\textbf{ChartQA}} & \multicolumn{2}{c}{\textbf{DocVQA}} & \multicolumn{2}{c}{\textbf{ScienceQA}} & \multicolumn{2}{c}{\textbf{TextVQA}} & \multicolumn{2}{c}{\textbf{VizWiz-VQA}} & \multicolumn{2}{c}{\textbf{VQAv2}} & \multicolumn{2}{c}{\textbf{Average}} \\
-\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9} \cmidrule(lr){10-11} \cmidrule(lr){12-13} \cmidrule(lr){14-15} \cmidrule(lr){16-17}
-\textbf{Calibration Method} & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ \\
+ & \multicolumn{2}{c}{\textbf{AI2D}} & \multicolumn{2}{c}{\textbf{ScienceQA}} & \multicolumn{2}{c}{\textbf{TextVQA}} & \multicolumn{2}{c}{\textbf{VizWiz-VQA}} & \multicolumn{2}{c}{\textbf{VQAv2}} & \multicolumn{2}{c}{\textbf{Average}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9} \cmidrule(lr){10-11} \cmidrule(lr){12-13}
+\textbf{Calibration Method} & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ & Ada $\downarrow$ & AUC $\uparrow$ \\
 \midrule
-\multicolumn{17}{l}{\textbf{Panel A: M3-LLaVA (7B)}} \\
+\multicolumn{13}{l}{\textbf{Panel A: M3-LLaVA (7B)}} \\
 \midrule
-Naive Confidence (NC) & 42.00 & \textit{0.614} & 71.03 & \textit{0.807} & 74.57 & \textit{0.845} & 21.93 & \textit{0.807} & 11.07 & \textbf{0.839} & 15.97 & \textit{0.793} & 7.23 & \textit{0.772} & 34.83 & \textit{0.782} \\
-Temperature Scaling (TS) & 12.18 & \textit{0.614} & 44.47 & \textit{0.807} & 48.89 & \textit{0.845} & 12.68 & \textit{0.807} & 11.14 & \textbf{0.839} & 15.09 & \textit{0.793} & 8.58 & \textit{0.772} & 21.86 & \textit{0.782} \\
-Platt Scaling (1D) & \textbf{7.70} & \textit{0.614} & \textit{3.62} & \textit{0.807} & \textit{2.52} & \textit{0.845} & \textbf{4.99} & \textit{0.807} & \textit{8.22} & \textbf{0.839} & \textbf{5.80} & \textit{0.793} & \textit{6.97} & \textit{0.772} & \textbf{5.69} & \textit{0.782} \\
-Trajectory Platt (5D) & \textit{11.15} & \textbf{0.661} & \textbf{2.88} & \textbf{0.818} & \textbf{1.81} & \textbf{0.888} & \textit{6.15} & \textbf{0.813} & \textbf{5.35} & \textit{0.835} & \textit{6.57} & \textbf{0.794} & \textbf{6.50} & \textbf{0.788} & \textit{5.78} & \textbf{0.800} \\
+Naive Confidence (NC) & 42.00 & 0.614 & 21.93 & 0.807 & 11.07 & \textbf{0.839} & 15.97 & \textit{0.793} & 7.23 & \textit{0.772} & 19.64 & 0.765 \\
+Temperature Scaling (TS) & 12.18 & 0.614 & 12.68 & 0.807 & 11.14 & \textbf{0.839} & 15.09 & \textit{0.793} & 8.58 & \textit{0.772} & 11.94 & 0.765 \\
+Adaptive TS (ATS) & 13.15 & \textit{0.625} & 13.00 & \textit{0.808} & 11.31 & \textbf{0.839} & 14.87 & \textit{0.793} & 7.52 & \textbf{0.788} & 11.97 & \textit{0.771} \\
+Platt Scaling (1D) & \textbf{7.70} & 0.614 & \textbf{4.99} & 0.807 & \textit{8.22} & \textbf{0.839} & \textbf{5.80} & \textit{0.793} & \textit{6.97} & \textit{0.772} & \textbf{6.73} & 0.765 \\
+Trajectory Platt (5D) & \textit{11.15} & \textbf{0.661} & \textit{6.15} & \textbf{0.813} & \textbf{5.35} & \textit{0.835} & \textit{6.57} & \textbf{0.794} & \textbf{6.50} & \textbf{0.788} & \textit{7.15} & \textbf{0.778} \\
 \midrule
-\multicolumn{17}{l}{\textbf{Panel B: MQT-LLaVA (7B)}} \\
+\multicolumn{13}{l}{\textbf{Panel B: MQT-LLaVA (7B)}} \\
 \midrule
-Naive Confidence (NC) & 26.92 & \textbf{0.746} & 71.30 & 0.491 & 53.30 & \textit{0.517} & 23.17 & \textit{0.760} & 31.91 & \textit{0.684} & 30.66 & \textbf{0.797} & \textit{10.31} & \textit{0.641} & 35.37 & 0.662 \\
-Temperature Scaling (TS) & 13.10 & \textbf{0.746} & 44.88 & 0.491 & 47.07 & \textit{0.517} & 10.23 & \textit{0.760} & 18.32 & \textit{0.684} & 29.41 & \textbf{0.797} & 13.65 & \textit{0.641} & 25.24 & 0.662 \\
-Platt Scaling (1D) & \textit{8.25} & \textbf{0.746} & \textit{4.27} & \textit{0.509} & \textit{3.67} & \textit{0.517} & \textit{6.91} & \textit{0.760} & \textit{10.46} & \textit{0.684} & \textbf{7.62} & \textbf{0.797} & 10.94 & \textit{0.641} & \textit{7.45} & \textit{0.665} \\
-Trajectory Platt (5D) & \textbf{6.53} & \textit{0.739} & \textbf{3.92} & \textbf{0.603} & \textbf{2.06} & \textbf{0.594} & \textbf{5.72} & \textbf{0.769} & \textbf{7.76} & \textbf{0.719} & \textit{8.17} & \textit{0.795} & \textbf{7.64} & \textbf{0.739} & \textbf{5.97} & \textbf{0.708} \\
+Naive Confidence (NC) & 26.92 & \textit{0.746} & 23.17 & 0.760 & 31.91 & 0.684 & 30.66 & \textbf{0.797} & \textit{10.31} & 0.641 & 24.60 & 0.726 \\
+Temperature Scaling (TS) & 13.10 & \textit{0.746} & 10.23 & 0.760 & 18.32 & 0.684 & 29.41 & \textbf{0.797} & 13.65 & 0.641 & 16.94 & 0.726 \\
+Adaptive TS (ATS) & 14.08 & \textbf{0.747} & 9.38 & \textit{0.761} & 18.36 & \textit{0.689} & 29.11 & \textit{0.796} & 12.03 & \textit{0.658} & 16.59 & \textit{0.730} \\
+Platt Scaling (1D) & \textit{8.25} & \textit{0.746} & \textit{6.91} & 0.760 & \textit{10.46} & 0.684 & \textbf{7.62} & \textbf{0.797} & 10.94 & 0.641 & \textit{8.84} & 0.726 \\
+Trajectory Platt (5D) & \textbf{6.53} & 0.739 & \textbf{5.72} & \textbf{0.769} & \textbf{7.76} & \textbf{0.719} & \textit{8.17} & 0.795 & \textbf{7.64} & \textbf{0.739} & \textbf{7.16} & \textbf{0.752} \\
 \bottomrule
 \end{tabular}%
 }

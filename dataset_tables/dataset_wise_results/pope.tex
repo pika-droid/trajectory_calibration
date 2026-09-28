@@ -7,9 +7,10 @@
 \toprule
 \textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & \textbf{3.45} & 4.40 & \textbf{0.0882} & \textit{0.739} \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 4.27 & \textit{4.37} & \textit{0.0883} & \textit{0.739} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{4.19} & \textbf{4.32} & \textbf{0.0882} & \textit{0.739} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & \textbf{3.45} & 4.40 & \textit{0.0882} & 0.739 \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 4.27 & 4.37 & 0.0883 & 0.739 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 4.42 & \textbf{4.27} & \textbf{0.0879} & \textit{0.750} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{4.19} & \textit{4.32} & \textit{0.0882} & 0.739 \\
 Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & 4.82 & 6.62 & 0.0887 & \textbf{0.751} \\
 \bottomrule
 \end{tabular}%
@@ -27,8 +28,9 @@ Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & 4.82 & 6.62 & 0.0887 & \textbf
 \midrule
 Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 4.01 & \textbf{4.30} & 0.0903 & \textbf{0.876} \\
 Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & \textbf{3.52} & 4.93 & \textit{0.0902} & \textbf{0.876} \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 3.75 & 4.90 & \textit{0.0902} & \textit{0.874} \\
 Platt Scaling (1D) & Single-Pass ($T = 0.0$) & 3.97 & 4.64 & \textbf{0.0893} & \textbf{0.876} \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{3.55} & \textit{4.48} & 0.0903 & \textit{0.873} \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{3.55} & \textit{4.48} & 0.0903 & 0.873 \\
 \bottomrule
 \end{tabular}%
 }

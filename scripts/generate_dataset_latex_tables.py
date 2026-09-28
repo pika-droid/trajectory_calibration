@@ -17,9 +17,10 @@ TABLES_DIR.mkdir(parents=True, exist_ok=True)
 DATASET_WISE_DIR.mkdir(parents=True, exist_ok=True)
 TEMP_DIR.mkdir(parents=True, exist_ok=True)
 
-CORE_DATASETS = ["ai2d", "chartqa", "docvqa", "scienceqa", "textvqa", "vizwiz-vqa", "vqav2"]
+CORE_DATASETS = ["ai2d", "scienceqa", "textvqa", "vizwiz-vqa", "vqav2"]
 ADVERSARIAL_DATASETS = ["avqa", "vllm-safety"]
-TARGET_9_DATASETS = set(CORE_DATASETS) | set(ADVERSARIAL_DATASETS)
+TARGET_7_DATASETS = set(CORE_DATASETS) | set(ADVERSARIAL_DATASETS)
+TARGET_9_DATASETS = TARGET_7_DATASETS  # Backwards compatibility alias
 
 RQ1_CORE7_FILE = TABLES_DIR / "rq1_core7_benchmark.tex"
 RQ1_ADVERSARIAL_FILE = TABLES_DIR / "rq1_adversarial_benchmark.tex"
@@ -53,6 +54,7 @@ DATASET_NAME_MAP = {
 SINGLE_PASS_BASELINES = [
     "Naive Confidence (NC)",
     "Temperature Scaling (TS)",
+    "Adaptive TS (ATS)",
     "Platt Scaling (1D)",
 ]
 
@@ -65,19 +67,22 @@ MULTI_PASS_METHODS = [
 
 PROPOSED_METHOD = "Trajectory Platt (5D)"
 
-ALL_8_METHODS = SINGLE_PASS_BASELINES + MULTI_PASS_METHODS + [PROPOSED_METHOD]
+ALL_9_METHODS = SINGLE_PASS_BASELINES + MULTI_PASS_METHODS + [PROPOSED_METHOD]
+ALL_8_METHODS = ALL_9_METHODS
 SINGLE_PASS_METHODS = SINGLE_PASS_BASELINES + [PROPOSED_METHOD]
 
 TARGET_METHODS_ORDER = [
     ("Naive Confidence (NC)", "Single-Pass ($T = 0.0$)", False),
     ("Temperature Scaling (TS)", "Single-Pass ($T = 0.0$)", False),
+    ("Adaptive TS (ATS)", "Single-Pass ($T = 0.0$)", False),
     ("Platt Scaling (1D)", "Single-Pass ($T = 0.0$)", False),
     ("Trajectory Platt (5D)", "Single-Pass ($T = 0.0$)", True),
 ]
 
-TARGET_METHODS_8_ORDER = [
+TARGET_METHODS_9_ORDER = [
     ("Naive Confidence (NC)", "Single-Pass ($T = 0.0$)", False),
     ("Temperature Scaling (TS)", "Single-Pass ($T = 0.0$)", False),
+    ("Adaptive TS (ATS)", "Single-Pass ($T = 0.0$)", False),
     ("Platt Scaling (1D)", "Single-Pass ($T = 0.0$)", False),
     ("LN-Entropy", "Multi-Pass ($T = 0.5, K = 10$)", False),
     ("Semantic Entropy", "Multi-Pass ($T = 0.5, K = 10$)", False),
@@ -85,10 +90,12 @@ TARGET_METHODS_8_ORDER = [
     ("UMPIRE", "Multi-Pass ($T = 0.5, K = 10$)", False),
     ("Trajectory Platt (5D)", "Single-Pass ($T = 0.0$)", True),
 ]
+TARGET_METHODS_8_ORDER = TARGET_METHODS_9_ORDER
 
 VQAV2_METHODS_ORDER = [
     ("Naive Confidence (NC)", "Single-Pass ($T = 0.0, K = 1$)", False),
     ("Temperature Scaling (TS)", "Single-Pass ($T = 0.0, K = 1$)", False),
+    ("Adaptive TS (ATS)", "Single-Pass ($T = 0.0, K = 1$)", False),
     ("Platt Scaling (1D)", "Single-Pass ($T = 0.0, K = 1$)", False),
     ("ln_entropy", "Multi-Pass ($T = 0.5, K = 10$)", False),
     ("semantic_entropy", "Multi-Pass ($T = 0.5, K = 10$)", False),
@@ -119,6 +126,7 @@ DATASET_DISPLAY_MAP = {
 BREAKDOWN_METHODS = [
     "Naive Confidence (NC)",
     "Temperature Scaling (TS)",
+    "Adaptive TS (ATS)",
     "Platt Scaling (1D)",
     "Trajectory Platt (5D)",
 ]
@@ -159,7 +167,7 @@ def generate_single_table(
     arch_model: str,
     is_macro: bool = False,
 ) -> str:
-    """Generates a standardized LaTeX benchmark table (8 methods for target 9 datasets, 4 for others)."""
+    """Generates a standardized LaTeX benchmark table (9 methods for target 9 datasets, 5 for others)."""
     tab_label = (
         f"tab:benchmark_{arch_label}_{DATASET_NAME_MAP.get(ds, ds)}"
         if not is_macro
@@ -175,7 +183,7 @@ def generate_single_table(
     )
 
     methods_order = (
-        TARGET_METHODS_8_ORDER
+        TARGET_METHODS_9_ORDER
         if (ds in TARGET_9_DATASETS and not is_macro)
         else TARGET_METHODS_ORDER
     )
@@ -354,8 +362,8 @@ def _render_breakdown_panel_rows(df_arch: pd.DataFrame) -> list[str]:
     return lines
 
 
-def build_core7_breakdown_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> str:
-    """Builds unified stacked 2-panel Core 7 benchmark breakdown table with Ada-ECE and AUROC."""
+def build_core5_breakdown_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> str:
+    """Builds unified stacked 2-panel Core 5 benchmark breakdown table with Ada-ECE and AUROC."""
     tab_label = "tab:core7_benchmark_breakdown"
 
     top_ds_headers = " & ".join(
@@ -365,21 +373,23 @@ def build_core7_breakdown_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> st
         [rf"\cmidrule(lr){{{2 * i + 2}-{2 * i + 3}}}" for i in range(len(CORE_DATASETS) + 1)]
     )
     sub_headers = " & ".join([r"Ada $\downarrow$ & AUC $\uparrow$"] * (len(CORE_DATASETS) + 1))
+    col_str = "c" * (2 * len(CORE_DATASETS) + 2)
+    total_cols = 1 + 2 * (len(CORE_DATASETS) + 1)
 
     lines = [
         r"\begin{table*}[t]",
         r"\centering",
-        r"\caption{\textbf{Comprehensive Calibration Benchmark Breakdown Across Core 7 Datasets.} Evaluated across Adaptive ECE (Ada-ECE (\%) $\downarrow$) and AUROC ($\uparrow$) on M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B). \textbf{Bold}: best; \textit{italic}: second best within each metric column. Clean unshaded presentation.}",
+        rf"\caption{{\textbf{{Comprehensive Calibration Benchmark Breakdown Across Core {len(CORE_DATASETS)} Datasets.}} Evaluated across Adaptive ECE (Ada-ECE (\%) $\downarrow$) and AUROC ($\uparrow$) on M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B). \textbf{{Bold}}: best; \textit{{italic}}: second best within each metric column. Clean unshaded presentation.}}",
         rf"\label{{{tab_label}}}",
         r"\tablestyle{2.8pt}{1.05}",
         r"\resizebox{\textwidth}{!}{%",
-        r"\begin{tabular}{l cccccccccccccccc}",
+        rf"\begin{{tabular}}{{l {col_str}}}",
         r"\toprule",
         rf" & {top_ds_headers} & \multicolumn{{2}}{{c}}{{\textbf{{Average}}}} \\",
         cmidrules,
         rf"\textbf{{Calibration Method}} & {sub_headers} \\",
         r"\midrule",
-        r"\multicolumn{17}{l}{\textbf{Panel A: M3-LLaVA (7B)}} \\",
+        rf"\multicolumn{{{total_cols}}}{{l}}{{\textbf{{Panel A: M3-LLaVA (7B)}}}} \\",
         r"\midrule",
     ]
 
@@ -387,7 +397,7 @@ def build_core7_breakdown_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> st
     lines.extend(
         [
             r"\midrule",
-            r"\multicolumn{17}{l}{\textbf{Panel B: MQT-LLaVA (7B)}} \\",
+            rf"\multicolumn{{{total_cols}}}{{l}}{{\textbf{{Panel B: MQT-LLaVA (7B)}}}} \\",
             r"\midrule",
         ]
     )
@@ -403,6 +413,9 @@ def build_core7_breakdown_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> st
     return "\n".join(lines)
 
 
+build_core7_breakdown_table = build_core5_breakdown_table
+
+
 def _render_rq1_panel_rows(
     df_arch: pd.DataFrame,
     datasets: list[str],
@@ -414,7 +427,7 @@ def _render_rq1_panel_rows(
         ada_vals: list[float | None] = []
         brier_vals: list[float | None] = []
         auc_vals: list[float | None] = []
-        for m in ALL_8_METHODS:
+        for m in ALL_9_METHODS:
             sub = df_arch[(df_arch["dataset"] == ds) & (df_arch["method"] == m)]
             if not sub.empty:
                 ece_vals.append(float(sub["ece_percent"].mean()))
@@ -437,7 +450,7 @@ def _render_rq1_panel_rows(
     avg_ada_vals: list[float | None] = []
     avg_brier_vals: list[float | None] = []
     avg_auc_vals: list[float | None] = []
-    for m in ALL_8_METHODS:
+    for m in ALL_9_METHODS:
         sub = df_arch[(df_arch["dataset"].isin(datasets)) & (df_arch["method"] == m)]
         if not sub.empty:
             avg_ece_vals.append(float(sub["ece_percent"].mean()))
@@ -456,7 +469,7 @@ def _render_rq1_panel_rows(
     avg_auc_fmt = rank_and_format(avg_auc_vals, higher_is_better=True, decimals=3)
 
     lines: list[str] = []
-    for i, m in enumerate(ALL_8_METHODS):
+    for i, m in enumerate(ALL_9_METHODS):
         cells: list[str] = [m]
         for ds in datasets:
             ece_f, ada_f, brier_f, auc_f = ds_metrics[ds]
@@ -470,6 +483,7 @@ def _render_rq1_panel_rows(
 RQ1_CORE7_METHODS = [
     "Naive Confidence (NC)",
     "Temperature Scaling (TS)",
+    "Adaptive TS (ATS)",
     "Platt Scaling (1D)",
     "Trajectory Platt (5D)",
 ]
@@ -480,12 +494,12 @@ def _render_rq1_core7_arch_table(
     arch_title: str,
     arch_label: str,
 ) -> str:
-    """Renders a single-architecture 17-column tabularx table for RQ1 Core 7 evaluation."""
+    """Renders a single-architecture 21-column tabularx table for RQ1 Core 7 evaluation."""
     lines = [
         r"\begin{table*}[t]",
         r"\centering",
         rf"\caption{{\textbf{{RQ1 Evaluation on {arch_title} (7B).}}",
-        r"Comparison of calibration methods across seven vision-language benchmarks.",
+        rf"Comparison of calibration methods across {len(CORE_DATASETS)} vision-language benchmarks.",
         r"Metrics: Expected Calibration Error (ECE (\%) $\downarrow$), Adaptive ECE",
         r"(Ada-ECE (\%) $\downarrow$), Brier Score ($\downarrow$), and AUROC ($\uparrow$).",
         r"\textbf{Bold}: Rank 1; \textit{italic}: Rank 2 among single-pass methods.}",
@@ -495,18 +509,21 @@ def _render_rq1_core7_arch_table(
         r"\setlength{\tabcolsep}{2pt}",
         r"\renewcommand{\arraystretch}{1.05}",
         "",
-        r"\begin{tabularx}{\textwidth}{l *{16}{Y}}",
+        r"\begin{tabularx}{\textwidth}{l *{20}{Y}}",
         r"\toprule",
         r"& \multicolumn{4}{c}{\textbf{Naive Confidence}}",
         r"& \multicolumn{4}{c}{\textbf{Temperature Scaling}}",
+        r"& \multicolumn{4}{c}{\textbf{Adaptive TS (ATS)}}",
         r"& \multicolumn{4}{c}{\textbf{Platt Scaling (1D)}}",
         r"& \multicolumn{4}{c}{\textbf{Trajectory Platt (5D)}} \\",
         r"\cmidrule(lr){2-5}",
         r"\cmidrule(lr){6-9}",
         r"\cmidrule(lr){10-13}",
         r"\cmidrule(lr){14-17}",
+        r"\cmidrule(lr){18-21}",
         "",
         r"\textbf{Dataset}",
+        r"& ECE & Ada. & Brier & AUROC",
         r"& ECE & Ada. & Brier & AUROC",
         r"& ECE & Ada. & Brier & AUROC",
         r"& ECE & Ada. & Brier & AUROC",
@@ -785,10 +802,11 @@ def build_temp_table(
     arch_model: str,
     is_macro: bool = False,
 ) -> str:
-    """Builds stacked temperature transfer table for 4 core methods."""
+    """Builds stacked temperature transfer table for 5 core methods."""
     temp_methods = [
         "Naive Confidence (NC)",
         "Temperature Scaling (TS)",
+        "Adaptive TS (ATS)",
         "Platt Scaling (1D)",
         "Trajectory Platt (5D)",
     ]
@@ -883,7 +901,7 @@ def build_lodo_table(df: pd.DataFrame, arch_label: str, arch_model: str) -> str:
     """Builds LODO table for 4 core methods across 4 standardized metrics."""
     lines = [
         "\\begin{table}[t]",
-        f"\\caption{{\\textbf{{Leave-One-Dataset-Out (LODO) Cross-Domain Transfer ({arch_model} 7B).}} Macro-averaged across all 14 held-out target benchmarks. Trained on pooled 13 benchmarks. \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
+        f"\\caption{{\\textbf{{Leave-One-Dataset-Out (LODO) Cross-Domain Transfer ({arch_model} 7B).}} Macro-averaged across Core 7 held-out target benchmarks. Trained on pooled 13 benchmarks. \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
         f"\\label{{tab:lodo_transfer_{arch_label}}}",
         "\\tablestyle{4pt}{1.05}",
         "\\resizebox{\\columnwidth}{!}{%",
@@ -896,12 +914,19 @@ def build_lodo_table(df: pd.DataFrame, arch_label: str, arch_model: str) -> str:
     methods_order = [
         "Naive Confidence (NC)",
         "Temperature Scaling (TS)",
+        "Adaptive TS (ATS)",
         "Platt Scaling (1D)",
         "Trajectory Platt (5D)",
     ]
 
+    if "test_dataset" in df.columns:
+        core_sub = df[df["test_dataset"].isin(CORE_DATASETS)]
+        target_df = core_sub if not core_sub.empty else df
+    else:
+        target_df = df
+
     agg = (
-        df.groupby(["method", "transfer_mode"])[
+        target_df.groupby(["method", "transfer_mode"])[
             ["ece_percent", "adaptive_ece_percent", "brier", "auroc"]
         ]
         .mean()

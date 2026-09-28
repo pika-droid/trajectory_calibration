@@ -34,6 +34,7 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from trajectory_calibration.calibrators.baselines import (
+    AdaptiveTemperatureScaling,
     NaiveConfidenceEstimator,
     PlattScalingEstimator,
     TemperatureScalingEstimator,
@@ -69,6 +70,7 @@ DEFAULT_SEEDS: list[int] = [42, 43, 44, 45, 46]
 METHODS_ORDER: list[str] = [
     "Naive Confidence (NC)",
     "Temperature Scaling (TS)",
+    "Adaptive TS (ATS)",
     "Platt Scaling (1D)",
     "Trajectory Platt (5D)",
 ]
@@ -162,6 +164,7 @@ def fit_and_eval_level(
     models: dict[str, Any] = {
         "Naive Confidence (NC)": NaiveConfidenceEstimator(),
         "Temperature Scaling (TS)": TemperatureScalingEstimator(),
+        "Adaptive TS (ATS)": AdaptiveTemperatureScaling(random_state=seed),
         "Platt Scaling (1D)": PlattScalingEstimator(random_state=seed),
         "Trajectory Platt (5D)": TrajectoryPlattScaler(n_features=5),
     }
@@ -210,7 +213,7 @@ def run_dataset_eval(
 
             for m_name in METHODS_ORDER:
                 panel = evals[m_name]
-                tokens_used = cum_tokens if "5D" in m_name else single_tokens
+                tokens_used = cum_tokens if ("5D" in m_name or "ATS" in m_name) else single_tokens
                 row: dict[str, Any] = {
                     "dataset": ds_name,
                     "arch": arch,
@@ -412,12 +415,12 @@ def format_token_budget_latex_subtable(
             first_col = f"\\multirow{{{len(methods_in_sub)}}}{{*}}{{{lvl}}}" if i == 0 else ""
             acc_col_str = f"\\multirow{{{len(methods_in_sub)}}}{{*}}{{{acc_str}}}" if i == 0 else ""
             is_tp = "5D" in m
-            t_str = f"{cum_val}" if is_tp else f"{s_val}"
+            is_traj = "5D" in m or "ATS" in m
+            t_str = f"{cum_val}" if is_traj else f"{s_val}"
             disp_m = f"\\textbf{{{m}}}" if is_tp else m
 
-            color_prefix = "\\rowcolor{gray!10} " if is_tp else ""
             row_str = (
-                f"{color_prefix}{first_col} & {t_str} & {acc_col_str} & {disp_m} & "
+                f"{first_col} & {t_str} & {acc_col_str} & {disp_m} & "
                 f"{ece_strs[i]} & {ada_strs[i]} & {brier_strs[i]} & {auc_strs[i]} \\\\"
             )
             lines.append(row_str)
@@ -505,6 +508,7 @@ def plot_macro_pareto(
     method_styles = {
         "Naive Confidence (NC)": {"color": "#7f7f7f", "ls": ":", "marker": "s", "lw": 1.8},
         "Temperature Scaling (TS)": {"color": "#e67e22", "ls": "--", "marker": "o", "lw": 1.8},
+        "Adaptive TS (ATS)": {"color": "#8e44ad", "ls": "-.", "marker": "v", "lw": 1.8},
         "Platt Scaling (1D)": {"color": "#27ae60", "ls": "-.", "marker": "^", "lw": 2.0},
         "Trajectory Platt (5D)": {"color": "#2980b9", "ls": "-", "marker": "D", "lw": 2.4, "ms": 9},
     }
@@ -580,6 +584,7 @@ def plot_9ds_grid(
     method_styles = {
         "Naive Confidence (NC)": {"color": "#7f7f7f", "ls": ":", "marker": "s", "lw": 1.5},
         "Temperature Scaling (TS)": {"color": "#e67e22", "ls": "--", "marker": "o", "lw": 1.5},
+        "Adaptive TS (ATS)": {"color": "#8e44ad", "ls": "-.", "marker": "v", "lw": 1.5},
         "Platt Scaling (1D)": {"color": "#27ae60", "ls": "-.", "marker": "^", "lw": 1.8},
         "Trajectory Platt (5D)": {"color": "#2980b9", "ls": "-", "marker": "D", "lw": 2.2, "ms": 7},
     }
@@ -622,7 +627,7 @@ def plot_9ds_grid(
     )
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(
-        handles, labels, loc="lower center", bbox_to_anchor=(0.5, -0.02), ncol=4, fontsize=11
+        handles, labels, loc="lower center", bbox_to_anchor=(0.5, -0.02), ncol=5, fontsize=11
     )
     plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.96))
 

@@ -1,5 +1,5 @@
 \begin{table}[t]
-\caption{\textbf{Macro-Averaged Calibration Benchmark Across Core 7 Datasets (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\caption{\textbf{Macro-Averaged Calibration Benchmark Across Core 5 Datasets (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
 \label{tab:benchmark_macro_macro_m3}
 \tablestyle{4pt}{1.05}
 \resizebox{\columnwidth}{!}{%
@@ -7,17 +7,18 @@
 \toprule
 \textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{Macro ECE (\%)} $\downarrow$ & \textbf{Macro Ada-ECE (\%)} $\downarrow$ & \textbf{Macro Brier} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 34.98 & 34.83 & 0.3475 & \textit{0.782} \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 21.42 & 21.86 & 0.2168 & \textit{0.782} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{5.27} & \textbf{5.69} & \textit{0.1442} & \textit{0.782} \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{5.42} & \textit{5.78} & \textbf{0.1425} & \textbf{0.800} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 19.85 & 19.64 & 0.2348 & 0.765 \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 11.32 & 11.94 & 0.1919 & 0.765 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 11.01 & 11.97 & 0.1909 & \textit{0.771} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{6.21} & \textbf{6.73} & \textit{0.1788} & 0.765 \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{6.56} & \textit{7.15} & \textbf{0.1769} & \textbf{0.778} \\
 \bottomrule
 \end{tabular}%
 }
 \end{table}
 
 \begin{table}[t]
-\caption{\textbf{Macro-Averaged Calibration Benchmark Across Core 7 Datasets (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\caption{\textbf{Macro-Averaged Calibration Benchmark Across Core 5 Datasets (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
 \label{tab:benchmark_macro_macro_mqt}
 \tablestyle{4pt}{1.05}
 \resizebox{\columnwidth}{!}{%
@@ -25,10 +26,11 @@ Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{5.42} & \textit{5.78} 
 \toprule
 \textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{Macro ECE (\%)} $\downarrow$ & \textbf{Macro Ada-ECE (\%)} $\downarrow$ & \textbf{Macro Brier} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 35.55 & 35.37 & 0.3364 & 0.662 \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 25.15 & 25.24 & 0.2308 & 0.662 \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{6.12} & \textit{7.45} & \textit{0.1478} & \textit{0.665} \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textbf{4.96} & \textbf{5.97} & \textbf{0.1431} & \textbf{0.708} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 24.84 & 24.60 & 0.2580 & 0.726 \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 16.82 & 16.94 & 0.2158 & 0.726 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 16.39 & 16.59 & 0.2145 & \textit{0.730} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{7.93} & \textit{8.84} & \textit{0.1845} & 0.726 \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textbf{6.24} & \textbf{7.16} & \textbf{0.1778} & \textbf{0.752} \\
 \bottomrule
 \end{tabular}%
 }

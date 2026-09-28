@@ -20,11 +20,27 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-SRC_PATH = Path(__file__).resolve().parent.parent / "src"
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+SRC_PATH = ROOT / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
+from scripts.run_combinatorial_ablation_5d import (
+    compute_loo_sensitivity_summary,
+    compute_macro_progression_summary,
+)
 from trajectory_calibration.features.definitions import CANONICAL_5D_KEYS, FEATURE_NAMES
+
+CORE_5_DATASETS: list[str] = [
+    "ai2d",
+    "scienceqa",
+    "textvqa",
+    "vizwiz-vqa",
+    "vqav2",
+]
+CORE_7_DATASETS = CORE_5_DATASETS  # Compatibility alias
 
 ROLE_DESCRIPTIONS = {
     "x1": "Base Fine-Scale Log-Odds Anchor ($\\ell_{576/256}$)",
@@ -129,7 +145,7 @@ def generate_macro_progression_table(
         r"\centering",
         r"\small",
         r"\caption{\textbf{Combinatorial 5D Trajectory Feature Cardinality Progression ($k \in \{1 \dots 5\}$)}. "
-        r"Macro-averaged out-of-fold calibration error and discrimination across all 14 vision-language benchmarks "
+        r"Macro-averaged out-of-fold calibration error and discrimination across Core 5 vision-language benchmarks "
         r"for M3-LLaVA (7B) and MQT-LLaVA (7B). Evaluates all $\sum_{k=1}^5 \binom{5}{k} = 31$ feature subsets. "
         r"Reported in pure decimal format. \textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 within each architecture. "
         r"Note: Subsets lacking the base logit anchor $x_1$ achieve artificially low quantile Ada-ECE via class-prior "
@@ -186,7 +202,7 @@ def generate_loo_table(
         r"\begin{table*}[t]",
         r"\centering",
         r"\small",
-        r"\caption{\textbf{Leave-One-Out (LOO) Feature Degradation Sensitivity across 14 Benchmarks}. "
+        r"\caption{\textbf{Leave-One-Out (LOO) Feature Degradation Sensitivity across Core 5 Benchmarks}. "
         r"Marginal change in calibration error ($\Delta \text{Ada-ECE} = \text{Ada-ECE}_{-j} - \text{Ada-ECE}_{\text{Full 5D}}$) "
         r"and discrimination ($\Delta \text{AUROC} = \text{AUROC}_{-j} - \text{AUROC}_{\text{Full 5D}}$) when dropping "
         r"individual feature $x_j$ from Trajectory Platt (5D). Positive $\Delta \text{Ada-ECE}$ and negative $\Delta \text{AUROC}$ "
@@ -431,25 +447,33 @@ def main() -> None:
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    df_m3_macro = pd.read_csv(results_dir / "ablation_5d_m3_macro_progression.csv")
-    df_m3_loo = pd.read_csv(results_dir / "ablation_5d_m3_loo_sensitivity.csv")
     df_m3_raw = pd.read_csv(results_dir / "ablation_5d_m3_raw_all_combinations.csv")
-
-    df_mqt_macro = pd.read_csv(results_dir / "ablation_5d_mqt_macro_progression.csv")
-    df_mqt_loo = pd.read_csv(results_dir / "ablation_5d_mqt_loo_sensitivity.csv")
     df_mqt_raw = pd.read_csv(results_dir / "ablation_5d_mqt_raw_all_combinations.csv")
 
-    # 1. Macro progression table
+    # Filter to Core 5 for macro progression and LOO sensitivity tables
+    df_m3_core = df_m3_raw[df_m3_raw["dataset"].isin(CORE_5_DATASETS)]
+    if df_m3_core.empty:
+        df_m3_core = df_m3_raw
+    df_mqt_core = df_mqt_raw[df_mqt_raw["dataset"].isin(CORE_5_DATASETS)]
+    if df_mqt_core.empty:
+        df_mqt_core = df_mqt_raw
+
+    df_m3_macro = compute_macro_progression_summary(df_m3_core)
+    df_mqt_macro = compute_macro_progression_summary(df_mqt_core)
+    df_m3_loo = compute_loo_sensitivity_summary(df_m3_core)
+    df_mqt_loo = compute_loo_sensitivity_summary(df_mqt_core)
+
+    # 1. Macro progression table (Core 5)
     tex_macro = generate_macro_progression_table(df_m3_macro, df_mqt_macro)
     (out_dir / "table_ablation_5d_macro_progression.tex").write_text(tex_macro, encoding="utf-8")
     print(f"Generated {out_dir / 'table_ablation_5d_macro_progression.tex'}")
 
-    # 2. LOO sensitivity table
+    # 2. LOO sensitivity table (Core 5)
     tex_loo = generate_loo_table(df_m3_loo, df_mqt_loo)
     (out_dir / "table_ablation_5d_loo.tex").write_text(tex_loo, encoding="utf-8")
     print(f"Generated {out_dir / 'table_ablation_5d_loo.tex'}")
 
-    # 3. 14-dataset grid table
+    # 3. 14-dataset grid table (Appendix Reference Grid: All 14 Datasets)
     tex_grid = generate_14ds_grid_table(df_m3_raw, df_mqt_raw)
     (out_dir / "table_ablation_5d_14ds_grid.tex").write_text(tex_grid, encoding="utf-8")
     print(f"Generated {out_dir / 'table_ablation_5d_14ds_grid.tex'}")

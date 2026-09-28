@@ -215,7 +215,7 @@ def main():
         report_lines.append(build_dataset_section(ds_k, ds_disp, df_all))
 
     out_file = OUT_DIR / "token_budget_scaling_report.md"
-    out_file.write_text("\n".join(report_lines) + "\n", encoding="utf-8")
+    out_file.write_text("\n".join(report_lines).rstrip() + "\n", encoding="utf-8")
     print(f"Successfully generated {out_file} ({len(report_lines)} lines).")
 
 

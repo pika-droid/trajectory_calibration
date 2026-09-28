@@ -61,7 +61,7 @@ def test_file_creation_and_basic_content() -> None:
 
 
 def test_table_structure_and_blocks() -> None:
-    """Verify 13-column layout, headers, 3 source blocks, and 5 rows per block."""
+    """Verify 13-column layout, headers, 3 source blocks, and 6 rows per block."""
     table2_m3, table3_mqt = generate_both_tables()
 
     for table_latex in [table2_m3, table3_mqt]:
@@ -83,6 +83,7 @@ def test_table_structure_and_blocks() -> None:
 
         # Rows check
         assert DIRECT_TRAIN_DISPLAY in table_latex
+        assert "Adaptive TS (ATS)" in table_latex
         for _, method_display in TRANSFER_METHODS:
             assert method_display in table_latex
 
@@ -156,28 +157,28 @@ def test_exact_numbers_m3_and_mqt() -> None:
     """Verify that table figures dynamically match values from CSV summaries and Excel sheets."""
     table2_m3, table3_mqt = generate_both_tables()
 
-    # 1. Check DirectTrain DocVQA values from CSV
+    # 1. Check DirectTrain TextVQA values from CSV
     df_m3 = pd.read_csv(BENCHMARK_M3_PATH)
-    docvqa_row_m3 = df_m3[
-        (df_m3["method"] == "Trajectory Platt (5D)") & (df_m3["dataset"] == "docvqa")
+    textvqa_row_m3 = df_m3[
+        (df_m3["method"] == "Trajectory Platt (5D)") & (df_m3["dataset"] == "textvqa")
     ].iloc[0]
     expected_m3_dt = (
-        f"{docvqa_row_m3['ece']:.4f} & {docvqa_row_m3['adaptive_ece']:.4f} & "
-        f"{docvqa_row_m3['auroc']:.3f} & {docvqa_row_m3['brier']:.4f}"
+        f"{textvqa_row_m3['ece']:.4f} & {textvqa_row_m3['adaptive_ece']:.4f} & "
+        f"{textvqa_row_m3['auroc']:.3f} & {textvqa_row_m3['brier']:.4f}"
     )
     assert expected_m3_dt in table2_m3
 
     df_mqt = pd.read_csv(BENCHMARK_MQT_PATH)
-    docvqa_row_mqt = df_mqt[
-        (df_mqt["method"] == "Trajectory Platt (5D)") & (df_mqt["dataset"] == "docvqa")
+    textvqa_row_mqt = df_mqt[
+        (df_mqt["method"] == "Trajectory Platt (5D)") & (df_mqt["dataset"] == "textvqa")
     ].iloc[0]
     expected_mqt_dt = (
-        f"{docvqa_row_mqt['ece']:.4f} & {docvqa_row_mqt['adaptive_ece']:.4f} & "
-        f"{docvqa_row_mqt['auroc']:.3f} & {docvqa_row_mqt['brier']:.4f}"
+        f"{textvqa_row_mqt['ece']:.4f} & {textvqa_row_mqt['adaptive_ece']:.4f} & "
+        f"{textvqa_row_mqt['auroc']:.3f} & {textvqa_row_mqt['brier']:.4f}"
     )
     assert expected_mqt_dt in table3_mqt
 
-    # 2. Check Transfer figures dynamically from Excel sheet src_vqav2 -> DocVQA
+    # 2. Check Transfer figures dynamically from Excel sheet src_vqav2 -> TextVQA
     df_vqav2 = pd.read_excel(EXCEL_PATH, sheet_name="src_vqav2", header=None)
     m3_headers = df_vqav2.iloc[1].tolist()
     ece_col_idx = m3_headers.index("Platt 5D ECE (%)")
@@ -185,10 +186,10 @@ def test_exact_numbers_m3_and_mqt() -> None:
     brier_col_idx = m3_headers.index("Platt 5D Brier")
     auroc_col_idx = m3_headers.index("Platt 5D AUROC")
 
-    m3_p5_ece = float(df_vqav2.iloc[4, ece_col_idx]) / 100.0
-    m3_p5_ada = float(df_vqav2.iloc[4, ada_col_idx]) / 100.0
-    m3_p5_brier = float(df_vqav2.iloc[4, brier_col_idx])
-    m3_p5_auroc = float(df_vqav2.iloc[4, auroc_col_idx])
+    m3_p5_ece = float(df_vqav2.iloc[12, ece_col_idx]) / 100.0
+    m3_p5_ada = float(df_vqav2.iloc[12, ada_col_idx]) / 100.0
+    m3_p5_brier = float(df_vqav2.iloc[12, brier_col_idx])
+    m3_p5_auroc = float(df_vqav2.iloc[12, auroc_col_idx])
     assert f"{m3_p5_ece:.4f}" in table2_m3
     assert f"{m3_p5_ada:.4f}" in table2_m3
     assert f"{m3_p5_brier:.4f}" in table2_m3
@@ -200,10 +201,10 @@ def test_exact_numbers_m3_and_mqt() -> None:
     mqt_brier_idx = mqt_headers.index("Platt 5D Brier")
     mqt_auroc_idx = mqt_headers.index("Platt 5D AUROC")
 
-    mqt_p5_ece = float(df_vqav2.iloc[21, mqt_ece_idx]) / 100.0
-    mqt_p5_ada = float(df_vqav2.iloc[21, mqt_ada_idx]) / 100.0
-    mqt_p5_brier = float(df_vqav2.iloc[21, mqt_brier_idx])
-    mqt_p5_auroc = float(df_vqav2.iloc[21, mqt_auroc_idx])
+    mqt_p5_ece = float(df_vqav2.iloc[29, mqt_ece_idx]) / 100.0
+    mqt_p5_ada = float(df_vqav2.iloc[29, mqt_ada_idx]) / 100.0
+    mqt_p5_brier = float(df_vqav2.iloc[29, mqt_brier_idx])
+    mqt_p5_auroc = float(df_vqav2.iloc[29, mqt_auroc_idx])
     assert f"{mqt_p5_ece:.4f}" in table3_mqt
     assert f"{mqt_p5_ada:.4f}" in table3_mqt
     assert f"{mqt_p5_brier:.4f}" in table3_mqt

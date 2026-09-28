@@ -8,39 +8,42 @@
 \toprule
 \multicolumn{13}{l}{\textbf{Source: VQAv2} (General Scene VQA)} \\
 \midrule
- & \multicolumn{4}{c}{\textbf{DocVQA} (Document Text)} & \multicolumn{4}{c}{\textbf{ChartQA} (Diagrams)} & \multicolumn{4}{c}{\textbf{TextVQA} (Scene Text)} \\
+ & \multicolumn{4}{c}{\textbf{TextVQA} (Scene Text)} & \multicolumn{4}{c}{\textbf{AI2D} (Diagrams)} & \multicolumn{4}{c}{\textbf{VizWiz-VQA} (Assistive)} \\
 \cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
 \textbf{Method} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ \\
 \midrule
-\textsc{In-Domain Calibration (Platt 5D)} & 0.0187 & 0.0181 & 0.888 & 0.0377 & 0.0331 & 0.0288 & 0.818 & 0.0752 & 0.0578 & 0.0535 & 0.835 & 0.1628 \\
-Uncalibrated (NC) & 0.7400 & 0.7400 & \textit{0.797} & 0.6348 & 0.7143 & 0.7143 & \textbf{0.799} & 0.6214 & \textit{0.0851} & \textit{0.0867} & \textbf{0.837} & \textbf{0.1717} \\
-Temperature Scaling (TS) & \textit{0.6968} & \textit{0.6968} & \textit{0.797} & \textit{0.5567} & \textit{0.6710} & \textit{0.6710} & \textbf{0.799} & \textit{0.5490} & 0.1030 & 0.1012 & \textbf{0.837} & \textit{0.1739} \\
-Platt Scaling (1D) & 0.7562 & 0.7562 & \textit{0.797} & 0.6240 & 0.7242 & 0.7242 & \textbf{0.799} & 0.6094 & 0.1788 & 0.1785 & \textbf{0.837} & 0.2066 \\
-\textbf{Platt 5D (Ours)} & \textbf{0.5865} & \textbf{0.5865} & \textbf{0.808} & \textbf{0.4247} & \textbf{0.5912} & \textbf{0.5912} & \textit{0.767} & \textbf{0.4566} & \textbf{0.0736} & \textbf{0.0754} & \textit{0.811} & 0.1793 \\
+\textsc{In-Domain Calibration (Platt 5D)} & 0.0578 & 0.0535 & 0.835 & 0.1628 & 0.0861 & 0.1115 & 0.661 & 0.2289 & 0.0638 & 0.0657 & 0.794 & 0.1828 \\
+Uncalibrated (NC) & \textit{0.0851} & \textit{0.0867} & \textit{0.837} & \textbf{0.1717} & 0.4210 & 0.4210 & 0.638 & 0.4209 & 0.1703 & 0.1703 & \textbf{0.789} & \textit{0.2118} \\
+Temperature Scaling (TS) & 0.1030 & 0.1012 & \textit{0.837} & 0.1739 & 0.4201 & 0.4201 & 0.638 & 0.4200 & \textbf{0.1544} & \textbf{0.1554} & \textbf{0.789} & \textbf{0.2099} \\
+Adaptive TS (ATS) & 0.1154 & 0.1126 & \textbf{0.840} & \textit{0.1737} & 0.4196 & 0.4196 & \textbf{0.667} & 0.4194 & \textit{0.1598} & \textit{0.1598} & \textit{0.787} & 0.2125 \\
+Platt Scaling (1D) & 0.1788 & 0.1785 & \textit{0.837} & 0.2066 & \textit{0.4184} & \textit{0.4184} & 0.638 & \textit{0.4183} & 0.2765 & 0.2765 & \textbf{0.789} & 0.2741 \\
+\textbf{Platt 5D (Ours)} & \textbf{0.0736} & \textbf{0.0754} & 0.811 & 0.1793 & \textbf{0.4026} & \textbf{0.4026} & \textit{0.661} & \textbf{0.4027} & 0.2400 & 0.2400 & 0.716 & 0.2677 \\
 \midrule
 \multicolumn{13}{l}{\textbf{Source: VizWiz-VQA} (Assistive / Blurry)} \\
 \midrule
- & \multicolumn{4}{c}{\textbf{ChartQA} (Diagrams)} & \multicolumn{4}{c}{\textbf{DocVQA} (Document Text)} & \multicolumn{4}{c}{\textbf{TextVQA} (Scene Text)} \\
+ & \multicolumn{4}{c}{\textbf{TextVQA} (Scene Text)} & \multicolumn{4}{c}{\textbf{AI2D} (Diagrams)} & \multicolumn{4}{c}{\textbf{VQAv2} (General Scene VQA)} \\
 \cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
 \textbf{Method} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ \\
 \midrule
-\textsc{In-Domain Calibration (Platt 5D)} & 0.0331 & 0.0288 & 0.818 & 0.0752 & 0.0187 & 0.0181 & 0.888 & 0.0377 & 0.0578 & 0.0535 & 0.835 & 0.1628 \\
-Uncalibrated (NC) & 0.7143 & 0.7143 & \textbf{0.799} & 0.6214 & 0.7400 & 0.7400 & \textit{0.797} & 0.6348 & 0.0851 & 0.0867 & \textbf{0.837} & 0.1717 \\
-Temperature Scaling (TS) & 0.6873 & 0.6873 & \textbf{0.799} & 0.5753 & 0.7134 & 0.7134 & \textit{0.797} & 0.5854 & 0.0886 & \textit{0.0851} & \textbf{0.837} & 0.1717 \\
-Platt Scaling (1D) & \textit{0.6112} & \textit{0.6112} & \textbf{0.799} & \textit{0.5092} & \textit{0.6321} & \textit{0.6321} & \textit{0.797} & \textit{0.5153} & \textit{0.0842} & 0.0896 & \textbf{0.837} & \textit{0.1689} \\
-\textbf{Platt 5D (Ours)} & \textbf{0.6079} & \textbf{0.6079} & \textbf{0.799} & \textbf{0.5081} & \textbf{0.6263} & \textbf{0.6263} & \textbf{0.799} & \textbf{0.5122} & \textbf{0.0776} & \textbf{0.0779} & \textit{0.835} & \textbf{0.1683} \\
+\textsc{In-Domain Calibration (Platt 5D)} & 0.0578 & 0.0535 & 0.835 & 0.1628 & 0.0861 & 0.1115 & 0.661 & 0.2289 & 0.0686 & 0.0650 & 0.788 & 0.1380 \\
+Uncalibrated (NC) & 0.0851 & 0.0867 & \textbf{0.837} & 0.1717 & 0.4210 & 0.4210 & \textbf{0.638} & 0.4209 & \textbf{0.0791} & \textbf{0.0769} & \textit{0.764} & \textbf{0.1370} \\
+Temperature Scaling (TS) & 0.0886 & \textit{0.0851} & \textbf{0.837} & 0.1717 & \textbf{0.4207} & \textbf{0.4207} & \textbf{0.638} & \textbf{0.4206} & \textit{0.0892} & \textit{0.0915} & \textit{0.764} & \textit{0.1407} \\
+Adaptive TS (ATS) & 0.0853 & 0.0854 & \textit{0.835} & 0.1720 & \textbf{0.4207} & \textbf{0.4207} & 0.605 & \textit{0.4207} & 0.0915 & 0.0916 & 0.760 & 0.1414 \\
+Platt Scaling (1D) & \textit{0.0842} & 0.0896 & \textbf{0.837} & \textit{0.1689} & \textit{0.4209} & \textit{0.4209} & \textbf{0.638} & 0.4208 & 0.1779 & 0.1782 & \textit{0.764} & 0.1767 \\
+\textbf{Platt 5D (Ours)} & \textbf{0.0776} & \textbf{0.0779} & \textit{0.835} & \textbf{0.1683} & \textit{0.4209} & \textit{0.4209} & \textit{0.637} & 0.4208 & 0.1788 & 0.1776 & \textbf{0.765} & 0.1772 \\
 \midrule
 \multicolumn{13}{l}{\textbf{Source: TextVQA} (Scene Text)} \\
 \midrule
- & \multicolumn{4}{c}{\textbf{ChartQA} (Diagrams)} & \multicolumn{4}{c}{\textbf{DocVQA} (Document Text)} & \multicolumn{4}{c}{\textbf{VizWiz-VQA} (Assistive)} \\
+ & \multicolumn{4}{c}{\textbf{VQAv2} (General Scene VQA)} & \multicolumn{4}{c}{\textbf{VizWiz-VQA} (Assistive)} & \multicolumn{4}{c}{\textbf{AI2D} (Diagrams)} \\
 \cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
 \textbf{Method} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ \\
 \midrule
-\textsc{In-Domain Calibration (Platt 5D)} & 0.0331 & 0.0288 & 0.818 & 0.0752 & 0.0187 & 0.0181 & 0.888 & 0.0377 & 0.0638 & 0.0657 & 0.794 & 0.1828 \\
-Uncalibrated (NC) & 0.7143 & 0.7143 & \textit{0.799} & 0.6214 & 0.7400 & 0.7400 & \textit{0.797} & 0.6348 & 0.1703 & 0.1703 & \textbf{0.789} & 0.2118 \\
-Temperature Scaling (TS) & 0.7054 & 0.7054 & \textit{0.799} & 0.6058 & 0.7314 & 0.7314 & \textit{0.797} & 0.6182 & 0.1660 & 0.1660 & \textbf{0.789} & 0.2102 \\
-Platt Scaling (1D) & \textit{0.6688} & \textit{0.6688} & \textit{0.799} & \textit{0.5716} & \textit{0.6921} & \textit{0.6921} & \textit{0.797} & \textit{0.5822} & \textbf{0.0885} & \textbf{0.0873} & \textbf{0.789} & \textbf{0.1881} \\
-\textbf{Platt 5D (Ours)} & \textbf{0.6560} & \textbf{0.6560} & \textbf{0.801} & \textbf{0.5561} & \textbf{0.6647} & \textbf{0.6647} & \textbf{0.809} & \textbf{0.5500} & \textit{0.1192} & \textit{0.1192} & \textit{0.780} & \textit{0.1988} \\
+\textsc{In-Domain Calibration (Platt 5D)} & 0.0686 & 0.0650 & 0.788 & 0.1380 & 0.0638 & 0.0657 & 0.794 & 0.1828 & 0.0861 & 0.1115 & 0.661 & 0.2289 \\
+Uncalibrated (NC) & \textbf{0.0791} & \textit{0.0769} & 0.764 & \textbf{0.1370} & 0.1703 & 0.1703 & \textbf{0.789} & 0.2118 & \textit{0.4210} & \textit{0.4210} & 0.638 & \textit{0.4209} \\
+Temperature Scaling (TS) & 0.0811 & 0.0799 & 0.764 & 0.1380 & 0.1660 & 0.1660 & \textbf{0.789} & 0.2102 & \textbf{0.4209} & \textbf{0.4209} & 0.638 & \textit{0.4209} \\
+Adaptive TS (ATS) & \textit{0.0799} & \textbf{0.0757} & \textit{0.768} & \textit{0.1372} & 0.1689 & 0.1689 & \textit{0.788} & 0.2112 & \textbf{0.4209} & \textbf{0.4209} & \textbf{0.658} & \textit{0.4209} \\
+Platt Scaling (1D) & 0.1235 & 0.1241 & 0.764 & 0.1507 & \textbf{0.0885} & \textbf{0.0873} & \textbf{0.789} & \textbf{0.1881} & \textbf{0.4209} & \textbf{0.4209} & 0.638 & \textit{0.4209} \\
+\textbf{Platt 5D (Ours)} & 0.0903 & 0.0928 & \textbf{0.770} & 0.1417 & \textit{0.1192} & \textit{0.1192} & 0.780 & \textit{0.1988} & \textbf{0.4209} & \textbf{0.4209} & \textit{0.648} & \textbf{0.4208} \\
 \bottomrule
 \end{tabular}%
 }

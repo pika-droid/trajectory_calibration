@@ -25,6 +25,7 @@ TABLE3_OUTPUT = OUTPUT_DIR / "table3_mqt_transfer.tex"
 TRANSFER_METHODS: list[tuple[str, str]] = [
     ("NC", "Uncalibrated (NC)"),
     ("TS", "Temperature Scaling (TS)"),
+    ("ATS", "Adaptive TS (ATS)"),
     ("Platt 1D", "Platt Scaling (1D)"),
     ("Platt 5D", r"\textbf{Platt 5D (Ours)}"),
 ]
@@ -36,9 +37,9 @@ SOURCE_BLOCKS: list[tuple[str, str, str, list[tuple[str, str, str]]]] = [
         "Source: VQAv2",
         "General Scene VQA",
         [
-            ("docvqa", "DocVQA", "Document Text"),
-            ("chartqa", "ChartQA", "Diagrams"),
             ("textvqa", "TextVQA", "Scene Text"),
+            ("ai2d", "AI2D", "Diagrams"),
+            ("vizwiz-vqa", "VizWiz-VQA", "Assistive"),
         ],
     ),
     (
@@ -46,9 +47,9 @@ SOURCE_BLOCKS: list[tuple[str, str, str, list[tuple[str, str, str]]]] = [
         "Source: VizWiz-VQA",
         "Assistive / Blurry",
         [
-            ("chartqa", "ChartQA", "Diagrams"),
-            ("docvqa", "DocVQA", "Document Text"),
             ("textvqa", "TextVQA", "Scene Text"),
+            ("ai2d", "AI2D", "Diagrams"),
+            ("vqav2", "VQAv2", "General Scene VQA"),
         ],
     ),
     (
@@ -56,9 +57,9 @@ SOURCE_BLOCKS: list[tuple[str, str, str, list[tuple[str, str, str]]]] = [
         "Source: TextVQA",
         "Scene Text",
         [
-            ("chartqa", "ChartQA", "Diagrams"),
-            ("docvqa", "DocVQA", "Document Text"),
+            ("vqav2", "VQAv2", "General Scene VQA"),
             ("vizwiz-vqa", "VizWiz-VQA", "Assistive"),
+            ("ai2d", "AI2D", "Diagrams"),
         ],
     ),
 ]

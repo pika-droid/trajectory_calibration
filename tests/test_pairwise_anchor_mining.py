@@ -39,21 +39,25 @@ def test_pairwise_data_loading(pairwise_df) -> None:
         "target",
         "nc_ece",
         "ts_ece",
+        "ats_ece",
         "p1_ece",
         "p5_ece",
         "vc_ece",
         "nc_ada",
         "ts_ada",
+        "ats_ada",
         "p1_ada",
         "p5_ada",
         "vc_ada",
         "nc_auroc",
         "ts_auroc",
+        "ats_auroc",
         "p1_auroc",
         "p5_auroc",
         "vc_auroc",
         "nc_brier",
         "ts_brier",
+        "ats_brier",
         "p1_brier",
         "p5_brier",
         "vc_brier",
@@ -74,8 +78,8 @@ def test_source_anchor_leaderboard(pairwise_df) -> None:
     # VQAv2 is the undisputed #1 universal anchor
     top_anchor = comb_lead.iloc[0]
     assert top_anchor["source"] == "vqav2"
-    assert top_anchor["win_p1_ece"] == 22
-    assert top_anchor["win_p1_ada"] == 22
+    assert top_anchor["win_p1_ece"] == 23
+    assert top_anchor["win_p1_ada"] == 23
     assert top_anchor["ece_reduction"] > 5.5
     assert top_anchor["ada_reduction"] > 5.5
 
@@ -110,9 +114,9 @@ def test_head_to_head_vcps_vs_platt5d(pairwise_df) -> None:
 
     comb = h2h["Combined"]
     assert comb["n_pairs"] == 312
-    assert comb["p5_beats_vc_ece"] == 186
-    assert np.isclose(comb["p5_winrate_vc_ece"], 59.62, atol=0.1)
-    assert comb["p5_beats_vc_ada"] == 185
+    assert comb["p5_beats_vc_ece"] == 178
+    assert np.isclose(comb["p5_winrate_vc_ece"], 57.05, atol=0.1)
+    assert comb["p5_beats_vc_ada"] == 176
     assert comb["median_diff_ece"] < 0.0  # Platt 5D has lower median error
 
     # Top 5 universal anchors subset (N=120)
@@ -150,9 +154,9 @@ def test_generated_reports_exist() -> None:
     tex_content = LATEX_PATH.read_text(encoding="utf-8")
     assert "\\begin{table*}" in tex_content
     assert "VQAv2" in tex_content
-    assert "\\textbf{22/24}" in tex_content
+    assert "\\textbf{23/24}" in tex_content
 
     md_content = REPORT_PATH.read_text(encoding="utf-8")
     assert "# Pairwise Zero-Shot Cross-Domain Anchor Mining" in md_content
     assert "DocVQA" in md_content
-    assert "186/312" in md_content
+    assert "178/312" in md_content

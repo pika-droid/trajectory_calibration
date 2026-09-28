@@ -50,7 +50,7 @@ def test_build_full_pipeline_combinations() -> None:
     reporting_only = build_full_pipeline(
         architectures=["m3", "mqt"], temperatures=[0.0], skip_calibration=True
     )
-    assert len(reporting_only) == 10
+    assert len(reporting_only) == 11
     assert all(s.category == "reporting" for s in reporting_only)
 
     # Skip calibration and ablation reporting
@@ -60,7 +60,7 @@ def test_build_full_pipeline_combinations() -> None:
         skip_calibration=True,
         skip_ablation=True,
     )
-    assert len(reporting_no_ablation) == 8
+    assert len(reporting_no_ablation) == 9
     assert all(s.category == "reporting" for s in reporting_no_ablation)
 
     # Skip calibration, ablation, and compendium compilation
@@ -71,7 +71,7 @@ def test_build_full_pipeline_combinations() -> None:
         skip_ablation=True,
         skip_compendium=True,
     )
-    assert len(reporting_minimal) == 7
+    assert len(reporting_minimal) == 8
     assert all(s.category == "reporting" for s in reporting_minimal)
 
     # Skip tables (calibration only)
@@ -94,6 +94,7 @@ def test_pipeline_dry_run() -> None:
     assert "benchmark_m3" in res.stdout
     assert "benchmark_mqt" in res.stdout
     assert "sample_efficiency_study" in res.stdout
+    assert "generate_sample_efficiency_tables" in res.stdout
     assert "token_budget_study" in res.stdout
     assert "generate_paper_table2" in res.stdout
     assert "mine_pairwise_anchors" in res.stdout

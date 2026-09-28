@@ -23,6 +23,7 @@ import numpy as np
 import pandas as pd
 
 from trajectory_calibration.calibrators.baselines import (
+    AdaptiveTemperatureScaling,
     NaiveConfidenceEstimator,
     PlattScalingEstimator,
     TemperatureScalingEstimator,
@@ -60,8 +61,8 @@ ALL_DATASETS: list[str] = [
     "vqav2",
 ]
 
-EVAL_METHODS: list[str] = ["NC", "TS", "Platt 1D", "Platt 5D", "VCPS-5D"]
-MATRIX_METHODS: list[str] = ["NC", "TS", "Platt 1D", "Platt 5D", "VCPS-5D"]
+EVAL_METHODS: list[str] = ["NC", "TS", "ATS", "Platt 1D", "Platt 5D", "VCPS-5D"]
+MATRIX_METHODS: list[str] = ["NC", "TS", "ATS", "Platt 1D", "Platt 5D", "VCPS-5D"]
 
 
 def load_all_features() -> dict[str, dict[str, pd.DataFrame]]:
@@ -83,12 +84,13 @@ def load_all_features() -> dict[str, dict[str, pd.DataFrame]]:
 
 
 def train_source_models(df_train: pd.DataFrame) -> dict[str, Any]:
-    """Fit candidate calibrators (NC, TS, Platt 1D, Platt 5D, VCPS-5D) on source dataset."""
+    """Fit candidate calibrators (NC, TS, ATS, Platt 1D, Platt 5D, VCPS-5D) on source dataset."""
     X_train_5d = np.asarray(df_train[CANONICAL_5D_KEYS].values, dtype=np.float64)
     y_train = np.asarray(df_train["is_correct"].values, dtype=np.float64)
 
     nc = NaiveConfidenceEstimator().fit(X_train_5d, y_train)
     ts = TemperatureScalingEstimator().fit(X_train_5d, y_train)
+    ats = AdaptiveTemperatureScaling().fit(X_train_5d, y_train)
     p1 = PlattScalingEstimator().fit(X_train_5d, y_train)
     p5 = TrajectoryPlattScaler(n_features=5).fit(X_train_5d, y_train)
     vcps = VaryingCoefficientPlattScaler(feature_set="5d")
@@ -97,6 +99,7 @@ def train_source_models(df_train: pd.DataFrame) -> dict[str, Any]:
     return {
         "NC": nc,
         "TS": ts,
+        "ATS": ats,
         "Platt 1D": p1,
         "Platt 5D": p5,
         "VCPS-5D": vcps,

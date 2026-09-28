@@ -31,6 +31,18 @@ from trajectory_calibration.features.definitions import CANONICAL_5D_KEYS, FEATU
 from trajectory_calibration.features.extractor import compute_features_from_sample
 
 
+def test_methods_order_contains_ats() -> None:
+    """Verify METHODS_ORDER includes Adaptive TS (ATS)."""
+    assert "Adaptive TS (ATS)" in METHODS_ORDER
+    assert METHODS_ORDER == [
+        "Naive Confidence (NC)",
+        "Temperature Scaling (TS)",
+        "Adaptive TS (ATS)",
+        "Platt Scaling (1D)",
+        "Trajectory Platt (5D)",
+    ]
+
+
 def test_scale_levels_and_cumulative_tokens() -> None:
     """Verify single-pass and cumulative token accounting for M3 and MQT."""
     # M3-LLaVA (7B): scales [1, 9, 36, 144, 576]
@@ -92,7 +104,7 @@ def test_prefix_feature_extraction_all_depths() -> None:
 
 
 def test_fit_and_eval_level_on_mock_data() -> None:
-    """Verify fit_and_eval_level trains all 4 calibrators and produces valid metric panels."""
+    """Verify fit_and_eval_level trains all 5 calibrators and produces valid metric panels."""
     np.random.seed(42)
     mock_samples = generate_mock_extraction("ai2d", num_samples=80, arch="m3")
     prefix = [1, 9, 36]
@@ -208,8 +220,8 @@ def test_latex_subtable_generation(tmp_path: Path) -> None:
     assert "\\label{tab:sample_test}" in tex_str
     assert "\\begin{tabular}{ccclcccc}" in tex_str
     assert "\\textbf{Acc (\\%)} $\\uparrow$" in tex_str
-    assert "\\multirow{4}{*}{42.50}" in tex_str
-    assert "\\rowcolor{gray!10}" in tex_str
+    assert "\\multirow{5}{*}{42.50}" in tex_str
+    assert "\\rowcolor" not in tex_str
     assert "\\textbf{Trajectory Platt (5D)}" in tex_str
 
     # 2. Macro table (is_macro=True) with acc_mean
@@ -236,11 +248,11 @@ def test_latex_subtable_generation(tmp_path: Path) -> None:
     )
     assert "\\begin{tabular}{ccclcccc}" in macro_tex_str
     assert "\\textbf{Acc (\\%)} $\\uparrow$" in macro_tex_str
-    assert "\\multirow{4}{*}{38.75}" in macro_tex_str
+    assert "\\multirow{5}{*}{38.75}" in macro_tex_str
 
     # 3. Fallback when accuracy column is missing or NaN
     df_no_acc = df.drop(columns=["accuracy_mean"])
     no_acc_tex_str = format_token_budget_latex_subtable(
         df_no_acc, "No Acc Caption", "tab:no_acc_test", is_macro=False
     )
-    assert "\\multirow{4}{*}{-}" in no_acc_tex_str
+    assert "\\multirow{5}{*}{-}" in no_acc_tex_str

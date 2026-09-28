@@ -10,20 +10,21 @@
 \cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-10}
 \textbf{Configuration / Source Anchor} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{Total Wins} $\uparrow$ \\
 \midrule
-\rowcolor{gray!10} \textsc{In-Domain Calibration (Platt 5D)} & 4.77 & 5.85 & 0.720 & 0.1356 & 5.53 & 6.42 & 0.743 & 0.1312 & — \\
+\textsc{In-Domain Calibration (Platt 5D)} & 4.77 & 5.85 & 0.720 & 0.1356 & 5.53 & 6.42 & 0.743 & 0.1312 & — \\
 \midrule
 \multicolumn{10}{l}{\textit{Zero-Shot Transfer Baselines (Macro Mean Across All Pairs)}} \\
-Naive Confidence (NC) & 40.76 & 40.73 & 0.673 & 0.4019 & 34.25 & 34.20 & \textbf{0.688} & 0.3230 & — \\
-Temperature Scaling (TS) & 33.51 & 34.97 & 0.673 & \textbf{0.3107} & 30.07 & 30.43 & \textbf{0.688} & 0.2581 & — \\
-Platt Scaling (1D) & 38.02 & 38.27 & 0.642 & 0.3640 & 31.39 & 31.48 & 0.594 & 0.2944 & — \\
+Naive Confidence (NC) & 41.57 & 41.55 & 0.682 & 0.4076 & 34.23 & 34.18 & \textit{0.688} & 0.3228 & — \\
+Temperature Scaling (TS) & 33.27 & 34.78 & 0.682 & \textit{0.3102} & 30.10 & 30.46 & \textit{0.688} & 0.2581 & — \\
+Adaptive TS (ATS) & 33.28 & 34.75 & \textit{0.686} & \textbf{0.3094} & 30.11 & 30.46 & \textbf{0.689} & 0.2580 & — \\
+Platt Scaling (1D) & 36.88 & 37.14 & 0.649 & 0.3531 & 31.42 & 31.51 & 0.594 & 0.2946 & — \\
 \midrule
 \multicolumn{10}{l}{\textit{Trajectory Platt (5D) Candidate Source Anchors}} \\
-\textbf{VQAv2} & 39.34 & 39.35 & \textbf{0.679} & 0.3689 & 33.81 & 33.58 & 0.662 & 0.3022 & \textbf{22/24} \\
-VizWiz-VQA & 40.85 & 40.88 & 0.662 & 0.3864 & \textit{20.94} & \textit{20.86} & \textit{0.685} & \textit{0.2090} & \textit{20/24} \\
-DocVQA & \textit{31.66} & \textit{31.62} & \textit{0.675} & 0.3328 & 37.85 & 37.87 & 0.644 & 0.3684 & 18/24 \\
-TextVQA & 41.36 & 41.35 & 0.667 & 0.4002 & \textbf{20.65} & \textbf{20.79} & 0.668 & \textbf{0.1868} & \textit{20/24} \\
-ChartQA & \textbf{31.33} & \textbf{31.51} & 0.662 & \textit{0.3326} & 36.06 & 36.07 & 0.476 & 0.3555 & 16/24 \\
-POPE & 42.77 & 42.82 & 0.668 & 0.4163 & 34.04 & 33.97 & 0.673 & 0.3197 & 9/24 \\
+\textbf{VQAv2} & 40.53 & 40.55 & \textbf{0.687} & 0.3766 & 33.81 & 33.57 & 0.662 & 0.3020 & \textbf{23/24} \\
+VizWiz-VQA & 40.46 & 40.48 & 0.671 & 0.3867 & \textit{20.96} & \textit{20.88} & 0.685 & \textit{0.2090} & \textit{20/24} \\
+DocVQA & \textit{30.03} & \textit{29.99} & 0.683 & 0.3174 & 37.88 & 37.89 & 0.644 & 0.3686 & 18/24 \\
+TextVQA & 42.01 & 41.99 & 0.676 & 0.4052 & \textbf{20.68} & \textbf{20.82} & 0.668 & \textbf{0.1868} & 19/24 \\
+ChartQA & \textbf{29.72} & \textbf{29.89} & 0.672 & 0.3175 & 36.09 & 36.10 & 0.475 & 0.3557 & 16/24 \\
+POPE & 43.80 & 43.82 & 0.677 & 0.4231 & 34.29 & 34.17 & 0.672 & 0.3221 & 9/24 \\
 \bottomrule
 \end{tabular}%
 }

@@ -7,10 +7,11 @@
 \toprule
 \textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 32.55 & 32.55 & 0.3223 & \textit{0.683} \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 8.41 & 10.85 & 0.2082 & \textit{0.683} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{5.90} & \textit{6.89} & \textit{0.1991} & \textit{0.683} \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{7.61} & \textbf{6.50} & \textbf{0.1978} & \textbf{0.707} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 32.55 & 32.55 & 0.3223 & 0.683 \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 8.41 & 10.85 & 0.2082 & 0.683 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & \textit{7.47} & 11.25 & 0.2053 & \textbf{0.709} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{5.90} & \textit{6.89} & \textit{0.1991} & 0.683 \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & 7.61 & \textbf{6.50} & \textbf{0.1978} & \textit{0.707} \\
 \bottomrule
 \end{tabular}%
 }
@@ -25,9 +26,10 @@ Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{7.61} & \textbf{6.50} 
 \toprule
 \textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 13.64 & \textbf{10.19} & 0.1865 & \textit{0.757} \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & \textbf{9.21} & 10.61 & \textit{0.1860} & \textit{0.757} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{9.56} & \textit{10.60} & 0.1861 & \textit{0.757} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 13.64 & \textbf{10.19} & 0.1865 & 0.757 \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & \textit{9.21} & 10.61 & 0.1860 & 0.757 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & \textbf{7.58} & 11.99 & \textit{0.1857} & \textit{0.759} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & 9.56 & \textit{10.60} & 0.1861 & 0.757 \\
 Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & 13.81 & 14.66 & \textbf{0.1854} & \textbf{0.763} \\
 \bottomrule
 \end{tabular}%

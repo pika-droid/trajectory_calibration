@@ -28,7 +28,7 @@ from scripts.generate_dataset_latex_tables import (
     RQ1_ADVERSARIAL_FILE,
     RQ1_CORE7_FILE,
     TABLES_DIR,
-    TARGET_9_DATASETS,
+    TARGET_7_DATASETS,
     TARGET_METHODS_8_ORDER,
     TARGET_METHODS_ORDER,
     TEMP_DIR,
@@ -163,7 +163,7 @@ def test_group2_macro_mean_table() -> None:
 
     assert "M3-LLaVA 7B" in content
     assert "MQT-LLaVA 7B" in content
-    assert "Across Core 7 Datasets" in content
+    assert f"Across Core {len(CORE_DATASETS)} Datasets" in content
     assert "\\begin{tabular}{lccccc}" in content
     assert "Macro ECE (\\%)" in content
     assert "Macro Ada-ECE (\\%)" in content
@@ -207,6 +207,7 @@ def test_group3_temp_ablation_tables() -> None:
     target_methods = [
         "Naive Confidence (NC)",
         "Temperature Scaling (TS)",
+        "Adaptive TS (ATS)",
         "Platt Scaling (1D)",
         "Trajectory Platt (5D)",
     ]
@@ -239,7 +240,7 @@ def test_group3_temp_ablation_tables() -> None:
 
 
 def test_group4_lodo_cross_dataset_table() -> None:
-    """Verify Group 4 lodo_cross_dataset.tex has 4 methods across both protocols, unshaded."""
+    """Verify Group 4 lodo_cross_dataset.tex has 5 methods across both protocols, unshaded."""
     lodo_f = TABLES_DIR / "lodo_cross_dataset.tex"
     assert lodo_f.exists(), f"Missing LODO table: {lodo_f}"
     content = lodo_f.read_text(encoding="utf-8")
@@ -251,11 +252,13 @@ def test_group4_lodo_cross_dataset_table() -> None:
     assert "Macro Ada-ECE (\\%)" in content
     assert "Macro Brier" in content
     assert "Macro AUROC" in content
+    assert "Core 7" in content
     assert r"\rowcolor" not in content, "Found forbidden \\rowcolor in lodo_cross_dataset.tex"
 
     for m in [
         "Naive Confidence (NC)",
         "Temperature Scaling (TS)",
+        "Adaptive TS (ATS)",
         "Platt Scaling (1D)",
         "Trajectory Platt (5D)",
     ]:
@@ -270,7 +273,8 @@ def test_core7_benchmark_breakdown_table() -> None:
 
     # Table wrapper and structure
     assert r"\begin{table*}[t]" in content
-    assert r"\begin{tabular}{l cccccccccccccccc}" in content
+    col_str = "c" * (2 * len(CORE_DATASETS) + 2)
+    assert rf"\begin{{tabular}}{{l {col_str}}}" in content
     assert r"\label{tab:core7_benchmark_breakdown}" in content
     assert r"\toprule" in content
     assert r"\bottomrule" in content
@@ -322,9 +326,9 @@ def test_build_core7_breakdown_table_dynamic() -> None:
 
 
 def test_9_dataset_wise_tables_all_8_methods_and_unshaded() -> None:
-    """Verify the 9 dataset-wise tables contain all 8 methods in canonical order, unshaded, with multi-pass placeholders."""
-    assert len(TARGET_9_DATASETS) == 9
-    for ds in TARGET_9_DATASETS:
+    """Verify the Core 5 + 2 Adversarial dataset-wise tables contain all 8 methods in canonical order, unshaded, with multi-pass placeholders."""
+    assert len(TARGET_7_DATASETS) == 7
+    for ds in TARGET_7_DATASETS:
         fname = DATASET_FILE_MAP[ds]
         p = DATASET_WISE_DIR / fname
         assert p.exists(), f"Missing dataset table: {p}"
@@ -356,11 +360,11 @@ def test_rq1_core7_benchmark_table() -> None:
     assert RQ1_CORE7_FILE.exists(), f"Missing {RQ1_CORE7_FILE}"
     content = RQ1_CORE7_FILE.read_text(encoding="utf-8")
 
-    # Table environment and tabularx column specification
+    # Table environment and tabularx column specification (4 metrics * 5 methods = 20 columns)
     assert r"\begin{table*}[t]" in content
     assert r"\label{tab:rq1_m3_llava}" in content
     assert r"\label{tab:rq1_mqt_llava}" in content
-    assert r"\begin{tabularx}{\textwidth}{l *{16}{Y}}" in content
+    assert r"\begin{tabularx}{\textwidth}{l *{20}{Y}}" in content
     assert r"\toprule" in content
     assert r"\bottomrule" in content
 
@@ -368,9 +372,10 @@ def test_rq1_core7_benchmark_table() -> None:
     assert "RQ1 Evaluation on M3-LLaVA (7B)" in content
     assert "RQ1 Evaluation on MQT-LLaVA (7B)" in content
 
-    # Top headers: exactly the 4 methods
+    # Top headers: exactly the 5 methods
     assert r"\multicolumn{4}{c}{\textbf{Naive Confidence}}" in content
     assert r"\multicolumn{4}{c}{\textbf{Temperature Scaling}}" in content
+    assert r"\multicolumn{4}{c}{\textbf{Adaptive TS (ATS)}}" in content
     assert r"\multicolumn{4}{c}{\textbf{Platt Scaling (1D)}}" in content
     assert r"\multicolumn{4}{c}{\textbf{Trajectory Platt (5D)}}" in content
 

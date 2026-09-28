@@ -187,6 +187,31 @@ def test_macro_aggregation_consistency() -> None:
     assert abs(float(vcps_50["ada_ece_mean"].iloc[0]) - 6.0) < 1e-6
     assert abs(float(vcps_50["ada_ece_std"].iloc[0]) - 0.0) < 1e-6
 
+    # Test filtering to Core 7 when a mix of Core and non-Core datasets is present
+    records_mix = []
+    for ds in ["ai2d", "pope"]:  # ai2d is Core 7, pope is non-Core
+        val = 5.0 if ds == "ai2d" else 20.0
+        records_mix.append(
+            {
+                "dataset": ds,
+                "arch": "m3",
+                "budget": "50",
+                "effective_n": 50,
+                "is_capped": False,
+                "seed": 42,
+                "method": "Adaptive TS (ATS)",
+                "adaptive_ece_percent": val,
+                "ece_percent": val,
+                "auroc": 0.70,
+                "brier": 0.20,
+            }
+        )
+    macro_mix = compute_macro_aggregates(pd.DataFrame(records_mix))
+    # Should only average ai2d (5.0), not pope (20.0)
+    ats_50 = macro_mix[(macro_mix["budget"] == "50") & (macro_mix["method"] == "Adaptive TS (ATS)")]
+    assert len(ats_50) == 1
+    assert abs(float(ats_50["ada_ece_mean"].iloc[0]) - 5.0) < 1e-6
+
 
 def test_generate_sample_efficiency_sheets(tmp_path: Path) -> None:
     """Verifies Excel workbook generation, sheet count, and table structure."""
@@ -260,12 +285,9 @@ def test_format_macro_latex_table_syntax() -> None:
         assert "\\end{table}" in latex_code
         assert "\\toprule" in latex_code
         assert "\\bottomrule" in latex_code
-        for line in latex_code.splitlines():
-            if "\\rowcolor" in line:
-                stripped = line.strip()
-                assert stripped.startswith("\\rowcolor"), (
-                    f"\\rowcolor must be at start of row, found: {line}"
-                )
+        assert "Core 7" in latex_code
+        assert "Adaptive TS (ATS)" in latex_code
+        assert "\\rowcolor" not in latex_code
 
 
 def test_plot_sample_efficiency_curves_generation(tmp_path: Path) -> None:
@@ -280,3 +302,26 @@ def test_plot_sample_efficiency_curves_generation(tmp_path: Path) -> None:
         plot_sample_efficiency_curves(macro_df, "M3-LLaVA", png_path, pdf_path)
         assert png_path.exists() and png_path.stat().st_size > 0
         assert pdf_path.exists() and pdf_path.stat().st_size > 0
+
+
+def test_format_targeted_sample_efficiency_latex_table() -> None:
+    """Verifies targeted dual-panel table generation with TextVQA and VQAv2."""
+    from scripts.run_sample_efficiency_study import format_targeted_sample_efficiency_latex_table
+
+    summary_path = Path("results/experiments/sample_efficiency/sample_efficiency_m3_summary.csv")
+    if summary_path.exists():
+        summary_df = pd.read_csv(summary_path)
+        targeted_ds = [
+            ("textvqa", "TextVQA (Scene Text VQA)"),
+            ("vqav2", "VQAv2 (General Scene VQA)"),
+        ]
+        latex_code = format_targeted_sample_efficiency_latex_table(
+            summary_df, "M3-LLaVA", targeted_ds, "tab:test_targeted_m3"
+        )
+        assert "\\begin{table}[t]" in latex_code
+        assert "\\end{table}" in latex_code
+        assert "Panel A: TextVQA (Scene Text VQA)" in latex_code
+        assert "Panel B: VQAv2 (General Scene VQA)" in latex_code
+        assert "tab:test_targeted_m3" in latex_code
+        assert "\\rowcolor" not in latex_code
+        assert "Trajectory Platt (5D)" in latex_code

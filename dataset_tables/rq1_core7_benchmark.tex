@@ -11,7 +11,7 @@
 \begin{table*}[t]
 \centering
 \caption{\textbf{RQ1 Evaluation on M3-LLaVA (7B).}
-Comparison of calibration methods across seven vision-language benchmarks.
+Comparison of calibration methods across 5 vision-language benchmarks.
 Metrics: Expected Calibration Error (ECE (\%) $\downarrow$), Adaptive ECE
 (Ada-ECE (\%) $\downarrow$), Brier Score ($\downarrow$), and AUROC ($\uparrow$).
 \textbf{Bold}: Rank 1; \textit{italic}: Rank 2 among single-pass methods.}
@@ -21,18 +21,21 @@ Metrics: Expected Calibration Error (ECE (\%) $\downarrow$), Adaptive ECE
 \setlength{\tabcolsep}{2pt}
 \renewcommand{\arraystretch}{1.05}
 
-\begin{tabularx}{\textwidth}{l *{16}{Y}}
+\begin{tabularx}{\textwidth}{l *{20}{Y}}
 \toprule
 & \multicolumn{4}{c}{\textbf{Naive Confidence}}
 & \multicolumn{4}{c}{\textbf{Temperature Scaling}}
+& \multicolumn{4}{c}{\textbf{Adaptive TS (ATS)}}
 & \multicolumn{4}{c}{\textbf{Platt Scaling (1D)}}
 & \multicolumn{4}{c}{\textbf{Trajectory Platt (5D)}} \\
 \cmidrule(lr){2-5}
 \cmidrule(lr){6-9}
 \cmidrule(lr){10-13}
 \cmidrule(lr){14-17}
+\cmidrule(lr){18-21}
 
 \textbf{Dataset}
+& ECE & Ada. & Brier & AUROC
 & ECE & Ada. & Brier & AUROC
 & ECE & Ada. & Brier & AUROC
 & ECE & Ada. & Brier & AUROC
@@ -40,53 +43,47 @@ Metrics: Expected Calibration Error (ECE (\%) $\downarrow$), Adaptive ECE
 \midrule
 
 AI2D
-& 42.00 & 42.00 & 0.4200 & \textit{0.614}
-& 8.62 & 12.18 & 0.2477 & \textit{0.614}
-& \textbf{5.63} & \textbf{7.70} & \textit{0.2370} & \textit{0.614}
+& 42.00 & 42.00 & 0.4200 & 0.614
+& 8.62 & 12.18 & 0.2477 & 0.614
+& 8.64 & 13.15 & 0.2476 & \textit{0.625}
+& \textbf{5.63} & \textbf{7.70} & \textit{0.2370} & 0.614
 & \textit{8.61} & \textit{11.15} & \textbf{0.2289} & \textbf{0.661} \\
 
-ChartQA
-& 71.03 & 71.03 & 0.6151 & \textit{0.807}
-& 44.47 & 44.47 & 0.2782 & \textit{0.807}
-& \textbf{3.23} & \textit{3.62} & \textit{0.0755} & \textit{0.807}
-& \textit{3.31} & \textbf{2.88} & \textbf{0.0752} & \textbf{0.818} \\
-
-DocVQA
-& 74.57 & 74.57 & 0.6430 & \textit{0.845}
-& 48.89 & 48.89 & 0.2796 & \textit{0.845}
-& \textit{2.62} & \textit{2.52} & \textit{0.0405} & \textit{0.845}
-& \textbf{1.87} & \textbf{1.81} & \textbf{0.0377} & \textbf{0.888} \\
-
 ScienceQA
-& 22.16 & 21.93 & 0.2368 & \textit{0.807}
-& 13.10 & 12.68 & 0.1924 & \textit{0.807}
-& \textbf{4.80} & \textbf{4.99} & \textit{0.1732} & \textit{0.807}
+& 22.16 & 21.93 & 0.2368 & 0.807
+& 13.10 & 12.68 & 0.1924 & 0.807
+& 12.98 & 13.00 & 0.1918 & \textit{0.808}
+& \textbf{4.80} & \textbf{4.99} & \textit{0.1732} & 0.807
 & \textit{5.17} & \textit{6.15} & \textbf{0.1719} & \textbf{0.813} \\
 
 TextVQA
 & 10.50 & 11.07 & 0.1714 & \textbf{0.839}
 & 10.38 & 11.14 & 0.1712 & \textbf{0.839}
+& 10.15 & 11.31 & 0.1710 & \textbf{0.839}
 & \textit{8.47} & \textit{8.22} & \textbf{0.1615} & \textbf{0.839}
 & \textbf{5.78} & \textbf{5.35} & \textit{0.1628} & \textit{0.835} \\
 
 VizWiz-VQA
 & 15.97 & 15.97 & 0.2071 & \textit{0.793}
-& 15.09 & 15.09 & \textit{0.2065} & \textit{0.793}
+& 15.09 & 15.09 & 0.2065 & \textit{0.793}
+& 14.87 & 14.87 & \textit{0.2058} & \textit{0.793}
 & \textit{6.64} & \textbf{5.80} & \textbf{0.1828} & \textit{0.793}
 & \textbf{6.38} & \textit{6.57} & \textbf{0.1828} & \textbf{0.794} \\
 
 VQAv2
-& 8.64 & 7.23 & \textit{0.1387} & \textit{0.772}
+& 8.64 & 7.23 & 0.1387 & \textit{0.772}
 & 9.40 & 8.58 & 0.1417 & \textit{0.772}
+& 8.39 & 7.52 & \textit{0.1381} & \textbf{0.788}
 & \textbf{5.52} & \textit{6.97} & 0.1391 & \textit{0.772}
 & \textit{6.86} & \textbf{6.50} & \textbf{0.1380} & \textbf{0.788} \\
 
 \midrule
 \textbf{Macro Avg.}
-& 34.98 & 34.83 & 0.3475 & \textit{0.782}
-& 21.42 & 21.86 & 0.2168 & \textit{0.782}
-& \textbf{5.27} & \textbf{5.69} & \textit{0.1442} & \textit{0.782}
-& \textit{5.42} & \textit{5.78} & \textbf{0.1425} & \textbf{0.800} \\
+& 19.85 & 19.64 & 0.2348 & 0.765
+& 11.32 & 11.94 & 0.1919 & 0.765
+& 11.01 & 11.97 & 0.1909 & \textit{0.771}
+& \textbf{6.21} & \textbf{6.73} & \textit{0.1788} & 0.765
+& \textit{6.56} & \textit{7.15} & \textbf{0.1769} & \textbf{0.778} \\
 
 \bottomrule
 \end{tabularx}
@@ -99,7 +96,7 @@ VQAv2
 \begin{table*}[t]
 \centering
 \caption{\textbf{RQ1 Evaluation on MQT-LLaVA (7B).}
-Comparison of calibration methods across seven vision-language benchmarks.
+Comparison of calibration methods across 5 vision-language benchmarks.
 Metrics: Expected Calibration Error (ECE (\%) $\downarrow$), Adaptive ECE
 (Ada-ECE (\%) $\downarrow$), Brier Score ($\downarrow$), and AUROC ($\uparrow$).
 \textbf{Bold}: Rank 1; \textit{italic}: Rank 2 among single-pass methods.}
@@ -109,18 +106,21 @@ Metrics: Expected Calibration Error (ECE (\%) $\downarrow$), Adaptive ECE
 \setlength{\tabcolsep}{2pt}
 \renewcommand{\arraystretch}{1.05}
 
-\begin{tabularx}{\textwidth}{l *{16}{Y}}
+\begin{tabularx}{\textwidth}{l *{20}{Y}}
 \toprule
 & \multicolumn{4}{c}{\textbf{Naive Confidence}}
 & \multicolumn{4}{c}{\textbf{Temperature Scaling}}
+& \multicolumn{4}{c}{\textbf{Adaptive TS (ATS)}}
 & \multicolumn{4}{c}{\textbf{Platt Scaling (1D)}}
 & \multicolumn{4}{c}{\textbf{Trajectory Platt (5D)}} \\
 \cmidrule(lr){2-5}
 \cmidrule(lr){6-9}
 \cmidrule(lr){10-13}
 \cmidrule(lr){14-17}
+\cmidrule(lr){18-21}
 
 \textbf{Dataset}
+& ECE & Ada. & Brier & AUROC
 & ECE & Ada. & Brier & AUROC
 & ECE & Ada. & Brier & AUROC
 & ECE & Ada. & Brier & AUROC
@@ -128,53 +128,47 @@ Metrics: Expected Calibration Error (ECE (\%) $\downarrow$), Adaptive ECE
 \midrule
 
 AI2D
-& 27.15 & 26.92 & 0.2887 & \textbf{0.746}
-& 13.31 & 13.10 & 0.2197 & \textbf{0.746}
-& \textbf{5.92} & \textit{8.25} & \textbf{0.2015} & \textbf{0.746}
-& \textit{6.27} & \textbf{6.53} & \textit{0.2035} & \textit{0.739} \\
-
-ChartQA
-& 71.30 & 71.30 & 0.6483 & 0.491
-& 44.88 & 44.88 & 0.2779 & 0.491
-& \textit{3.06} & \textit{4.27} & \textbf{0.0762} & \textit{0.509}
-& \textbf{2.44} & \textbf{3.92} & \textit{0.0765} & \textbf{0.603} \\
-
-DocVQA
-& 53.30 & 53.30 & 0.4162 & \textit{0.517}
-& 47.07 & 47.07 & 0.2584 & \textit{0.517}
-& \textbf{0.09} & \textit{3.67} & \textbf{0.0362} & \textit{0.517}
-& \textit{1.08} & \textbf{2.06} & \textit{0.0364} & \textbf{0.594} \\
+& 27.15 & 26.92 & 0.2887 & \textit{0.746}
+& 13.31 & 13.10 & 0.2197 & \textit{0.746}
+& 13.38 & 14.08 & 0.2195 & \textbf{0.747}
+& \textbf{5.92} & \textit{8.25} & \textbf{0.2015} & \textit{0.746}
+& \textit{6.27} & \textbf{6.53} & \textit{0.2035} & 0.739 \\
 
 ScienceQA
-& 23.65 & 23.17 & 0.2579 & \textit{0.760}
-& 9.32 & 10.23 & 0.1975 & \textit{0.760}
-& \textit{7.99} & \textit{6.91} & \textit{0.1916} & \textit{0.760}
+& 23.65 & 23.17 & 0.2579 & 0.760
+& 9.32 & 10.23 & 0.1975 & 0.760
+& 8.73 & 9.38 & 0.1966 & \textit{0.761}
+& \textit{7.99} & \textit{6.91} & \textit{0.1916} & 0.760
 & \textbf{6.46} & \textbf{5.72} & \textbf{0.1860} & \textbf{0.769} \\
 
 TextVQA
-& 32.27 & 31.91 & 0.3286 & \textit{0.684}
-& 18.21 & 18.32 & 0.2503 & \textit{0.684}
-& \textit{8.95} & \textit{10.46} & \textit{0.2148} & \textit{0.684}
+& 32.27 & 31.91 & 0.3286 & 0.684
+& 18.21 & 18.32 & 0.2503 & 0.684
+& 18.36 & 18.36 & 0.2500 & \textit{0.689}
+& \textit{8.95} & \textit{10.46} & \textit{0.2148} & 0.684
 & \textbf{5.25} & \textbf{7.76} & \textbf{0.1948} & \textbf{0.719} \\
 
 VizWiz-VQA
 & 30.66 & 30.66 & 0.2435 & \textbf{0.797}
 & 29.41 & 29.41 & 0.2328 & \textbf{0.797}
+& 29.11 & 29.11 & 0.2312 & \textit{0.796}
 & \textit{6.27} & \textbf{7.62} & \textit{0.1433} & \textbf{0.797}
-& \textbf{6.03} & \textit{8.17} & \textbf{0.1418} & \textit{0.795} \\
+& \textbf{6.03} & \textit{8.17} & \textbf{0.1418} & 0.795 \\
 
 VQAv2
-& \textit{10.49} & \textit{10.31} & 0.1713 & \textit{0.641}
-& 13.87 & 13.65 & 0.1789 & \textit{0.641}
-& 10.54 & 10.94 & \textit{0.1712} & \textit{0.641}
+& \textit{10.49} & \textit{10.31} & 0.1713 & 0.641
+& 13.87 & 13.65 & 0.1789 & 0.641
+& 12.36 & 12.03 & 0.1753 & \textit{0.658}
+& 10.54 & 10.94 & \textit{0.1712} & 0.641
 & \textbf{7.16} & \textbf{7.64} & \textbf{0.1629} & \textbf{0.739} \\
 
 \midrule
 \textbf{Macro Avg.}
-& 35.55 & 35.37 & 0.3364 & 0.662
-& 25.15 & 25.24 & 0.2308 & 0.662
-& \textit{6.12} & \textit{7.45} & \textit{0.1478} & \textit{0.665}
-& \textbf{4.96} & \textbf{5.97} & \textbf{0.1431} & \textbf{0.708} \\
+& 24.84 & 24.60 & 0.2580 & 0.726
+& 16.82 & 16.94 & 0.2158 & 0.726
+& 16.39 & 16.59 & 0.2145 & \textit{0.730}
+& \textit{7.93} & \textit{8.84} & \textit{0.1845} & 0.726
+& \textbf{6.24} & \textbf{7.16} & \textbf{0.1778} & \textbf{0.752} \\
 
 \bottomrule
 \end{tabularx}

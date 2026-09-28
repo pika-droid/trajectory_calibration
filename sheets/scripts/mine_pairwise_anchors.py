@@ -136,21 +136,25 @@ def load_pairwise_data(workbook_path: Path) -> pd.DataFrame:
     rename_map = {
         "NC ECE (%)": "nc_ece",
         "TS ECE (%)": "ts_ece",
+        "ATS ECE (%)": "ats_ece",
         "Platt 1D ECE (%)": "p1_ece",
         "Platt 5D ECE (%)": "p5_ece",
         "VCPS-5D ECE (%)": "vc_ece",
         "NC Ada-ECE (%)": "nc_ada",
         "TS Ada-ECE (%)": "ts_ada",
+        "ATS Ada-ECE (%)": "ats_ada",
         "Platt 1D Ada-ECE (%)": "p1_ada",
         "Platt 5D Ada-ECE (%)": "p5_ada",
         "VCPS-5D Ada-ECE (%)": "vc_ada",
         "NC AUROC": "nc_auroc",
         "TS AUROC": "ts_auroc",
+        "ATS AUROC": "ats_auroc",
         "Platt 1D AUROC": "p1_auroc",
         "Platt 5D AUROC": "p5_auroc",
         "VCPS-5D AUROC": "vc_auroc",
         "NC Brier": "nc_brier",
         "TS Brier": "ts_brier",
+        "ATS Brier": "ats_brier",
         "Platt 1D Brier": "p1_brier",
         "Platt 5D Brier": "p5_brier",
         "VCPS-5D Brier": "vc_brier",
@@ -499,6 +503,7 @@ def generate_latex_table(
     baseline_configs: list[tuple[str, str, str, str, str]] = [
         ("Naive Confidence (NC)", "nc_ece", "nc_ada", "nc_auroc", "nc_brier"),
         ("Temperature Scaling (TS)", "ts_ece", "ts_ada", "ts_auroc", "ts_brier"),
+        ("Adaptive TS (ATS)", "ats_ece", "ats_ada", "ats_auroc", "ats_brier"),
         ("Platt Scaling (1D)", "p1_ece", "p1_ada", "p1_auroc", "p1_brier"),
     ]
 
@@ -571,7 +576,7 @@ def generate_latex_table(
         r"\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-10}",
         r"\textbf{Configuration / Source Anchor} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{Total Wins} $\uparrow$ \\",
         r"\midrule",
-        rf"\rowcolor{{gray!10}} \textsc{{In-Domain Calibration (Platt 5D)}} & {m3_ceil['ece']:.2f} & {m3_ceil['ada_ece']:.2f} & {m3_ceil['auroc']:.3f} & {m3_ceil['brier']:.4f} & {mqt_ceil['ece']:.2f} & {mqt_ceil['ada_ece']:.2f} & {mqt_ceil['auroc']:.3f} & {mqt_ceil['brier']:.4f} & — \\",
+        rf"\textsc{{In-Domain Calibration (Platt 5D)}} & {m3_ceil['ece']:.2f} & {m3_ceil['ada_ece']:.2f} & {m3_ceil['auroc']:.3f} & {m3_ceil['brier']:.4f} & {mqt_ceil['ece']:.2f} & {mqt_ceil['ada_ece']:.2f} & {mqt_ceil['auroc']:.3f} & {mqt_ceil['brier']:.4f} & — \\",
         r"\midrule",
         r"\multicolumn{10}{l}{\textit{Zero-Shot Transfer Baselines (Macro Mean Across All Pairs)}} \\",
     ]
