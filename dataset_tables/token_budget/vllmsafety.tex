@@ -1,85 +1,87 @@
-\begin{table}[t]
+\begin{table*}[t]
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
+\begin{tabular}{ccclcccc}
+\toprule
+\textbf{Depth ($k$)} & \textbf{Tokens ($T$)} & \textbf{Acc} $\uparrow$ & \textbf{Calibration Method} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\midrule
+\multirow{5}{*}{1} & 1 & \multirow{5}{*}{31.32} & Naive Confidence (NC) & 0.1132 & \textbf{0.1185} & \textit{0.2010} & \textbf{0.752} \\
+ & 1 &  & Temperature Scaling (TS) & 0.1508 & 0.1536 & 0.2035 & \textbf{0.752} \\
+ & 1 &  & Adaptive TS (ATS) & 0.1508 & 0.1536 & 0.2035 & \textbf{0.752} \\
+ & 1 &  & Platt Scaling (1D) & \textit{0.1075} & \textit{0.1209} & \textbf{0.1936} & \textbf{0.752} \\
+ & 1 &  & \textbf{Trajectory Platt (5D)} & \textbf{0.1070} & \textit{0.1209} & \textbf{0.1936} & \textbf{0.752} \\
+\midrule
+\multirow{5}{*}{2} & 9 & \multirow{5}{*}{32.63} & Naive Confidence (NC) & \textit{0.1220} & \textit{0.1221} & \textbf{0.1879} & \textbf{0.797} \\
+ & 9 &  & Temperature Scaling (TS) & 0.1622 & 0.1651 & 0.1965 & \textbf{0.797} \\
+ & 10 &  & Adaptive TS (ATS) & 0.1505 & 0.1551 & 0.1933 & \textit{0.794} \\
+ & 9 &  & Platt Scaling (1D) & 0.1405 & 0.1476 & 0.1908 & \textbf{0.797} \\
+ & 10 &  & \textbf{Trajectory Platt (5D)} & \textbf{0.0955} & \textbf{0.1079} & \textit{0.1888} & 0.765 \\
+\midrule
+\multirow{5}{*}{3} & 36 & \multirow{5}{*}{32.37} & Naive Confidence (NC) & \textit{0.1039} & \textit{0.1059} & 0.1895 & \textbf{0.778} \\
+ & 36 &  & Temperature Scaling (TS) & 0.1478 & 0.1484 & 0.1964 & \textbf{0.778} \\
+ & 46 &  & Adaptive TS (ATS) & 0.1388 & 0.1401 & 0.1939 & \textit{0.775} \\
+ & 36 &  & Platt Scaling (1D) & 0.1042 & 0.1226 & \textit{0.1886} & \textbf{0.778} \\
+ & 46 &  & \textbf{Trajectory Platt (5D)} & \textbf{0.0798} & \textbf{0.0898} & \textbf{0.1859} & 0.744 \\
+\midrule
+\multirow{5}{*}{4} & 144 & \multirow{5}{*}{32.63} & Naive Confidence (NC) & \textit{0.1021} & \textbf{0.1048} & \textbf{0.1800} & \textbf{0.800} \\
+ & 144 &  & Temperature Scaling (TS) & 0.1519 & 0.1552 & 0.1882 & \textbf{0.800} \\
+ & 190 &  & Adaptive TS (ATS) & 0.1453 & 0.1471 & 0.1851 & \textit{0.799} \\
+ & 144 &  & Platt Scaling (1D) & 0.1254 & 0.1341 & 0.1846 & \textbf{0.800} \\
+ & 190 &  & \textbf{Trajectory Platt (5D)} & \textbf{0.0972} & \textit{0.1067} & \textit{0.1815} & 0.772 \\
+\midrule
+\multirow{5}{*}{5} & 576 & \multirow{5}{*}{31.58} & Naive Confidence (NC) & \textit{0.1063} & \textit{0.1064} & \textit{0.1741} & \textbf{0.811} \\
+ & 576 &  & Temperature Scaling (TS) & 0.1596 & 0.1548 & 0.1811 & \textbf{0.811} \\
+ & 766 &  & Adaptive TS (ATS) & 0.1411 & 0.1432 & 0.1769 & \textit{0.807} \\
+ & 576 &  & Platt Scaling (1D) & 0.1310 & 0.1371 & 0.1794 & \textbf{0.811} \\
+ & 766 &  & \textbf{Trajectory Platt (5D)} & \textbf{0.0722} & \textbf{0.0796} & \textbf{0.1725} & 0.774 \\
+\bottomrule
+\end{tabular}
 \caption{\textbf{Token Budget vs. Calibration Performance on \texttt{vllm-safety} (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
 \label{tab:token_budget_vllm_safety_m3}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\end{table*}
+
+\begin{table*}[t]
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{ccclcccc}
 \toprule
-\textbf{Depth ($k$)} & \textbf{Tokens ($T$)} & \textbf{Acc (\%)} $\uparrow$ & \textbf{Calibration Method} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Depth ($k$)} & \textbf{Tokens ($T$)} & \textbf{Acc} $\uparrow$ & \textbf{Calibration Method} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-\multirow{5}{*}{1} & 1 & \multirow{5}{*}{31.32} & Naive Confidence (NC) & 11.32 & \textbf{11.85} & \textit{0.2010} & \textbf{0.752} \\
- & 1 &  & Temperature Scaling (TS) & 15.08 & 15.36 & 0.2035 & \textbf{0.752} \\
- & 1 &  & Adaptive TS (ATS) & 15.08 & 15.36 & 0.2035 & \textbf{0.752} \\
- & 1 &  & Platt Scaling (1D) & \textit{10.75} & \textit{12.09} & \textbf{0.1936} & \textbf{0.752} \\
- & 1 &  & \textbf{Trajectory Platt (5D)} & \textbf{10.70} & \textit{12.09} & \textbf{0.1936} & \textbf{0.752} \\
+\multirow{5}{*}{1} & 1 & \multirow{5}{*}{24.21} & Naive Confidence (NC) & \textbf{0.0943} & \textbf{0.0928} & \textbf{0.1621} & \textbf{0.799} \\
+ & 1 &  & Temperature Scaling (TS) & 0.1797 & 0.1720 & 0.1776 & \textbf{0.799} \\
+ & 1 &  & Adaptive TS (ATS) & 0.1797 & 0.1721 & 0.1776 & \textbf{0.799} \\
+ & 1 &  & Platt Scaling (1D) & 0.1353 & \textit{0.1395} & \textit{0.1644} & \textbf{0.799} \\
+ & 1 &  & \textbf{Trajectory Platt (5D)} & \textit{0.1349} & \textit{0.1395} & \textit{0.1644} & \textbf{0.799} \\
 \midrule
-\multirow{5}{*}{2} & 9 & \multirow{5}{*}{32.63} & Naive Confidence (NC) & \textit{12.20} & \textit{12.21} & \textbf{0.1879} & \textbf{0.797} \\
- & 9 &  & Temperature Scaling (TS) & 16.22 & 16.51 & 0.1965 & \textbf{0.797} \\
- & 10 &  & Adaptive TS (ATS) & 15.05 & 15.51 & 0.1933 & \textit{0.794} \\
- & 9 &  & Platt Scaling (1D) & 14.05 & 14.76 & 0.1908 & \textbf{0.797} \\
- & 10 &  & \textbf{Trajectory Platt (5D)} & \textbf{9.55} & \textbf{10.79} & \textit{0.1888} & 0.765 \\
+\multirow{5}{*}{2} & 9 & \multirow{5}{*}{31.58} & Naive Confidence (NC) & \textit{0.0976} & \textit{0.0984} & \textit{0.1832} & \textbf{0.783} \\
+ & 9 &  & Temperature Scaling (TS) & 0.1679 & 0.1699 & 0.1991 & \textbf{0.783} \\
+ & 10 &  & Adaptive TS (ATS) & 0.1534 & 0.1561 & 0.1947 & \textbf{0.783} \\
+ & 9 &  & Platt Scaling (1D) & 0.1374 & 0.1444 & 0.1900 & \textbf{0.783} \\
+ & 10 &  & \textbf{Trajectory Platt (5D)} & \textbf{0.0767} & \textbf{0.0873} & \textbf{0.1805} & \textit{0.767} \\
 \midrule
-\multirow{5}{*}{3} & 36 & \multirow{5}{*}{32.37} & Naive Confidence (NC) & \textit{10.39} & \textit{10.59} & 0.1895 & \textbf{0.778} \\
- & 36 &  & Temperature Scaling (TS) & 14.78 & 14.84 & 0.1964 & \textbf{0.778} \\
- & 46 &  & Adaptive TS (ATS) & 13.88 & 14.01 & 0.1939 & \textit{0.775} \\
- & 36 &  & Platt Scaling (1D) & 10.42 & 12.26 & \textit{0.1886} & \textbf{0.778} \\
- & 46 &  & \textbf{Trajectory Platt (5D)} & \textbf{7.98} & \textbf{8.98} & \textbf{0.1859} & 0.744 \\
+\multirow{5}{*}{3} & 36 & \multirow{5}{*}{33.42} & Naive Confidence (NC) & \textit{0.0944} & \textit{0.1005} & \textit{0.1830} & \textbf{0.793} \\
+ & 36 &  & Temperature Scaling (TS) & 0.1534 & 0.1534 & 0.1954 & \textbf{0.793} \\
+ & 46 &  & Adaptive TS (ATS) & 0.1344 & 0.1386 & 0.1896 & \textit{0.792} \\
+ & 36 &  & Platt Scaling (1D) & 0.1199 & 0.1262 & 0.1878 & \textbf{0.793} \\
+ & 46 &  & \textbf{Trajectory Platt (5D)} & \textbf{0.0654} & \textbf{0.0687} & \textbf{0.1775} & 0.775 \\
 \midrule
-\multirow{5}{*}{4} & 144 & \multirow{5}{*}{32.63} & Naive Confidence (NC) & \textit{10.21} & \textbf{10.48} & \textbf{0.1800} & \textbf{0.800} \\
- & 144 &  & Temperature Scaling (TS) & 15.19 & 15.52 & 0.1882 & \textbf{0.800} \\
- & 190 &  & Adaptive TS (ATS) & 14.53 & 14.71 & 0.1851 & \textit{0.799} \\
- & 144 &  & Platt Scaling (1D) & 12.54 & 13.41 & 0.1846 & \textbf{0.800} \\
- & 190 &  & \textbf{Trajectory Platt (5D)} & \textbf{9.72} & \textit{10.67} & \textit{0.1815} & 0.772 \\
+\multirow{5}{*}{4} & 144 & \multirow{5}{*}{33.68} & Naive Confidence (NC) & \textit{0.1065} & \textit{0.1068} & \textit{0.1836} & \textbf{0.796} \\
+ & 144 &  & Temperature Scaling (TS) & 0.1553 & 0.1617 & 0.1983 & \textbf{0.796} \\
+ & 190 &  & Adaptive TS (ATS) & 0.1454 & 0.1469 & 0.1929 & \textbf{0.796} \\
+ & 144 &  & Platt Scaling (1D) & 0.1247 & 0.1314 & 0.1875 & \textbf{0.796} \\
+ & 190 &  & \textbf{Trajectory Platt (5D)} & \textbf{0.0617} & \textbf{0.0696} & \textbf{0.1765} & \textit{0.782} \\
 \midrule
-\multirow{5}{*}{5} & 576 & \multirow{5}{*}{31.58} & Naive Confidence (NC) & \textit{10.63} & \textit{10.64} & \textit{0.1741} & \textbf{0.811} \\
- & 576 &  & Temperature Scaling (TS) & 15.96 & 15.48 & 0.1811 & \textbf{0.811} \\
- & 766 &  & Adaptive TS (ATS) & 14.11 & 14.32 & 0.1769 & \textit{0.807} \\
- & 576 &  & Platt Scaling (1D) & 13.10 & 13.71 & 0.1794 & \textbf{0.811} \\
- & 766 &  & \textbf{Trajectory Platt (5D)} & \textbf{7.22} & \textbf{7.96} & \textbf{0.1725} & 0.774 \\
+\multirow{5}{*}{5} & 256 & \multirow{5}{*}{33.95} & Naive Confidence (NC) & \textit{0.1044} & \textit{0.1035} & \textit{0.1918} & \textbf{0.776} \\
+ & 256 &  & Temperature Scaling (TS) & 0.1635 & 0.1613 & 0.2050 & \textbf{0.776} \\
+ & 446 &  & Adaptive TS (ATS) & 0.1530 & 0.1495 & 0.2004 & \textbf{0.776} \\
+ & 256 &  & Platt Scaling (1D) & 0.1247 & 0.1220 & 0.1930 & \textbf{0.776} \\
+ & 446 &  & \textbf{Trajectory Platt (5D)} & \textbf{0.0590} & \textbf{0.0696} & \textbf{0.1797} & \textit{0.769} \\
 \bottomrule
-\end{tabular}%
-}
-\end{table}
-
-\begin{table}[t]
+\end{tabular}
 \caption{\textbf{Token Budget vs. Calibration Performance on \texttt{vllm-safety} (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
 \label{tab:token_budget_vllm_safety_mqt}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{ccclcccc}
-\toprule
-\textbf{Depth ($k$)} & \textbf{Tokens ($T$)} & \textbf{Acc (\%)} $\uparrow$ & \textbf{Calibration Method} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
-\midrule
-\multirow{5}{*}{1} & 1 & \multirow{5}{*}{24.21} & Naive Confidence (NC) & \textbf{9.43} & \textbf{9.28} & \textbf{0.1621} & \textbf{0.799} \\
- & 1 &  & Temperature Scaling (TS) & 17.97 & 17.20 & 0.1776 & \textbf{0.799} \\
- & 1 &  & Adaptive TS (ATS) & 17.97 & 17.21 & 0.1776 & \textbf{0.799} \\
- & 1 &  & Platt Scaling (1D) & 13.53 & \textit{13.95} & \textit{0.1644} & \textbf{0.799} \\
- & 1 &  & \textbf{Trajectory Platt (5D)} & \textit{13.49} & \textit{13.95} & \textit{0.1644} & \textbf{0.799} \\
-\midrule
-\multirow{5}{*}{2} & 9 & \multirow{5}{*}{31.58} & Naive Confidence (NC) & \textit{9.76} & \textit{9.84} & \textit{0.1832} & \textbf{0.783} \\
- & 9 &  & Temperature Scaling (TS) & 16.79 & 16.99 & 0.1991 & \textbf{0.783} \\
- & 10 &  & Adaptive TS (ATS) & 15.34 & 15.61 & 0.1947 & \textbf{0.783} \\
- & 9 &  & Platt Scaling (1D) & 13.74 & 14.44 & 0.1900 & \textbf{0.783} \\
- & 10 &  & \textbf{Trajectory Platt (5D)} & \textbf{7.67} & \textbf{8.73} & \textbf{0.1805} & \textit{0.767} \\
-\midrule
-\multirow{5}{*}{3} & 36 & \multirow{5}{*}{33.42} & Naive Confidence (NC) & \textit{9.44} & \textit{10.05} & \textit{0.1830} & \textbf{0.793} \\
- & 36 &  & Temperature Scaling (TS) & 15.34 & 15.34 & 0.1954 & \textbf{0.793} \\
- & 46 &  & Adaptive TS (ATS) & 13.44 & 13.86 & 0.1896 & \textit{0.792} \\
- & 36 &  & Platt Scaling (1D) & 11.99 & 12.62 & 0.1878 & \textbf{0.793} \\
- & 46 &  & \textbf{Trajectory Platt (5D)} & \textbf{6.54} & \textbf{6.87} & \textbf{0.1775} & 0.775 \\
-\midrule
-\multirow{5}{*}{4} & 144 & \multirow{5}{*}{33.68} & Naive Confidence (NC) & \textit{10.65} & \textit{10.68} & \textit{0.1836} & \textbf{0.796} \\
- & 144 &  & Temperature Scaling (TS) & 15.53 & 16.17 & 0.1983 & \textbf{0.796} \\
- & 190 &  & Adaptive TS (ATS) & 14.54 & 14.69 & 0.1929 & \textbf{0.796} \\
- & 144 &  & Platt Scaling (1D) & 12.47 & 13.14 & 0.1875 & \textbf{0.796} \\
- & 190 &  & \textbf{Trajectory Platt (5D)} & \textbf{6.17} & \textbf{6.96} & \textbf{0.1765} & \textit{0.782} \\
-\midrule
-\multirow{5}{*}{5} & 256 & \multirow{5}{*}{33.95} & Naive Confidence (NC) & \textit{10.44} & \textit{10.35} & \textit{0.1918} & \textbf{0.776} \\
- & 256 &  & Temperature Scaling (TS) & 16.35 & 16.13 & 0.2050 & \textbf{0.776} \\
- & 446 &  & Adaptive TS (ATS) & 15.30 & 14.95 & 0.2004 & \textbf{0.776} \\
- & 256 &  & Platt Scaling (1D) & 12.47 & 12.20 & 0.1930 & \textbf{0.776} \\
- & 446 &  & \textbf{Trajectory Platt (5D)} & \textbf{5.90} & \textbf{6.96} & \textbf{0.1797} & \textit{0.769} \\
-\bottomrule
-\end{tabular}%
-}
-\end{table}
+\end{table*}

@@ -1,9 +1,8 @@
 \begin{table*}[t]
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
 \centering
 \small
-\caption{\textbf{Combinatorial 5D Trajectory Feature Cardinality Progression ($k \in \{1 \dots 5\}$)}. Macro-averaged out-of-fold calibration error and discrimination across Core 5 vision-language benchmarks for M3-LLaVA (7B) and MQT-LLaVA (7B). Evaluates all $\sum_{k=1}^5 \binom{5}{k} = 31$ feature subsets. Reported in pure decimal format. \textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 within each architecture. Note: Subsets lacking the base logit anchor $x_1$ achieve artificially low quantile Ada-ECE via class-prior probability clustering, but suffer severe AUROC collapse ($\le 0.64$ vs. $0.71+$ for $x_1$-anchored models); joint calibration and discrimination require the full 5D representation.}
-\label{tab:ablation_5d_macro_progression}
-\vspace{2mm}
 \begin{tabular}{cccccc}
 \toprule
 \textbf{Cardinality ($k$)} & \textbf{Subsets $\binom{5}{k}$} & \textbf{Optimal Formula} & \textbf{Macro Ada-ECE (Best) $\downarrow$} & \textbf{Macro Ada-ECE (Mean $\pm$ Std)} & \textbf{Macro AUROC (Best) $\uparrow$} \\
@@ -25,4 +24,6 @@ $k = 4$ & 5 & $x_{1} + x_{2} + x_{3} + x_{4}$ & 0.0341 & 0.0368 $\pm$ 0.0029 & \
 $k = 5$ & 1 & $x_{1} + x_{2} + x_{3} + x_{4} + x_{5}$ & 0.0344 & 0.0344 $\pm$ 0.0000 & \textbf{0.768} \\
 \bottomrule
 \end{tabular}
+\caption{\textbf{Combinatorial 5D Trajectory Feature Cardinality Progression ($k \in \{1 \dots 5\}$)}. Macro-averaged out-of-fold calibration error and discrimination across Core 5 benchmarks for M3-LLaVA and MQT-LLaVA (7B). Evaluates all $\sum_{k=1}^5 \binom{5}{k} = 31$ feature subsets. \textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 within each architecture.}
+\label{tab:ablation_5d_macro_progression}
 \end{table*}

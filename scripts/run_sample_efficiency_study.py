@@ -425,21 +425,26 @@ def rank_and_format_latex(
 
 def format_macro_latex_table(macro_df: pd.DataFrame, arch_name: str, tab_label: str) -> str:
     """Formats LaTeX subtable for an architecture across budget tiers."""
+    caption = (
+        f"\\textbf{{Macro-Averaged Calibration Scaling Across Training Budgets ({arch_name} 7B).}} "
+        "Evaluated across Core 5 benchmarks over 5 subsampling seeds. "
+        "\\textbf{Bold}: best; \\textit{italic}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better."
+    )
     lines = [
-        "\\begin{table}[t]",
-        f"\\caption{{\\textbf{{Macro-Averaged Calibration Scaling Across Training Budgets ({arch_name} 7B).}} "
-        "Evaluated across Core 5 benchmarks over 5 subsampling seeds (superseding legacy Core 7). "
-        "\\textbf{Bold}: best; \\textit{italic}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}",
-        f"\\label{{{tab_label}}}",
-        "\\tablestyle{4pt}{1.05}",
-        "\\resizebox{\\columnwidth}{!}{%",
+        "\\begin{table*}[t]",
+        "\\setlength{\\tabcolsep}{4pt}",
+        "\\renewcommand{\\arraystretch}{1.05}",
+        "\\centering",
+        "\\footnotesize",
         "\\begin{tabular}{llcccc}",
         "\\toprule",
-        "\\textbf{Budget ($N$)} & \\textbf{Calibration Method} & "
-        "\\textbf{Macro ECE (\\%)} $\\downarrow$ & "
-        "\\textbf{Macro Ada-ECE (\\%)} $\\downarrow$ & "
-        "\\textbf{Macro AUROC} $\\uparrow$ & "
-        "\\textbf{Macro Brier} $\\downarrow$ \\\\",
+        (
+            "\\textbf{Budget ($N$)} & \\textbf{Calibration Method} & "
+            "\\textbf{Macro ECE} $\\downarrow$ & "
+            "\\textbf{Macro Ada-ECE} $\\downarrow$ & "
+            "\\textbf{Macro AUROC} $\\uparrow$ & "
+            "\\textbf{Macro Brier} $\\downarrow$ \\\\"
+        ),
         "\\midrule",
     ]
 
@@ -459,21 +464,23 @@ def format_macro_latex_table(macro_df: pd.DataFrame, arch_name: str, tab_label: 
         rows_data = []
         for m in methods_in_sub:
             sub_m = cast(pd.DataFrame, sub[sub["method"] == m])
+            raw_ece = float(np.asarray(sub_m["ece_mean"])[0])
+            raw_ada = float(np.asarray(sub_m["ada_ece_mean"])[0])
             rows_data.append(
                 (
                     m,
-                    float(np.asarray(sub_m["ece_mean"])[0]),
-                    float(np.asarray(sub_m["ada_ece_mean"])[0]),
+                    raw_ece / 100.0,
+                    raw_ada / 100.0,
                     float(np.asarray(sub_m["auroc_mean"])[0]),
                     float(np.asarray(sub_m["brier_mean"])[0]),
                 )
             )
 
         ece_strs = rank_and_format_latex(
-            [r[1] for r in rows_data], higher_is_better=False, decimals=2
+            [r[1] for r in rows_data], higher_is_better=False, decimals=4
         )
         ada_strs = rank_and_format_latex(
-            [r[2] for r in rows_data], higher_is_better=False, decimals=2
+            [r[2] for r in rows_data], higher_is_better=False, decimals=4
         )
         auc_strs = rank_and_format_latex(
             [r[3] for r in rows_data], higher_is_better=True, decimals=3
@@ -496,7 +503,15 @@ def format_macro_latex_table(macro_df: pd.DataFrame, arch_name: str, tab_label: 
         if b_idx < len(budgets_in_df) - 1:
             lines.append("\\midrule")
 
-    lines.extend(["\\bottomrule", "\\end{tabular}%", "}", "\\end{table}"])
+    lines.extend(
+        [
+            "\\bottomrule",
+            "\\end{tabular}",
+            f"\\caption{{{caption}}}",
+            f"\\label{{{tab_label}}}",
+            "\\end{table*}",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -510,20 +525,20 @@ def format_targeted_sample_efficiency_latex_table(
     caption = (
         rf"\textbf{{Calibration Sample Efficiency Scaling Across Training Budgets ({arch_title} 7B).}} "
         r"Evaluated across 7 training budgets $N \in \{50, 100, 200, 500, 1000, 1500, \text{Full}\}$ "
-        r"over 5 subsampling seeds. Panel A: TextVQA (Scene Text VQA); Panel B: VQAv2 (General Scene VQA). "
+        r"over 5 subsampling seeds. Panel A: TextVQA; Panel B: VQAv2. "
         r"\textbf{Bold}: best; \textit{italic}: second best within each budget tier."
     )
     lines = [
-        r"\begin{table}[t]",
-        rf"\caption{{{caption}}}",
-        rf"\label{{{tab_label}}}",
-        r"\tablestyle{4pt}{1.05}",
-        r"\resizebox{\columnwidth}{!}{%",
+        r"\begin{table*}[t]",
+        r"\setlength{\tabcolsep}{3pt}",
+        r"\renewcommand{\arraystretch}{0.88}",
+        r"\centering",
+        r"\scriptsize",
         r"\begin{tabular}{llcccc}",
         r"\toprule",
         (
             r"\textbf{Budget ($N$)} & \textbf{Calibration Method} & "
-            r"\textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & "
+            r"\textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & "
             r"\textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ \\"
         ),
         r"\midrule",
@@ -564,17 +579,17 @@ def format_targeted_sample_efficiency_latex_table(
                     if "adaptive_ece_percent_mean" in sub_m.columns
                     else "ada_ece_mean"
                 )
-                ece_val = float(np.asarray(sub_m[ece_col])[0])
-                ada_val = float(np.asarray(sub_m[ada_col])[0])
+                raw_ece = float(np.asarray(sub_m[ece_col])[0])
+                raw_ada = float(np.asarray(sub_m[ada_col])[0])
                 auc_val = float(np.asarray(sub_m["auroc_mean"])[0])
                 brier_val = float(np.asarray(sub_m["brier_mean"])[0])
-                rows_data.append((m, ece_val, ada_val, auc_val, brier_val))
+                rows_data.append((m, raw_ece / 100.0, raw_ada / 100.0, auc_val, brier_val))
 
             ece_strs = rank_and_format_latex(
-                [r[1] for r in rows_data], higher_is_better=False, decimals=2
+                [r[1] for r in rows_data], higher_is_better=False, decimals=4
             )
             ada_strs = rank_and_format_latex(
-                [r[2] for r in rows_data], higher_is_better=False, decimals=2
+                [r[2] for r in rows_data], higher_is_better=False, decimals=4
             )
             auc_strs = rank_and_format_latex(
                 [r[3] for r in rows_data], higher_is_better=True, decimals=3
@@ -599,7 +614,15 @@ def format_targeted_sample_efficiency_latex_table(
             if b_idx < len(budgets_in_df) - 1:
                 lines.append(r"\midrule")
 
-    lines.extend([r"\bottomrule", r"\end{tabular}%", r"}", r"\end{table}"])
+    lines.extend(
+        [
+            r"\bottomrule",
+            r"\end{tabular}",
+            rf"\caption{{{caption}}}",
+            rf"\label{{{tab_label}}}",
+            r"\end{table*}",
+        ]
+    )
     return "\n".join(lines)
 
 

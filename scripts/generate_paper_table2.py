@@ -39,7 +39,7 @@ SOURCE_BLOCKS: list[tuple[str, str, str, list[tuple[str, str, str]]]] = [
         [
             ("textvqa", "TextVQA", "Scene Text"),
             ("ai2d", "AI2D", "Diagrams"),
-            ("vizwiz-vqa", "VizWiz-VQA", "Assistive"),
+            ("avqa", "AVQA", "Adversarial Audio-Visual"),
         ],
     ),
     (
@@ -58,8 +58,8 @@ SOURCE_BLOCKS: list[tuple[str, str, str, list[tuple[str, str, str]]]] = [
         "Scene Text",
         [
             ("vqav2", "VQAv2", "General Scene VQA"),
-            ("vizwiz-vqa", "VizWiz-VQA", "Assistive"),
-            ("ai2d", "AI2D", "Diagrams"),
+            ("avqa", "AVQA", "Adversarial Audio-Visual"),
+            ("vllm-safety", "VLLM-Safety", "Adversarial Safety"),
         ],
     ),
 ]
@@ -128,7 +128,7 @@ def load_pairwise_transfer_data(
     return data
 
 
-def load_direct_train_data(csv_path: Path) -> dict[str, dict[str, float]]:
+def load_direct_train_data(csv_path: Path, arch: str = "m3") -> dict[str, dict[str, float]]:
     """Load in-domain calibration ceilings from benchmark summary CSV for Trajectory Platt (5D)."""
     df = pd.read_csv(csv_path)
     sub = df[df["method"] == "Trajectory Platt (5D)"]
@@ -142,6 +142,23 @@ def load_direct_train_data(csv_path: Path) -> dict[str, dict[str, float]]:
             "auroc": float(row["auroc"]),
             "brier": float(row["brier"]),
         }
+
+    # Also load adversarial benchmark ceilings if present
+    adv_csv = ROOT / "results" / "adversarial_safety_benchmark_results.csv"
+    if adv_csv.exists():
+        df_adv = pd.read_csv(adv_csv)
+        sub_adv = df_adv[
+            (df_adv["method"] == "Trajectory Platt (5D)")
+            & (df_adv["arch"].str.lower() == arch.lower())
+        ]
+        for _, row in sub_adv.iterrows():
+            ds = str(row["dataset"]).strip()
+            direct_data[ds] = {
+                "ece": float(row["ece"]),
+                "ada_ece": float(row["adaptive_ece"]),
+                "auroc": float(row["auroc"]),
+                "brier": float(row["brier"]),
+            }
 
     return direct_data
 
@@ -261,19 +278,17 @@ def generate_paper_table(
     """Generate complete publication-ready LaTeX table for one architecture."""
     caption = (
         rf"\textbf{{Zero-Shot Cross-Domain Calibration Transfer ({arch_display} 7B).}} "
-        r"Pairwise zero-shot calibration transfer from source datasets across held-out target "
-        r"vision-language benchmarks without target domain supervision. "
-        r"Evaluated across Expected Calibration Error (\textbf{ECE} $\downarrow$), "
-        r"Adaptive ECE (\textbf{Ada-ECE} $\downarrow$), AUROC ($\uparrow$), and Brier score ($\downarrow$). "
+        r"Pairwise zero-shot transfer across held-out target benchmarks without target supervision. "
+        r"Evaluated on ECE ($\downarrow$), Ada-ECE ($\downarrow$), AUROC ($\uparrow$), and Brier score ($\downarrow$). "
         r"\textbf{Bold}: Rank 1; \textit{italic}: Rank 2 among transfer methods."
     )
 
     lines: list[str] = [
         r"\begin{table*}[t]",
+        r"\setlength{\tabcolsep}{3pt}",
+        r"\renewcommand{\arraystretch}{1.05}",
         r"\centering",
-        rf"\caption{{{caption}}}",
-        rf"\label{{{table_label}}}",
-        r"\tablestyle{3pt}{1.05}",
+        r"\footnotesize",
         r"\resizebox{\textwidth}{!}{%",
         r"\begin{tabular}{l cccc cccc cccc}",
         r"\toprule",
@@ -297,6 +312,8 @@ def generate_paper_table(
             r"\bottomrule",
             r"\end{tabular}%",
             r"}",
+            rf"\caption{{{caption}}}",
+            rf"\label{{{table_label}}}",
             r"\end{table*}",
             "",
         ]
@@ -308,8 +325,8 @@ def generate_paper_table(
 def generate_both_tables() -> tuple[str, str]:
     """Load data and generate both Table 2 (M3) and Table 3 (MQT) LaTeX strings."""
     transfer_data = load_pairwise_transfer_data(EXCEL_PATH)
-    dt_m3 = load_direct_train_data(BENCHMARK_M3_PATH)
-    dt_mqt = load_direct_train_data(BENCHMARK_MQT_PATH)
+    dt_m3 = load_direct_train_data(BENCHMARK_M3_PATH, arch="m3")
+    dt_mqt = load_direct_train_data(BENCHMARK_MQT_PATH, arch="mqt")
 
     table2_m3 = generate_paper_table(
         arch_key="m3",

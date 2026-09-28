@@ -550,33 +550,44 @@ def generate_latex_table(
 
         anchor_wins_raw.append(safe_int(comb_row["win_p1_ece"]))
 
-    # Option A ranking across all 9 transfer configurations
-    m3_ece_fmt = format_rankings_latex(m3_ece_raw, lower_is_better=True, decimals=2)
-    m3_ada_fmt = format_rankings_latex(m3_ada_raw, lower_is_better=True, decimals=2)
+    # Option A ranking across all 9 transfer configurations in pure decimals
+    m3_ece_dec = [x / 100.0 for x in m3_ece_raw]
+    m3_ada_dec = [x / 100.0 for x in m3_ada_raw]
+    mqt_ece_dec = [x / 100.0 for x in mqt_ece_raw]
+    mqt_ada_dec = [x / 100.0 for x in mqt_ada_raw]
+
+    m3_ece_fmt = format_rankings_latex(m3_ece_dec, lower_is_better=True, decimals=4)
+    m3_ada_fmt = format_rankings_latex(m3_ada_dec, lower_is_better=True, decimals=4)
     m3_auc_fmt = format_rankings_latex(m3_auc_raw, lower_is_better=False, decimals=3)
     m3_brier_fmt = format_rankings_latex(m3_brier_raw, lower_is_better=True, decimals=4)
 
-    mqt_ece_fmt = format_rankings_latex(mqt_ece_raw, lower_is_better=True, decimals=2)
-    mqt_ada_fmt = format_rankings_latex(mqt_ada_raw, lower_is_better=True, decimals=2)
+    mqt_ece_fmt = format_rankings_latex(mqt_ece_dec, lower_is_better=True, decimals=4)
+    mqt_ada_fmt = format_rankings_latex(mqt_ada_dec, lower_is_better=True, decimals=4)
     mqt_auc_fmt = format_rankings_latex(mqt_auc_raw, lower_is_better=False, decimals=3)
     mqt_brier_fmt = format_rankings_latex(mqt_brier_raw, lower_is_better=True, decimals=4)
 
     wins_fmt = ["—"] * len(baseline_configs) + format_int_rankings_latex(anchor_wins_raw, total=24)
 
+    caption = (
+        r"\textbf{Zero-Shot Cross-Domain Source Anchor Leaderboard.} Performance of Trajectory Platt (5D) "
+        r"across candidate source anchors vs. transfer baselines across 12 unseen target benchmarks on "
+        r"M3-LLaVA and MQT-LLaVA (7B). \textbf{Bold}: Rank 1; \textit{Italic}: Rank 2 among transfer configurations. "
+        r"$\downarrow$/$\uparrow$: lower/higher is better."
+    )
+
     tex_lines = [
         r"\begin{table*}[t]",
+        r"\setlength{\tabcolsep}{3.5pt}",
+        r"\renewcommand{\arraystretch}{1.05}",
         r"\centering",
-        r"\caption{\textbf{Zero-Shot Cross-Domain Source Anchor Leaderboard.} Performance of Trajectory Platt (5D) across candidate source anchors vs. standard transfer baselines across 12 unseen target benchmarks. Evaluated zero-shot on M3-LLaVA (7B) and MQT-LLaVA (7B). \textbf{Bold}: Rank 1; \textit{Italic}: Rank 2 among transfer configurations. $\downarrow$: lower is better; $\uparrow$: higher is better.}",
-        r"\label{tab:pairwise_anchor_summary}",
-        r"\tablestyle{3.5pt}{1.05}",
-        r"\resizebox{\textwidth}{!}{%",
+        r"\footnotesize",
         r"\begin{tabular}{l cccc cccc c}",
         r"\toprule",
         r" & \multicolumn{4}{c}{\textbf{M3-LLaVA (7B)}} & \multicolumn{4}{c}{\textbf{MQT-LLaVA (7B)}} & \textbf{Dual-Arch} \\",
         r"\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-10}",
-        r"\textbf{Configuration / Source Anchor} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{Total Wins} $\uparrow$ \\",
+        r"\textbf{Configuration / Source Anchor} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{Total Wins} $\uparrow$ \\",
         r"\midrule",
-        rf"\textsc{{In-Domain Calibration (Platt 5D)}} & {m3_ceil['ece']:.2f} & {m3_ceil['ada_ece']:.2f} & {m3_ceil['auroc']:.3f} & {m3_ceil['brier']:.4f} & {mqt_ceil['ece']:.2f} & {mqt_ceil['ada_ece']:.2f} & {mqt_ceil['auroc']:.3f} & {mqt_ceil['brier']:.4f} & — \\",
+        rf"\textsc{{In-Domain Calibration (Platt 5D)}} & {m3_ceil['ece'] / 100.0:.4f} & {m3_ceil['ada_ece'] / 100.0:.4f} & {m3_ceil['auroc']:.3f} & {m3_ceil['brier']:.4f} & {mqt_ceil['ece'] / 100.0:.4f} & {mqt_ceil['ada_ece'] / 100.0:.4f} & {mqt_ceil['auroc']:.3f} & {mqt_ceil['brier']:.4f} & — \\",
         r"\midrule",
         r"\multicolumn{10}{l}{\textit{Zero-Shot Transfer Baselines (Macro Mean Across All Pairs)}} \\",
     ]
@@ -608,8 +619,9 @@ def generate_latex_table(
     tex_lines.extend(
         [
             r"\bottomrule",
-            r"\end{tabular}%",
-            r"}",
+            r"\end{tabular}",
+            rf"\caption{{{caption}}}",
+            r"\label{tab:pairwise_anchor_summary}",
             r"\end{table*}",
             "",
         ]

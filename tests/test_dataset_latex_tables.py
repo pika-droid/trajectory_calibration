@@ -86,8 +86,8 @@ def test_group1_dataset_wise_tables_exist_and_structure() -> None:
         content = out_f.read_text(encoding="utf-8")
         assert "\\begin{table}[t]" in content
         assert "\\begin{tabular}{lccccc}" in content
-        assert "ECE (\\%)" in content
-        assert "Ada-ECE (\\%)" in content
+        assert "ECE" in content
+        assert "Ada-ECE" in content
         assert "Brier" in content
         assert "AUROC" in content
 
@@ -123,8 +123,8 @@ def test_adversarial_safety_latex_tables() -> None:
         assert "\\begin{tabular}{lccccc}" in content
         assert "\\toprule" in content
         assert "\\bottomrule" in content
-        assert "ECE (\\%)" in content
-        assert "Ada-ECE (\\%)" in content
+        assert "ECE" in content
+        assert "Ada-ECE" in content
         assert "Brier" in content
         assert "AUROC" in content
 
@@ -165,8 +165,8 @@ def test_group2_macro_mean_table() -> None:
     assert "MQT-LLaVA 7B" in content
     assert f"Across Core {len(CORE_DATASETS)} Datasets" in content
     assert "\\begin{tabular}{lccccc}" in content
-    assert "Macro ECE (\\%)" in content
-    assert "Macro Ada-ECE (\\%)" in content
+    assert "Macro ECE" in content
+    assert "Macro Ada-ECE" in content
     assert "Macro Brier" in content
     assert "Macro AUROC" in content
     assert "Trajectory Platt (5D)" in content
@@ -182,8 +182,8 @@ def test_group9_vqav2_multirollout_table() -> None:
     assert "M3-LLaVA 7B" in content
     assert "MQT-LLaVA 7B" in content
     assert "\\begin{tabular}{lccccc}" in content
-    assert "ECE (\\%)" in content
-    assert "Ada-ECE (\\%)" in content
+    assert "ECE" in content
+    assert "Ada-ECE" in content
     assert "Brier" in content
     assert "AUROC" in content
     assert r"\rowcolor" not in content
@@ -227,8 +227,8 @@ def test_group3_temp_ablation_tables() -> None:
         assert "Sampling Temperature $T = 1.5$" in content
         assert "Mean (Averaged Across Temperatures)" in content
         assert "\\begin{tabular}{lcccc}" in content
-        assert "ECE (\\%)" in content
-        assert "Ada-ECE (\\%)" in content
+        assert "ECE" in content
+        assert "Ada-ECE" in content
         assert "Brier" in content
         assert "AUROC" in content
 
@@ -248,11 +248,11 @@ def test_group4_lodo_cross_dataset_table() -> None:
     assert "Zero-Shot Base" in content
     assert "Target Adapted (Saerens-EM)" in content
     assert "\\begin{tabular}{llcccc}" in content
-    assert "Macro ECE (\\%)" in content
-    assert "Macro Ada-ECE (\\%)" in content
+    assert "Macro ECE" in content
+    assert "Macro Ada-ECE" in content
     assert "Macro Brier" in content
     assert "Macro AUROC" in content
-    assert "Core 7" in content
+    assert f"Core {len(CORE_DATASETS)}" in content
     assert r"\rowcolor" not in content, "Found forbidden \\rowcolor in lodo_cross_dataset.tex"
 
     for m in [
@@ -369,8 +369,8 @@ def test_rq1_core7_benchmark_table() -> None:
     assert r"\bottomrule" in content
 
     # Both architecture titles present
-    assert "RQ1 Evaluation on M3-LLaVA (7B)" in content
-    assert "RQ1 Evaluation on MQT-LLaVA (7B)" in content
+    assert "M3-LLaVA (7B)" in content
+    assert "MQT-LLaVA (7B)" in content
 
     # Top headers: exactly the 5 methods
     assert r"\multicolumn{4}{c}{\textbf{Naive Confidence}}" in content
@@ -389,8 +389,8 @@ def test_rq1_core7_benchmark_table() -> None:
     assert "AVQA" not in content
     assert "VLLM-Safety" not in content
 
-    # Sub-headers (4 metrics per method)
-    assert "ECE & Ada. & Brier & AUROC" in content
+    # Sub-headers (4 metrics per method, Option B: AUC and Ada)
+    assert "ECE & Ada & Brier & AUC" in content
 
     # Strictly unshaded: NO \rowcolor
     assert r"\rowcolor" not in content, "Found forbidden \\rowcolor in rq1_core7_benchmark.tex"
@@ -496,7 +496,7 @@ def test_dynamic_multi_pass_data_ingestion() -> None:
     # Core 7 table should format numerical values for core 4 methods
     t_core7 = build_rq1_core7_table(df_full, df_full)
     assert r"\begin{table*}[t]" in t_core7
-    assert "10.00" in t_core7
+    assert "0.1000" in t_core7
     assert "0.1500" in t_core7
 
     # Adversarial table should dynamically populate multi-pass rows
@@ -509,7 +509,7 @@ def test_dynamic_multi_pass_data_ingestion() -> None:
                 clean_line = line.strip().removesuffix(r"\\").strip()
                 cells = [c.strip() for c in clean_line.split("&")[1:]]
                 assert all(c != "-" for c in cells), f"Adversarial method {m} has dashes: {line}"
-                assert "10.00" in line
+                assert "0.1000" in line
                 assert "0.1500" in line
 
     # Single table should also dynamically populate multi-pass rows
@@ -520,7 +520,7 @@ def test_dynamic_multi_pass_data_ingestion() -> None:
                 clean_line = line.strip().removesuffix(r"\\").strip()
                 cells = [c.strip() for c in clean_line.split("&")[2:]]
                 assert all(c != "-" for c in cells), f"Single table method {m} has dashes: {line}"
-                assert "10.00" in line
+                assert "0.1000" in line
 
 
 def test_functions_under_200_loc() -> None:

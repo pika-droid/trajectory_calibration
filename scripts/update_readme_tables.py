@@ -24,15 +24,14 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parent.parent
 README_PATH = ROOT / "README.md"
 
-CORE_7_DATASETS = [
+CORE_5_DATASETS = [
     "ai2d",
-    "chartqa",
-    "docvqa",
     "scienceqa",
     "textvqa",
     "vizwiz-vqa",
     "vqav2",
 ]
+CORE_7_DATASETS = CORE_5_DATASETS  # Backwards compatibility alias
 
 CORE_METHODS = [
     "Naive Confidence (NC)",
@@ -43,17 +42,17 @@ CORE_METHODS = [
 
 
 def generate_ada_ece_table_and_bullets(arch: str, arch_label: str) -> str:
-    """Generates the Core 7 Adaptive ECE breakdown table and analytical bullets."""
+    """Generates the Core 5 Adaptive ECE breakdown table and analytical bullets."""
     csv_path = ROOT / f"results/experiments/benchmark/benchmark_{arch}_summary.csv"
     df = pd.read_csv(csv_path)
     df["dataset"] = df["dataset"].replace({"vqav2_5scale": "vqav2"})
-    sub_df = df[(df["dataset"].isin(CORE_7_DATASETS)) & (df["method"].isin(CORE_METHODS))]
+    sub_df = df[(df["dataset"].isin(CORE_5_DATASETS)) & (df["method"].isin(CORE_METHODS))]
 
     pivot = sub_df.pivot(index="method", columns="dataset", values="adaptive_ece_percent")
     pivot = pivot.reindex(CORE_METHODS)
-    pivot["Macro Mean"] = pivot[CORE_7_DATASETS].mean(axis=1)
+    pivot["Macro Mean"] = pivot[CORE_5_DATASETS].mean(axis=1)
 
-    all_cols = CORE_7_DATASETS + ["Macro Mean"]
+    all_cols = CORE_5_DATASETS + ["Macro Mean"]
     ranks: dict[str, tuple[float, float | None]] = {}
     for col in all_cols:
         vals = sorted(pivot[col].unique())
@@ -63,7 +62,7 @@ def generate_ada_ece_table_and_bullets(arch: str, arch_label: str) -> str:
 
     lines = []
     lines.append(
-        f"###### {arch_label}: Adaptive ECE (%) Across Core 7 Datasets [Lower is Better]\n"
+        f"###### {arch_label}: Adaptive ECE (%) Across Core 5 Datasets [Lower is Better]\n"
     )
     lines.append("| Calibration Method | " + " | ".join(all_cols) + " |")
     lines.append("| :--- | " + " | ".join([":---:"] * len(all_cols)) + " |")
@@ -97,42 +96,42 @@ def format_analytical_bullets(
     platt_vals = pivot.loc["Platt Scaling (1D)"]
 
     # 1. TP-5D vs TS
-    tp5_ts_wins = [ds for ds in CORE_7_DATASETS if tp5_vals[ds] < ts_vals[ds]]
-    tp5_ts_losses = [ds for ds in CORE_7_DATASETS if ds not in tp5_ts_wins]
+    tp5_ts_wins = [ds for ds in CORE_5_DATASETS if tp5_vals[ds] < ts_vals[ds]]
+    tp5_ts_losses = [ds for ds in CORE_5_DATASETS if ds not in tp5_ts_wins]
     ts_loss_str = (
         f" (all except {', '.join([f'`{d}`' for d in tp5_ts_losses])})" if tp5_ts_losses else ""
     )
     lines.append("")
     lines.append("- **Trajectory Platt (5D) vs. Global Temperature Scaling (TS)**:")
     lines.append(
-        f"  - Trajectory Platt (5D) beats TS on **{len(tp5_ts_wins)} / 7 Core datasets**{ts_loss_str}."
+        f"  - Trajectory Platt (5D) beats TS on **{len(tp5_ts_wins)} / 5 Core datasets**{ts_loss_str}."
     )
 
     # 2. TP-5D vs 1D Platt
-    tp5_platt_wins = [ds for ds in CORE_7_DATASETS if tp5_vals[ds] < platt_vals[ds]]
+    tp5_platt_wins = [ds for ds in CORE_5_DATASETS if tp5_vals[ds] < platt_vals[ds]]
     platt_formatted = ", ".join([f"`{d}`" for d in tp5_platt_wins])
     lines.append("- **Trajectory Platt (5D) vs. 1D Platt Scaling**:")
     lines.append(
-        f"  - Trajectory Platt (5D) beats 1D Platt Scaling on **{len(tp5_platt_wins)} / 7 Core datasets**: {platt_formatted}."
+        f"  - Trajectory Platt (5D) beats 1D Platt Scaling on **{len(tp5_platt_wins)} / 5 Core datasets**: {platt_formatted}."
     )
 
     # 3. Top-1 lowest Adaptive ECE
     num_1_wins = []
-    for ds in CORE_7_DATASETS:
+    for ds in CORE_5_DATASETS:
         best_val, _ = ranks[ds]
         if abs(tp5_vals[ds] - best_val) < 1e-4:
             num_1_wins.append(f"`{ds}` (**{best_val:.2f}%**)")
 
     lines.append(
-        f"- **Trajectory Platt (5D)** achieves the #1 lowest Adaptive ECE on **{len(num_1_wins)} / 7 Core benchmarks**: {', '.join(num_1_wins)}."
+        f"- **Trajectory Platt (5D)** achieves the #1 lowest Adaptive ECE on **{len(num_1_wins)} / 5 Core benchmarks**: {', '.join(num_1_wins)}."
     )
     return lines
 
 
 def generate_macro_table() -> str:
-    """Generates the standardized Macro-Average summary table across Core 7 datasets."""
+    """Generates the standardized Macro-Average summary table across Core 5 datasets."""
     lines = [
-        r"### Macro-Average Calibration Benchmark Across Core 7 Datasets ($T_{\text{gen}} = 0.00$, $1\times$ Compute)"
+        r"### Macro-Average Calibration Benchmark Across Core 5 Datasets ($T_{\text{gen}} = 0.00$, $1\times$ Compute)"
         + "\n",
         r"| Model | Calibration Method | Regime / Sampling | Macro ECE (%) $\downarrow$ | Macro Ada-ECE (%) $\downarrow$ | Macro Brier $\downarrow$ | Macro AUROC $\uparrow$ |",
         "| :--- | :--- | :--- | :---: | :---: | :---: | :---: |",
@@ -142,7 +141,7 @@ def generate_macro_table() -> str:
         bench_df = pd.read_csv(ROOT / f"results/experiments/benchmark/benchmark_{arch}_summary.csv")
         bench_df["dataset"] = bench_df["dataset"].replace({"vqav2_5scale": "vqav2"})
         sub_df = bench_df[
-            (bench_df["dataset"].isin(CORE_7_DATASETS)) & (bench_df["method"].isin(CORE_METHODS))
+            (bench_df["dataset"].isin(CORE_5_DATASETS)) & (bench_df["method"].isin(CORE_METHODS))
         ]
 
         rows = []

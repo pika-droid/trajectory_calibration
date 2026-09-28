@@ -45,22 +45,21 @@ from trajectory_calibration.features.definitions import CANONICAL_5D_KEYS
 from trajectory_calibration.features.loader import get_stratified_split, load_dataset_features
 from trajectory_calibration.utils.helpers import set_seed
 
-CORE_7_DATASETS: list[str] = [
+CORE_5_DATASETS: list[str] = [
     "ai2d",
-    "chartqa",
-    "docvqa",
     "scienceqa",
     "textvqa",
     "vizwiz-vqa",
     "vqav2",
 ]
+CORE_7_DATASETS: list[str] = CORE_5_DATASETS  # Compatibility alias
 
 ADVERSARIAL_2_DATASETS: list[str] = [
     "avqa",
     "vllm-safety",
 ]
 
-ALL_9_DATASETS: list[str] = [*CORE_7_DATASETS, *ADVERSARIAL_2_DATASETS]
+ALL_7_DATASETS: list[str] = [*CORE_5_DATASETS, *ADVERSARIAL_2_DATASETS]
 
 M3_SCALES: list[int] = [1, 9, 36, 144, 576]
 MQT_SCALES: list[int] = [1, 9, 36, 144, 256]
@@ -97,7 +96,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--datasets",
         nargs="+",
-        default=ALL_9_DATASETS,
+        default=ALL_7_DATASETS,
         help="Datasets to evaluate.",
     )
     parser.add_argument(
@@ -124,6 +123,14 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default="dataset_tables/token_budget",
         help="Directory to save LaTeX tables.",
+    )
+    parser.add_argument(
+        "--generate_tables_only",
+        "--skip_evaluation",
+        "--skip-evaluation",
+        dest="generate_tables_only",
+        action="store_true",
+        help="Skip fitting and regenerate summaries, plots, and LaTeX tables from existing CSVs.",
     )
     return parser.parse_args()
 
@@ -273,11 +280,11 @@ def run_architecture_benchmark(
     return raw_df, summary_df
 
 
-def compute_core7_macro(raw_df: pd.DataFrame) -> pd.DataFrame:
-    """Computes Core 7 Macro-Averaged metrics at each token depth level."""
-    core7_df = raw_df[raw_df["dataset"].isin(CORE_7_DATASETS)]
+def compute_core5_macro(raw_df: pd.DataFrame) -> pd.DataFrame:
+    """Computes Core 5 Macro-Averaged metrics at each token depth level."""
+    core5_df = raw_df[raw_df["dataset"].isin(CORE_5_DATASETS)]
 
-    seed_macro_raw = core7_df.groupby(
+    seed_macro_raw = core5_df.groupby(
         ["arch", "level", "scale", "single_tokens", "cum_tokens", "tokens_used", "seed", "method"]
     )[["accuracy", "ece_percent", "adaptive_ece_percent", "brier", "auroc"]].mean()
     seed_macro = pd.DataFrame(seed_macro_raw).reset_index()
@@ -308,6 +315,9 @@ def compute_core7_macro(raw_df: pd.DataFrame) -> pd.DataFrame:
     macro_df["method_order"] = macro_df["method"].map(lambda m: method_order_map.get(m, 999))
     macro_df = macro_df.sort_values(["level", "method_order"]).reset_index(drop=True)
     return macro_df
+
+
+compute_core7_macro = compute_core5_macro
 
 
 def rank_and_format_latex(
@@ -354,16 +364,19 @@ def format_token_budget_latex_subtable(
         acc_col = "accuracy_mean" if "accuracy_mean" in df.columns else "acc_mean"
 
     lines = [
-        "\\begin{table}[t]",
-        f"\\caption{{{title_caption} \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
-        f"\\label{{{tab_label}}}",
-        "\\tablestyle{4pt}{1.05}",
-        "\\resizebox{\\columnwidth}{!}{%",
+        "\\begin{table*}[t]",
+        "\\setlength{\\tabcolsep}{4pt}",
+        "\\renewcommand{\\arraystretch}{1.05}",
+        "\\centering",
+        "\\footnotesize",
         "\\begin{tabular}{ccclcccc}",
         "\\toprule",
-        "\\textbf{Depth ($k$)} & \\textbf{Tokens ($T$)} & \\textbf{Acc (\\%)} $\\uparrow$ & \\textbf{Calibration Method} & "
-        "\\textbf{ECE (\\%)} $\\downarrow$ & \\textbf{Ada-ECE (\\%)} $\\downarrow$ & "
-        "\\textbf{Brier} $\\downarrow$ & \\textbf{AUROC} $\\uparrow$ \\\\",
+        (
+            "\\textbf{Depth ($k$)} & \\textbf{Tokens ($T$)} & \\textbf{Acc} $\\uparrow$ & "
+            "\\textbf{Calibration Method} & "
+            "\\textbf{ECE} $\\downarrow$ & \\textbf{Ada-ECE} $\\downarrow$ & "
+            "\\textbf{Brier} $\\downarrow$ & \\textbf{AUROC} $\\uparrow$ \\\\"
+        ),
         "\\midrule",
     ]
 
@@ -385,24 +398,26 @@ def format_token_budget_latex_subtable(
             t_used = int(np.asarray(sub_m["tokens_used"])[0])
             s_val = int(np.asarray(sub_m["scale"])[0])
             cum_val = int(np.asarray(sub_m["cum_tokens"])[0])
+            raw_ece = float(np.asarray(sub_m[ece_col])[0])
+            raw_ada = float(np.asarray(sub_m[ada_col])[0])
             rows_data.append(
                 (
                     m,
                     t_used,
                     s_val,
                     cum_val,
-                    float(np.asarray(sub_m[ece_col])[0]),
-                    float(np.asarray(sub_m[ada_col])[0]),
+                    raw_ece / 100.0,
+                    raw_ada / 100.0,
                     float(np.asarray(sub_m[brier_col])[0]),
                     float(np.asarray(sub_m[auroc_col])[0]),
                 )
             )
 
         ece_strs = rank_and_format_latex(
-            [r[4] for r in rows_data], higher_is_better=False, decimals=2
+            [r[4] for r in rows_data], higher_is_better=False, decimals=4
         )
         ada_strs = rank_and_format_latex(
-            [r[5] for r in rows_data], higher_is_better=False, decimals=2
+            [r[5] for r in rows_data], higher_is_better=False, decimals=4
         )
         brier_strs = rank_and_format_latex(
             [r[6] for r in rows_data], higher_is_better=False, decimals=4
@@ -428,7 +443,15 @@ def format_token_budget_latex_subtable(
         if lvl_idx < len(levels) - 1:
             lines.append("\\midrule")
 
-    lines.extend(["\\bottomrule", "\\end{tabular}%", "}", "\\end{table}"])
+    lines.extend(
+        [
+            "\\bottomrule",
+            "\\end{tabular}",
+            f"\\caption{{{title_caption} \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
+            f"\\label{{{tab_label}}}",
+            "\\end{table*}",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -439,25 +462,29 @@ def generate_all_latex_tables(
     macro_mqt: pd.DataFrame,
     tables_dir: Path,
 ) -> None:
-    """Generates all 11 LaTeX tables (2 Macro + 9 Individual Datasets)."""
+    """Generates all LaTeX tables (2 Macro + individual datasets)."""
     tables_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Macro Tables
-    m3_caption = "\\textbf{Token Budget vs. Macro Calibration Performance Across Core 7 Datasets (M3-LLaVA 7B).}"
+    m3_caption = "\\textbf{Token Budget vs. Macro Calibration Performance Across Core 5 Datasets (M3-LLaVA 7B).}"
     t_macro_m3 = format_token_budget_latex_subtable(
-        macro_m3, m3_caption, "tab:token_budget_macro_core7_m3", is_macro=True
+        macro_m3, m3_caption, "tab:token_budget_macro_core5_m3", is_macro=True
     )
+    (tables_dir / "token_budget_macro_core5_m3.tex").write_text(t_macro_m3 + "\n", encoding="utf-8")
     (tables_dir / "token_budget_macro_core7_m3.tex").write_text(t_macro_m3 + "\n", encoding="utf-8")
 
-    mqt_caption = "\\textbf{Token Budget vs. Macro Calibration Performance Across Core 7 Datasets (MQT-LLaVA 7B).}"
+    mqt_caption = "\\textbf{Token Budget vs. Macro Calibration Performance Across Core 5 Datasets (MQT-LLaVA 7B).}"
     t_macro_mqt = format_token_budget_latex_subtable(
-        macro_mqt, mqt_caption, "tab:token_budget_macro_core7_mqt", is_macro=True
+        macro_mqt, mqt_caption, "tab:token_budget_macro_core5_mqt", is_macro=True
+    )
+    (tables_dir / "token_budget_macro_core5_mqt.tex").write_text(
+        t_macro_mqt + "\n", encoding="utf-8"
     )
     (tables_dir / "token_budget_macro_core7_mqt.tex").write_text(
         t_macro_mqt + "\n", encoding="utf-8"
     )
 
-    # 2. Individual 9 Datasets
+    # 2. Individual datasets (Core 5 + 2 Adversarial)
     file_map = {
         "ai2d": "ai2d.tex",
         "chartqa": "chartqa.tex",
@@ -550,7 +577,7 @@ def plot_macro_pareto(
     ax.set_xlabel("Visual Token Budget ($T$, Log Scale)", fontsize=12, fontweight="bold")
     ax.set_ylabel("Macro Adaptive ECE (%) $\\downarrow$", fontsize=12, fontweight="bold")
     ax.set_title(
-        f"Visual Token Budget vs. Calibration Efficiency ({arch_name} 7B)\nMacro Average Across Core 7 Vision-Language Benchmarks",
+        f"Visual Token Budget vs. Calibration Efficiency ({arch_name} 7B)\nMacro Average Across Core 5 Vision-Language Benchmarks",
         fontsize=13,
         fontweight="bold",
         pad=12,
@@ -589,7 +616,7 @@ def plot_9ds_grid(
         "Trajectory Platt (5D)": {"color": "#2980b9", "ls": "-", "marker": "D", "lw": 2.2, "ms": 7},
     }
 
-    for idx, ds in enumerate(ALL_9_DATASETS):
+    for idx, ds in enumerate(ALL_7_DATASETS):
         ax = axes[idx]
         sub_ds = cast(pd.DataFrame, summary_m3[summary_m3["dataset"] == ds])
 
@@ -619,8 +646,11 @@ def plot_9ds_grid(
         ax.set_ylabel("Ada-ECE (%)", fontsize=9)
         ax.grid(True, linestyle="--", alpha=0.5)
 
+    for empty_idx in range(len(ALL_7_DATASETS), len(axes)):
+        axes[empty_idx].set_visible(False)
+
     fig.suptitle(
-        "Visual Token Budget vs. Calibration Performance across 9 Datasets (M3-LLaVA 7B)",
+        f"Visual Token Budget vs. Calibration Performance across {len(ALL_7_DATASETS)} Datasets (M3-LLaVA 7B)",
         fontsize=14,
         fontweight="bold",
         y=0.99,
@@ -651,8 +681,8 @@ def save_csv_results(
     csv_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Macro CSVs
-    macro_m3.to_csv(csv_dir / "token_budget_macro_core7_m3.csv", index=False)
-    macro_mqt.to_csv(csv_dir / "token_budget_macro_core7_mqt.csv", index=False)
+    macro_m3.to_csv(csv_dir / "token_budget_macro_core5_m3.csv", index=False)
+    macro_mqt.to_csv(csv_dir / "token_budget_macro_core5_mqt.csv", index=False)
 
     # 2. Combined Raw & Summary
     full_raw = pd.concat([raw_m3, raw_mqt], ignore_index=True)
@@ -660,8 +690,8 @@ def save_csv_results(
     full_raw.to_csv(csv_dir / "token_budget_all_raw.csv", index=False)
     full_summary.to_csv(csv_dir / "token_budget_all_summary.csv", index=False)
 
-    # 3. Individual 9 Dataset CSVs
-    for ds in ALL_9_DATASETS:
+    # 3. Individual Dataset CSVs (Core 5 + 2 Adversarial)
+    for ds in ALL_7_DATASETS:
         sub_ds = full_summary[full_summary["dataset"] == ds]
         safe_ds_name = ds.replace("-", "_")
         sub_ds.to_csv(csv_dir / f"token_budget_{safe_ds_name}.csv", index=False)
@@ -681,29 +711,44 @@ def main() -> None:
     print(" TOKEN BUDGET VS. CALIBRATION PERFORMANCE BENCHMARK (RQ - TOKEN EFFICIENCY)")
     print("=" * 80)
 
-    # 1. Run M3 Benchmark
-    print("\n--- Running M3-LLaVA (7B) Benchmark ---")
-    raw_m3, summary_m3 = run_architecture_benchmark(
-        features_dir=args.features_dir,
-        arch="m3",
-        datasets=args.datasets,
-        seeds=args.seeds,
-    )
-    macro_m3 = compute_core7_macro(raw_m3)
+    if args.generate_tables_only and (csv_dir / "token_budget_all_summary.csv").exists():
+        print(f"Loading existing token budget CSVs from {csv_dir}...")
+        full_raw = pd.read_csv(csv_dir / "token_budget_all_raw.csv")
+        full_summary = pd.read_csv(csv_dir / "token_budget_all_summary.csv")
+        raw_m3 = cast(pd.DataFrame, full_raw[full_raw["arch"] == "m3"])
+        raw_mqt = cast(pd.DataFrame, full_raw[full_raw["arch"] == "mqt"])
+        summary_m3 = cast(pd.DataFrame, full_summary[full_summary["arch"] == "m3"])
+        summary_mqt = cast(pd.DataFrame, full_summary[full_summary["arch"] == "mqt"])
+        macro_m3 = compute_core5_macro(raw_m3)
+        macro_mqt = compute_core5_macro(raw_mqt)
+        macro_m3.to_csv(csv_dir / "token_budget_macro_core5_m3.csv", index=False)
+        macro_mqt.to_csv(csv_dir / "token_budget_macro_core5_mqt.csv", index=False)
+        macro_m3.to_csv(csv_dir / "token_budget_macro_core7_m3.csv", index=False)
+        macro_mqt.to_csv(csv_dir / "token_budget_macro_core7_mqt.csv", index=False)
+    else:
+        # 1. Run M3 Benchmark
+        print("\n--- Running M3-LLaVA (7B) Benchmark ---")
+        raw_m3, summary_m3 = run_architecture_benchmark(
+            features_dir=args.features_dir,
+            arch="m3",
+            datasets=args.datasets,
+            seeds=args.seeds,
+        )
+        macro_m3 = compute_core5_macro(raw_m3)
 
-    # 2. Run MQT Benchmark
-    print("\n--- Running MQT-LLaVA (7B) Benchmark ---")
-    raw_mqt, summary_mqt = run_architecture_benchmark(
-        features_dir=args.features_dir,
-        arch="mqt",
-        datasets=args.datasets,
-        seeds=args.seeds,
-    )
-    macro_mqt = compute_core7_macro(raw_mqt)
+        # 2. Run MQT Benchmark
+        print("\n--- Running MQT-LLaVA (7B) Benchmark ---")
+        raw_mqt, summary_mqt = run_architecture_benchmark(
+            features_dir=args.features_dir,
+            arch="mqt",
+            datasets=args.datasets,
+            seeds=args.seeds,
+        )
+        macro_mqt = compute_core5_macro(raw_mqt)
 
-    # 3. Save CSVs
-    print("\n--- Saving CSV Summaries ---")
-    save_csv_results(raw_m3, summary_m3, macro_m3, raw_mqt, summary_mqt, macro_mqt, csv_dir)
+        # 3. Save CSVs
+        print("\n--- Saving CSV Summaries ---")
+        save_csv_results(raw_m3, summary_m3, macro_m3, raw_mqt, summary_mqt, macro_mqt, csv_dir)
 
     # 4. Generate LaTeX Tables
     print("\n--- Generating Publication LaTeX Tables ---")
@@ -714,14 +759,14 @@ def main() -> None:
     plot_macro_pareto(
         macro_m3,
         "M3-LLaVA",
-        fig_dir / "token_budget_m3_core7_pareto.png",
-        fig_dir / "token_budget_m3_core7_pareto.pdf",
+        fig_dir / "token_budget_m3_core5_pareto.png",
+        fig_dir / "token_budget_m3_core5_pareto.pdf",
     )
     plot_macro_pareto(
         macro_mqt,
         "MQT-LLaVA",
-        fig_dir / "token_budget_mqt_core7_pareto.png",
-        fig_dir / "token_budget_mqt_core7_pareto.pdf",
+        fig_dir / "token_budget_mqt_core5_pareto.png",
+        fig_dir / "token_budget_mqt_core5_pareto.pdf",
     )
     plot_9ds_grid(
         summary_m3,

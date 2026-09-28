@@ -1,37 +1,39 @@
 \begin{table}[t]
-\caption{\textbf{Calibration Benchmark on \texttt{chartqa} (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:benchmark_m3_chartqa}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 71.03 & 71.03 & 0.6151 & \textit{0.807} \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 44.47 & 44.47 & 0.2782 & \textit{0.807} \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 44.45 & 44.45 & 0.2781 & \textit{0.807} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{3.23} & \textit{3.62} & \textit{0.0755} & \textit{0.807} \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{3.31} & \textbf{2.88} & \textbf{0.0752} & \textbf{0.818} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 0.7103 & 0.7103 & 0.6151 & \textit{0.807} \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 0.4447 & 0.4447 & 0.2782 & \textit{0.807} \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 0.4445 & 0.4445 & 0.2781 & \textit{0.807} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{0.0323} & \textit{0.0362} & \textit{0.0755} & \textit{0.807} \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{0.0331} & \textbf{0.0288} & \textbf{0.0752} & \textbf{0.818} \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{Calibration Benchmark on \texttt{chartqa} (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:benchmark_m3_chartqa}
 \end{table}
 
 \begin{table}[t]
-\caption{\textbf{Calibration Benchmark on \texttt{chartqa} (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:benchmark_mqt_chartqa}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 71.30 & 71.30 & 0.6483 & 0.491 \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 44.88 & 44.88 & 0.2779 & 0.491 \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 44.87 & 44.87 & 0.2777 & 0.491 \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{3.06} & \textit{4.27} & \textbf{0.0762} & \textit{0.509} \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textbf{2.44} & \textbf{3.92} & \textit{0.0765} & \textbf{0.603} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 0.7130 & 0.7130 & 0.6483 & 0.491 \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 0.4488 & 0.4488 & 0.2779 & 0.491 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 0.4487 & 0.4487 & 0.2777 & 0.491 \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{0.0306} & \textit{0.0427} & \textbf{0.0762} & \textit{0.509} \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textbf{0.0244} & \textbf{0.0392} & \textit{0.0765} & \textbf{0.603} \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{Calibration Benchmark on \texttt{chartqa} (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:benchmark_mqt_chartqa}
 \end{table}

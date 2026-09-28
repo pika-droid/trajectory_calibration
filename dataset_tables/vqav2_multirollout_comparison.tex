@@ -1,45 +1,47 @@
 \begin{table}[t]
-\caption{\textbf{VQAv2 Calibration: Single-Pass Trajectory Calibration ($1\times$) vs. Multi-Rollout UMPIRE Suite ($10\times$) (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:vqav2_multirollout_m3}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0, K = 1$) & 8.64 & 7.23 & 0.1387 & 0.772 \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0, K = 1$) & 9.40 & 8.58 & 0.1417 & 0.772 \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0, K = 1$) & 8.39 & 7.52 & \textit{0.1381} & 0.788 \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0, K = 1$) & \textbf{5.52} & \textit{6.97} & 0.1391 & 0.772 \\
-LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & 12.40 & - & - & 0.787 \\
-Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & 11.40 & - & - & 0.690 \\
-EigenScore & Multi-Pass ($T = 0.5, K = 10$) & 6.20 & - & - & \textit{0.816} \\
-UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & \textit{5.80} & - & - & \textbf{0.819} \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0, K = 1$) & 6.86 & \textbf{6.50} & \textbf{0.1380} & 0.788 \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0, K = 1$) & 0.0864 & 0.0723 & 0.1387 & 0.772 \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0, K = 1$) & 0.0940 & 0.0858 & 0.1417 & 0.772 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0, K = 1$) & 0.0839 & 0.0752 & \textit{0.1381} & 0.788 \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0, K = 1$) & \textbf{0.0552} & \textit{0.0697} & 0.1391 & 0.772 \\
+LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & 0.1240 & - & - & 0.787 \\
+Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & 0.1140 & - & - & 0.690 \\
+EigenScore & Multi-Pass ($T = 0.5, K = 10$) & 0.0620 & - & - & \textit{0.816} \\
+UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & \textit{0.0580} & - & - & \textbf{0.819} \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0, K = 1$) & 0.0686 & \textbf{0.0650} & \textbf{0.1380} & 0.788 \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{VQAv2 Calibration: Single-Pass Trajectory Calibration ($1\times$) vs. Multi-Rollout UMPIRE Suite ($10\times$) (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:vqav2_multirollout_m3}
 \end{table}
 
 \begin{table}[t]
-\caption{\textbf{VQAv2 Calibration: Single-Pass Trajectory Calibration ($1\times$) vs. Multi-Rollout UMPIRE Suite ($10\times$) (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:vqav2_multirollout_mqt}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0, K = 1$) & 10.49 & \textit{10.31} & 0.1713 & 0.641 \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0, K = 1$) & 13.87 & 13.65 & 0.1789 & 0.641 \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0, K = 1$) & 12.36 & 12.03 & 0.1753 & 0.658 \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0, K = 1$) & 10.54 & 10.94 & \textit{0.1712} & 0.641 \\
-LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & 12.30 & - & - & 0.767 \\
-Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & 13.70 & - & - & 0.699 \\
-EigenScore & Multi-Pass ($T = 0.5, K = 10$) & 10.20 & - & - & \textit{0.773} \\
-UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & \textit{7.80} & - & - & \textbf{0.790} \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0, K = 1$) & \textbf{7.16} & \textbf{7.64} & \textbf{0.1629} & 0.739 \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0, K = 1$) & 0.1049 & \textit{0.1031} & 0.1713 & 0.641 \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0, K = 1$) & 0.1387 & 0.1365 & 0.1789 & 0.641 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0, K = 1$) & 0.1236 & 0.1203 & 0.1753 & 0.658 \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0, K = 1$) & 0.1054 & 0.1094 & \textit{0.1712} & 0.641 \\
+LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & 0.1230 & - & - & 0.767 \\
+Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & 0.1370 & - & - & 0.699 \\
+EigenScore & Multi-Pass ($T = 0.5, K = 10$) & 0.1020 & - & - & \textit{0.773} \\
+UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & \textit{0.0780} & - & - & \textbf{0.790} \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0, K = 1$) & \textbf{0.0716} & \textbf{0.0764} & \textbf{0.1629} & 0.739 \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{VQAv2 Calibration: Single-Pass Trajectory Calibration ($1\times$) vs. Multi-Rollout UMPIRE Suite ($10\times$) (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:vqav2_multirollout_mqt}
 \end{table}

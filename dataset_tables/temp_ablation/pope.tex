@@ -1,121 +1,127 @@
 \begin{table}[t]
-\caption{\textbf{Temperature Transfer Robustness on \texttt{pope} (M3-LLaVA 7B).} Evaluated across sampling temperatures $T \in \{0.0, 0.3, 0.6, 1.0, 1.5\}$ and Mean (trained at $T=0.0$). \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:temp_transfer_m3_pope}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{0.95}
+\centering
+\scriptsize
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Calibration Method} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
 \multicolumn{5}{l}{\textbf{Sampling Temperature $T = 0.0$}} \\
 \midrule
-Naive Confidence (NC) & \textbf{3.45} & 4.40 & \textit{0.0882} & 0.739 \\
-Temperature Scaling (TS) & 4.27 & 4.37 & 0.0883 & 0.739 \\
-Adaptive TS (ATS) & 4.42 & \textbf{4.27} & \textbf{0.0879} & \textit{0.750} \\
-Platt Scaling (1D) & \textit{4.19} & \textit{4.32} & \textit{0.0882} & 0.739 \\
-Trajectory Platt (5D) & 4.82 & 6.62 & 0.0887 & \textbf{0.751} \\
+Naive Confidence (NC) & \textbf{0.0345} & 0.0440 & \textit{0.0882} & 0.739 \\
+Temperature Scaling (TS) & 0.0427 & 0.0437 & 0.0883 & 0.739 \\
+Adaptive TS (ATS) & 0.0442 & \textbf{0.0427} & \textbf{0.0879} & \textit{0.750} \\
+Platt Scaling (1D) & \textit{0.0419} & \textit{0.0432} & \textit{0.0882} & 0.739 \\
+Trajectory Platt (5D) & 0.0482 & 0.0662 & 0.0887 & \textbf{0.751} \\
 \midrule
 \multicolumn{5}{l}{\textbf{Sampling Temperature $T = 0.3$}} \\
 \midrule
-Naive Confidence (NC) & 9.83 & 8.69 & 0.0980 & 0.764 \\
-Temperature Scaling (TS) & \textit{9.69} & \textit{8.53} & \textit{0.0972} & 0.764 \\
-Adaptive TS (ATS) & \textbf{9.66} & 8.54 & \textbf{0.0968} & \textbf{0.772} \\
-Platt Scaling (1D) & \textit{9.69} & 8.55 & \textit{0.0972} & 0.764 \\
-Trajectory Platt (5D) & 9.71 & \textbf{8.43} & 0.0975 & \textit{0.770} \\
+Naive Confidence (NC) & 0.0983 & 0.0869 & 0.0980 & 0.764 \\
+Temperature Scaling (TS) & \textit{0.0969} & \textit{0.0853} & \textit{0.0972} & 0.764 \\
+Adaptive TS (ATS) & \textbf{0.0966} & 0.0854 & \textbf{0.0968} & \textbf{0.772} \\
+Platt Scaling (1D) & \textit{0.0969} & 0.0855 & \textit{0.0972} & 0.764 \\
+Trajectory Platt (5D) & 0.0971 & \textbf{0.0843} & 0.0975 & \textit{0.770} \\
 \midrule
 \multicolumn{5}{l}{\textbf{Sampling Temperature $T = 0.6$}} \\
 \midrule
-Naive Confidence (NC) & 7.00 & 6.53 & 0.0912 & 0.786 \\
-Temperature Scaling (TS) & 6.73 & 6.02 & 0.0904 & 0.786 \\
-Adaptive TS (ATS) & \textbf{6.40} & 6.42 & \textbf{0.0901} & \textbf{0.796} \\
-Platt Scaling (1D) & \textit{6.64} & \textit{5.97} & 0.0904 & 0.786 \\
-Trajectory Platt (5D) & 7.45 & \textbf{5.76} & \textit{0.0902} & \textit{0.794} \\
+Naive Confidence (NC) & 0.0700 & 0.0653 & 0.0912 & 0.786 \\
+Temperature Scaling (TS) & 0.0673 & 0.0602 & 0.0904 & 0.786 \\
+Adaptive TS (ATS) & \textbf{0.0640} & 0.0642 & \textbf{0.0901} & \textbf{0.796} \\
+Platt Scaling (1D) & \textit{0.0664} & \textit{0.0597} & 0.0904 & 0.786 \\
+Trajectory Platt (5D) & 0.0745 & \textbf{0.0576} & \textit{0.0902} & \textit{0.794} \\
 \midrule
 \multicolumn{5}{l}{\textbf{Sampling Temperature $T = 1.0$}} \\
 \midrule
-Naive Confidence (NC) & \textbf{4.34} & 4.56 & \textit{0.0882} & 0.826 \\
-Temperature Scaling (TS) & \textit{5.08} & \textit{4.43} & 0.0883 & 0.826 \\
-Adaptive TS (ATS) & 5.15 & \textbf{4.38} & \textit{0.0882} & \textit{0.828} \\
-Platt Scaling (1D) & 5.16 & 4.47 & 0.0883 & 0.826 \\
-Trajectory Platt (5D) & 6.77 & 4.82 & \textbf{0.0872} & \textbf{0.832} \\
+Naive Confidence (NC) & \textbf{0.0434} & 0.0456 & \textit{0.0882} & 0.826 \\
+Temperature Scaling (TS) & \textit{0.0508} & \textit{0.0443} & 0.0883 & 0.826 \\
+Adaptive TS (ATS) & 0.0515 & \textbf{0.0438} & \textit{0.0882} & \textit{0.828} \\
+Platt Scaling (1D) & 0.0516 & 0.0447 & 0.0883 & 0.826 \\
+Trajectory Platt (5D) & 0.0677 & 0.0482 & \textbf{0.0872} & \textbf{0.832} \\
 \midrule
 \multicolumn{5}{l}{\textbf{Sampling Temperature $T = 1.5$}} \\
 \midrule
-Naive Confidence (NC) & \textbf{5.38} & \textbf{6.14} & \textbf{0.0953} & 0.876 \\
-Temperature Scaling (TS) & \textit{6.83} & \textit{6.80} & \textit{0.0970} & 0.876 \\
-Adaptive TS (ATS) & 7.34 & 7.98 & 0.0977 & \textbf{0.880} \\
-Platt Scaling (1D) & 7.25 & 6.81 & 0.0972 & 0.876 \\
-Trajectory Platt (5D) & 9.71 & 9.39 & 0.1004 & \textit{0.879} \\
+Naive Confidence (NC) & \textbf{0.0538} & \textbf{0.0614} & \textbf{0.0953} & 0.876 \\
+Temperature Scaling (TS) & \textit{0.0683} & \textit{0.0680} & \textit{0.0970} & 0.876 \\
+Adaptive TS (ATS) & 0.0734 & 0.0798 & 0.0977 & \textbf{0.880} \\
+Platt Scaling (1D) & 0.0725 & 0.0681 & 0.0972 & 0.876 \\
+Trajectory Platt (5D) & 0.0971 & 0.0939 & 0.1004 & \textit{0.879} \\
 \midrule
 \multicolumn{5}{l}{\textbf{Mean (Averaged Across Temperatures)}} \\
 \midrule
-Naive Confidence (NC) & \textbf{6.00} & 6.06 & \textit{0.0922} & \textit{0.798} \\
-Temperature Scaling (TS) & \textit{6.52} & \textit{6.03} & \textit{0.0922} & \textit{0.798} \\
-Adaptive TS (ATS) & 6.59 & 6.32 & \textbf{0.0921} & \textbf{0.805} \\
-Platt Scaling (1D) & 6.59 & \textbf{6.02} & 0.0923 & \textit{0.798} \\
-Trajectory Platt (5D) & 7.69 & 7.00 & 0.0928 & \textbf{0.805} \\
+Naive Confidence (NC) & \textbf{0.0600} & 0.0606 & \textit{0.0922} & \textit{0.798} \\
+Temperature Scaling (TS) & \textit{0.0652} & \textit{0.0603} & \textit{0.0922} & \textit{0.798} \\
+Adaptive TS (ATS) & 0.0659 & 0.0632 & \textbf{0.0921} & \textbf{0.805} \\
+Platt Scaling (1D) & 0.0659 & \textbf{0.0602} & 0.0923 & \textit{0.798} \\
+Trajectory Platt (5D) & 0.0769 & 0.0700 & 0.0928 & \textbf{0.805} \\
 \bottomrule
 \end{tabular}%
 }
+\caption{\textbf{Temperature Transfer Robustness on \texttt{pope} (M3-LLaVA 7B).} Evaluated across sampling temperatures $T \in \{0.0, 0.3, 0.6, 1.0, 1.5\}$ and Mean (trained at $T=0.0$). \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:temp_transfer_m3_pope}
 \end{table}
 
 \begin{table}[t]
-\caption{\textbf{Temperature Transfer Robustness on \texttt{pope} (MQT-LLaVA 7B).} Evaluated across sampling temperatures $T \in \{0.0, 0.3, 0.6, 1.0, 1.5\}$ and Mean (trained at $T=0.0$). \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:temp_transfer_mqt_pope}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{0.95}
+\centering
+\scriptsize
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Calibration Method} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
 \multicolumn{5}{l}{\textbf{Sampling Temperature $T = 0.0$}} \\
 \midrule
-Naive Confidence (NC) & 4.01 & \textbf{4.30} & 0.0903 & \textbf{0.876} \\
-Temperature Scaling (TS) & \textbf{3.52} & 4.93 & \textit{0.0902} & \textbf{0.876} \\
-Adaptive TS (ATS) & 3.75 & 4.90 & \textit{0.0902} & \textit{0.874} \\
-Platt Scaling (1D) & 3.97 & 4.64 & \textbf{0.0893} & \textbf{0.876} \\
-Trajectory Platt (5D) & \textit{3.55} & \textit{4.48} & 0.0903 & 0.873 \\
+Naive Confidence (NC) & 0.0401 & \textbf{0.0430} & 0.0903 & \textbf{0.876} \\
+Temperature Scaling (TS) & \textbf{0.0352} & 0.0493 & \textit{0.0902} & \textbf{0.876} \\
+Adaptive TS (ATS) & 0.0375 & 0.0490 & \textit{0.0902} & \textit{0.874} \\
+Platt Scaling (1D) & 0.0397 & 0.0464 & \textbf{0.0893} & \textbf{0.876} \\
+Trajectory Platt (5D) & \textit{0.0355} & \textit{0.0448} & 0.0903 & 0.873 \\
 \midrule
 \multicolumn{5}{l}{\textbf{Sampling Temperature $T = 0.3$}} \\
 \midrule
-Naive Confidence (NC) & 10.43 & 10.43 & 0.1108 & \textbf{0.872} \\
-Temperature Scaling (TS) & \textit{9.42} & \textit{9.18} & \textit{0.1043} & \textbf{0.872} \\
-Adaptive TS (ATS) & 9.47 & 9.26 & 0.1048 & \textit{0.871} \\
-Platt Scaling (1D) & \textbf{9.20} & \textbf{8.91} & \textbf{0.1031} & \textbf{0.872} \\
-Trajectory Platt (5D) & 10.26 & 10.17 & 0.1108 & 0.868 \\
+Naive Confidence (NC) & 0.1043 & 0.1043 & 0.1108 & \textbf{0.872} \\
+Temperature Scaling (TS) & \textit{0.0942} & \textit{0.0918} & \textit{0.1043} & \textbf{0.872} \\
+Adaptive TS (ATS) & 0.0947 & 0.0926 & 0.1048 & \textit{0.871} \\
+Platt Scaling (1D) & \textbf{0.0920} & \textbf{0.0891} & \textbf{0.1031} & \textbf{0.872} \\
+Trajectory Platt (5D) & 0.1026 & 0.1017 & 0.1108 & 0.868 \\
 \midrule
 \multicolumn{5}{l}{\textbf{Sampling Temperature $T = 0.6$}} \\
 \midrule
-Naive Confidence (NC) & 8.53 & 8.26 & 0.1098 & \textbf{0.852} \\
-Temperature Scaling (TS) & \textit{6.12} & 6.16 & \textit{0.1036} & \textbf{0.852} \\
-Adaptive TS (ATS) & \textbf{6.10} & \textit{6.15} & 0.1038 & \textit{0.851} \\
-Platt Scaling (1D) & 6.78 & \textbf{5.66} & \textbf{0.1026} & \textbf{0.852} \\
-Trajectory Platt (5D) & 7.67 & 6.88 & 0.1068 & 0.846 \\
+Naive Confidence (NC) & 0.0853 & 0.0826 & 0.1098 & \textbf{0.852} \\
+Temperature Scaling (TS) & \textit{0.0612} & 0.0616 & \textit{0.1036} & \textbf{0.852} \\
+Adaptive TS (ATS) & \textbf{0.0610} & \textit{0.0615} & 0.1038 & \textit{0.851} \\
+Platt Scaling (1D) & 0.0678 & \textbf{0.0566} & \textbf{0.1026} & \textbf{0.852} \\
+Trajectory Platt (5D) & 0.0767 & 0.0688 & 0.1068 & 0.846 \\
 \midrule
 \multicolumn{5}{l}{\textbf{Sampling Temperature $T = 1.0$}} \\
 \midrule
-Naive Confidence (NC) & 5.39 & 5.84 & 0.1081 & \textbf{0.855} \\
-Temperature Scaling (TS) & 4.31 & 4.94 & \textit{0.1046} & \textbf{0.855} \\
-Adaptive TS (ATS) & \textit{3.97} & 5.59 & \textit{0.1046} & \textbf{0.855} \\
-Platt Scaling (1D) & 4.42 & \textit{4.83} & \textbf{0.1037} & \textbf{0.855} \\
-Trajectory Platt (5D) & \textbf{2.34} & \textbf{3.68} & 0.1048 & \textit{0.852} \\
+Naive Confidence (NC) & 0.0539 & 0.0584 & 0.1081 & \textbf{0.855} \\
+Temperature Scaling (TS) & 0.0431 & 0.0494 & \textit{0.1046} & \textbf{0.855} \\
+Adaptive TS (ATS) & \textit{0.0397} & 0.0559 & \textit{0.1046} & \textbf{0.855} \\
+Platt Scaling (1D) & 0.0442 & \textit{0.0483} & \textbf{0.1037} & \textbf{0.855} \\
+Trajectory Platt (5D) & \textbf{0.0234} & \textbf{0.0368} & 0.1048 & \textit{0.852} \\
 \midrule
 \multicolumn{5}{l}{\textbf{Sampling Temperature $T = 1.5$}} \\
 \midrule
-Naive Confidence (NC) & 8.46 & 9.36 & 0.1545 & \textbf{0.810} \\
-Temperature Scaling (TS) & 8.73 & 7.36 & 0.1497 & \textbf{0.810} \\
-Adaptive TS (ATS) & 8.47 & \textbf{7.05} & 0.1496 & \textbf{0.810} \\
-Platt Scaling (1D) & \textit{6.48} & \textit{7.12} & \textbf{0.1473} & \textbf{0.810} \\
-Trajectory Platt (5D) & \textbf{6.20} & 7.43 & \textit{0.1487} & \textit{0.805} \\
+Naive Confidence (NC) & 0.0846 & 0.0936 & 0.1545 & \textbf{0.810} \\
+Temperature Scaling (TS) & 0.0873 & 0.0736 & 0.1497 & \textbf{0.810} \\
+Adaptive TS (ATS) & 0.0847 & \textbf{0.0705} & 0.1496 & \textbf{0.810} \\
+Platt Scaling (1D) & \textit{0.0648} & \textit{0.0712} & \textbf{0.1473} & \textbf{0.810} \\
+Trajectory Platt (5D) & \textbf{0.0620} & 0.0743 & \textit{0.1487} & \textit{0.805} \\
 \midrule
 \multicolumn{5}{l}{\textbf{Mean (Averaged Across Temperatures)}} \\
 \midrule
-Naive Confidence (NC) & 7.36 & 7.64 & 0.1147 & \textbf{0.853} \\
-Temperature Scaling (TS) & 6.42 & \textit{6.52} & \textit{0.1105} & \textbf{0.853} \\
-Adaptive TS (ATS) & 6.35 & 6.59 & 0.1106 & \textit{0.852} \\
-Platt Scaling (1D) & \textit{6.17} & \textbf{6.23} & \textbf{0.1092} & \textbf{0.853} \\
-Trajectory Platt (5D) & \textbf{6.01} & 6.53 & 0.1123 & 0.849 \\
+Naive Confidence (NC) & 0.0736 & 0.0764 & 0.1147 & \textbf{0.853} \\
+Temperature Scaling (TS) & 0.0642 & \textit{0.0652} & \textit{0.1105} & \textbf{0.853} \\
+Adaptive TS (ATS) & 0.0635 & 0.0659 & 0.1106 & \textit{0.852} \\
+Platt Scaling (1D) & \textit{0.0617} & \textbf{0.0623} & \textbf{0.1092} & \textbf{0.853} \\
+Trajectory Platt (5D) & \textbf{0.0601} & 0.0653 & 0.1123 & 0.849 \\
 \bottomrule
 \end{tabular}%
 }
+\caption{\textbf{Temperature Transfer Robustness on \texttt{pope} (MQT-LLaVA 7B).} Evaluated across sampling temperatures $T \in \{0.0, 0.3, 0.6, 1.0, 1.5\}$ and Mean (trained at $T=0.0$). \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:temp_transfer_mqt_pope}
 \end{table}

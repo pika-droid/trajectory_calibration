@@ -1,9 +1,8 @@
 \begin{table*}[t]
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
 \centering
 \small
-\caption{\textbf{Leave-One-Out (LOO) Feature Degradation Sensitivity across Core 5 Benchmarks}. Marginal change in calibration error ($\Delta \text{Ada-ECE} = \text{Ada-ECE}_{-j} - \text{Ada-ECE}_{\text{Full 5D}}$) and discrimination ($\Delta \text{AUROC} = \text{AUROC}_{-j} - \text{AUROC}_{\text{Full 5D}}$) when dropping individual feature $x_j$ from Trajectory Platt (5D). Positive $\Delta \text{Ada-ECE}$ and negative $\Delta \text{AUROC}$ indicate feature necessity. \textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 degradation impact.}
-\label{tab:ablation_5d_loo}
-\vspace{2mm}
 \begin{tabular}{clccccl}
 \toprule
 \multirow{2}{*}{\textbf{Dropped Feature}} & \multirow{2}{*}{\textbf{Functional Role}} & \multicolumn{2}{c}{\textbf{M3-LLaVA (7B)}} & \multicolumn{2}{c}{\textbf{MQT-LLaVA (7B)}} & \multirow{2}{*}{\textbf{Macro Impact}} \\
@@ -17,4 +16,6 @@ $x_{4}$ (Answer Flip Frequency) & Argmax Scale Transition Rate & +0.0014 & -0.00
 $x_{5}$ (Monotonicity Count) & Directional Monotonicity Trend & +0.0023 & +0.000 & -0.0003 & -0.001 & Monotonic Decay Disruption \\
 \bottomrule
 \end{tabular}
+\caption{\textbf{Leave-One-Out (LOO) Feature Degradation Sensitivity across Core 5 Benchmarks}. Marginal change in calibration error ($\Delta \text{Ada-ECE}$) and discrimination ($\Delta \text{AUROC}$) when dropping individual feature $x_j$ from Trajectory Platt (5D). \textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 degradation impact.}
+\label{tab:ablation_5d_loo}
 \end{table*}

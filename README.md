@@ -173,36 +173,36 @@ Evaluated across all 14 vision-language benchmarks on single-pass feature matric
 > [!NOTE]
 > **Single-Pass vs. Multi-Rollout UQ**: Multi-rollout sampling algorithms (such as Kuhn Semantic Entropy, Chen EigenScore, and UQLM Token Negentropy) require drawing $M$ stochastic response rollouts per sample ($M \ge 5$) or full-vocabulary logit matrices.
 
-###### M3-LLaVA: Adaptive ECE (%) Across Core 7 Datasets [Lower is Better]
+###### M3-LLaVA: Adaptive ECE (%) Across Core 5 Datasets [Lower is Better]
 
-| Calibration Method | ai2d | chartqa | docvqa | scienceqa | textvqa | vizwiz-vqa | vqav2 | Macro Mean |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Naive Confidence (NC) | 42.00% | 71.03% | 74.57% | 21.93% | 11.07% | 15.97% | 7.23% | 34.83% |
-| Temperature Scaling (TS) | 12.18% | 44.47% | 48.89% | 12.68% | 11.14% | 15.09% | 8.58% | 21.86% |
-| Platt Scaling (1D) | **7.70%** | *3.62%* | *2.52%* | **4.99%** | *8.22%* | **5.80%** | *6.97%* | **5.69%** |
-| **Trajectory Platt (5D) [Our Method]** | *11.15%* | **2.88%** | **1.81%** | *6.15%* | **5.35%** | *6.57%* | **6.50%** | *5.78%* |
+| Calibration Method | ai2d | scienceqa | textvqa | vizwiz-vqa | vqav2 | Macro Mean |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Naive Confidence (NC) | 42.00% | 21.93% | 11.07% | 15.97% | 7.23% | 19.64% |
+| Temperature Scaling (TS) | 12.18% | 12.68% | 11.14% | 15.09% | 8.58% | 11.94% |
+| Platt Scaling (1D) | **7.70%** | **4.99%** | *8.22%* | **5.80%** | *6.97%* | **6.73%** |
+| **Trajectory Platt (5D) [Our Method]** | *11.15%* | *6.15%* | **5.35%** | *6.57%* | **6.50%** | *7.15%* |
 
 - **Trajectory Platt (5D) vs. Global Temperature Scaling (TS)**:
-  - Trajectory Platt (5D) beats TS on **7 / 7 Core datasets**.
+  - Trajectory Platt (5D) beats TS on **5 / 5 Core datasets**.
 - **Trajectory Platt (5D) vs. 1D Platt Scaling**:
-  - Trajectory Platt (5D) beats 1D Platt Scaling on **4 / 7 Core datasets**: `chartqa`, `docvqa`, `textvqa`, `vqav2`.
-- **Trajectory Platt (5D)** achieves the #1 lowest Adaptive ECE on **4 / 7 Core benchmarks**: `chartqa` (**2.88%**), `docvqa` (**1.81%**), `textvqa` (**5.35%**), `vqav2` (**6.50%**).
+  - Trajectory Platt (5D) beats 1D Platt Scaling on **2 / 5 Core datasets**: `textvqa`, `vqav2`.
+- **Trajectory Platt (5D)** achieves the #1 lowest Adaptive ECE on **2 / 5 Core benchmarks**: `textvqa` (**5.35%**), `vqav2` (**6.50%**).
 ---
 
-### MQT-LLaVA: Adaptive ECE (%) Across Core 7 Datasets [Lower is Better]
+### MQT-LLaVA: Adaptive ECE (%) Across Core 5 Datasets [Lower is Better]
 
-| Calibration Method | ai2d | chartqa | docvqa | scienceqa | textvqa | vizwiz-vqa | vqav2 | Macro Mean |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Naive Confidence (NC) | 26.92% | 71.30% | 53.30% | 23.17% | 31.91% | 30.66% | *10.31%* | 35.37% |
-| Temperature Scaling (TS) | 13.10% | 44.88% | 47.07% | 10.23% | 18.32% | 29.41% | 13.65% | 25.24% |
-| Platt Scaling (1D) | *8.25%* | *4.27%* | *3.67%* | *6.91%* | *10.46%* | **7.62%** | 10.94% | *7.45%* |
-| **Trajectory Platt (5D) [Our Method]** | **6.53%** | **3.92%** | **2.06%** | **5.72%** | **7.76%** | *8.17%* | **7.64%** | **5.97%** |
+| Calibration Method | ai2d | scienceqa | textvqa | vizwiz-vqa | vqav2 | Macro Mean |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Naive Confidence (NC) | 26.92% | 23.17% | 31.91% | 30.66% | *10.31%* | 24.60% |
+| Temperature Scaling (TS) | 13.10% | 10.23% | 18.32% | 29.41% | 13.65% | 16.94% |
+| Platt Scaling (1D) | *8.25%* | *6.91%* | *10.46%* | **7.62%** | 10.94% | *8.84%* |
+| **Trajectory Platt (5D) [Our Method]** | **6.53%** | **5.72%** | **7.76%** | *8.17%* | **7.64%** | **7.16%** |
 
 - **Trajectory Platt (5D) vs. Global Temperature Scaling (TS)**:
-  - Trajectory Platt (5D) beats TS on **7 / 7 Core datasets**.
+  - Trajectory Platt (5D) beats TS on **5 / 5 Core datasets**.
 - **Trajectory Platt (5D) vs. 1D Platt Scaling**:
-  - Trajectory Platt (5D) beats 1D Platt Scaling on **6 / 7 Core datasets**: `ai2d`, `chartqa`, `docvqa`, `scienceqa`, `textvqa`, `vqav2`.
-- **Trajectory Platt (5D)** achieves the #1 lowest Adaptive ECE on **6 / 7 Core benchmarks**: `ai2d` (**6.53%**), `chartqa` (**3.92%**), `docvqa` (**2.06%**), `scienceqa` (**5.72%**), `textvqa` (**7.76%**), `vqav2` (**7.64%**).
+  - Trajectory Platt (5D) beats 1D Platt Scaling on **4 / 5 Core datasets**: `ai2d`, `scienceqa`, `textvqa`, `vqav2`.
+- **Trajectory Platt (5D)** achieves the #1 lowest Adaptive ECE on **4 / 5 Core benchmarks**: `ai2d` (**6.53%**), `scienceqa` (**5.72%**), `textvqa` (**7.76%**), `vqav2` (**7.64%**).
 ---
 
 ## Benchmark Logs & Multi-Pass Baselines (UMPIRE Paper)
@@ -219,18 +219,18 @@ Compares single-pass greedy calibration ($T=0.0$, $1\times$ compute) against cla
 - **M3-LLaVA**: [`logs/vcps_logs/m3_llava_vcps_vs_baselines.md`](logs/vcps_logs/m3_llava_vcps_vs_baselines.md)
 - **MQT-LLaVA**: [`logs/vcps_logs/mqt_llava_vcps_vs_baselines.md`](logs/vcps_logs/mqt_llava_vcps_vs_baselines.md)
 
-### Macro-Average Calibration Benchmark Across Core 7 Datasets ($T_{\text{gen}} = 0.00$, $1\times$ Compute)
+### Macro-Average Calibration Benchmark Across Core 5 Datasets ($T_{\text{gen}} = 0.00$, $1\times$ Compute)
 
 | Model | Calibration Method | Regime / Sampling | Macro ECE (%) $\downarrow$ | Macro Ada-ECE (%) $\downarrow$ | Macro Brier $\downarrow$ | Macro AUROC $\uparrow$ |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: |
-| **M3-LLaVA** | Naive Confidence (NC) | Single-Pass ($T = 0.0$) | 34.98% | 34.83% | 0.3475 | *0.782* |
-|  | Temperature Scaling (TS) | Single-Pass ($T = 0.0$) | 21.42% | 21.86% | 0.2168 | *0.782* |
-|  | Platt Scaling (1D) | Single-Pass ($T = 0.0$) | **5.27%** | **5.69%** | *0.1442* | *0.782* |
-|  | **Trajectory Platt (5D) [Our Method]** | Single-Pass ($T = 0.0$) | *5.42%* | *5.78%* | **0.1425** | **0.800** |
-| **MQT-LLaVA** | Naive Confidence (NC) | Single-Pass ($T = 0.0$) | 35.55% | 35.37% | 0.3364 | 0.662 |
-|  | Temperature Scaling (TS) | Single-Pass ($T = 0.0$) | 25.15% | 25.24% | 0.2308 | 0.662 |
-|  | Platt Scaling (1D) | Single-Pass ($T = 0.0$) | *6.12%* | *7.45%* | *0.1478* | *0.665* |
-|  | **Trajectory Platt (5D) [Our Method]** | Single-Pass ($T = 0.0$) | **4.96%** | **5.97%** | **0.1431** | **0.708** |
+| **M3-LLaVA** | Naive Confidence (NC) | Single-Pass ($T = 0.0$) | 19.85% | 19.64% | 0.2348 | *0.765* |
+|  | Temperature Scaling (TS) | Single-Pass ($T = 0.0$) | 11.32% | 11.94% | 0.1919 | *0.765* |
+|  | Platt Scaling (1D) | Single-Pass ($T = 0.0$) | **6.21%** | **6.73%** | *0.1788* | *0.765* |
+|  | **Trajectory Platt (5D) [Our Method]** | Single-Pass ($T = 0.0$) | *6.56%* | *7.15%* | **0.1769** | **0.778** |
+| **MQT-LLaVA** | Naive Confidence (NC) | Single-Pass ($T = 0.0$) | 24.84% | 24.60% | 0.2580 | *0.726* |
+|  | Temperature Scaling (TS) | Single-Pass ($T = 0.0$) | 16.82% | 16.94% | 0.2158 | *0.726* |
+|  | Platt Scaling (1D) | Single-Pass ($T = 0.0$) | *7.93%* | *8.84%* | *0.1845* | *0.726* |
+|  | **Trajectory Platt (5D) [Our Method]** | Single-Pass ($T = 0.0$) | **6.24%** | **7.16%** | **0.1778** | **0.752** |
 
 ### VQAv2 Benchmark: Single-Pass Trajectory Calibration ($1\times$) vs. Multi-Rollout UMPIRE Suite ($10\times$)
 

@@ -1,31 +1,31 @@
 \begin{table*}[t]
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
 \centering
-\caption{\textbf{Zero-Shot Cross-Domain Source Anchor Leaderboard.} Performance of Trajectory Platt (5D) across candidate source anchors vs. standard transfer baselines across 12 unseen target benchmarks. Evaluated zero-shot on M3-LLaVA (7B) and MQT-LLaVA (7B). \textbf{Bold}: Rank 1; \textit{Italic}: Rank 2 among transfer configurations. $\downarrow$: lower is better; $\uparrow$: higher is better.}
-\label{tab:pairwise_anchor_summary}
-\tablestyle{3.5pt}{1.05}
-\resizebox{\textwidth}{!}{%
+\footnotesize
 \begin{tabular}{l cccc cccc c}
 \toprule
  & \multicolumn{4}{c}{\textbf{M3-LLaVA (7B)}} & \multicolumn{4}{c}{\textbf{MQT-LLaVA (7B)}} & \textbf{Dual-Arch} \\
 \cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-10}
-\textbf{Configuration / Source Anchor} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{Total Wins} $\uparrow$ \\
+\textbf{Configuration / Source Anchor} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{Total Wins} $\uparrow$ \\
 \midrule
-\textsc{In-Domain Calibration (Platt 5D)} & 4.77 & 5.85 & 0.720 & 0.1356 & 5.53 & 6.42 & 0.743 & 0.1312 & — \\
+\textsc{In-Domain Calibration (Platt 5D)} & 0.0477 & 0.0585 & 0.720 & 0.1356 & 0.0553 & 0.0642 & 0.743 & 0.1312 & — \\
 \midrule
 \multicolumn{10}{l}{\textit{Zero-Shot Transfer Baselines (Macro Mean Across All Pairs)}} \\
-Naive Confidence (NC) & 41.57 & 41.55 & 0.682 & 0.4076 & 34.23 & 34.18 & \textit{0.688} & 0.3228 & — \\
-Temperature Scaling (TS) & 33.27 & 34.78 & 0.682 & \textit{0.3102} & 30.10 & 30.46 & \textit{0.688} & 0.2581 & — \\
-Adaptive TS (ATS) & 33.28 & 34.75 & \textit{0.686} & \textbf{0.3094} & 30.11 & 30.46 & \textbf{0.689} & 0.2580 & — \\
-Platt Scaling (1D) & 36.88 & 37.14 & 0.649 & 0.3531 & 31.42 & 31.51 & 0.594 & 0.2946 & — \\
+Naive Confidence (NC) & 0.4157 & 0.4155 & 0.682 & 0.4076 & 0.3423 & 0.3418 & \textit{0.688} & 0.3228 & — \\
+Temperature Scaling (TS) & 0.3327 & 0.3478 & 0.682 & \textit{0.3102} & 0.3010 & 0.3046 & \textit{0.688} & 0.2581 & — \\
+Adaptive TS (ATS) & 0.3328 & 0.3475 & \textit{0.686} & \textbf{0.3094} & 0.3011 & 0.3046 & \textbf{0.689} & 0.2580 & — \\
+Platt Scaling (1D) & 0.3688 & 0.3714 & 0.649 & 0.3531 & 0.3142 & 0.3151 & 0.594 & 0.2946 & — \\
 \midrule
 \multicolumn{10}{l}{\textit{Trajectory Platt (5D) Candidate Source Anchors}} \\
-\textbf{VQAv2} & 40.53 & 40.55 & \textbf{0.687} & 0.3766 & 33.81 & 33.57 & 0.662 & 0.3020 & \textbf{23/24} \\
-VizWiz-VQA & 40.46 & 40.48 & 0.671 & 0.3867 & \textit{20.96} & \textit{20.88} & 0.685 & \textit{0.2090} & \textit{20/24} \\
-DocVQA & \textit{30.03} & \textit{29.99} & 0.683 & 0.3174 & 37.88 & 37.89 & 0.644 & 0.3686 & 18/24 \\
-TextVQA & 42.01 & 41.99 & 0.676 & 0.4052 & \textbf{20.68} & \textbf{20.82} & 0.668 & \textbf{0.1868} & 19/24 \\
-ChartQA & \textbf{29.72} & \textbf{29.89} & 0.672 & 0.3175 & 36.09 & 36.10 & 0.475 & 0.3557 & 16/24 \\
-POPE & 43.80 & 43.82 & 0.677 & 0.4231 & 34.29 & 34.17 & 0.672 & 0.3221 & 9/24 \\
+\textbf{VQAv2} & 0.4053 & 0.4055 & \textbf{0.687} & 0.3766 & 0.3381 & 0.3357 & 0.662 & 0.3020 & \textbf{23/24} \\
+VizWiz-VQA & 0.4046 & 0.4048 & 0.671 & 0.3867 & \textit{0.2096} & \textit{0.2088} & 0.685 & \textit{0.2090} & \textit{20/24} \\
+DocVQA & \textit{0.3003} & \textit{0.2999} & 0.683 & 0.3174 & 0.3788 & 0.3789 & 0.644 & 0.3686 & 18/24 \\
+TextVQA & 0.4201 & 0.4199 & 0.676 & 0.4052 & \textbf{0.2068} & \textbf{0.2082} & 0.668 & \textbf{0.1868} & 19/24 \\
+ChartQA & \textbf{0.2972} & \textbf{0.2989} & 0.672 & 0.3175 & 0.3609 & 0.3610 & 0.475 & 0.3557 & 16/24 \\
+POPE & 0.4380 & 0.4382 & 0.677 & 0.4231 & 0.3429 & 0.3417 & 0.672 & 0.3221 & 9/24 \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{Zero-Shot Cross-Domain Source Anchor Leaderboard.} Performance of Trajectory Platt (5D) across candidate source anchors vs. transfer baselines across 12 unseen target benchmarks on M3-LLaVA and MQT-LLaVA (7B). \textbf{Bold}: Rank 1; \textit{Italic}: Rank 2 among transfer configurations. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:pairwise_anchor_summary}
 \end{table*}

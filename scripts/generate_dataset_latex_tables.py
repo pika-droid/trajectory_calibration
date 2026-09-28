@@ -192,8 +192,16 @@ def generate_single_table(
     for m_key, regime, is_ours in methods_order:
         sub = sub_df[sub_df["method"] == m_key]
         if not sub.empty:
-            ece = float(sub["ece_percent"].mean())
-            ada_ece = float(sub["adaptive_ece_percent"].mean())
+            ece = (
+                float(sub["ece"].mean())
+                if "ece" in sub.columns
+                else float(sub["ece_percent"].mean()) / 100.0
+            )
+            ada_ece = (
+                float(sub["adaptive_ece"].mean())
+                if "adaptive_ece" in sub.columns
+                else float(sub["adaptive_ece_percent"].mean()) / 100.0
+            )
             brier = float(sub["brier"].mean())
             auroc = float(sub["auroc"].mean())
             rows.append((m_key, regime, is_ours, ece, ada_ece, brier, auroc))
@@ -208,18 +216,18 @@ def generate_single_table(
     )
     lines = [
         "\\begin{table}[t]",
-        f"\\caption{{\\textbf{{{macro_prefix}Calibration Benchmark {caption_name} ({arch_model} 7B).}} \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
-        f"\\label{{{tab_label}}}",
-        "\\tablestyle{4pt}{1.05}",
-        "\\resizebox{\\columnwidth}{!}{%",
+        "\\setlength{\\tabcolsep}{4pt}",
+        "\\renewcommand{\\arraystretch}{1.05}",
+        "\\centering",
+        "\\footnotesize",
         "\\begin{tabular}{lccccc}",
         "\\toprule",
-        f"\\textbf{{Calibration Method}} & \\textbf{{Regime / Sampling}} & \\textbf{{{macro_col}ECE (\\%)}} $\\downarrow$ & \\textbf{{{macro_col}Ada-ECE (\\%)}} $\\downarrow$ & \\textbf{{{macro_col}Brier}} $\\downarrow$ & \\textbf{{{macro_col}AUROC}} $\\uparrow$ \\\\",
+        f"\\textbf{{Calibration Method}} & \\textbf{{Regime / Sampling}} & \\textbf{{{macro_col}ECE}} $\\downarrow$ & \\textbf{{{macro_col}Ada-ECE}} $\\downarrow$ & \\textbf{{{macro_col}Brier}} $\\downarrow$ & \\textbf{{{macro_col}AUROC}} $\\uparrow$ \\\\",
         "\\midrule",
     ]
 
-    ece_formatted = rank_and_format([r[3] for r in rows], higher_is_better=False, decimals=2)
-    ada_ece_formatted = rank_and_format([r[4] for r in rows], higher_is_better=False, decimals=2)
+    ece_formatted = rank_and_format([r[3] for r in rows], higher_is_better=False, decimals=4)
+    ada_ece_formatted = rank_and_format([r[4] for r in rows], higher_is_better=False, decimals=4)
     brier_formatted = rank_and_format([r[5] for r in rows], higher_is_better=False, decimals=4)
     auroc_formatted = rank_and_format([r[6] for r in rows], higher_is_better=True, decimals=3)
 
@@ -234,8 +242,9 @@ def generate_single_table(
     lines.extend(
         [
             "\\bottomrule",
-            "\\end{tabular}%",
-            "}",
+            "\\end{tabular}",
+            f"\\caption{{\\textbf{{{macro_prefix}Calibration Benchmark {caption_name} ({arch_model} 7B).}} \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
+            f"\\label{{{tab_label}}}",
             "\\end{table}",
         ]
     )
@@ -263,7 +272,7 @@ def generate_vqav2_multirollout_latex_table(
                         disp_name,
                         regime,
                         is_ours,
-                        float(r["cece"] * 100.0),
+                        float(r["cece"]),
                         None,
                         None,
                         float(r["auc"]),
@@ -273,13 +282,19 @@ def generate_vqav2_multirollout_latex_table(
             sub = df_bench[(df_bench["dataset"] == "vqav2") & (df_bench["method"] == m_key)]
             if not sub.empty:
                 r = sub.iloc[0]
+                ece_v = float(r["ece"]) if "ece" in r else float(r["ece_percent"]) / 100.0
+                ada_v = (
+                    float(r["adaptive_ece"])
+                    if "adaptive_ece" in r
+                    else float(r["adaptive_ece_percent"]) / 100.0
+                )
                 rows.append(
                     (
                         disp_name,
                         regime,
                         is_ours,
-                        float(r["ece_percent"]),
-                        float(r["adaptive_ece_percent"]),
+                        ece_v,
+                        ada_v,
                         float(r["brier"]),
                         float(r["auroc"]),
                     )
@@ -290,18 +305,18 @@ def generate_vqav2_multirollout_latex_table(
 
     lines = [
         "\\begin{table}[t]",
-        f"\\caption{{\\textbf{{VQAv2 Calibration: Single-Pass Trajectory Calibration ($1\\times$) vs. Multi-Rollout UMPIRE Suite ($10\\times$) ({arch_model} 7B).}} \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
-        f"\\label{{{tab_label}}}",
-        "\\tablestyle{4pt}{1.05}",
-        "\\resizebox{\\columnwidth}{!}{%",
+        "\\setlength{\\tabcolsep}{4pt}",
+        "\\renewcommand{\\arraystretch}{1.05}",
+        "\\centering",
+        "\\footnotesize",
         "\\begin{tabular}{lccccc}",
         "\\toprule",
-        "\\textbf{Calibration Method} & \\textbf{Regime / Sampling} & \\textbf{ECE (\\%)} $\\downarrow$ & \\textbf{Ada-ECE (\\%)} $\\downarrow$ & \\textbf{Brier} $\\downarrow$ & \\textbf{AUROC} $\\uparrow$ \\\\",
+        "\\textbf{Calibration Method} & \\textbf{Regime / Sampling} & \\textbf{ECE} $\\downarrow$ & \\textbf{Ada-ECE} $\\downarrow$ & \\textbf{Brier} $\\downarrow$ & \\textbf{AUROC} $\\uparrow$ \\\\",
         "\\midrule",
     ]
 
-    ece_formatted = rank_and_format([r[3] for r in rows], higher_is_better=False, decimals=2)
-    ada_ece_formatted = rank_and_format([r[4] for r in rows], higher_is_better=False, decimals=2)
+    ece_formatted = rank_and_format([r[3] for r in rows], higher_is_better=False, decimals=4)
+    ada_ece_formatted = rank_and_format([r[4] for r in rows], higher_is_better=False, decimals=4)
     brier_formatted = rank_and_format([r[5] for r in rows], higher_is_better=False, decimals=4)
     auroc_formatted = rank_and_format([r[6] for r in rows], higher_is_better=True, decimals=3)
 
@@ -316,8 +331,9 @@ def generate_vqav2_multirollout_latex_table(
     lines.extend(
         [
             "\\bottomrule",
-            "\\end{tabular}%",
-            "}",
+            "\\end{tabular}",
+            f"\\caption{{\\textbf{{VQAv2 Calibration: Single-Pass Trajectory Calibration ($1\\times$) vs. Multi-Rollout UMPIRE Suite ($10\\times$) ({arch_model} 7B).}} \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
+            f"\\label{{{tab_label}}}",
             "\\end{table}",
         ]
     )
@@ -325,7 +341,7 @@ def generate_vqav2_multirollout_latex_table(
 
 
 def _render_breakdown_panel_rows(df_arch: pd.DataFrame) -> list[str]:
-    """Renders data rows for a single architecture panel across Core 7 datasets and Average."""
+    """Renders data rows for a single architecture panel across Core 5 datasets and Average."""
     ada_by_ds: dict[str, list[str]] = {}
     auc_by_ds: dict[str, list[str]] = {}
 
@@ -334,19 +350,37 @@ def _render_breakdown_panel_rows(df_arch: pd.DataFrame) -> list[str]:
         auc_vals: list[float | None] = []
         for m in BREAKDOWN_METHODS:
             sub = df_arch[(df_arch["dataset"] == ds) & (df_arch["method"] == m)]
-            ada_vals.append(float(sub["adaptive_ece_percent"].mean()) if not sub.empty else None)
-            auc_vals.append(float(sub["auroc"].mean()) if not sub.empty else None)
-        ada_by_ds[ds] = rank_and_format(ada_vals, higher_is_better=False, decimals=2)
+            if not sub.empty:
+                val = (
+                    float(sub["adaptive_ece"].mean())
+                    if "adaptive_ece" in sub.columns
+                    else float(sub["adaptive_ece_percent"].mean()) / 100.0
+                )
+                ada_vals.append(val)
+                auc_vals.append(float(sub["auroc"].mean()))
+            else:
+                ada_vals.append(None)
+                auc_vals.append(None)
+        ada_by_ds[ds] = rank_and_format(ada_vals, higher_is_better=False, decimals=4)
         auc_by_ds[ds] = rank_and_format(auc_vals, higher_is_better=True, decimals=3)
 
     avg_ada_vals: list[float | None] = []
     avg_auc_vals: list[float | None] = []
     for m in BREAKDOWN_METHODS:
         sub = df_arch[(df_arch["dataset"].isin(CORE_DATASETS)) & (df_arch["method"] == m)]
-        avg_ada_vals.append(float(sub["adaptive_ece_percent"].mean()) if not sub.empty else None)
-        avg_auc_vals.append(float(sub["auroc"].mean()) if not sub.empty else None)
+        if not sub.empty:
+            val = (
+                float(sub["adaptive_ece"].mean())
+                if "adaptive_ece" in sub.columns
+                else float(sub["adaptive_ece_percent"].mean()) / 100.0
+            )
+            avg_ada_vals.append(val)
+            avg_auc_vals.append(float(sub["auroc"].mean()))
+        else:
+            avg_ada_vals.append(None)
+            avg_auc_vals.append(None)
 
-    avg_ada_formatted = rank_and_format(avg_ada_vals, higher_is_better=False, decimals=2)
+    avg_ada_formatted = rank_and_format(avg_ada_vals, higher_is_better=False, decimals=4)
     avg_auc_formatted = rank_and_format(avg_auc_vals, higher_is_better=True, decimals=3)
 
     lines: list[str] = []
@@ -378,10 +412,10 @@ def build_core5_breakdown_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> st
 
     lines = [
         r"\begin{table*}[t]",
+        r"\setlength{\tabcolsep}{2.8pt}",
+        r"\renewcommand{\arraystretch}{1.05}",
         r"\centering",
-        rf"\caption{{\textbf{{Comprehensive Calibration Benchmark Breakdown Across Core {len(CORE_DATASETS)} Datasets.}} Evaluated across Adaptive ECE (Ada-ECE (\%) $\downarrow$) and AUROC ($\uparrow$) on M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B). \textbf{{Bold}}: best; \textit{{italic}}: second best within each metric column. Clean unshaded presentation.}}",
-        rf"\label{{{tab_label}}}",
-        r"\tablestyle{2.8pt}{1.05}",
+        r"\footnotesize",
         r"\resizebox{\textwidth}{!}{%",
         rf"\begin{{tabular}}{{l {col_str}}}",
         r"\toprule",
@@ -407,6 +441,8 @@ def build_core5_breakdown_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> st
             r"\bottomrule",
             r"\end{tabular}%",
             r"}",
+            rf"\caption{{\textbf{{Calibration Benchmark Breakdown Across Core {len(CORE_DATASETS)} Datasets.}} Evaluated on Ada-ECE ($\downarrow$) and AUROC ($\uparrow$) for M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B). \textbf{{Bold}}: best; \textit{{italic}}: second best within each metric column.}}",
+            rf"\label{{{tab_label}}}",
             r"\end{table*}",
         ]
     )
@@ -430,8 +466,18 @@ def _render_rq1_panel_rows(
         for m in ALL_9_METHODS:
             sub = df_arch[(df_arch["dataset"] == ds) & (df_arch["method"] == m)]
             if not sub.empty:
-                ece_vals.append(float(sub["ece_percent"].mean()))
-                ada_vals.append(float(sub["adaptive_ece_percent"].mean()))
+                ece_v = (
+                    float(sub["ece"].mean())
+                    if "ece" in sub.columns
+                    else float(sub["ece_percent"].mean()) / 100.0
+                )
+                ada_v = (
+                    float(sub["adaptive_ece"].mean())
+                    if "adaptive_ece" in sub.columns
+                    else float(sub["adaptive_ece_percent"].mean()) / 100.0
+                )
+                ece_vals.append(ece_v)
+                ada_vals.append(ada_v)
                 brier_vals.append(float(sub["brier"].mean()))
                 auc_vals.append(float(sub["auroc"].mean()))
             else:
@@ -440,8 +486,8 @@ def _render_rq1_panel_rows(
                 brier_vals.append(None)
                 auc_vals.append(None)
         ds_metrics[ds] = (
-            rank_and_format(ece_vals, higher_is_better=False, decimals=2),
-            rank_and_format(ada_vals, higher_is_better=False, decimals=2),
+            rank_and_format(ece_vals, higher_is_better=False, decimals=4),
+            rank_and_format(ada_vals, higher_is_better=False, decimals=4),
             rank_and_format(brier_vals, higher_is_better=False, decimals=4),
             rank_and_format(auc_vals, higher_is_better=True, decimals=3),
         )
@@ -453,8 +499,18 @@ def _render_rq1_panel_rows(
     for m in ALL_9_METHODS:
         sub = df_arch[(df_arch["dataset"].isin(datasets)) & (df_arch["method"] == m)]
         if not sub.empty:
-            avg_ece_vals.append(float(sub["ece_percent"].mean()))
-            avg_ada_vals.append(float(sub["adaptive_ece_percent"].mean()))
+            ece_v = (
+                float(sub["ece"].mean())
+                if "ece" in sub.columns
+                else float(sub["ece_percent"].mean()) / 100.0
+            )
+            ada_v = (
+                float(sub["adaptive_ece"].mean())
+                if "adaptive_ece" in sub.columns
+                else float(sub["adaptive_ece_percent"].mean()) / 100.0
+            )
+            avg_ece_vals.append(ece_v)
+            avg_ada_vals.append(ada_v)
             avg_brier_vals.append(float(sub["brier"].mean()))
             avg_auc_vals.append(float(sub["auroc"].mean()))
         else:
@@ -463,8 +519,8 @@ def _render_rq1_panel_rows(
             avg_brier_vals.append(None)
             avg_auc_vals.append(None)
 
-    avg_ece_fmt = rank_and_format(avg_ece_vals, higher_is_better=False, decimals=2)
-    avg_ada_fmt = rank_and_format(avg_ada_vals, higher_is_better=False, decimals=2)
+    avg_ece_fmt = rank_and_format(avg_ece_vals, higher_is_better=False, decimals=4)
+    avg_ada_fmt = rank_and_format(avg_ada_vals, higher_is_better=False, decimals=4)
     avg_brier_fmt = rank_and_format(avg_brier_vals, higher_is_better=False, decimals=4)
     avg_auc_fmt = rank_and_format(avg_auc_vals, higher_is_better=True, decimals=3)
 
@@ -494,19 +550,13 @@ def _render_rq1_core7_arch_table(
     arch_title: str,
     arch_label: str,
 ) -> str:
-    """Renders a single-architecture 21-column tabularx table for RQ1 Core 7 evaluation."""
+    """Renders a single-architecture 21-column tabularx table for RQ1 Core 5 evaluation."""
     lines = [
         r"\begin{table*}[t]",
         r"\centering",
-        rf"\caption{{\textbf{{RQ1 Evaluation on {arch_title} (7B).}}",
-        rf"Comparison of calibration methods across {len(CORE_DATASETS)} vision-language benchmarks.",
-        r"Metrics: Expected Calibration Error (ECE (\%) $\downarrow$), Adaptive ECE",
-        r"(Ada-ECE (\%) $\downarrow$), Brier Score ($\downarrow$), and AUROC ($\uparrow$).",
-        r"\textbf{Bold}: Rank 1; \textit{italic}: Rank 2 among single-pass methods.}",
-        rf"\label{{{arch_label}}}",
         "",
         r"\scriptsize",
-        r"\setlength{\tabcolsep}{2pt}",
+        r"\setlength{\tabcolsep}{1.5pt}",
         r"\renewcommand{\arraystretch}{1.05}",
         "",
         r"\begin{tabularx}{\textwidth}{l *{20}{Y}}",
@@ -523,11 +573,11 @@ def _render_rq1_core7_arch_table(
         r"\cmidrule(lr){18-21}",
         "",
         r"\textbf{Dataset}",
-        r"& ECE & Ada. & Brier & AUROC",
-        r"& ECE & Ada. & Brier & AUROC",
-        r"& ECE & Ada. & Brier & AUROC",
-        r"& ECE & Ada. & Brier & AUROC",
-        r"& ECE & Ada. & Brier & AUROC \\",
+        r"& ECE & Ada & Brier & AUC",
+        r"& ECE & Ada & Brier & AUC",
+        r"& ECE & Ada & Brier & AUC",
+        r"& ECE & Ada & Brier & AUC",
+        r"& ECE & Ada & Brier & AUC \\",
         r"\midrule",
         "",
     ]
@@ -539,13 +589,29 @@ def _render_rq1_core7_arch_table(
         auc_vals: list[float | None] = []
         for m in RQ1_CORE7_METHODS:
             sub = df_arch[(df_arch["dataset"] == ds) & (df_arch["method"] == m)]
-            ece_vals.append(float(sub["ece_percent"].mean()) if not sub.empty else None)
-            ada_vals.append(float(sub["adaptive_ece_percent"].mean()) if not sub.empty else None)
-            brier_vals.append(float(sub["brier"].mean()) if not sub.empty else None)
-            auc_vals.append(float(sub["auroc"].mean()) if not sub.empty else None)
+            if not sub.empty:
+                ece_v = (
+                    float(sub["ece"].mean())
+                    if "ece" in sub.columns
+                    else float(sub["ece_percent"].mean()) / 100.0
+                )
+                ada_v = (
+                    float(sub["adaptive_ece"].mean())
+                    if "adaptive_ece" in sub.columns
+                    else float(sub["adaptive_ece_percent"].mean()) / 100.0
+                )
+                ece_vals.append(ece_v)
+                ada_vals.append(ada_v)
+                brier_vals.append(float(sub["brier"].mean()))
+                auc_vals.append(float(sub["auroc"].mean()))
+            else:
+                ece_vals.append(None)
+                ada_vals.append(None)
+                brier_vals.append(None)
+                auc_vals.append(None)
 
-        ece_fmt = rank_and_format(ece_vals, higher_is_better=False, decimals=2)
-        ada_fmt = rank_and_format(ada_vals, higher_is_better=False, decimals=2)
+        ece_fmt = rank_and_format(ece_vals, higher_is_better=False, decimals=4)
+        ada_fmt = rank_and_format(ada_vals, higher_is_better=False, decimals=4)
         brier_fmt = rank_and_format(brier_vals, higher_is_better=False, decimals=4)
         auc_fmt = rank_and_format(auc_vals, higher_is_better=True, decimals=3)
 
@@ -556,20 +622,36 @@ def _render_rq1_core7_arch_table(
             lines.append(f"& {ece_fmt[i]} & {ada_fmt[i]} & {brier_fmt[i]} & {auc_fmt[i]}{suffix}")
         lines.append("")
 
-    # Macro Average row across Core 7 datasets
+    # Macro Average row across Core 5 datasets
     avg_ece_vals: list[float | None] = []
     avg_ada_vals: list[float | None] = []
     avg_brier_vals: list[float | None] = []
     avg_auc_vals: list[float | None] = []
     for m in RQ1_CORE7_METHODS:
         sub = df_arch[(df_arch["dataset"].isin(CORE_DATASETS)) & (df_arch["method"] == m)]
-        avg_ece_vals.append(float(sub["ece_percent"].mean()) if not sub.empty else None)
-        avg_ada_vals.append(float(sub["adaptive_ece_percent"].mean()) if not sub.empty else None)
-        avg_brier_vals.append(float(sub["brier"].mean()) if not sub.empty else None)
-        avg_auc_vals.append(float(sub["auroc"].mean()) if not sub.empty else None)
+        if not sub.empty:
+            ece_v = (
+                float(sub["ece"].mean())
+                if "ece" in sub.columns
+                else float(sub["ece_percent"].mean()) / 100.0
+            )
+            ada_v = (
+                float(sub["adaptive_ece"].mean())
+                if "adaptive_ece" in sub.columns
+                else float(sub["adaptive_ece_percent"].mean()) / 100.0
+            )
+            avg_ece_vals.append(ece_v)
+            avg_ada_vals.append(ada_v)
+            avg_brier_vals.append(float(sub["brier"].mean()))
+            avg_auc_vals.append(float(sub["auroc"].mean()))
+        else:
+            avg_ece_vals.append(None)
+            avg_ada_vals.append(None)
+            avg_brier_vals.append(None)
+            avg_auc_vals.append(None)
 
-    avg_ece_fmt = rank_and_format(avg_ece_vals, higher_is_better=False, decimals=2)
-    avg_ada_fmt = rank_and_format(avg_ada_vals, higher_is_better=False, decimals=2)
+    avg_ece_fmt = rank_and_format(avg_ece_vals, higher_is_better=False, decimals=4)
+    avg_ada_fmt = rank_and_format(avg_ada_vals, higher_is_better=False, decimals=4)
     avg_brier_fmt = rank_and_format(avg_brier_vals, higher_is_better=False, decimals=4)
     avg_auc_fmt = rank_and_format(avg_auc_vals, higher_is_better=True, decimals=3)
 
@@ -583,13 +665,21 @@ def _render_rq1_core7_arch_table(
     lines.append("")
     lines.append(r"\bottomrule")
     lines.append(r"\end{tabularx}")
+    lines.append(
+        rf"\caption{{\textbf{{RQ1 Calibration Benchmark on {arch_title} (7B).}} "
+        rf"Comparison of calibration methods across {len(CORE_DATASETS)} vision-language benchmarks. "
+        r"Metrics: Expected Calibration Error (ECE $\downarrow$), Adaptive ECE "
+        r"(Ada-ECE $\downarrow$), Brier Score ($\downarrow$), and AUC ($\uparrow$). "
+        r"\textbf{Bold}: Rank 1; \textit{italic}: Rank 2 among single-pass methods.}"
+    )
+    lines.append(rf"\label{{{arch_label}}}")
     lines.append(r"\end{table*}")
 
     return "\n".join(lines)
 
 
 def build_rq1_core7_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> str:
-    """Builds unified Core 7 master benchmark tables for RQ1 across M3 and MQT."""
+    """Builds unified Core 5 master benchmark tables for RQ1 across M3 and MQT."""
     m3_table = _render_rq1_core7_arch_table(
         df_m3, arch_title="M3-LLaVA", arch_label="tab:rq1_m3_llava"
     )
@@ -635,18 +725,16 @@ def build_rq1_adversarial_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> st
         [rf"\cmidrule(lr){{{4 * i + 2}-{4 * i + 5}}}" for i in range(len(ADVERSARIAL_DATASETS) + 1)]
     )
     sub_headers = " & ".join(
-        [
-            r"ECE (\%) $\downarrow$ & Ada-ECE (\%) $\downarrow$ & Brier $\downarrow$ & AUROC $\uparrow$"
-        ]
+        [r"ECE $\downarrow$ & Ada-ECE $\downarrow$ & Brier $\downarrow$ & AUROC $\uparrow$"]
         * (len(ADVERSARIAL_DATASETS) + 1)
     )
 
     lines = [
         r"\begin{table*}[t]",
+        r"\setlength{\tabcolsep}{4.0pt}",
+        r"\renewcommand{\arraystretch}{1.05}",
         r"\centering",
-        r"\caption{\textbf{RQ1 Evaluation: Calibration Robustness Under Adversarial and Safety Stress Benchmarks.} Evaluated across Expected Calibration Error (ECE (\%) $\downarrow$), Adaptive ECE (Ada-ECE (\%) $\downarrow$), Brier Score ($\downarrow$), and AUROC ($\uparrow$) on M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B) across AVQA, VLLM-Safety, and Adversarial Macro Average. \textbf{Bold}: Rank 1; \textit{italic}: Rank 2 within each metric column among single-pass methods. Multi-pass baselines report placeholders ($-$) pending rerun completion. Clean unshaded presentation.}",
-        rf"\label{{{tab_label}}}",
-        r"\tablestyle{4.0pt}{1.05}",
+        r"\footnotesize",
         r"\resizebox{\textwidth}{!}{%",
         rf"\begin{{tabular}}{{{col_spec}}}",
         r"\toprule",
@@ -672,6 +760,8 @@ def build_rq1_adversarial_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> st
             r"\bottomrule",
             r"\end{tabular}%",
             r"}",
+            r"\caption{\textbf{RQ1 Calibration Robustness Under Adversarial and Safety Stress Benchmarks.} Performance on AVQA, VLLM-Safety, and Adversarial Macro Average for M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B). \textbf{Bold}: Rank 1; \textit{italic}: Rank 2 within each metric column among single-pass methods.}",
+            rf"\label{{{tab_label}}}",
             r"\end{table*}",
         ]
     )
@@ -728,15 +818,19 @@ def generate_benchmark_tables():
 
     # 4. Core 7 comprehensive breakdown table in dataset_tables/core7_benchmark_breakdown.tex
     core7_breakdown = build_core7_breakdown_table(df_m3, df_mqt)
-    out_core7 = TABLES_DIR / "core7_benchmark_breakdown.tex"
-    out_core7.write_text(core7_breakdown + "\n", encoding="utf-8")
-    print(f"Generated: {out_core7}")
+    (TABLES_DIR / "core7_benchmark_breakdown.tex").write_text(
+        core7_breakdown + "\n", encoding="utf-8"
+    )
+    (TABLES_DIR / "core5_benchmark_breakdown.tex").write_text(
+        core7_breakdown + "\n", encoding="utf-8"
+    )
+    print(f"Generated: {TABLES_DIR / 'core5_benchmark_breakdown.tex'}")
 
-    # 5. RQ1 Master Table: Core 7 Benchmark
+    # 5. RQ1 Master Table: Core 5 Benchmark
     rq1_core7 = build_rq1_core7_table(df_m3, df_mqt)
-    out_rq1_core7 = RQ1_CORE7_FILE
-    out_rq1_core7.write_text(rq1_core7 + "\n", encoding="utf-8")
-    print(f"Generated: {out_rq1_core7}")
+    RQ1_CORE7_FILE.write_text(rq1_core7 + "\n", encoding="utf-8")
+    (TABLES_DIR / "rq1_core5_benchmark.tex").write_text(rq1_core7 + "\n", encoding="utf-8")
+    print(f"Generated: {TABLES_DIR / 'rq1_core5_benchmark.tex'}")
 
     # Also generate individual per-arch files for standalone modular inclusion
     m3_table = _render_rq1_core7_arch_table(
@@ -747,8 +841,10 @@ def generate_benchmark_tables():
     )
     (TABLES_DIR / "rq1_core7_m3.tex").write_text(m3_table + "\n", encoding="utf-8")
     (TABLES_DIR / "rq1_core7_mqt.tex").write_text(mqt_table + "\n", encoding="utf-8")
-    print(f"Generated: {TABLES_DIR / 'rq1_core7_m3.tex'}")
-    print(f"Generated: {TABLES_DIR / 'rq1_core7_mqt.tex'}")
+    (TABLES_DIR / "rq1_core5_m3.tex").write_text(m3_table + "\n", encoding="utf-8")
+    (TABLES_DIR / "rq1_core5_mqt.tex").write_text(mqt_table + "\n", encoding="utf-8")
+    print(f"Generated: {TABLES_DIR / 'rq1_core5_m3.tex'}")
+    print(f"Generated: {TABLES_DIR / 'rq1_core5_mqt.tex'}")
 
     # 6. RQ1 Master Table: Adversarial Benchmark
     rq1_adv = build_rq1_adversarial_table(df_m3, df_mqt)
@@ -784,8 +880,8 @@ def _render_temp_block(
         rf"\multicolumn{{5}}{{l}}{{\textbf{{{block_title}}}}} \\",
         r"\midrule",
     ]
-    ece_strs = rank_and_format([r[1] for r in raw_rows], higher_is_better=False, decimals=2)
-    ada_strs = rank_and_format([r[2] for r in raw_rows], higher_is_better=False, decimals=2)
+    ece_strs = rank_and_format([r[1] for r in raw_rows], higher_is_better=False, decimals=4)
+    ada_strs = rank_and_format([r[2] for r in raw_rows], higher_is_better=False, decimals=4)
     brier_strs = rank_and_format([r[3] for r in raw_rows], higher_is_better=False, decimals=4)
     auc_strs = rank_and_format([r[4] for r in raw_rows], higher_is_better=True, decimals=3)
 
@@ -822,13 +918,14 @@ def build_temp_table(
 
     lines = [
         "\\begin{table}[t]",
-        f"\\caption{{\\textbf{{Temperature Transfer Robustness {caption_target} ({arch_model} 7B).}} Evaluated across sampling temperatures $T \\in \\{{0.0, 0.3, 0.6, 1.0, 1.5\\}}$ and Mean (trained at $T=0.0$). \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
-        f"\\label{{{tab_label}}}",
-        "\\tablestyle{4pt}{1.05}",
-        "\\resizebox{\\columnwidth}{!}{%",
+        "\\setlength{\\tabcolsep}{2.5pt}",
+        "\\renewcommand{\\arraystretch}{0.95}",
+        "\\centering",
+        "\\scriptsize",
+        "\\resizebox{\\linewidth}{!}{%",
         "\\begin{tabular}{lcccc}",
         "\\toprule",
-        "\\textbf{Calibration Method} & \\textbf{ECE (\\%)} $\\downarrow$ & \\textbf{Ada-ECE (\\%)} $\\downarrow$ & \\textbf{Brier} $\\downarrow$ & \\textbf{AUROC} $\\uparrow$ \\\\",
+        "\\textbf{Calibration Method} & \\textbf{ECE} $\\downarrow$ & \\textbf{Ada-ECE} $\\downarrow$ & \\textbf{Brier} $\\downarrow$ & \\textbf{AUROC} $\\uparrow$ \\\\",
         "\\midrule",
     ]
 
@@ -840,10 +937,21 @@ def build_temp_table(
         raw_rows = []
         for m in temp_methods:
             m_sub = sub[(sub["method"] == m) & (sub["temperature"] == t)]
-            ece = float(m_sub["ece_percent"].mean()) if not m_sub.empty else np.nan
-            ada = float(m_sub["adaptive_ece_percent"].mean()) if not m_sub.empty else np.nan
-            brier = float(m_sub["brier"].mean()) if not m_sub.empty else np.nan
-            auc = float(m_sub["auroc"].mean()) if not m_sub.empty else np.nan
+            if not m_sub.empty:
+                ece = (
+                    float(m_sub["ece"].mean())
+                    if "ece" in m_sub.columns
+                    else float(m_sub["ece_percent"].mean()) / 100.0
+                )
+                ada = (
+                    float(m_sub["adaptive_ece"].mean())
+                    if "adaptive_ece" in m_sub.columns
+                    else float(m_sub["adaptive_ece_percent"].mean()) / 100.0
+                )
+                brier = float(m_sub["brier"].mean())
+                auc = float(m_sub["auroc"].mean())
+            else:
+                ece, ada, brier, auc = np.nan, np.nan, np.nan, np.nan
             raw_rows.append((m, ece, ada, brier, auc))
         lines.extend(_render_temp_block(f"Sampling Temperature $T = {t:.1f}$", raw_rows))
         lines.append(r"\midrule")
@@ -852,10 +960,21 @@ def build_temp_table(
     mean_rows = []
     for m in temp_methods:
         m_sub = sub[sub["method"] == m]
-        ece = float(m_sub["ece_percent"].mean()) if not m_sub.empty else np.nan
-        ada = float(m_sub["adaptive_ece_percent"].mean()) if not m_sub.empty else np.nan
-        brier = float(m_sub["brier"].mean()) if not m_sub.empty else np.nan
-        auc = float(m_sub["auroc"].mean()) if not m_sub.empty else np.nan
+        if not m_sub.empty:
+            ece = (
+                float(m_sub["ece"].mean())
+                if "ece" in m_sub.columns
+                else float(m_sub["ece_percent"].mean()) / 100.0
+            )
+            ada = (
+                float(m_sub["adaptive_ece"].mean())
+                if "adaptive_ece" in m_sub.columns
+                else float(m_sub["adaptive_ece_percent"].mean()) / 100.0
+            )
+            brier = float(m_sub["brier"].mean())
+            auc = float(m_sub["auroc"].mean())
+        else:
+            ece, ada, brier, auc = np.nan, np.nan, np.nan, np.nan
         mean_rows.append((m, ece, ada, brier, auc))
     lines.extend(_render_temp_block("Mean (Averaged Across Temperatures)", mean_rows))
 
@@ -864,6 +983,8 @@ def build_temp_table(
             "\\bottomrule",
             "\\end{tabular}%",
             "}",
+            f"\\caption{{\\textbf{{Temperature Transfer Robustness {caption_target} ({arch_model} 7B).}} Evaluated across sampling temperatures $T \\in \\{{0.0, 0.3, 0.6, 1.0, 1.5\\}}$ and Mean (trained at $T=0.0$). \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
+            f"\\label{{{tab_label}}}",
             "\\end{table}",
         ]
     )
@@ -898,19 +1019,7 @@ def generate_temperature_tables():
 
 
 def build_lodo_table(df: pd.DataFrame, arch_label: str, arch_model: str) -> str:
-    """Builds LODO table for 4 core methods across 4 standardized metrics."""
-    lines = [
-        "\\begin{table}[t]",
-        f"\\caption{{\\textbf{{Leave-One-Dataset-Out (LODO) Cross-Domain Transfer ({arch_model} 7B).}} Macro-averaged across Core 7 held-out target benchmarks. Trained on pooled 13 benchmarks. \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
-        f"\\label{{tab:lodo_transfer_{arch_label}}}",
-        "\\tablestyle{4pt}{1.05}",
-        "\\resizebox{\\columnwidth}{!}{%",
-        "\\begin{tabular}{llcccc}",
-        "\\toprule",
-        "\\textbf{Calibration Method} & \\textbf{Transfer Protocol} & \\textbf{Macro ECE (\\%)} $\\downarrow$ & \\textbf{Macro Ada-ECE (\\%)} $\\downarrow$ & \\textbf{Macro Brier} $\\downarrow$ & \\textbf{Macro AUROC} $\\uparrow$ \\\\",
-        "\\midrule",
-    ]
-
+    """Builds LODO table for 5 core methods across 4 standardized metrics."""
     methods_order = [
         "Naive Confidence (NC)",
         "Temperature Scaling (TS)",
@@ -919,19 +1028,33 @@ def build_lodo_table(df: pd.DataFrame, arch_label: str, arch_model: str) -> str:
         "Trajectory Platt (5D)",
     ]
 
+    lines = [
+        "\\begin{table}[t]",
+        "\\setlength{\\tabcolsep}{4pt}",
+        "\\renewcommand{\\arraystretch}{1.05}",
+        "\\centering",
+        "\\footnotesize",
+        "\\begin{tabular}{llcccc}",
+        "\\toprule",
+        "\\textbf{Calibration Method} & \\textbf{Transfer Protocol} & \\textbf{Macro ECE} $\\downarrow$ & \\textbf{Macro Ada-ECE} $\\downarrow$ & \\textbf{Macro Brier} $\\downarrow$ & \\textbf{Macro AUROC} $\\uparrow$ \\\\",
+        "\\midrule",
+    ]
+
     if "test_dataset" in df.columns:
         core_sub = df[df["test_dataset"].isin(CORE_DATASETS)]
         target_df = core_sub if not core_sub.empty else df
     else:
         target_df = df
 
-    agg = (
-        target_df.groupby(["method", "transfer_mode"])[
-            ["ece_percent", "adaptive_ece_percent", "brier", "auroc"]
-        ]
-        .mean()
-        .reset_index()
-    )
+    agg_cols = ["brier", "auroc"]
+    if "ece" in target_df.columns:
+        agg_cols.extend(["ece", "adaptive_ece"])
+        agg = target_df.groupby(["method", "transfer_mode"])[agg_cols].mean().reset_index()
+    else:
+        agg_cols.extend(["ece_percent", "adaptive_ece_percent"])
+        agg = target_df.groupby(["method", "transfer_mode"])[agg_cols].mean().reset_index()
+        agg["ece"] = agg["ece_percent"] / 100.0
+        agg["adaptive_ece"] = agg["adaptive_ece_percent"] / 100.0
 
     rows = []
     for m in methods_order:
@@ -943,16 +1066,16 @@ def build_lodo_table(df: pd.DataFrame, arch_label: str, arch_model: str) -> str:
                     (
                         m,
                         mode,
-                        float(r["ece_percent"]),
-                        float(r["adaptive_ece_percent"]),
+                        float(r["ece"]),
+                        float(r["adaptive_ece"]),
                         float(r["brier"]),
                         float(r["auroc"]),
                         "5D" in m,
                     )
                 )
 
-    ece_formatted = rank_and_format([r[2] for r in rows], higher_is_better=False, decimals=2)
-    ada_formatted = rank_and_format([r[3] for r in rows], higher_is_better=False, decimals=2)
+    ece_formatted = rank_and_format([r[2] for r in rows], higher_is_better=False, decimals=4)
+    ada_formatted = rank_and_format([r[3] for r in rows], higher_is_better=False, decimals=4)
     brier_formatted = rank_and_format([r[4] for r in rows], higher_is_better=False, decimals=4)
     auc_formatted = rank_and_format([r[5] for r in rows], higher_is_better=True, decimals=3)
 
@@ -966,8 +1089,9 @@ def build_lodo_table(df: pd.DataFrame, arch_label: str, arch_model: str) -> str:
     lines.extend(
         [
             "\\bottomrule",
-            "\\end{tabular}%",
-            "}",
+            "\\end{tabular}",
+            f"\\caption{{\\textbf{{Leave-One-Dataset-Out (LODO) Cross-Domain Transfer ({arch_model} 7B).}} Macro-averaged across held-out Core {len(CORE_DATASETS)} benchmarks. \\textbf{{Bold}}: best; \\textit{{italic}}: second best. $\\downarrow$/$\\uparrow$: lower/higher is better.}}",
+            f"\\label{{tab:lodo_transfer_{arch_label}}}",
             "\\end{table}",
         ]
     )

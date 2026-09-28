@@ -80,6 +80,7 @@ exclude = [
     "pilot_features_1k",
     "build",
     "dist",
+    "scratch",
 ]
 pythonVersion = "3.10"
 typeCheckingMode = "standard"
@@ -100,6 +101,7 @@ exclude = [
     "pilot_features_1k",
     "build",
     "dist",
+    "scratch",
 ]
 
 [tool.ruff.lint]

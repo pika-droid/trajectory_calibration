@@ -120,7 +120,9 @@ def test_format_analytical_bullets_with_trajectory_platt() -> None:
     bullets = format_analytical_bullets(df, ranks)
     joined = "\n".join(bullets)
 
-    assert "Trajectory Platt (5D) vs. Global Temperature Scaling (TS)" in joined
-    assert "Trajectory Platt (5D) vs. 1D Platt Scaling" in joined
-    assert "Trajectory Platt (5D) beats TS on **7 / 7 Core datasets**" in joined
-    assert "Trajectory Platt (5D) beats 1D Platt Scaling on **7 / 7 Core datasets**" in joined
+    num_ds = len(CORE_7_DATASETS)
+    assert f"Trajectory Platt (5D) beats TS on **{num_ds} / {num_ds} Core datasets**" in joined
+    assert (
+        f"Trajectory Platt (5D) beats 1D Platt Scaling on **{num_ds} / {num_ds} Core datasets**"
+        in joined
+    )

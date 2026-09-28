@@ -1,45 +1,47 @@
 \begin{table}[t]
-\caption{\textbf{Calibration Benchmark on \texttt{vizwiz-vqa} (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:benchmark_m3_vizwizvqa}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 15.97 & 15.97 & 0.2071 & \textit{0.793} \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 15.09 & 15.09 & 0.2065 & \textit{0.793} \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 14.87 & 14.87 & \textit{0.2058} & \textit{0.793} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{6.64} & \textbf{5.80} & \textbf{0.1828} & \textit{0.793} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 0.1597 & 0.1597 & 0.2071 & \textit{0.793} \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 0.1509 & 0.1509 & 0.2065 & \textit{0.793} \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 0.1487 & 0.1487 & \textit{0.2058} & \textit{0.793} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{0.0664} & \textbf{0.0580} & \textbf{0.1828} & \textit{0.793} \\
 LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 EigenScore & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textbf{6.38} & \textit{6.57} & \textbf{0.1828} & \textbf{0.794} \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textbf{0.0638} & \textit{0.0657} & \textbf{0.1828} & \textbf{0.794} \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{Calibration Benchmark on \texttt{vizwiz-vqa} (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:benchmark_m3_vizwizvqa}
 \end{table}
 
 \begin{table}[t]
-\caption{\textbf{Calibration Benchmark on \texttt{vizwiz-vqa} (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:benchmark_mqt_vizwizvqa}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 30.66 & 30.66 & 0.2435 & \textbf{0.797} \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 29.41 & 29.41 & 0.2328 & \textbf{0.797} \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 29.11 & 29.11 & 0.2312 & \textit{0.796} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{6.27} & \textbf{7.62} & \textit{0.1433} & \textbf{0.797} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 0.3066 & 0.3066 & 0.2435 & \textbf{0.797} \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 0.2941 & 0.2941 & 0.2328 & \textbf{0.797} \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 0.2911 & 0.2911 & 0.2312 & \textit{0.796} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{0.0627} & \textbf{0.0762} & \textit{0.1433} & \textbf{0.797} \\
 LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 EigenScore & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textbf{6.03} & \textit{8.17} & \textbf{0.1418} & 0.795 \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textbf{0.0603} & \textit{0.0817} & \textbf{0.1418} & 0.795 \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{Calibration Benchmark on \texttt{vizwiz-vqa} (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:benchmark_mqt_vizwizvqa}
 \end{table}

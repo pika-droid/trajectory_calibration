@@ -1,9 +1,8 @@
 \begin{table*}[t]
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
 \centering
 \scriptsize
-\caption{\textbf{Exhaustive 14-Benchmark Progression Grid: Adaptive ECE ($\downarrow$)}. Per-dataset comparison across 1D Platt ($\{x_1\}$), Optimal 2D, Optimal 3D, Optimal 4D, and Full Trajectory Platt 5D. Option A ranking: \textbf{Bold} Rank 1, \textit{Italic} Rank 2 across each benchmark row.}
-\label{tab:ablation_5d_14ds_grid}
-\vspace{2mm}
 \begin{tabular}{lccccc}
 \toprule
 \textbf{Benchmark Dataset} & \textbf{1D Platt ($\{x_1\}$)} & \textbf{Best-2D} & \textbf{Best-3D} & \textbf{Best-4D} & \textbf{Full 5D (Ours)} \\
@@ -47,4 +46,6 @@ VQAv2 & 0.0880 & \textbf{0.0232} & 0.0256 & \textit{0.0255} & 0.0296 \\
 \textbf{Macro Mean} & 0.0460 & \textbf{0.0205} & \textit{0.0215} & 0.0256 & 0.0320 \\
 \bottomrule
 \end{tabular}
+\caption{\textbf{Exhaustive 14-Benchmark Progression Grid: Adaptive ECE ($\downarrow$)}. Per-dataset comparison across 1D Platt ($\{x_1\}$), Optimal 2D, Optimal 3D, Optimal 4D, and Full Trajectory Platt 5D. Option A ranking: \textbf{Bold} Rank 1, \textit{Italic} Rank 2 across each benchmark row.}
+\label{tab:ablation_5d_14ds_grid}
 \end{table*}

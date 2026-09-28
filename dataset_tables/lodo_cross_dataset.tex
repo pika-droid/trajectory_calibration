@@ -1,47 +1,49 @@
 \begin{table}[t]
-\caption{\textbf{Leave-One-Dataset-Out (LODO) Cross-Domain Transfer (M3-LLaVA 7B).} Macro-averaged across Core 7 held-out target benchmarks. Trained on pooled 13 benchmarks. \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:lodo_transfer_m3}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{llcccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Transfer Protocol} & \textbf{Macro ECE (\%)} $\downarrow$ & \textbf{Macro Ada-ECE (\%)} $\downarrow$ & \textbf{Macro Brier} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{Transfer Protocol} & \textbf{Macro ECE} $\downarrow$ & \textbf{Macro Ada-ECE} $\downarrow$ & \textbf{Macro Brier} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Zero-Shot Base & 19.40 & \textbf{19.39} & \textbf{0.2356} & \textit{0.765} \\
-Naive Confidence (NC) & Target Adapted (Saerens-EM) & 37.57 & 37.57 & 0.3669 & 0.713 \\
-Temperature Scaling (TS) & Zero-Shot Base & \textbf{15.41} & 21.32 & 0.2363 & \textit{0.765} \\
-Temperature Scaling (TS) & Target Adapted (Saerens-EM) & 40.61 & 40.61 & 0.4061 & \textit{0.765} \\
-Adaptive TS (ATS) & Zero-Shot Base & \textit{15.44} & 21.72 & \textit{0.2362} & \textbf{0.767} \\
-Adaptive TS (ATS) & Target Adapted (Saerens-EM) & 40.61 & 40.61 & 0.4061 & \textbf{0.767} \\
-Platt Scaling (1D) & Zero-Shot Base & 24.43 & 25.41 & 0.2800 & \textit{0.765} \\
-Platt Scaling (1D) & Target Adapted (Saerens-EM) & 56.23 & 56.23 & 0.5623 & \textit{0.765} \\
-Trajectory Platt (5D) & Zero-Shot Base & 19.83 & \textit{20.03} & 0.2467 & 0.723 \\
-Trajectory Platt (5D) & Target Adapted (Saerens-EM) & 41.67 & 41.80 & 0.4131 & 0.723 \\
+Naive Confidence (NC) & Zero-Shot Base & 0.1940 & \textbf{0.1939} & \textbf{0.2356} & \textit{0.765} \\
+Naive Confidence (NC) & Target Adapted (Saerens-EM) & 0.3757 & 0.3757 & 0.3669 & 0.713 \\
+Temperature Scaling (TS) & Zero-Shot Base & \textbf{0.1541} & 0.2132 & 0.2363 & \textit{0.765} \\
+Temperature Scaling (TS) & Target Adapted (Saerens-EM) & 0.4061 & 0.4061 & 0.4061 & \textit{0.765} \\
+Adaptive TS (ATS) & Zero-Shot Base & \textit{0.1544} & 0.2172 & \textit{0.2362} & \textbf{0.767} \\
+Adaptive TS (ATS) & Target Adapted (Saerens-EM) & 0.4061 & 0.4061 & 0.4061 & \textbf{0.767} \\
+Platt Scaling (1D) & Zero-Shot Base & 0.2443 & 0.2541 & 0.2800 & \textit{0.765} \\
+Platt Scaling (1D) & Target Adapted (Saerens-EM) & 0.5623 & 0.5623 & 0.5623 & \textit{0.765} \\
+Trajectory Platt (5D) & Zero-Shot Base & 0.1983 & \textit{0.2003} & 0.2467 & 0.723 \\
+Trajectory Platt (5D) & Target Adapted (Saerens-EM) & 0.4167 & 0.4180 & 0.4131 & 0.723 \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{Leave-One-Dataset-Out (LODO) Cross-Domain Transfer (M3-LLaVA 7B).} Macro-averaged across held-out Core 5 benchmarks. \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:lodo_transfer_m3}
 \end{table}
 
 \begin{table}[t]
-\caption{\textbf{Leave-One-Dataset-Out (LODO) Cross-Domain Transfer (MQT-LLaVA 7B).} Macro-averaged across Core 7 held-out target benchmarks. Trained on pooled 13 benchmarks. \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:lodo_transfer_mqt}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{llcccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Transfer Protocol} & \textbf{Macro ECE (\%)} $\downarrow$ & \textbf{Macro Ada-ECE (\%)} $\downarrow$ & \textbf{Macro Brier} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{Transfer Protocol} & \textbf{Macro ECE} $\downarrow$ & \textbf{Macro Ada-ECE} $\downarrow$ & \textbf{Macro Brier} $\downarrow$ & \textbf{Macro AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Zero-Shot Base & 24.48 & 24.48 & 0.2542 & \textit{0.753} \\
-Naive Confidence (NC) & Target Adapted (Saerens-EM) & 46.64 & 46.64 & 0.4495 & 0.673 \\
-Temperature Scaling (TS) & Zero-Shot Base & 19.50 & 19.83 & 0.2247 & \textit{0.753} \\
-Temperature Scaling (TS) & Target Adapted (Saerens-EM) & 49.56 & 49.56 & 0.4956 & \textit{0.753} \\
-Adaptive TS (ATS) & Zero-Shot Base & 19.26 & 19.62 & 0.2233 & \textbf{0.756} \\
-Adaptive TS (ATS) & Target Adapted (Saerens-EM) & 49.56 & 49.56 & 0.4956 & \textbf{0.756} \\
-Platt Scaling (1D) & Zero-Shot Base & \textit{14.80} & \textit{14.82} & \textit{0.2114} & \textit{0.753} \\
-Platt Scaling (1D) & Target Adapted (Saerens-EM) & 24.14 & 24.08 & 0.2617 & \textit{0.753} \\
-Trajectory Platt (5D) & Zero-Shot Base & \textbf{12.33} & \textbf{12.26} & \textbf{0.2070} & 0.734 \\
-Trajectory Platt (5D) & Target Adapted (Saerens-EM) & 21.52 & 21.57 & 0.2567 & 0.734 \\
+Naive Confidence (NC) & Zero-Shot Base & 0.2448 & 0.2448 & 0.2542 & \textit{0.753} \\
+Naive Confidence (NC) & Target Adapted (Saerens-EM) & 0.4664 & 0.4664 & 0.4495 & 0.673 \\
+Temperature Scaling (TS) & Zero-Shot Base & 0.1950 & 0.1983 & 0.2247 & \textit{0.753} \\
+Temperature Scaling (TS) & Target Adapted (Saerens-EM) & 0.4956 & 0.4956 & 0.4956 & \textit{0.753} \\
+Adaptive TS (ATS) & Zero-Shot Base & 0.1926 & 0.1962 & 0.2233 & \textbf{0.756} \\
+Adaptive TS (ATS) & Target Adapted (Saerens-EM) & 0.4956 & 0.4956 & 0.4956 & \textbf{0.756} \\
+Platt Scaling (1D) & Zero-Shot Base & \textit{0.1480} & \textit{0.1482} & \textit{0.2114} & \textit{0.753} \\
+Platt Scaling (1D) & Target Adapted (Saerens-EM) & 0.2414 & 0.2408 & 0.2617 & \textit{0.753} \\
+Trajectory Platt (5D) & Zero-Shot Base & \textbf{0.1233} & \textbf{0.1226} & \textbf{0.2070} & 0.734 \\
+Trajectory Platt (5D) & Target Adapted (Saerens-EM) & 0.2152 & 0.2157 & 0.2567 & 0.734 \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{Leave-One-Dataset-Out (LODO) Cross-Domain Transfer (MQT-LLaVA 7B).} Macro-averaged across held-out Core 5 benchmarks. \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:lodo_transfer_mqt}
 \end{table}

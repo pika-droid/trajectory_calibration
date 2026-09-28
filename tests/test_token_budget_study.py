@@ -215,11 +215,11 @@ def test_latex_subtable_generation(tmp_path: Path) -> None:
     )
 
     # 1. Dataset table (is_macro=False)
-    assert "\\begin{table}[t]" in tex_str
-    assert "\\end{table}" in tex_str
+    assert "\\begin{table*}[t]" in tex_str
+    assert "\\end{table*}" in tex_str
     assert "\\label{tab:sample_test}" in tex_str
     assert "\\begin{tabular}{ccclcccc}" in tex_str
-    assert "\\textbf{Acc (\\%)} $\\uparrow$" in tex_str
+    assert "\\textbf{Acc} $\\uparrow$" in tex_str
     assert "\\multirow{5}{*}{42.50}" in tex_str
     assert "\\rowcolor" not in tex_str
     assert "\\textbf{Trajectory Platt (5D)}" in tex_str
@@ -247,7 +247,7 @@ def test_latex_subtable_generation(tmp_path: Path) -> None:
         df_macro, "Macro Caption", "tab:macro_test", is_macro=True
     )
     assert "\\begin{tabular}{ccclcccc}" in macro_tex_str
-    assert "\\textbf{Acc (\\%)} $\\uparrow$" in macro_tex_str
+    assert "\\textbf{Acc} $\\uparrow$" in macro_tex_str
     assert "\\multirow{5}{*}{38.75}" in macro_tex_str
 
     # 3. Fallback when accuracy column is missing or NaN

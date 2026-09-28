@@ -180,31 +180,46 @@ def test_exact_numbers_m3_and_mqt() -> None:
 
     # 2. Check Transfer figures dynamically from Excel sheet src_vqav2 -> TextVQA
     df_vqav2 = pd.read_excel(EXCEL_PATH, sheet_name="src_vqav2", header=None)
-    m3_headers = df_vqav2.iloc[1].tolist()
+
+    # Locate M3 section dynamically
+    m3_title_idx = next(r for r in range(len(df_vqav2)) if "M3-LLaVA" in str(df_vqav2.iloc[r, 0]))
+    m3_headers = df_vqav2.iloc[m3_title_idx + 1].tolist()
     ece_col_idx = m3_headers.index("Platt 5D ECE (%)")
     ada_col_idx = m3_headers.index("Platt 5D Ada-ECE (%)")
     brier_col_idx = m3_headers.index("Platt 5D Brier")
     auroc_col_idx = m3_headers.index("Platt 5D AUROC")
 
-    m3_p5_ece = float(df_vqav2.iloc[12, ece_col_idx]) / 100.0
-    m3_p5_ada = float(df_vqav2.iloc[12, ada_col_idx]) / 100.0
-    m3_p5_brier = float(df_vqav2.iloc[12, brier_col_idx])
-    m3_p5_auroc = float(df_vqav2.iloc[12, auroc_col_idx])
+    m3_textvqa_row_idx = next(
+        r
+        for r in range(m3_title_idx + 2, len(df_vqav2))
+        if str(df_vqav2.iloc[r, 0]).strip() == "textvqa"
+    )
+    m3_p5_ece = float(df_vqav2.iloc[m3_textvqa_row_idx, ece_col_idx]) / 100.0
+    m3_p5_ada = float(df_vqav2.iloc[m3_textvqa_row_idx, ada_col_idx]) / 100.0
+    m3_p5_brier = float(df_vqav2.iloc[m3_textvqa_row_idx, brier_col_idx])
+    m3_p5_auroc = float(df_vqav2.iloc[m3_textvqa_row_idx, auroc_col_idx])
     assert f"{m3_p5_ece:.4f}" in table2_m3
     assert f"{m3_p5_ada:.4f}" in table2_m3
     assert f"{m3_p5_brier:.4f}" in table2_m3
     assert f"{m3_p5_auroc:.3f}" in table2_m3
 
-    mqt_headers = df_vqav2.iloc[18].tolist()
+    # Locate MQT section dynamically
+    mqt_title_idx = next(r for r in range(len(df_vqav2)) if "MQT-LLaVA" in str(df_vqav2.iloc[r, 0]))
+    mqt_headers = df_vqav2.iloc[mqt_title_idx + 1].tolist()
     mqt_ece_idx = mqt_headers.index("Platt 5D ECE (%)")
     mqt_ada_idx = mqt_headers.index("Platt 5D Ada-ECE (%)")
     mqt_brier_idx = mqt_headers.index("Platt 5D Brier")
     mqt_auroc_idx = mqt_headers.index("Platt 5D AUROC")
 
-    mqt_p5_ece = float(df_vqav2.iloc[29, mqt_ece_idx]) / 100.0
-    mqt_p5_ada = float(df_vqav2.iloc[29, mqt_ada_idx]) / 100.0
-    mqt_p5_brier = float(df_vqav2.iloc[29, mqt_brier_idx])
-    mqt_p5_auroc = float(df_vqav2.iloc[29, mqt_auroc_idx])
+    mqt_textvqa_row_idx = next(
+        r
+        for r in range(mqt_title_idx + 2, len(df_vqav2))
+        if str(df_vqav2.iloc[r, 0]).strip() == "textvqa"
+    )
+    mqt_p5_ece = float(df_vqav2.iloc[mqt_textvqa_row_idx, mqt_ece_idx]) / 100.0
+    mqt_p5_ada = float(df_vqav2.iloc[mqt_textvqa_row_idx, mqt_ada_idx]) / 100.0
+    mqt_p5_brier = float(df_vqav2.iloc[mqt_textvqa_row_idx, mqt_brier_idx])
+    mqt_p5_auroc = float(df_vqav2.iloc[mqt_textvqa_row_idx, mqt_auroc_idx])
     assert f"{mqt_p5_ece:.4f}" in table3_mqt
     assert f"{mqt_p5_ada:.4f}" in table3_mqt
     assert f"{mqt_p5_brier:.4f}" in table3_mqt

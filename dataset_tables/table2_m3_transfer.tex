@@ -1,23 +1,23 @@
 \begin{table*}[t]
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.05}
 \centering
-\caption{\textbf{Zero-Shot Cross-Domain Calibration Transfer (M3-LLaVA 7B).} Pairwise zero-shot calibration transfer from source datasets across held-out target vision-language benchmarks without target domain supervision. Evaluated across Expected Calibration Error (\textbf{ECE} $\downarrow$), Adaptive ECE (\textbf{Ada-ECE} $\downarrow$), AUROC ($\uparrow$), and Brier score ($\downarrow$). \textbf{Bold}: Rank 1; \textit{italic}: Rank 2 among transfer methods.}
-\label{tab:table2_m3_transfer}
-\tablestyle{3pt}{1.05}
+\footnotesize
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{l cccc cccc cccc}
 \toprule
 \multicolumn{13}{l}{\textbf{Source: VQAv2} (General Scene VQA)} \\
 \midrule
- & \multicolumn{4}{c}{\textbf{TextVQA} (Scene Text)} & \multicolumn{4}{c}{\textbf{AI2D} (Diagrams)} & \multicolumn{4}{c}{\textbf{VizWiz-VQA} (Assistive)} \\
+ & \multicolumn{4}{c}{\textbf{TextVQA} (Scene Text)} & \multicolumn{4}{c}{\textbf{AI2D} (Diagrams)} & \multicolumn{4}{c}{\textbf{AVQA} (Adversarial Audio-Visual)} \\
 \cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
 \textbf{Method} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ \\
 \midrule
-\textsc{In-Domain Calibration (Platt 5D)} & 0.0578 & 0.0535 & 0.835 & 0.1628 & 0.0861 & 0.1115 & 0.661 & 0.2289 & 0.0638 & 0.0657 & 0.794 & 0.1828 \\
-Uncalibrated (NC) & \textit{0.0851} & \textit{0.0867} & \textit{0.837} & \textbf{0.1717} & 0.4210 & 0.4210 & 0.638 & 0.4209 & 0.1703 & 0.1703 & \textbf{0.789} & \textit{0.2118} \\
-Temperature Scaling (TS) & 0.1030 & 0.1012 & \textit{0.837} & 0.1739 & 0.4201 & 0.4201 & 0.638 & 0.4200 & \textbf{0.1544} & \textbf{0.1554} & \textbf{0.789} & \textbf{0.2099} \\
-Adaptive TS (ATS) & 0.1154 & 0.1126 & \textbf{0.840} & \textit{0.1737} & 0.4196 & 0.4196 & \textbf{0.667} & 0.4194 & \textit{0.1598} & \textit{0.1598} & \textit{0.787} & 0.2125 \\
-Platt Scaling (1D) & 0.1788 & 0.1785 & \textit{0.837} & 0.2066 & \textit{0.4184} & \textit{0.4184} & 0.638 & \textit{0.4183} & 0.2765 & 0.2765 & \textbf{0.789} & 0.2741 \\
-\textbf{Platt 5D (Ours)} & \textbf{0.0736} & \textbf{0.0754} & 0.811 & 0.1793 & \textbf{0.4026} & \textbf{0.4026} & \textit{0.661} & \textbf{0.4027} & 0.2400 & 0.2400 & 0.716 & 0.2677 \\
+\textsc{In-Domain Calibration (Platt 5D)} & 0.0578 & 0.0535 & 0.835 & 0.1628 & 0.0861 & 0.1115 & 0.661 & 0.2289 & 0.0526 & 0.0745 & 0.691 & 0.2240 \\
+Uncalibrated (NC) & \textit{0.0851} & \textit{0.0867} & \textit{0.837} & \textbf{0.1717} & 0.4210 & 0.4210 & 0.638 & 0.4209 & 0.2370 & 0.2335 & 0.594 & 0.3219 \\
+Temperature Scaling (TS) & 0.1030 & 0.1012 & \textit{0.837} & 0.1739 & 0.4201 & 0.4201 & 0.638 & 0.4200 & \textbf{0.2047} & \textit{0.2102} & 0.594 & 0.3065 \\
+Adaptive TS (ATS) & 0.1154 & 0.1126 & \textbf{0.840} & \textit{0.1737} & 0.4196 & 0.4196 & \textbf{0.667} & 0.4194 & \textit{0.2058} & \textbf{0.2079} & \textit{0.604} & \textit{0.3020} \\
+Platt Scaling (1D) & 0.1788 & 0.1785 & \textit{0.837} & 0.2066 & \textit{0.4184} & \textit{0.4184} & 0.638 & \textit{0.4183} & 0.2791 & 0.2791 & 0.594 & 0.3257 \\
+\textbf{Platt 5D (Ours)} & \textbf{0.0736} & \textbf{0.0754} & 0.811 & 0.1793 & \textbf{0.4026} & \textbf{0.4026} & \textit{0.661} & \textbf{0.4027} & 0.2409 & 0.2402 & \textbf{0.639} & \textbf{0.2986} \\
 \midrule
 \multicolumn{13}{l}{\textbf{Source: VizWiz-VQA} (Assistive / Blurry)} \\
 \midrule
@@ -34,17 +34,19 @@ Platt Scaling (1D) & \textit{0.0842} & 0.0896 & \textbf{0.837} & \textit{0.1689}
 \midrule
 \multicolumn{13}{l}{\textbf{Source: TextVQA} (Scene Text)} \\
 \midrule
- & \multicolumn{4}{c}{\textbf{VQAv2} (General Scene VQA)} & \multicolumn{4}{c}{\textbf{VizWiz-VQA} (Assistive)} & \multicolumn{4}{c}{\textbf{AI2D} (Diagrams)} \\
+ & \multicolumn{4}{c}{\textbf{VQAv2} (General Scene VQA)} & \multicolumn{4}{c}{\textbf{AVQA} (Adversarial Audio-Visual)} & \multicolumn{4}{c}{\textbf{VLLM-Safety} (Adversarial Safety)} \\
 \cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
 \textbf{Method} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ \\
 \midrule
-\textsc{In-Domain Calibration (Platt 5D)} & 0.0686 & 0.0650 & 0.788 & 0.1380 & 0.0638 & 0.0657 & 0.794 & 0.1828 & 0.0861 & 0.1115 & 0.661 & 0.2289 \\
-Uncalibrated (NC) & \textbf{0.0791} & \textit{0.0769} & 0.764 & \textbf{0.1370} & 0.1703 & 0.1703 & \textbf{0.789} & 0.2118 & \textit{0.4210} & \textit{0.4210} & 0.638 & \textit{0.4209} \\
-Temperature Scaling (TS) & 0.0811 & 0.0799 & 0.764 & 0.1380 & 0.1660 & 0.1660 & \textbf{0.789} & 0.2102 & \textbf{0.4209} & \textbf{0.4209} & 0.638 & \textit{0.4209} \\
-Adaptive TS (ATS) & \textit{0.0799} & \textbf{0.0757} & \textit{0.768} & \textit{0.1372} & 0.1689 & 0.1689 & \textit{0.788} & 0.2112 & \textbf{0.4209} & \textbf{0.4209} & \textbf{0.658} & \textit{0.4209} \\
-Platt Scaling (1D) & 0.1235 & 0.1241 & 0.764 & 0.1507 & \textbf{0.0885} & \textbf{0.0873} & \textbf{0.789} & \textbf{0.1881} & \textbf{0.4209} & \textbf{0.4209} & 0.638 & \textit{0.4209} \\
-\textbf{Platt 5D (Ours)} & 0.0903 & 0.0928 & \textbf{0.770} & 0.1417 & \textit{0.1192} & \textit{0.1192} & 0.780 & \textit{0.1988} & \textbf{0.4209} & \textbf{0.4209} & \textit{0.648} & \textbf{0.4208} \\
+\textsc{In-Domain Calibration (Platt 5D)} & 0.0686 & 0.0650 & 0.788 & 0.1380 & 0.0526 & 0.0745 & 0.691 & 0.2240 & 0.0587 & 0.0688 & 0.773 & 0.1709 \\
+Uncalibrated (NC) & \textbf{0.0791} & \textit{0.0769} & 0.764 & \textbf{0.1370} & 0.2370 & 0.2335 & 0.594 & 0.3219 & \textit{0.1157} & \textit{0.1119} & \textbf{0.821} & \textit{0.1763} \\
+Temperature Scaling (TS) & 0.0811 & 0.0799 & 0.764 & 0.1380 & 0.2290 & 0.2270 & 0.594 & 0.3185 & 0.1185 & 0.1164 & \textbf{0.821} & \textbf{0.1757} \\
+Adaptive TS (ATS) & \textit{0.0799} & \textbf{0.0757} & \textit{0.768} & \textit{0.1372} & 0.2327 & 0.2296 & \textit{0.597} & 0.3187 & 0.1216 & 0.1169 & \textit{0.820} & 0.1770 \\
+Platt Scaling (1D) & 0.1235 & 0.1241 & 0.764 & 0.1507 & \textbf{0.2227} & \textbf{0.2162} & 0.594 & \textit{0.3177} & 0.1223 & 0.1203 & \textbf{0.821} & 0.1836 \\
+\textbf{Platt 5D (Ours)} & 0.0903 & 0.0928 & \textbf{0.770} & 0.1417 & \textit{0.2251} & \textit{0.2245} & \textbf{0.599} & \textbf{0.3162} & \textbf{0.1013} & \textbf{0.0973} & 0.812 & 0.1774 \\
 \bottomrule
 \end{tabular}%
 }
+\caption{\textbf{Zero-Shot Cross-Domain Calibration Transfer (M3-LLaVA 7B).} Pairwise zero-shot transfer across held-out target benchmarks without target supervision. Evaluated on ECE ($\downarrow$), Ada-ECE ($\downarrow$), AUROC ($\uparrow$), and Brier score ($\downarrow$). \textbf{Bold}: Rank 1; \textit{italic}: Rank 2 among transfer methods.}
+\label{tab:table2_m3_transfer}
 \end{table*}

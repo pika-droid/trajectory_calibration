@@ -140,19 +140,18 @@ def generate_macro_progression_table(
     df_mqt: pd.DataFrame,
 ) -> str:
     """Generate table_ablation_5d_macro_progression.tex comparing cardinalities k=1..5."""
+    caption = (
+        r"\textbf{Combinatorial 5D Trajectory Feature Cardinality Progression ($k \in \{1 \dots 5\}$)}. "
+        r"Macro-averaged out-of-fold calibration error and discrimination across Core 5 benchmarks "
+        r"for M3-LLaVA and MQT-LLaVA (7B). Evaluates all $\sum_{k=1}^5 \binom{5}{k} = 31$ feature subsets. "
+        r"\textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 within each architecture."
+    )
     lines: list[str] = [
         r"\begin{table*}[t]",
+        r"\setlength{\tabcolsep}{4pt}",
+        r"\renewcommand{\arraystretch}{1.05}",
         r"\centering",
         r"\small",
-        r"\caption{\textbf{Combinatorial 5D Trajectory Feature Cardinality Progression ($k \in \{1 \dots 5\}$)}. "
-        r"Macro-averaged out-of-fold calibration error and discrimination across Core 5 vision-language benchmarks "
-        r"for M3-LLaVA (7B) and MQT-LLaVA (7B). Evaluates all $\sum_{k=1}^5 \binom{5}{k} = 31$ feature subsets. "
-        r"Reported in pure decimal format. \textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 within each architecture. "
-        r"Note: Subsets lacking the base logit anchor $x_1$ achieve artificially low quantile Ada-ECE via class-prior "
-        r"probability clustering, but suffer severe AUROC collapse ($\le 0.64$ vs. $0.71+$ for $x_1$-anchored models); "
-        r"joint calibration and discrimination require the full 5D representation.}",
-        r"\label{tab:ablation_5d_macro_progression}",
-        r"\vspace{2mm}",
         r"\begin{tabular}{cccccc}",
         r"\toprule",
         r"\textbf{Cardinality ($k$)} & \textbf{Subsets $\binom{5}{k}$} & \textbf{Optimal Formula} & "
@@ -186,7 +185,15 @@ def generate_macro_progression_table(
     # Remove trailing \midrule and replace with \bottomrule
     if lines[-1] == r"\midrule":
         lines[-1] = r"\bottomrule"
-    lines.extend([r"\end{tabular}", r"\end{table*}", ""])
+    lines.extend(
+        [
+            r"\end{tabular}",
+            rf"\caption{{{caption}}}",
+            r"\label{tab:ablation_5d_macro_progression}",
+            r"\end{table*}",
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -198,17 +205,18 @@ def generate_loo_table(
     m3_indexed = df_loo_m3.set_index("feature_dropped").loc[CANONICAL_5D_KEYS]
     mqt_indexed = df_loo_mqt.set_index("feature_dropped").loc[CANONICAL_5D_KEYS]
 
+    caption = (
+        r"\textbf{Leave-One-Out (LOO) Feature Degradation Sensitivity across Core 5 Benchmarks}. "
+        r"Marginal change in calibration error ($\Delta \text{Ada-ECE}$) and discrimination ($\Delta \text{AUROC}$) "
+        r"when dropping individual feature $x_j$ from Trajectory Platt (5D). "
+        r"\textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 degradation impact."
+    )
     lines: list[str] = [
         r"\begin{table*}[t]",
+        r"\setlength{\tabcolsep}{4pt}",
+        r"\renewcommand{\arraystretch}{1.05}",
         r"\centering",
         r"\small",
-        r"\caption{\textbf{Leave-One-Out (LOO) Feature Degradation Sensitivity across Core 5 Benchmarks}. "
-        r"Marginal change in calibration error ($\Delta \text{Ada-ECE} = \text{Ada-ECE}_{-j} - \text{Ada-ECE}_{\text{Full 5D}}$) "
-        r"and discrimination ($\Delta \text{AUROC} = \text{AUROC}_{-j} - \text{AUROC}_{\text{Full 5D}}$) when dropping "
-        r"individual feature $x_j$ from Trajectory Platt (5D). Positive $\Delta \text{Ada-ECE}$ and negative $\Delta \text{AUROC}$ "
-        r"indicate feature necessity. \textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 degradation impact.}",
-        r"\label{tab:ablation_5d_loo}",
-        r"\vspace{2mm}",
         r"\begin{tabular}{clccccl}",
         r"\toprule",
         r"\multirow{2}{*}{\textbf{Dropped Feature}} & \multirow{2}{*}{\textbf{Functional Role}} & "
@@ -259,7 +267,16 @@ def generate_loo_table(
             f"{feat_math} & {role} & {m3_d_ada_str} & {m3_d_auroc_str} & {mqt_d_ada_str} & {mqt_d_auroc_str} & {impact} \\\\"
         )
 
-    lines.extend([r"\bottomrule", r"\end{tabular}", r"\end{table*}", ""])
+    lines.extend(
+        [
+            r"\bottomrule",
+            r"\end{tabular}",
+            rf"\caption{{{caption}}}",
+            r"\label{tab:ablation_5d_loo}",
+            r"\end{table*}",
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -268,15 +285,17 @@ def generate_14ds_grid_table(
     df_raw_mqt: pd.DataFrame,
 ) -> str:
     """Generate table_ablation_5d_14ds_grid.tex showing 1D, Best-2D, Best-3D, Best-4D, Full-5D."""
+    caption = (
+        r"\textbf{Exhaustive 14-Benchmark Progression Grid: Adaptive ECE ($\downarrow$)}. "
+        r"Per-dataset comparison across 1D Platt ($\{x_1\}$), Optimal 2D, Optimal 3D, Optimal 4D, and Full Trajectory Platt 5D. "
+        r"Option A ranking: \textbf{Bold} Rank 1, \textit{Italic} Rank 2 across each benchmark row."
+    )
     lines: list[str] = [
         r"\begin{table*}[t]",
+        r"\setlength{\tabcolsep}{4pt}",
+        r"\renewcommand{\arraystretch}{1.05}",
         r"\centering",
         r"\scriptsize",
-        r"\caption{\textbf{Exhaustive 14-Benchmark Progression Grid: Adaptive ECE ($\downarrow$)}. "
-        r"Per-dataset comparison across 1D Platt ($\{x_1\}$), Optimal 2D, Optimal 3D, Optimal 4D, and Full Trajectory Platt 5D. "
-        r"Option A ranking: \textbf{Bold} Rank 1, \textit{Italic} Rank 2 across each benchmark row.}",
-        r"\label{tab:ablation_5d_14ds_grid}",
-        r"\vspace{2mm}",
         r"\begin{tabular}{lccccc}",
         r"\toprule",
         r"\textbf{Benchmark Dataset} & \textbf{1D Platt ($\{x_1\}$)} & \textbf{Best-2D} & \textbf{Best-3D} & \textbf{Best-4D} & \textbf{Full 5D (Ours)} \\",
@@ -336,7 +355,15 @@ def generate_14ds_grid_table(
 
     if lines[-1] == r"\midrule":
         lines[-1] = r"\bottomrule"
-    lines.extend([r"\end{tabular}", r"\end{table*}", ""])
+    lines.extend(
+        [
+            r"\end{tabular}",
+            rf"\caption{{{caption}}}",
+            r"\label{tab:ablation_5d_14ds_grid}",
+            r"\end{table*}",
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -348,23 +375,19 @@ def generate_single_dataset_progression_table(
 ) -> str:
     """Generate cardinality progression table k=1..5 for a single dataset."""
     label_slug = dataset_key.replace("-", "")
+    caption_text = (
+        r"\caption{\textbf{Combinatorial 5D Trajectory Feature Cardinality Progression on \textsc{"
+        + dataset_display
+        + r"} ($k \in \{1 \dots 5\}$)}. "
+        r"Out-of-fold calibration error and discrimination across feature cardinality levels for M3-LLaVA and MQT-LLaVA (7B). "
+        r"\textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 within each architecture.}"
+    )
     lines: list[str] = [
-        r"\begin{table}[t]",
+        r"\begin{table*}[t]",
+        r"\setlength{\tabcolsep}{3.5pt}",
+        r"\renewcommand{\arraystretch}{1.05}",
         r"\centering",
-        (
-            r"\caption{\textbf{Combinatorial 5D Trajectory Feature Cardinality Progression on \textsc{"
-            + dataset_display
-            + r"} ($k \in \{1 \dots 5\}$)}. "
-            r"Out-of-fold calibration error and discrimination across feature cardinality levels for M3-LLaVA (7B) and MQT-LLaVA (7B). "
-            r"Evaluated across all $\sum_{k=1}^5 \binom{5}{k} = 31$ feature subsets. Reported in pure decimal format. "
-            r"\textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 within each architecture. Note: Subsets lacking the base logit anchor $x_1$ "
-            r"achieve artificially low quantile Ada-ECE via class-prior probability clustering, but suffer severe AUROC collapse "
-            r"and degraded Brier scores; joint calibration and discrimination require the full 5D representation.}"
-        ),
-        r"\label{tab:ablation_5d_" + label_slug + "}",
-        r"\providecommand{\tablestyle}[2]{\setlength{\tabcolsep}{#1}\renewcommand{\arraystretch}{#2}}",
-        r"\tablestyle{3.5pt}{1.05}",
-        r"\resizebox{\linewidth}{!}{%",
+        r"\footnotesize",
         r"\begin{tabular}{ccccccc}",
         r"\toprule",
         (
@@ -421,7 +444,15 @@ def generate_single_dataset_progression_table(
 
     if lines[-1] == r"\midrule":
         lines[-1] = r"\bottomrule"
-    lines.extend([r"\end{tabular}%", r"}", r"\end{table}", ""])
+    lines.extend(
+        [
+            r"\end{tabular}",
+            caption_text,
+            r"\label{tab:ablation_5d_" + label_slug + "}",
+            r"\end{table*}",
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 

@@ -39,12 +39,14 @@ def rank_and_format(vals, higher_is_better=False, is_pct=False, decimals=2):
 
 
 def build_macro_section(arch_key, arch_display):
-    csv_file = CSV_DIR / f"token_budget_macro_core7_{arch_key}.csv"
+    csv_file = CSV_DIR / f"token_budget_macro_core5_{arch_key}.csv"
+    if not csv_file.exists():
+        csv_file = CSV_DIR / f"token_budget_macro_core7_{arch_key}.csv"
     if not csv_file.exists():
         return ""
     df = pd.read_csv(csv_file)
     lines = [
-        f"### Macro-Averaged Performance Across Core 7 Benchmarks ({arch_display})",
+        f"### Macro-Averaged Performance Across Core 5 Benchmarks ({arch_display})",
         "",
         "| Depth ($k$) | Tokens ($T$) | Acc (%) $\\uparrow$ | Calibration Method | ECE (%) $\\downarrow$ | Ada-ECE (%) $\\downarrow$ | Brier $\\downarrow$ | AUROC $\\uparrow$ |",
         "| :---: | :---: | :---: | :--- | :---: | :---: | :---: | :---: |",

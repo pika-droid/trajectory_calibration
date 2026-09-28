@@ -1,37 +1,39 @@
 \begin{table}[t]
-\caption{\textbf{Calibration Benchmark on \texttt{lego-puzzles} (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:benchmark_m3_legopuzzles}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 73.16 & 73.16 & 0.7314 & \textit{0.477} \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 34.71 & 34.71 & 0.3160 & \textit{0.477} \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 34.66 & 34.66 & 0.3156 & \textit{0.477} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{0.71} & \textit{11.89} & \textit{0.1958} & \textit{0.477} \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{4.15} & \textbf{9.40} & \textbf{0.1914} & \textbf{0.601} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 0.7316 & 0.7316 & 0.7314 & \textit{0.477} \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 0.3471 & 0.3471 & 0.3160 & \textit{0.477} \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 0.3466 & 0.3466 & 0.3156 & \textit{0.477} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{0.0071} & \textit{0.1189} & \textit{0.1958} & \textit{0.477} \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{0.0415} & \textbf{0.0940} & \textbf{0.1914} & \textbf{0.601} \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{Calibration Benchmark on \texttt{lego-puzzles} (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:benchmark_m3_legopuzzles}
 \end{table}
 
 \begin{table}[t]
-\caption{\textbf{Calibration Benchmark on \texttt{lego-puzzles} (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:benchmark_mqt_legopuzzles}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 34.60 & 33.80 & 0.3474 & 0.510 \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 23.68 & 23.68 & 0.2539 & 0.510 \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 23.68 & 23.68 & 0.2539 & \textit{0.511} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{0.60} & \textit{12.43} & \textit{0.1968} & 0.490 \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{7.81} & \textbf{8.67} & \textbf{0.1924} & \textbf{0.593} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 0.3460 & 0.3380 & 0.3474 & 0.510 \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 0.2368 & 0.2368 & 0.2539 & 0.510 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 0.2368 & 0.2368 & 0.2539 & \textit{0.511} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{0.0060} & \textit{0.1243} & \textit{0.1968} & 0.490 \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{0.0781} & \textbf{0.0867} & \textbf{0.1924} & \textbf{0.593} \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{Calibration Benchmark on \texttt{lego-puzzles} (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:benchmark_mqt_legopuzzles}
 \end{table}

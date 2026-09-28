@@ -281,11 +281,11 @@ def test_format_macro_latex_table_syntax() -> None:
     if macro_path.exists():
         macro_df = pd.read_csv(macro_path)
         latex_code = format_macro_latex_table(macro_df, "M3-LLaVA", "tab:test_m3")
-        assert "\\begin{table}[t]" in latex_code
-        assert "\\end{table}" in latex_code
+        assert "\\begin{table*}[t]" in latex_code
+        assert "\\end{table*}" in latex_code
         assert "\\toprule" in latex_code
         assert "\\bottomrule" in latex_code
-        assert "Core 7" in latex_code
+        assert "Core 5" in latex_code
         assert "Adaptive TS (ATS)" in latex_code
         assert "\\rowcolor" not in latex_code
 
@@ -318,10 +318,10 @@ def test_format_targeted_sample_efficiency_latex_table() -> None:
         latex_code = format_targeted_sample_efficiency_latex_table(
             summary_df, "M3-LLaVA", targeted_ds, "tab:test_targeted_m3"
         )
-        assert "\\begin{table}[t]" in latex_code
-        assert "\\end{table}" in latex_code
-        assert "Panel A: TextVQA (Scene Text VQA)" in latex_code
-        assert "Panel B: VQAv2 (General Scene VQA)" in latex_code
+        assert "\\begin{table*}[t]" in latex_code
+        assert "\\end{table*}" in latex_code
+        assert "Panel A: TextVQA" in latex_code
+        assert "Panel B: VQAv2" in latex_code
         assert "tab:test_targeted_m3" in latex_code
         assert "\\rowcolor" not in latex_code
         assert "Trajectory Platt (5D)" in latex_code

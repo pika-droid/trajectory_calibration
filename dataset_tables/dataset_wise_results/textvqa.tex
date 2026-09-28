@@ -1,45 +1,47 @@
 \begin{table}[t]
-\caption{\textbf{Calibration Benchmark on \texttt{textvqa} (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:benchmark_m3_textvqa}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 10.50 & 11.07 & 0.1714 & \textbf{0.839} \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 10.38 & 11.14 & 0.1712 & \textbf{0.839} \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 10.15 & 11.31 & 0.1710 & \textbf{0.839} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{8.47} & \textit{8.22} & \textbf{0.1615} & \textbf{0.839} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 0.1050 & 0.1107 & 0.1714 & \textbf{0.839} \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 0.1038 & 0.1114 & 0.1712 & \textbf{0.839} \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 0.1015 & 0.1131 & 0.1710 & \textbf{0.839} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{0.0847} & \textit{0.0822} & \textbf{0.1615} & \textbf{0.839} \\
 LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 EigenScore & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textbf{5.78} & \textbf{5.35} & \textit{0.1628} & \textit{0.835} \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textbf{0.0578} & \textbf{0.0535} & \textit{0.1628} & \textit{0.835} \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{Calibration Benchmark on \texttt{textvqa} (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:benchmark_m3_textvqa}
 \end{table}
 
 \begin{table}[t]
-\caption{\textbf{Calibration Benchmark on \texttt{textvqa} (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:benchmark_mqt_textvqa}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 32.27 & 31.91 & 0.3286 & 0.684 \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 18.21 & 18.32 & 0.2503 & 0.684 \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 18.36 & 18.36 & 0.2500 & \textit{0.689} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{8.95} & \textit{10.46} & \textit{0.2148} & 0.684 \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 0.3227 & 0.3191 & 0.3286 & 0.684 \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 0.1821 & 0.1832 & 0.2503 & 0.684 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 0.1836 & 0.1836 & 0.2500 & \textit{0.689} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textit{0.0895} & \textit{0.1046} & \textit{0.2148} & 0.684 \\
 LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 EigenScore & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textbf{5.25} & \textbf{7.76} & \textbf{0.1948} & \textbf{0.719} \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textbf{0.0525} & \textbf{0.0776} & \textbf{0.1948} & \textbf{0.719} \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{Calibration Benchmark on \texttt{textvqa} (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:benchmark_mqt_textvqa}
 \end{table}

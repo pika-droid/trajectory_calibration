@@ -1,45 +1,47 @@
 \begin{table}[t]
-\caption{\textbf{Calibration Benchmark on \texttt{ai2d} (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:benchmark_m3_ai2d}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 42.00 & 42.00 & 0.4200 & 0.614 \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 8.62 & 12.18 & 0.2477 & 0.614 \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 8.64 & 13.15 & 0.2476 & \textit{0.625} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{5.63} & \textbf{7.70} & \textit{0.2370} & 0.614 \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 0.4200 & 0.4200 & 0.4200 & 0.614 \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 0.0862 & 0.1218 & 0.2477 & 0.614 \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 0.0864 & 0.1315 & 0.2476 & \textit{0.625} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{0.0563} & \textbf{0.0770} & \textit{0.2370} & 0.614 \\
 LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 EigenScore & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{8.61} & \textit{11.15} & \textbf{0.2289} & \textbf{0.661} \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{0.0861} & \textit{0.1115} & \textbf{0.2289} & \textbf{0.661} \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{Calibration Benchmark on \texttt{ai2d} (M3-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:benchmark_m3_ai2d}
 \end{table}
 
 \begin{table}[t]
-\caption{\textbf{Calibration Benchmark on \texttt{ai2d} (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
-\label{tab:benchmark_mqt_ai2d}
-\tablestyle{4pt}{1.05}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\centering
+\footnotesize
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE (\%)} $\downarrow$ & \textbf{Ada-ECE (\%)} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
+\textbf{Calibration Method} & \textbf{Regime / Sampling} & \textbf{ECE} $\downarrow$ & \textbf{Ada-ECE} $\downarrow$ & \textbf{Brier} $\downarrow$ & \textbf{AUROC} $\uparrow$ \\
 \midrule
-Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 27.15 & 26.92 & 0.2887 & \textit{0.746} \\
-Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 13.31 & 13.10 & 0.2197 & \textit{0.746} \\
-Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 13.38 & 14.08 & 0.2195 & \textbf{0.747} \\
-Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{5.92} & \textit{8.25} & \textbf{0.2015} & \textit{0.746} \\
+Naive Confidence (NC) & Single-Pass ($T = 0.0$) & 0.2715 & 0.2692 & 0.2887 & \textit{0.746} \\
+Temperature Scaling (TS) & Single-Pass ($T = 0.0$) & 0.1331 & 0.1310 & 0.2197 & \textit{0.746} \\
+Adaptive TS (ATS) & Single-Pass ($T = 0.0$) & 0.1338 & 0.1408 & 0.2195 & \textbf{0.747} \\
+Platt Scaling (1D) & Single-Pass ($T = 0.0$) & \textbf{0.0592} & \textit{0.0825} & \textbf{0.2015} & \textit{0.746} \\
 LN-Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 Semantic Entropy & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 EigenScore & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
 UMPIRE & Multi-Pass ($T = 0.5, K = 10$) & - & - & - & - \\
-Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{6.27} & \textbf{6.53} & \textit{0.2035} & 0.739 \\
+Trajectory Platt (5D) & Single-Pass ($T = 0.0$) & \textit{0.0627} & \textbf{0.0653} & \textit{0.2035} & 0.739 \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
+\caption{\textbf{Calibration Benchmark on \texttt{ai2d} (MQT-LLaVA 7B).} \textbf{Bold}: best; \textit{italic}: second best. $\downarrow$/$\uparrow$: lower/higher is better.}
+\label{tab:benchmark_mqt_ai2d}
 \end{table}

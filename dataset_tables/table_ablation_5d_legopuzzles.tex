@@ -1,10 +1,8 @@
-\begin{table}[t]
+\begin{table*}[t]
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
 \centering
-\caption{\textbf{Combinatorial 5D Trajectory Feature Cardinality Progression on \textsc{LegoPuzzles} ($k \in \{1 \dots 5\}$)}. Out-of-fold calibration error and discrimination across feature cardinality levels for M3-LLaVA (7B) and MQT-LLaVA (7B). Evaluated across all $\sum_{k=1}^5 \binom{5}{k} = 31$ feature subsets. Reported in pure decimal format. \textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 within each architecture. Note: Subsets lacking the base logit anchor $x_1$ achieve artificially low quantile Ada-ECE via class-prior probability clustering, but suffer severe AUROC collapse and degraded Brier scores; joint calibration and discrimination require the full 5D representation.}
-\label{tab:ablation_5d_legopuzzles}
-\providecommand{\tablestyle}[2]{\setlength{\tabcolsep}{#1}\renewcommand{\arraystretch}{#2}}
-\tablestyle{3.5pt}{1.05}
-\resizebox{\linewidth}{!}{%
+\footnotesize
 \begin{tabular}{ccccccc}
 \toprule
 \textbf{Cardinality ($k$)} & \textbf{Subsets} & \textbf{Optimal Formula} & \textbf{Ada-ECE} $\downarrow$ & \textbf{Mean $\pm$ Std} & \textbf{AUROC} $\uparrow$ & \textbf{Brier} $\downarrow$ \\
@@ -25,6 +23,7 @@ $k = 3$ & 10 & $x_{1} + x_{3} + x_{4}$ & \textbf{0.0303} & 0.0535 $\pm$ 0.0224 &
 $k = 4$ & 5 & $x_{1} + x_{2} + x_{3} + x_{4}$ & 0.0383 & 0.0536 $\pm$ 0.0172 & 0.607 & 0.1934 \\
 $k = 5$ & 1 & $x_{1} + x_{2} + x_{3} + x_{4} + x_{5}$ & 0.0520 & 0.0520 $\pm$ 0.0000 & \textit{0.611} & \textit{0.1929} \\
 \bottomrule
-\end{tabular}%
-}
-\end{table}
+\end{tabular}
+\caption{\textbf{Combinatorial 5D Trajectory Feature Cardinality Progression on \textsc{LegoPuzzles} ($k \in \{1 \dots 5\}$)}. Out-of-fold calibration error and discrimination across feature cardinality levels for M3-LLaVA and MQT-LLaVA (7B). \textbf{Bold}: Rank 1, \textit{Italic}: Rank 2 within each architecture.}
+\label{tab:ablation_5d_legopuzzles}
+\end{table*}
