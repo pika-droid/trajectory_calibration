@@ -119,7 +119,7 @@ DATASET_DISPLAY_MAP = {
     "textvqa": "TextVQA",
     "vizwiz-vqa": "VizWiz-VQA",
     "vqav2": "VQAv2",
-    "avqa": "AVQA",
+    "avqa": "Adversarial VQA",
     "vllm-safety": "VLLM-Safety",
 }
 
@@ -760,7 +760,7 @@ def build_rq1_adversarial_table(df_m3: pd.DataFrame, df_mqt: pd.DataFrame) -> st
             r"\bottomrule",
             r"\end{tabular}%",
             r"}",
-            r"\caption{\textbf{RQ1 Calibration Robustness Under Adversarial and Safety Stress Benchmarks.} Performance on AVQA, VLLM-Safety, and Adversarial Macro Average for M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B). \textbf{Bold}: Rank 1; \textit{italic}: Rank 2 within each metric column among single-pass methods.}",
+            r"\caption{\textbf{RQ1 Calibration Robustness Under Adversarial and Safety Stress Benchmarks.} Performance on Adversarial VQA, VLLM-Safety, and Adversarial Macro Average for M3-LLaVA (7B) (Panel A) and MQT-LLaVA (7B) (Panel B). \textbf{Bold}: Rank 1; \textit{italic}: Rank 2 within each metric column among single-pass methods.}",
             rf"\label{{{tab_label}}}",
             r"\end{table*}",
         ]

@@ -39,7 +39,7 @@ SOURCE_BLOCKS: list[tuple[str, str, str, list[tuple[str, str, str]]]] = [
         [
             ("textvqa", "TextVQA", "Scene Text"),
             ("ai2d", "AI2D", "Diagrams"),
-            ("avqa", "AVQA", "Adversarial Audio-Visual"),
+            ("avqa", "Adversarial VQA", "Adversarial Robustness"),
         ],
     ),
     (
@@ -58,7 +58,7 @@ SOURCE_BLOCKS: list[tuple[str, str, str, list[tuple[str, str, str]]]] = [
         "Scene Text",
         [
             ("vqav2", "VQAv2", "General Scene VQA"),
-            ("avqa", "AVQA", "Adversarial Audio-Visual"),
+            ("avqa", "Adversarial VQA", "Adversarial Robustness"),
             ("vllm-safety", "VLLM-Safety", "Adversarial Safety"),
         ],
     ),
