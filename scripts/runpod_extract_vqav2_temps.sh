@@ -27,6 +27,15 @@ ARCHS="${ARCHS:-m3 mqt}"
 TEMPS="${TEMPS:-0.0 0.3 0.6 1.0 1.5}"
 HF_TOKEN="${HF_TOKEN:-}"
 
+echo "=== [0/6] Cleaning up cache & configuring workspace storage ==="
+# Clean any bloated datasets cache from root container disk to free space
+rm -rf /root/.cache/huggingface /tmp/* ~/.cache/huggingface 2>/dev/null || true
+export HF_HOME="${WORKSPACE}/.cache/huggingface"
+export TRANSFORMERS_CACHE="${HF_HOME}"
+export HF_DATASETS_CACHE="${HF_HOME}/datasets"
+export TMPDIR="${WORKSPACE}/tmp"
+mkdir -p "${HF_HOME}" "${TMPDIR}"
+
 echo "=== [1/6] Installing System Packages ==="
 apt-get update -qq
 apt-get install -y --no-install-recommends \

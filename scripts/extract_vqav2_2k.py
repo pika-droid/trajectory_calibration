@@ -235,6 +235,31 @@ def resolve_existing_checkpoint(
     return []
 
 
+def load_raw_vqav2_samples(repo_root: Path, target_count: int) -> list[dict[str, Any]]:
+    """Loads target_count raw VQAv2 samples via streaming and caches locally to avoid downloading unnecessary splits."""
+    cache_file = repo_root / "data" / f"raw_vqav2_{target_count}.pt"
+    if cache_file.exists():
+        try:
+            cached: list[dict[str, Any]] = safe_torch_load(cache_file)
+            if len(cached) >= target_count:
+                logger.info(f"Loaded {target_count} raw VQAv2 samples from cache: {cache_file}")
+                return cached[:target_count]
+        except Exception as e:
+            logger.warning(f"Could not load cache ({e}). Re-streaming...")
+
+    logger.info(f"Streaming first {target_count} samples from lmms-lab/vqav2 (validation split)...")
+    ds_stream = load_dataset("lmms-lab/vqav2", split="validation", streaming=True)
+    samples: list[dict[str, Any]] = []
+    it = iter(ds_stream)
+    for _ in tqdm(range(target_count), desc="Streaming VQAv2 samples"):
+        samples.append(next(it))
+
+    cache_file.parent.mkdir(parents=True, exist_ok=True)
+    torch.save(samples, cache_file)
+    logger.info(f"Saved {len(samples)} raw samples to local cache: {cache_file}")
+    return samples
+
+
 def run_extraction(
     repo_root: Path,
     arch: str = "m3",
@@ -270,8 +295,7 @@ def run_extraction(
         return
 
     processed_qids = {str(r["question_id"]) for r in existing_records}
-    logger.info("Loading VQAv2 validation split from lmms-lab/vqav2...")
-    ds_val = load_dataset("lmms-lab/vqav2", split="validation")
+    raw_samples = load_raw_vqav2_samples(repo_root, target_count)
 
     logger.info(f"Initializing UnifiedVLMWrapper ({arch.upper()}) from {resolved_model}...")
     wrapper = UnifiedVLMWrapper(
@@ -284,7 +308,7 @@ def run_extraction(
         if qid_str in processed_qids:
             continue
 
-        raw_sample = ds_val[idx]
+        raw_sample = raw_samples[idx]
         assert str(raw_sample["question_id"]) == qid_str, (
             f"Dataset index {idx} QID {raw_sample['question_id']} does not match canonical QID {qid_str}!"
         )
