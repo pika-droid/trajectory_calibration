@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import math
 import os
 import shutil
 import sys
@@ -100,6 +101,104 @@ def extract_vqav2_record(
     }
 
 
+def validate_feature_records(
+    records: list[dict[str, Any]],
+    arch: str,
+    canonical_qids: list[str] | None = None,
+) -> dict[str, Any]:
+    """Exhaustively validates feature records for NaNs, Infs, blanks, and schema integrity."""
+    if not records:
+        raise ValueError("Cannot validate empty records list!")
+
+    expected_scales = ARCH_SCALES[arch.lower()]
+    nan_count = 0
+    inf_count = 0
+    blank_ans_count = 0
+    all_confs: list[float] = []
+    all_accs: list[float] = []
+
+    for idx, rec in enumerate(records):
+        qid = str(rec.get("question_id", ""))
+        if not qid:
+            raise ValueError(f"Record at index {idx} has missing or empty question_id!")
+
+        if canonical_qids is not None and idx < len(canonical_qids):
+            expected_qid = str(canonical_qids[idx])
+            if qid != expected_qid:
+                raise ValueError(
+                    f"Sample {idx} QID mismatch: got {qid}, expected {expected_qid} from canonical manifest!"
+                )
+
+        q_text = str(rec.get("question", "")).strip()
+        if not q_text:
+            raise ValueError(f"Sample {idx} (QID={qid}) has empty question text!")
+
+        gt = rec.get("ground_truth") or rec.get("sample", {}).get("answers")
+        if not gt or not isinstance(gt, list) or len(gt) == 0:
+            raise ValueError(f"Sample {idx} (QID={qid}) has missing or empty ground truth answers!")
+
+        feats = rec.get("features", {})
+        if not isinstance(feats, dict):
+            raise ValueError(f"Sample {idx} (QID={qid}) has invalid features dict!")
+
+        for s in expected_scales:
+            if s not in feats:
+                raise ValueError(
+                    f"Sample {idx} (QID={qid}) missing expected scale {s} in features!"
+                )
+            f_scale = feats[s]
+            ans = str(f_scale.get("answer", "")).strip()
+            if not ans:
+                blank_ans_count += 1
+
+            for metric_key in ("conf_softmax", "margin", "avg_log_prob", "vqa_accuracy"):
+                if metric_key not in f_scale:
+                    continue
+                val = f_scale[metric_key]
+                if val is None or not isinstance(val, (int, float)):
+                    raise ValueError(
+                        f"Sample {idx} (scale {s}) metric '{metric_key}' is invalid/missing: {val}"
+                    )
+                val_f = float(val)
+                if math.isnan(val_f):
+                    nan_count += 1
+                    raise ValueError(f"Sample {idx} (scale {s}) metric '{metric_key}' is NaN!")
+                if math.isinf(val_f):
+                    inf_count += 1
+                    raise ValueError(f"Sample {idx} (scale {s}) metric '{metric_key}' is Inf!")
+
+            conf = float(f_scale["conf_softmax"])
+            if not (0.0 <= conf <= 1.0):
+                raise ValueError(
+                    f"Sample {idx} (scale {s}) conf_softmax={conf} out of [0, 1] range!"
+                )
+            all_confs.append(conf)
+
+        top_acc = rec.get("vqa_accuracy")
+        if top_acc is not None:
+            top_acc_f = float(top_acc)
+            if math.isnan(top_acc_f) or math.isinf(top_acc_f):
+                raise ValueError(f"Sample {idx} top-level vqa_accuracy is invalid: {top_acc}")
+            all_accs.append(top_acc_f)
+
+    fine_scale = expected_scales[-1]
+    fine_accs = [
+        float(r["features"][fine_scale].get("vqa_accuracy", 0.0))
+        for r in records
+        if fine_scale in r.get("features", {})
+    ]
+    summary = {
+        "total_records": len(records),
+        "nan_count": nan_count,
+        "inf_count": inf_count,
+        "blank_answers": blank_ans_count,
+        "min_conf": min(all_confs) if all_confs else 0.0,
+        "max_conf": max(all_confs) if all_confs else 0.0,
+        "mean_accuracy": float(np.mean(fine_accs)) if fine_accs else 0.0,
+    }
+    return summary
+
+
 def load_canonical_items(repo_root: Path, target_count: int) -> list[dict[str, Any]]:
     """Loads target_count canonical VQAv2 items from data/canonical_manifest_all.json."""
     manifest_p = repo_root / "data" / "canonical_manifest_all.json"
@@ -159,7 +258,15 @@ def run_extraction(
 
     existing_records = resolve_existing_checkpoint(out_file, canonical_qids, target_count)
     if len(existing_records) >= target_count:
-        logger.info(f"Extraction already complete ({len(existing_records)}/{target_count}). Done!")
+        logger.info(f"Extraction already complete ({len(existing_records)}/{target_count}).")
+        summary = validate_feature_records(
+            existing_records, arch=arch, canonical_qids=canonical_qids
+        )
+        logger.info(
+            f"Validation PASSED for {len(existing_records)} samples: "
+            f"0 NaNs, 0 Infs, {summary['blank_answers']} blanks, "
+            f"mean fine acc={summary['mean_accuracy']:.2%}"
+        )
         return
 
     processed_qids = {str(r["question_id"]) for r in existing_records}
@@ -195,6 +302,12 @@ def run_extraction(
 
     torch.save(records, out_file)
     logger.info(f"Extraction complete! Saved {len(records)} samples to {out_file}.")
+    summary = validate_feature_records(records, arch=arch, canonical_qids=canonical_qids)
+    logger.info(
+        f"Validation PASSED for {len(records)} samples: "
+        f"0 NaNs, 0 Infs, {summary['blank_answers']} blanks, "
+        f"mean fine acc={summary['mean_accuracy']:.2%}"
+    )
 
 
 def main() -> None:
@@ -204,10 +317,36 @@ def main() -> None:
     parser.add_argument("--gen_temperature", type=float, default=0.0)
     parser.add_argument("--target_count", type=int, default=2000)
     parser.add_argument("--save_interval", type=int, default=50)
+    parser.add_argument(
+        "--validate_only", action="store_true", help="Only validate existing .pt file"
+    )
     args = parser.parse_args()
 
     set_seed(42)
     repo_root = Path(__file__).resolve().parent.parent
+    if args.validate_only:
+        arch = args.arch.lower()
+        out_file = (
+            repo_root
+            / "data"
+            / "features"
+            / f"{arch}_llava"
+            / f"temp_{args.gen_temperature:.1f}"
+            / "vqav2_5scale.pt"
+        )
+        if not out_file.exists():
+            raise FileNotFoundError(f"Feature file not found for validation: {out_file}")
+        records = safe_torch_load(out_file)
+        canonical_items = load_canonical_items(repo_root, args.target_count)
+        canonical_qids = [str(x["question_id"]) for x in canonical_items]
+        summary = validate_feature_records(records, arch=arch, canonical_qids=canonical_qids)
+        logger.info(
+            f"Validation PASSED: {summary['total_records']} samples, "
+            f"0 NaNs, 0 Infs, {summary['blank_answers']} blanks, "
+            f"mean fine acc={summary['mean_accuracy']:.2%}"
+        )
+        return
+
     run_extraction(
         repo_root=repo_root,
         arch=args.arch,

@@ -97,28 +97,42 @@ for ARCH in ${ARCHS}; do
             --target_count "${TARGET_COUNT}" \
             --save_interval "${SAVE_INTERVAL}"
 
-        # Verification check
+        # Comprehensive Verification and Integrity Audit
         out_file="${REPO_DIR}/data/features/${ARCH}_llava/temp_${T}/vqav2_5scale.pt"
         python3 - << PYEOF
-import torch
-p = "${out_file}"
-data = torch.load(p, map_location="cpu")
+import sys
+from pathlib import Path
+repo_dir = Path("${REPO_DIR}")
+sys.path.insert(0, str(repo_dir / "scripts"))
+from extract_vqav2_2k import load_canonical_items, validate_feature_records
+from trajectory_calibration.utils.helpers import safe_torch_load
+
+p = Path("${out_file}")
+data = safe_torch_load(p)
+canonical_items = load_canonical_items(repo_dir, ${TARGET_COUNT})
+canonical_qids = [str(x["question_id"]) for x in canonical_items]
+
+summary = validate_feature_records(data, arch="${ARCH}", canonical_qids=canonical_qids)
+
 s0 = data[0].get("sample", {})
 q0 = s0.get("question", "")
 qid0 = str(data[0].get("question_id", ""))
 fine_scale = 576 if "${ARCH}" == "m3" else 256
 pred0 = data[0]["features"][fine_scale].get("answer")
-acc = sum(1 for r in data if r.get("vqa_accuracy", 0) > 0.5) / len(data)
 
-print(f"Verified : {p}")
-print(f"Count    : {len(data)} / 2000")
-print(f"Q0 ID    : {qid0} (expected 262148000)")
-print(f"Q0 text  : '{q0}'")
-print(f"Q0 pred  : '{pred0}'")
-print(f"Fine Acc : {acc:.2%}")
-assert len(data) == 2000, f"Expected 2000 samples, got {len(data)}"
-assert qid0 == "262148000", f"Unexpected sample 0 QID {qid0}"
-print("Status: 100% CANONICAL SAMPLE PARITY VERIFIED OK!")
+print(f"Verified       : {p}")
+print(f"Total count    : {summary['total_records']} / ${TARGET_COUNT}")
+print(f"Q0 ID          : {qid0} (expected 262148000)")
+print(f"Q0 text        : '{q0}'")
+print(f"Q0 pred        : '{pred0}'")
+print(f"Fine Accuracy  : {summary['mean_accuracy']:.2%}")
+print(f"Conf Range     : [{summary['min_conf']:.4f}, {summary['max_conf']:.4f}]")
+print(f"NaNs / Infs    : {summary['nan_count']} / {summary['inf_count']}")
+print(f"Blank Answers  : {summary['blank_answers']}")
+assert summary["total_records"] == ${TARGET_COUNT}, f"Expected ${TARGET_COUNT} samples, got {summary['total_records']}"
+assert summary["nan_count"] == 0, f"Found {summary['nan_count']} NaNs!"
+assert summary["inf_count"] == 0, f"Found {summary['inf_count']} Infs!"
+print("Status: 100% CANONICAL SAMPLE PARITY & NUMERICAL INTEGRITY VERIFIED OK!")
 PYEOF
     done
 done
